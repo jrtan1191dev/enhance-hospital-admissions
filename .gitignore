@@ -1,0 +1,147 @@
+# ==============================================================================
+# Agent
+# ==============================================================================
+.claude/
+.agents/
+skills-lock.json
+
+# ==============================================================================
+# Environment & Secrets (Never commit secrets or credentials)
+# ==============================================================================
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+
+# ==============================================================================
+# React / Node.js / Frontend Essentials
+# ==============================================================================
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Production / Build Output
+dist/
+build/
+out/
+
+# Framework & Bundler Caches
+.cache/
+.vite/
+.turbo/
+.parcel-cache/
+.next/
+.nuxt/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+cypress/videos/
+cypress/screenshots/
+
+# Storybook build output
+storybook-static/
+
+# ==============================================================================
+# Spring Boot / Java / Maven / Gradle Essentials
+# ==============================================================================
+# Compiled class files
+*.class
+
+# Maven build outputs & release files
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle build outputs & cache
+.gradle/
+gradle-app.setting
+
+# Packaging (Exclude generated artifacts, preserve wrappers)
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+!gradle/wrapper/gradle-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Application logs & JVM crash logs
+*.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# ==============================================================================
+# IDEs & Editors
+# ==============================================================================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+
+# VS Code (preserve team configurations if desired)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/nbproject/genfiles.properties
+
+# ==============================================================================
+# Operating System & Temporary Files
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+
+# Linux / Editor swap files
+*~
+*.swp
+*.swo
+.fuse_hidden*
+.directory
+
+# Local analytics / agent metrics
+.claude/analytics/skill-invocations.jsonl

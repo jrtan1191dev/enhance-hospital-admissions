@@ -16,7 +16,7 @@ Produce a Comprehensive Technical Architecture Document (TAD) & Implementation S
 
 ## Decisions so far
 
-- [001: Data Model & Domain Entities](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/001-data-model-and-domain-entities.md): UUID primary keys with standard bidirectional JPA relationships, in-memory H2 database with automatic boot DataInitializer, and 6 core relational entities (`Ward`, `Cubicle`, `Bed`, `Patient`, `AdmissionRequest`, `AssessmentBroadcast`).
+- [001: Data Model & Domain Entities](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/001-data-model-and-domain-entities.md): UUID primary keys with standard bidirectional JPA relationships, in-memory H2 database, and 5 core relational entities (`Ward`, `Bed`, `Patient`, `AdmissionRequest`, `AssessmentBroadcast`) under a strict Level -> Ward -> Bed hierarchy (cubicle entity explicitly eliminated).
 - [003: Real-Time Event & Notification Mechanism](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/003-realtime-event-notification-mechanism.md): Target production architecture (CQRS & event-driven pub/sub) is documented, but the prototype deliberately takes a simplified direct REST + lightweight polling approach (no CQRS, no event sourcing).
 
 ## Not yet specified

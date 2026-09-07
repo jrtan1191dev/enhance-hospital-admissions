@@ -14,8 +14,7 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
 2. `AdmissionRequest` (acuity tiers 1–5, primary ED assessment, specialist consult assessments, effective BMU tier, queue timestamps)
 3. `AssessmentBroadcast` (service cluster, targeted on-call roster, claimed specialist, SLA timeout timer, discordance flag)
 4. `Bed` (bed number, current state: `WHITE`, `GREEN`, `GREY`, equipment capabilities: telemetry, negative pressure)
-5. `Cubicle` (cubicle identifier, ward class tier, capacity 4–6, active composite cohort lock: `WardClass + Gender + InfectionStatus`, holding room designation flag)
-6. `Ward` (ward code, specialty service clustering, floor)
+5. `Ward` (ward code, level/floor number, ward class, gender/infection cohort lock, service cluster, holding ward flag)
 
 ## Resolution (ADR-001: Relational Domain Entities & In-Memory H2 Persistence)
 
@@ -23,8 +22,9 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
 
 - **Primary Keys**: `java.util.UUID` with `@GeneratedValue(strategy = GenerationType.UUID)` for globally unique, standards-compliant IDs.
 - **JPA Mappings**: Standard bidirectional object graph (`@OneToMany`, `@ManyToOne`, `@OneToOne`) with DTO projections and Jackson `@JsonIgnoreProperties` / `@JsonBackReference` to prevent circular serialization.
+- **Hierarchy**: Strict physical hierarchy of **Level $\rightarrow$ Ward $\rightarrow$ Bed** (cubicle entity explicitly eliminated).
 - **Database Engine**: In-memory **H2 Database** (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) with `spring.jpa.hibernate.ddl-auto=create-drop`.
-- **Seed Data**: A Spring Boot `CommandLineRunner` (`DataInitializer`) automatically populates wards (8A, 8B, 9A, 9B), cubicles, beds in initial `WHITE`/`GREEN`/`GREY` states, and synthetic waiting ED patients upon application boot.
+- **Seed Data**: A Spring Boot `CommandLineRunner` (`DataInitializer`) automatically populates levels and wards (e.g. Level 8 Ward 8A, Level 8 Ward 8B, Level 9 Ward 9A), beds in initial `WHITE`/`GREEN`/`GREY` states, and synthetic waiting ED patients upon application boot.
 
 ---
 
@@ -42,28 +42,21 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
 
 #### B. Entities Schema
 
-1. **`Ward`**:
+1. `Ward`:
    - `UUID id`
+   - `int level` (floor number, e.g., 8)
    - `String wardCode` (e.g., "Ward 8A")
+   - `@Enumerated(EnumType.STRING) WardClass wardClass` (`A`, `B1`, `B2`, `C`)
    - `String serviceCluster` (e.g., "CARDIOLOGY", "GENERAL_MEDICINE", "SURGERY")
-   - `int floor`
-   - `@OneToMany(mappedBy = "ward", cascade = CascadeType.ALL) List<Cubicle> cubicles`
+   - `boolean isHoldingWard` (flag for dynamic holding ward designation)
+   - `@Enumerated(EnumType.STRING) Gender lockedGender` (MALE, FEMALE, or null if all-White flex)
+   - `@Enumerated(EnumType.STRING) InfectionStatus lockedInfectionStatus` (null if all-White flex)
+   - `@OneToMany(mappedBy = "ward", cascade = CascadeType.ALL) List<Bed> beds`
 
-2. **`Cubicle`**:
-   - `UUID id`
-   - `String cubicleNumber` (e.g., "Cubicle 1")
-   - `@ManyToOne @JoinColumn(name = "ward_id") Ward ward`
-   - `@Enumerated(EnumType.STRING) WardClass wardClass`
-   - `int totalBeds` (4 or 6)
-   - `boolean isHoldingRoom`
-   - `@Enumerated(EnumType.STRING) Gender lockedGender` (null if all-White)
-   - `@Enumerated(EnumType.STRING) InfectionStatus lockedInfectionStatus` (null if all-White)
-   - `@OneToMany(mappedBy = "cubicle", cascade = CascadeType.ALL) List<Bed> beds`
-
-3. **`Bed`**:
+2. **`Bed`**:
    - `UUID id`
    - `String bedNumber` (e.g., "8A-01")
-   - `@ManyToOne @JoinColumn(name = "cubicle_id") Cubicle cubicle`
+   - `@ManyToOne @JoinColumn(name = "ward_id") Ward ward`
    - `@Enumerated(EnumType.STRING) BedStatus status` (`WHITE`, `GREEN`, `GREY`, `CLEANING_IN_PROGRESS`)
    - `boolean hasTelemetry`
    - `boolean isNegativePressure`

@@ -10,6 +10,6 @@
 
 How should the two-phase pack-then-batch and dynamic cohort-swap algorithm be implemented in lightweight Java/Spring Boot without external solvers?
 1. Exact scoring functions for hard constraints (gender cohorting, isolation, ward class tier) and soft optimization (service clustering, fall risk bed proximity).
-2. Phase 1 Consolidation: Algorithm logic for identifying and filling matching partially filled cubicles (`Grey`/`Green` + `White`).
-3. Phase 2 Holding Room Creation: Algorithm logic for detecting clusters ($\ge 3$ patients) and selecting candidate all-`White` cubicles.
-4. Dynamic Cohort-Swap Re-Optimization: Detection logic for isolated `Green` beds blocking an otherwise empty cubicle and proposing swaps to BMU before ED departure.
+2. Phase 1 Consolidation: Algorithm logic for identifying and filling matching partially filled wards (`Grey`/`Green` + `White` beds).
+3. Phase 2 Holding Ward Creation: Algorithm logic for detecting clusters ($\ge 3$ patients) and selecting candidate all-`White` flex wards.
+4. Dynamic Cohort-Swap Re-Optimization: Detection logic for isolated `Green` beds blocking an otherwise empty flex ward and proposing swaps to BMU before ED departure.

@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: admissions
+  profiles:
+    active: prototype
+  jpa:
+    open-in-view: false
+
+server:
+  port: 8080
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

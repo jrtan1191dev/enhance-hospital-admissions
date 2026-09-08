@@ -107,4 +107,19 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.detail").value("An unexpected internal error occurred. Please contact the system administrator."))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
+
+    @Test
+    @DisplayName("Authenticated user diagnostic logging captures user identity and URI with query parameters")
+    void testAuthenticatedUserDiagnosticLogging() throws Exception {
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        "dr_tan_ed", "secret", java.util.List.of()));
+        try {
+            mockMvc.perform(get("/test/not-found?reason=urgent").accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.status").value(404));
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
 }

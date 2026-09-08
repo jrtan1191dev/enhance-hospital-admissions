@@ -3,6 +3,9 @@ spring:
     name: admissions
   profiles:
     active: prototype
+  mvc:
+    problemdetails:
+      enabled: true
   jpa:
     open-in-view: false
 

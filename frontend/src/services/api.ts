@@ -37,6 +37,19 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
+http.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const problem = error.response?.data;
+    if (problem?.detail) {
+      error.message = problem.detail;
+    } else if (problem?.title) {
+      error.message = problem.title;
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const api = {
   // Auth & Session
   getAuthStatus: () => http.get<{ authenticated: boolean; username?: string; roles?: string[] }>('/api/v1/auth/me').then((r) => r.data),

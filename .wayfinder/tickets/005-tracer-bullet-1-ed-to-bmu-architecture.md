@@ -3,7 +3,7 @@
 - **Type**: `wayfinder:prototype`
 - **Status**: `open`
 - **Assignee**: `unassigned`
-- **Blocked by**: [001-data-model-and-domain-entities.md](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/001-data-model-and-domain-entities.md), [002-heuristic-bed-constraint-and-batching-algo.md](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/002-heuristic-bed-constraint-and-batching-algo.md), [004-api-surface-and-contract-design.md](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/004-api-surface-and-contract-design.md)
+- **Blocked by**: none (previously 001, 002, 004 — all closed)
 - **Blocks**: [006-tracer-bullet-2-patient-tracker-and-turnover-loop.md](file:///Users/tjunrong/Documents/playground/enhance-hospital-admissions/.wayfinder/tickets/006-tracer-bullet-2-patient-tracker-and-turnover-loop.md)
 
 ## Question

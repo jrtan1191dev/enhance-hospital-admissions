@@ -74,3 +74,13 @@ Algorithm scoring parameters are stored in a configurable entity (`BmuAlgorithmC
 - **Prototype Implementation Decision**: **Pure Java synchronous on-demand evaluation.**
   - Recommendations and batch suggestions are computed synchronously in-memory by Spring Boot services whenever `GET /api/bmu/queue` or `GET /api/bmu/beds/recommendations/{requestId}` is called.
   - Easiest, most direct implementation: zero complex event bus plumbing, zero async race conditions, and instant response times on mocked H2 datasets.
+
+---
+
+### 6. Algorithm Performance Metrics & KPI Tracking
+
+The heuristic engine directly feeds BMU operational KPIs:
+- **BMU Suggestion Acceptance Rate**: Tracked via `ALLOCATE_BED` (accepted) vs. `OVERRIDE_ALLOCATION` (overridden with mandatory structured reason code).
+- **Batch Holding Ward Adoption Rate**: Tracked via `APPROVE_BATCH_HOLDING_WARD` events, measuring the percentage of waiting patients placed via batch recommendations.
+- **Ghost Bed Reduction & Cohort-Swap Yield**: Tracked via `APPROVE_COHORT_SWAP` events and bed inventory occupancy gains.
+

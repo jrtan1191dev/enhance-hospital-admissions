@@ -109,3 +109,14 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
    - `String specialistSpecialtyRecommendation`
    - `String specialistImpression`
    - `boolean specialistDiversionEndorsed`
+
+---
+
+### 3. KPI Reporting & Relational Schema Fields
+
+To enable direct SQL calculation of the 21 hospital KPIs, the relational schema explicitly captures state transition timestamps and decision flags:
+- `admission_requests`: `requested_at`, `allocated_at`, `admitted_at`, `discharged_at`, `is_discordant`, `is_recommendation_accepted`, `override_reason_code`, `delay_reason_tag`, `diversion_recommended`, `sister_hospital_referral_id`, `public_tracking_token`.
+- `assessment_broadcasts`: `created_at`, `claimed_at`, `last_modified_at`, `status`.
+- `beds`: `cleaning_started_at`, `last_cleaned_at`, `status`.
+- Base class `AuditableEntity`: `created_by`, `created_at`, `last_modified_by`, `last_modified_at` tracking automated auditing on every entity.
+

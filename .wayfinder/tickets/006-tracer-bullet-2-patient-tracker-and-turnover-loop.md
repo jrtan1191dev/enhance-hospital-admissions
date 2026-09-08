@@ -48,3 +48,14 @@ How does Tracer Bullet 2 complete the circular hospital lifecycle?
 
 Tracer Bullet 2 connects seamlessly with Tracer Bullet 1 to complete the full hospital operational loop:
 $$\text{ED Assessment (White [empty, cleaned] Bed Selected)} \to \text{BMU Assigned (Green)} \to \text{Ward Check-in (Grey)} \to \text{Patient Vacated (Mustard Yellow - Pending Clean)} \to \text{Housekeeping Sign-off (White - empty, cleaned)}$$
+
+---
+
+### 4. Tracer Bullet 2 KPI Verification & Measurement Trace
+
+Executing Tracer Bullet 2 emits and verifies the patient transparency and turnover operational KPIs:
+- **Patient Portal Access Rate**: Emits `TRACK_PATIENT_ACCESS` with `Token` and `MilestoneStep`.
+- **2-Hour Periodic Update Delivery**: Emits `DISPATCH_PERIODIC_UPDATE` on active dwell timer milestones.
+- **Discharge Before 12:00 PM**: Emits `VACATE_PATIENT` recording the vacancy timestamp and noon compliance.
+- **30-Minute Cleaning Turnover SLA**: Emits `CLEAN_BED` recording elapsed cleaning minutes against the 30-minute SLA countdown.
+

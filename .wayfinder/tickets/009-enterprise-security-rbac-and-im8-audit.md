@@ -64,7 +64,36 @@ Rather than using an ephemeral in-memory list, audit trails are written as **act
 
 ---
 
-### 4. Summary Matrix: Security & Audit Across Profiles
+### 4. Operational KPI Instrumentation & Automated Extraction
+
+All 21 operational KPIs defined in `pain-points.md` and the four Epic specifications are instrumented directly into the structured audit logging pipeline. Each event provides machine-parseable key-value pairs in the `details` string:
+
+| Operational KPI (pain-points.md) | Emitted Audit Action | Event Details Payload & Metrics Captured |
+| :--- | :--- | :--- |
+| **Primary ED Turnaround Time** | `SUBMIT_ED_ASSESSMENT` | `PrimaryAcuity`, `WardClass`, `ElapsedMins` |
+| **Specialist Pick-Up Latency** | `CLAIM_BROADCAST` | `TargetCluster`, `Specialist`, `ElapsedClaimMins` |
+| **Primary vs Specialist Concordance** | `SUBMIT_SPECIALIST_CONSULT` | `PrimaryAcuity`, `SecondaryAcuity`, `Concordant={true\|false}` |
+| **BMU Suggestion Acceptance Rate** | `ALLOCATE_BED` / `OVERRIDE_ALLOCATION` | `AssignedBed`, `Score`, `Override={true\|false}`, `OverrideReason` |
+| **Sister Hospital Diversion Rate** | `DIVERSION_REFERRAL` | `Facility`, `ReferralId`, `SlaWindowMins=30` |
+| **Batch Holding Ward Adoption** | `APPROVE_BATCH_HOLDING_WARD` | `BatchSize`, `PatientIds`, `WardClass`, `Gender` |
+| **Cohort-Swap Optimization Yield** | `APPROVE_COHORT_SWAP` | `ReassignedPatient`, `FromBed`, `ToBed`, `UnlockedWard` |
+| **Prolonged-Wait Tagging Rate** | `TAG_DELAY_REASON` | `DelayCode`, `DwellMins`, `AcuityTier` |
+| **Patient Portal Access Rate** | `TRACK_PATIENT_ACCESS` | `PatientId`, `MilestoneStep`, `EstWaitMins` |
+| **2-Hour Periodic Update Delivery** | `DISPATCH_PERIODIC_UPDATE` | `Channel=SMS_PUSH`, `Milestone`, `DeliveryStatus=SUCCESS` |
+| **Discharge Before 12:00 PM** | `VACATE_PATIENT` | `BedNumber`, `VacateHour`, `DischargedBeforeNoon={true\|false}` |
+| **Bed Turnover Cleaning Latency** | `CLEAN_BED` | `BedNumber`, `ElapsedCleaningMins`, `Within30mSla={true\|false}` |
+
+#### Fast Log Extraction Script Example
+```bash
+# Calculate 30-Minute Cleaning SLA Compliance directly from logs:
+grep 'action="CLEAN_BED"' application.log | \
+  sed -n 's/.*ElapsedCleaningMins=\([0-9.]*\).*/\1/p' | \
+  awk '{sum+=$1; count++; if($1<=30.0) ok++} END {print "Avg Latency:", sum/count, "mins | SLA Compliance:", (ok/count)*100, "%"}'
+```
+
+---
+
+### 5. Summary Matrix: Security & Audit Across Profiles
 
 | Capability | `@Profile("prototype")` Implementation | Default (Production-Ready) Implementation |
 | :--- | :--- | :--- |
@@ -72,3 +101,4 @@ Rather than using an ephemeral in-memory list, audit trails are written as **act
 | **User Identity** | Seeded accounts (`dr_tan_ed`, `bmu_coord_wong`, etc.) | Active Directory / Keycloak / Singpass verified identities |
 | **Audit Logging** | Real structured log statements with seeded usernames | Real structured log statements shipped to immutable SIEM |
 | **Method Authorization** | Spring Security `@PreAuthorize` enabled | Spring Security `@PreAuthorize` enabled |
+| **KPI Observability** | Console/Log script KPI extraction (`jq`, `grep`, `awk`) | SIEM / OpenSearch dashboards & metric queries |

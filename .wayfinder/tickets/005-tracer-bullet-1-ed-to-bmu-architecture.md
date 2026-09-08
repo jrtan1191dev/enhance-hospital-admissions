@@ -72,3 +72,14 @@ Populates on boot only when the `prototype` profile is active:
    - Coordinator clicks "Approve Bed 8A-04" $\rightarrow$ calls `POST /api/bmu/allocations/approve`.
    - Result: Bed 8A-04 instantly flips from `EMPTY_CLEANED` (`WHITE` [empty, cleaned]) $\rightarrow$ `EMPTY_ASSIGNED` (`GREEN`).
    - BMU dashboard also displays "Batch Holding Ward Suggestion" for the 3 waiting female patients (P102, P103, P104) targeting Ward 8B.
+
+---
+
+### 4. Tracer Bullet 1 KPI Verification & Measurement Trace
+
+Executing Tracer Bullet 1 emits and verifies the initial pipeline of operational KPIs:
+- **Primary ED Assessment Turnaround**: Emits `SUBMIT_ED_ASSESSMENT` with `ElapsedMins`.
+- **Specialist Pick-up Latency**: Emits `CLAIM_BROADCAST` and `SUBMIT_SPECIALIST_CONSULT`.
+- **Primary vs Specialist Concordance Rate**: Validated when Dr. Lim confirms Dr. Tan's Tier 2 acuity.
+- **BMU Suggestion Acceptance Rate**: Emits `ALLOCATE_BED` with `Override=false`.
+

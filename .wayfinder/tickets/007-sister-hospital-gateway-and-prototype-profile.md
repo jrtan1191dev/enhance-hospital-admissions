@@ -12,22 +12,26 @@ How should external Sister Community Hospital (OCH, AH, SACH) and MIC@Home (Hosp
 
 ## Resolution (ADR-007: Sister Hospital Gateway & Spring Profile Boundary Architecture)
 
-### 1. Spring Profile Separation Strategy (`prototype` vs. `prod`)
+### 1. Spring Profile Strategy: Production-Ready Default vs. Prototype Profile Isolation
 
-To maintain clean separation of concerns, high maintainability, and zero risk of synthetic mock data or mock behaviors leaking into production, all prototype-specific mocks and seeds are gated using Spring's native profile and Dependency Injection mechanism:
+To maintain clean separation of concerns, high maintainability, and zero risk of synthetic mock data or mock behaviors leaking into live environments, the application is **production-ready by default**:
 
-- **`prototype` Profile (`spring.profiles.active=prototype`)**:
-  - Active by default during local development, demo walkthroughs, and automated integration tests.
-  - Activates in-memory H2 database (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`).
+- **Default Profile (`default`) — Production-Ready**:
+  - Active whenever the application runs without explicitly overriding profiles, or in live hospital environments.
+  - Connects to enterprise persistent PostgreSQL database.
+  - `DataInitializer` seed runner is completely inactive; patient data originates exclusively from hospital EHR/ADT feeds.
+  - Wires production HTTP adapters (`HttpSisterHospitalGateway`) that execute authenticated mTLS/OAuth2 REST or FHIR calls against real cluster endpoints.
+  - Core domain services (`AllocationService`, `HeuristicEngine`, `AssessmentService`) depend solely on gateway interfaces, ensuring zero business logic modification between environments.
+- **`prototype` Profile (`@Profile("prototype")`) — Strictly Isolated Prototype Scope**:
+  - All prototype decisions, constraints, synthetic datasets, and mocked integration behaviors discussed to date are **strictly and exclusively bound to the `prototype` profile**.
+  - Must be explicitly activated (e.g. `spring.profiles.active=prototype`) for local prototype evaluation, interactive reviewer walkthroughs, and automated integration tests.
+  - Activates in-memory H2 database (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) with `create-drop`.
   - Activates `DataInitializer` `CommandLineRunner` to seed synthetic wards, beds, and waiting ED patients.
   - Injects mocked external integration gateways (`MockSisterHospitalGateway`).
   - Enables simulated latency and automatic bilateral SLA timers.
-- **`prod` Profile (Production Target)**:
-  - Active in staging/production hospital deployment environments.
-  - Connects to enterprise persistent PostgreSQL database.
-  - `DataInitializer` is completely inactive; data originates exclusively from hospital EHR/ADT feeds.
-  - Injects production HTTP adapters (`HttpSisterHospitalGateway`) that execute authenticated mTLS/OAuth2 REST or FHIR calls against real cluster endpoints.
-  - Core domain services (`AllocationService`, `HeuristicEngine`, `AssessmentService`) depend solely on gateway interfaces, ensuring zero business logic modification between environments.
+- **`dev` and `qa` Profiles (Separate Staging / Testing Environments)**:
+  - Reserved for future staging and QA environments where specific configurations and data sources will be defined later.
+  - **Strictly decoupled from `prototype`**: `dev` and `qa` serve completely different operational intentions and will **not** inherit or mix with prototype mock data, in-memory H2, or prototype-specific shortcuts.
 
 ---
 
@@ -54,15 +58,15 @@ public interface SisterHospitalGateway {
 - Updates `AdmissionRequest.status` to `DIVERTED_SISTER_HOSPITAL` or `DIVERTED_HAH`.
 - Emits diversion payload to the Patient Admission Tracker, rendering the rehabilitation care explainer card.
 
-#### Production Implementation (`HttpSisterHospitalGateway`)
-- Annotated with `@Component` and `@Profile("prod")`.
-- Target enterprise adapter calling real Sister Hospital EHR APIs or national FHIR referral endpoints using Spring `RestClient` / `WebClient` with mTLS certificates, OAuth2 Bearer tokens, and circuit-breaker resilience (Resilience4j).
+#### Production-Ready Default Implementation (`HttpSisterHospitalGateway`)
+- Annotated with `@Component` and `@Profile("default")` (or `@Profile("!prototype")`).
+- Default enterprise adapter calling real Sister Hospital EHR APIs or national FHIR referral endpoints using Spring `RestClient` / `WebClient` with mTLS certificates, OAuth2 Bearer tokens, and circuit-breaker resilience (Resilience4j).
 
 ---
 
 ### 3. Extension of `@Profile("prototype")` Across All Mocked Boundaries
 
-| Component / Responsibility | `@Profile("prototype")` Implementation | `@Profile("prod")` Target Implementation |
+| Component / Responsibility | `@Profile("prototype")` Implementation | Default (Production-Ready) Implementation |
 | :--- | :--- | :--- |
 | **Sister Hospital Integration** | `MockSisterHospitalGateway` (simulated referral IDs & SLA timers) | `HttpSisterHospitalGateway` (real mTLS REST / FHIR calls) |
 | **Database & Persistence** | In-Memory H2 DB (`create-drop`) | Clustered PostgreSQL with Flyway / Liquibase migrations |

@@ -20,10 +20,11 @@ What is the bare-minimum executable code skeleton and UI stub structure connecti
 ### 1. Monorepo Skeleton & Technology Selection
 
 - **Backend**: Spring Boot 3 (Java 17/21) with Maven, Spring Web, Spring Data JPA, H2 in-memory DB, and Lombok.
-- **Spring Profile Strategy (`prototype` vs `prod`)**:
-  - The application uses Spring profiles to cleanly decouple prototype mocks and synthetic datasets from future production adapters.
-  - Active profile for local prototype evaluation is `prototype` (`spring.profiles.active=prototype`), activating in-memory H2, synthetic `DataInitializer`, and mock external integration gateways.
-  - In `prod` (production), Spring Dependency Injection replaces mock beans with real external HTTP clients (e.g. actual Sister Hospital APIs) and connects to enterprise persistent RDBMS without altering business logic or domain services.
+- **Spring Profile Strategy (Production-Ready Default vs Prototype Profile Isolation)**:
+  - The application is **production-ready by default**. When no profile is specified (or running in standard production environments), default beans connect to enterprise persistent RDBMS, actual hospital EHR feeds, and real external Sister Hospital API adapters.
+  - All prototype decisions and constraints discussed up to now are **strictly tied to the `prototype` profile only** (`@Profile("prototype")`).
+  - Active profile for local evaluation is `prototype` (`spring.profiles.active=prototype`), which leverages Spring's Dependency Injection to activate in-memory H2, synthetic `DataInitializer` seeds, and mock external integration gateways without altering core business logic or domain services.
+  - Other environments such as `dev` and `qa` are distinct profiles reserved for future configuration and are strictly decoupled from the prototype profile.
 - **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, TanStack Query, and **TanStack Router (`@tanstack/react-router`)**.
 - **Role Switching & Access Matrix**:
   - Persistent **Topbar Role-Switcher**: `[🩺 ED Attending]` | `[👨‍⚕️ Inpatient Specialist]` | `[🏢 BMU Coordinator]` | `[📱 Patient Admission Tracker]` | `[🧹 Ward & EVS]`.

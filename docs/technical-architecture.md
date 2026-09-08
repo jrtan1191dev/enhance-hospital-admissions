@@ -51,7 +51,7 @@ To ensure both long-term enterprise readiness and immediate prototype velocity, 
 | **Authentication & RBAC** | Singpass / HealthHub OIDC integration, hospital Active Directory OAuth2/JWT with fine-grained RBAC. | **Zero-Auth Topbar Role Switcher**: Topbar toggle between clinical personas (`[🩺 ED Attending]`, `[👨‍⚕️ Specialist]`, `[🏢 BMU]`, `[📱 Patient Admission Tracker]`, `[🧹 Ward & EVS]`) with route guards. |
 | **Physical Hierarchy** | Level $\rightarrow$ Ward $\rightarrow$ Bed (Strictly no cubicles). | **Level $\rightarrow$ Ward $\rightarrow$ Bed** (Strictly preserved in prototype). |
 
-### 2.1 Spring Profile Architecture (`prototype` vs `prod`) & Dependency Injection
+### 2.1 Spring Profile Architecture: Production-Ready Default vs. Prototype Profile Isolation
 
 > [!IMPORTANT]
 > **Prototype Decision & Production Transition Path**:
@@ -59,7 +59,10 @@ To ensure both long-term enterprise readiness and immediate prototype velocity, 
 > 
 > To release in production, these mocks **must be replaced with calls to the actual Sister Hospitals' and hospital EHR APIs**. 
 > 
-> To ensure high maintainability and prevent synthetic code from leaking into production, the system strictly leverages **Spring's Profile mechanism and Dependency Injection (DI)**:
+> To ensure high maintainability and prevent synthetic code from leaking into production, the codebase is **production-ready by default**:
+> - **Production-Ready Default**: In standard runs where no profile is specified, Spring Dependency Injection wires default production beans connecting to real external hospital APIs and enterprise PostgreSQL.
+> - **Strict Prototype Profile Isolation (`prototype`)**: All decisions, constraints, mock gateways, and synthetic datasets discussed up to this point are **strictly and exclusively bound to the `prototype` profile (`@Profile("prototype")`)**. When active (`spring.profiles.active=prototype`), Spring DI injects mock implementations without modifying any core business logic or domain services.
+> - **Separate Staging Environments (`dev`, `qa`)**: Profiles such as `dev` and `qa` represent distinct future environments whose specific configurations and integrations will be detailed later. They are **strictly decoupled from `prototype`** and must not be mixed with prototype mocks, in-memory databases, or synthetic data shortcuts.
 
 ```mermaid
 graph TD
@@ -71,33 +74,34 @@ graph TD
         GatewayInterface[SisterHospitalGateway Interface]
     end
 
-    subgraph Spring Profile: prototype
+    subgraph Spring Profile: prototype (Strictly Isolated Prototype)
         MockGateway[MockSisterHospitalGateway<br/>@Profile prototype]
         H2DB[(In-Memory H2 DB<br/>@Profile prototype)]
         Seeder[DataInitializer CommandLineRunner<br/>@Profile prototype]
     end
 
-    subgraph Spring Profile: prod / default
-        ProdGateway[HttpSisterHospitalGateway<br/>@Profile prod]
-        PostgresDB[(Clustered PostgreSQL DB<br/>@Profile prod)]
-        EHRFeed[Live Hospital ADT / FHIR Ingestion<br/>@Profile prod]
+    subgraph Spring Profile: default (Production-Ready)
+        ProdGateway[HttpSisterHospitalGateway<br/>@Profile default / !prototype]
+        PostgresDB[(Clustered PostgreSQL DB<br/>Standard application.yml)]
+        EHRFeed[Live Hospital ADT / FHIR Ingestion<br/>Default Provider]
     end
 
     Service --> GatewayInterface
     GatewayInterface -.->|Injected when active=prototype| MockGateway
-    GatewayInterface -.->|Injected when active=prod| ProdGateway
+    GatewayInterface -.->|Injected by default| ProdGateway
 ```
 
 #### Profile-Gated Component Matrix:
 1. **`SisterHospitalGateway`**:
-   - `MockSisterHospitalGateway` (`@Profile("prototype")`): Simulates Outram Community Hospital (OCH), Alexandra Hospital (AH), St. Andrew's Community Hospital (SACH), and MIC@Home. Generates synthetic reference IDs (e.g., `OCH-REF-2026-9014`), initiates a 30-minute bilateral SLA countdown, and flips admission status to `DIVERTED_SISTER_HOSPITAL` or `DIVERTED_HAH`.
-   - `HttpSisterHospitalGateway` (`@Profile("prod")`): Calls actual external hospital cluster APIs over HTTPS with mutual TLS (mTLS), OAuth2 tokens, and circuit-breaker fault tolerance.
+   - `MockSisterHospitalGateway` (`@Profile("prototype")`): Simulates Outram Community Hospital (OCH), Alexandra Hospital (AH), St. Andrew's Community Hospital (SACH), and MIC@Home. Generates synthetic reference IDs (e.g., `OCH-REF-2026-9014`), initiates a 30-minute bilateral SLA countdown, and flips admission status to `DIVERTED_SISTER_HOSPITAL` or `DIVERTED_HAH`. Active strictly under `prototype`.
+   - `HttpSisterHospitalGateway` (Default implementation via `@Profile("default")` or `@ConditionalOnMissingBean`): Calls actual external hospital cluster APIs over HTTPS with mutual TLS (mTLS), OAuth2 tokens, and circuit-breaker fault tolerance.
 2. **`DataInitializer` (Synthetic Seed Data)**:
    - Annotated with `@Profile("prototype")`. Seeds Ward 8A, Ward 8B, Ward 9A, and initial ED patients (P101–P104) on startup.
-   - Completely disabled in `prod`, ensuring no synthetic records ever enter a live hospital environment.
+   - Completely disabled by default, ensuring no synthetic records ever enter a live hospital environment.
 3. **Database Configuration**:
-   - `application-prototype.yml`: Configures in-memory H2 (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) with `create-drop`.
-   - `application-prod.yml`: Configures production connection pools, persistent PostgreSQL, and managed database migrations.
+   - `application.yml` (Default): Configures production connection pools, persistent PostgreSQL, and managed database migrations.
+   - `application-prototype.yml` (`@Profile("prototype")`): Overrides with in-memory H2 (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) and `create-drop` for local prototype evaluation only.
+   - `dev` and `qa` environments will be independently configured with their respective staging databases and services as their requirements are defined.
 
 ## 3. System Architecture & Monorepo Topology
 

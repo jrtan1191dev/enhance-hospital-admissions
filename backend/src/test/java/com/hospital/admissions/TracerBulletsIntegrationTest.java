@@ -132,7 +132,7 @@ class TracerBulletsIntegrationTest {
         bed8A03 = bedRepository.findById(bed8A03.getId()).orElseThrow();
         assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.OCCUPIED_TAKEN);
 
-        // Step 3: Ward Nurse vacates patient upon discharge -> Bed turns EMPTY_PENDING_CLEANING (Yellow)
+        // Step 3: Ward Nurse vacates patient upon discharge -> Bed turns EMPTY_PENDING_CLEANING (Mustard Yellow - vacated, empty, not yet cleaned)
         mockMvc.perform(post("/api/patients/beds/" + bed8A03.getId() + "/vacate")
                         .header("X-User-Role", "WARD_NURSE"))
                 .andExpect(status().isOk())
@@ -141,7 +141,7 @@ class TracerBulletsIntegrationTest {
         bed8A03 = bedRepository.findById(bed8A03.getId()).orElseThrow();
         assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.EMPTY_PENDING_CLEANING);
 
-        // Step 4: Housekeeping completes 30m terminal cleaning -> Bed turns EMPTY_CLEANED (White)
+        // Step 4: Housekeeping completes 30m terminal cleaning -> Bed turns EMPTY_CLEANED (White - empty, cleaned)
         mockMvc.perform(post("/api/patients/beds/" + bed8A03.getId() + "/clean")
                         .header("X-User-Role", "HOUSEKEEPING"))
                 .andExpect(status().isOk())

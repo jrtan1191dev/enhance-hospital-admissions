@@ -181,6 +181,16 @@ class DomainAndDtoTest {
         assertThat(config.getWeightConsolidation()).isEqualTo(30);
         assertThat(config.getWeightFallRiskStation()).isEqualTo(15);
         assertThat(config.getBatchHoldingWardThreshold()).isEqualTo(3);
+
+        // Verify AuditableEntity fields
+        patient.setCreatedBy("dr_tan_ed");
+        patient.setCreatedAt(now);
+        patient.setLastModifiedBy("bmu_coord_wong");
+        patient.setLastModifiedAt(now);
+        assertThat(patient.getCreatedBy()).isEqualTo("dr_tan_ed");
+        assertThat(patient.getCreatedAt()).isEqualTo(now);
+        assertThat(patient.getLastModifiedBy()).isEqualTo("bmu_coord_wong");
+        assertThat(patient.getLastModifiedAt()).isEqualTo(now);
     }
 
     @Test

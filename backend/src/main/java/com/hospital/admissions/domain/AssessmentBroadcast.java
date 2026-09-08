@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AssessmentBroadcast {
+public class AssessmentBroadcast extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Bed {
+public class Bed extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

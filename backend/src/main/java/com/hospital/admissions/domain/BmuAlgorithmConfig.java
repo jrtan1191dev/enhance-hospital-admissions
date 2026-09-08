@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BmuAlgorithmConfig {
+public class BmuAlgorithmConfig extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

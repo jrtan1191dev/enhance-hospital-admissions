@@ -11,11 +11,7 @@ export type SpecialtyCluster =
   | 'SURGERY'
   | 'ORTHOPAEDICS';
 
-export type WardClass = 
-  | 'CLASS_A'
-  | 'CLASS_B1'
-  | 'CLASS_B2'
-  | 'CLASS_C';
+export type WardClass = 'A' | 'B1' | 'B2' | 'C';
 
 export type Gender = 'MALE' | 'FEMALE';
 
@@ -150,13 +146,10 @@ export interface SisterHospitalReferralResponse {
 
 export interface EdAssessmentSubmitRequest {
   patientId: string;
-  acuityTier: AcuityTier;
-  specialtyCluster: SpecialtyCluster;
-  wardClass: WardClass;
-  telemetryRequired: boolean;
-  fallRiskPrecautions: boolean;
-  isolationRequired: InfectionStatus;
-  clinicalNotes?: string;
+  suspectedDiagnosisService: SpecialtyCluster;
+  primaryAcuityTier: AcuityTier;
+  requestedWardClass: WardClass;
+  needsTelemetry: boolean;
 }
 
 export interface SpecialistConsultRequest {

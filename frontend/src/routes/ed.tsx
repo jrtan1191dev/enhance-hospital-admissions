@@ -29,7 +29,7 @@ export function EdRoute() {
   // Form State
   const [acuityTier, setAcuityTier] = useState<AcuityTier>('TIER_2_ACUTE_URGENT');
   const [specialty, setSpecialty] = useState<SpecialtyCluster>('CARDIOLOGY');
-  const [wardClass, setWardClass] = useState<WardClass>('CLASS_B2');
+  const [wardClass, setWardClass] = useState<WardClass>('B2');
   const [telemetry, setTelemetry] = useState<boolean>(true);
   const [fallRisk, setFallRisk] = useState<boolean>(true);
   const [isolation, setIsolation] = useState<InfectionStatus>('NONE');
@@ -58,7 +58,7 @@ export function EdRoute() {
       setSpecialty('GENERAL_MEDICINE');
       setTelemetry(false);
     }
-    setWardClass(patient.wardClassPreference || 'CLASS_B2');
+    setWardClass(patient.wardClassPreference || 'B2');
     setIsolation(patient.infectionStatus || 'NONE');
     setFallRisk((patient.fallRiskScore || 0) > 50);
     setClinicalNotes(`EHR Synthesis: ${patient.suspectedDiagnosis || 'Acute presentation'}. Vitals BP ${patient.vitalsBp || '120/80'}, SpO2 ${patient.vitalsSpo2 || 98}%.`);
@@ -70,13 +70,10 @@ export function EdRoute() {
 
     submitMutation.mutate({
       patientId: selectedPatient.id,
-      acuityTier,
-      specialtyCluster: specialty,
-      wardClass,
-      telemetryRequired: telemetry,
-      fallRiskPrecautions: fallRisk,
-      isolationRequired: isolation,
-      clinicalNotes,
+      suspectedDiagnosisService: specialty,
+      primaryAcuityTier: acuityTier,
+      requestedWardClass: wardClass,
+      needsTelemetry: telemetry,
     });
   };
 
@@ -342,10 +339,10 @@ export function EdRoute() {
                         onChange={(e) => setWardClass(e.target.value as WardClass)}
                         className="w-full text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-medium shadow-2xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all cursor-pointer"
                       >
-                        <option value="CLASS_B2">Class B2 (5-6 bed cubicle)</option>
-                        <option value="CLASS_C">Class C (Partitioned cubicle)</option>
-                        <option value="CLASS_B1">Class B1 (4 bed cubicle)</option>
-                        <option value="CLASS_A">Class A (Single room)</option>
+                        <option value="B2">Class B2 (5-6 bed cubicle)</option>
+                        <option value="C">Class C (Partitioned cubicle)</option>
+                        <option value="B1">Class B1 (4 bed cubicle)</option>
+                        <option value="A">Class A (Single room)</option>
                       </select>
                     </div>
                   </div>

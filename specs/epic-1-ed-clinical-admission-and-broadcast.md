@@ -121,6 +121,106 @@ interface AssessmentBroadcast {
 
 ---
 
+## KPI Instrumentation & Extraction Recommendations
+
+To facilitate automated metric calculation in downstream reporting pipelines, all Epic 1 KPIs are instrumented via relational database timestamps and structured SLF4J audit events emitted through `AuditLogger`.
+
+### 1. Structured Audit Log Events
+
+Every clinical action emits an `[AUDIT]` log record with MDC context (`auditUser`, `auditAction`, `auditTarget`):
+- `SUBMIT_ED_ASSESSMENT`:
+  - `target`: `AdmissionRequest:{id}`
+  - `details`: `PrimaryAcuity={tier}, WardClass={class}, Cluster={cluster}, RecommendedAccepted={true|false}, ElapsedMins={mins}`
+- `CLAIM_BROADCAST`:
+  - `target`: `AssessmentBroadcast:{id}`
+  - `details`: `TargetCluster={cluster}, Specialist={doctorName}, ElapsedClaimMins={mins}`
+- `AUTO_ESCALATE_BROADCAST`:
+  - `target`: `AssessmentBroadcast:{id}`
+  - `details`: `TargetCluster={cluster}, EscalatedTo={defaultDoctorName}, SlaExceeded=true`
+- `SUBMIT_SPECIALIST_CONSULT`:
+  - `target`: `AssessmentBroadcast:{id}`
+  - `details`: `PrimaryAcuity={primaryTier}, SecondaryAcuity={secondaryTier}, Concordant={true|false}, DiversionEndorsed={true|false}`
+
+### 2. Database Schema Audit Fields
+
+- `admission_requests`: `id`, `created_at`, `requested_at`, `primary_acuity_tier`, `secondary_acuity_tier`, `is_discordant`, `is_recommendation_accepted`
+- `assessment_broadcasts`: `id`, `admission_request_id`, `target_cluster`, `status`, `claimed_by_specialist_id`, `claimed_at`, `created_at`, `last_modified_at`
+
+### 3. Metric Computation Recipes
+
+#### KPI 1: Primary ED Assessment Turnaround Time
+- **SQL Extraction**:
+  ```sql
+  SELECT 
+    AVG(EXTRACT(EPOCH FROM (requested_at - created_at)) / 60.0) AS avg_turnaround_mins,
+    PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (requested_at - created_at)) / 60.0) AS p50_mins,
+    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (requested_at - created_at)) / 60.0) AS p95_mins
+  FROM admission_requests;
+  ```
+- **Log Script (Bash / jq)**:
+  ```bash
+  grep 'action="SUBMIT_ED_ASSESSMENT"' application.log | \
+    sed -n 's/.*ElapsedMins=\([0-9.]*\).*/\1/p' | \
+    awk '{sum+=$1; count++} END {print "Average Turnaround (mins):", sum/count}'
+  ```
+
+#### KPI 2: Specialist Broadcast Pick-Up & Response Latency
+- **SQL Extraction**:
+  ```sql
+  -- Claim Pick-Up Latency
+  SELECT 
+    AVG(EXTRACT(EPOCH FROM (claimed_at - created_at)) / 60.0) AS avg_pickup_latency_mins
+  FROM assessment_broadcasts 
+  WHERE claimed_at IS NOT NULL;
+
+  -- Consult Submission Latency
+  SELECT 
+    AVG(EXTRACT(EPOCH FROM (last_modified_at - claimed_at)) / 60.0) AS avg_consult_latency_mins
+  FROM assessment_broadcasts 
+  WHERE status = 'COMPLETED';
+  ```
+
+#### KPI 3: Primary vs Specialist Concordance Rate
+- **SQL Extraction**:
+  ```sql
+  SELECT 
+    COUNT(*) AS total_consulted_cases,
+    SUM(CASE WHEN primary_acuity_tier = secondary_acuity_tier THEN 1 ELSE 0 END) AS concordant_cases,
+    ROUND(100.0 * SUM(CASE WHEN primary_acuity_tier = secondary_acuity_tier THEN 1 ELSE 0 END) / COUNT(*), 2) AS concordance_rate_pct
+  FROM admission_requests
+  WHERE secondary_acuity_tier IS NOT NULL;
+  ```
+- **Log Script (Bash / grep)**:
+  ```bash
+  total=$(grep -c 'action="SUBMIT_SPECIALIST_CONSULT"' application.log)
+  concordant=$(grep 'action="SUBMIT_SPECIALIST_CONSULT"' application.log | grep -c 'Concordant=true')
+  echo "scale=2; ($concordant / $total) * 100" | bc | awk '{print "Concordance Rate: " $1 "%"}'
+  ```
+
+#### KPI 4: Accepted Admissions Based on Recommendations
+- **SQL Extraction**:
+  ```sql
+  SELECT 
+    COUNT(*) AS total_admissions,
+    SUM(CASE WHEN is_recommendation_accepted = true THEN 1 ELSE 0 END) AS accepted_recommendations,
+    ROUND(100.0 * SUM(CASE WHEN is_recommendation_accepted = true THEN 1 ELSE 0 END) / COUNT(*), 2) AS acceptance_rate_pct
+  FROM admission_requests;
+  ```
+
+#### KPI 5: Breakdown of Accepted Requests by Severity Tier
+- **SQL Extraction**:
+  ```sql
+  SELECT 
+    primary_acuity_tier,
+    COUNT(*) AS request_count,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) AS percentage_of_total
+  FROM admission_requests
+  GROUP BY primary_acuity_tier
+  ORDER BY primary_acuity_tier;
+  ```
+
+---
+
 ## Testing Decisions
 
 ### What Makes a Good Test

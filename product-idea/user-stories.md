@@ -700,22 +700,118 @@ Scenario: Housekeeping signs off terminal cleaning within 30-minute SLA
 
 ---
 
-## Traceability Matrix
+## Traceability & KPI Extraction Matrix
 
-| Epic | Feature | User Story | Mapped Pain Point in `pain-points.md` | Primary KPI Impact |
-| :--- | :--- | :--- | :--- | :--- |
-| **Epic 1** | Feature 1.1 | Story 1.1.1, 1.1.2 | Pain Point 1: Multi-Doctor Admission Decision Latency | Admission Decision Turnaround Time |
-| **Epic 1** | Feature 1.2 | Story 1.2.1, 1.2.2, 1.2.3 | Pain Point 1: Multi-Doctor Admission Decision Latency | Specialist Pick-Up & Response Latency |
-| **Epic 1** | Feature 1.3 | Story 1.3.1, 1.3.2 | Pain Point 1 & 2: Urgency Gating & Safety Escalation | Primary vs Specialist Concordance Rate |
-| **Epic 1** | Feature 1.4 | Story 1.4.1, 1.4.2 | Pain Point 2: ED-to-BMU Manual Phone Requests | BMU Phone Call Reduction (100% Digital) |
-| **Epic 2** | Feature 2.1 | Story 2.1.1, 2.1.2 | Pain Point 2: Direct Digital BMU Bed Requests | BMU Suggestion Acceptance Rate (>85%) |
-| **Epic 2** | Feature 2.2 | Story 2.2.1, 2.2.2 | Pain Point 4 & 6: Bed State Orchestration | Bed Turnover Cleaning Latency (<30 mins) |
-| **Epic 2** | Feature 2.3 | Story 2.3.1, 2.3.2, 2.3.3 | Pain Point 4: Ghost Capacity & Multi-Bed Locking | Capacity Utilization Gain & Ghost Bed Reduction |
-| **Epic 2** | Feature 2.4 | Story 2.4.1, 2.4.2 | Pain Point 3: Under-utilized Diversion (Sister Hosp/HaH) | % Accepted Diversions (30-min Bilateral SLA) |
-| **Epic 2** | Feature 2.5 | Story 2.5.1, 2.5.2 | Pain Point 5: Lack of Wait Duration Visibility | Prolonged-Wait Communication Rate |
-| **Epic 3** | Feature 3.1 | Story 3.1.1, 3.1.2 | Pain Point 5: Lack of Wait Duration Visibility | Patient Portal Login & Access Rate |
-| **Epic 3** | Feature 3.2 | Story 3.2.1, 3.2.2 | Pain Point 5: Lack of Wait Duration Visibility | 2-Hour Periodic Update Delivery Rate (100%) |
-| **Epic 3** | Feature 3.3 | Story 3.3.1, 3.3.2 | Pain Point 3: Under-utilized Diversion Insights | Early MSW & Financial Counseling Connect Rate |
-| **Epic 4** | Feature 4.1 | Story 4.1.1, 4.1.2 | Pain Point 6: Manual Caregiver Prep Bottlenecks | Early Caregiver Engagement Completion Rate |
-| **Epic 4** | Feature 4.2 | Story 4.2.1, 4.2.2 | Pain Point 6: Medication Bottlenecks & Exit Block | Bedside Discharge Medication Adoption Rate |
-| **Epic 4** | Feature 4.3 | Story 4.3.1, 4.3.2 | Pain Point 6: Bed Turnover Bottlenecks | Discharge Before 12:00 PM & 30-min Cleaning SLA |
+| Epic | Feature | User Story | Mapped Pain Point in `pain-points.md` | Primary KPI Impact | Emitted Audit Event (Log) | DB Audit Columns (SQL) | Recommended Computation Method |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Epic 1** | Feature 1.1 | Story 1.1.1, 1.1.2 | Pain Point 1: Multi-Doctor Admission Decision Latency | Admission Decision Turnaround Time | `SUBMIT_ED_ASSESSMENT` (`ElapsedMins`) | `requested_at - created_at` | **SQL**: `AVG(requested_at - created_at)`<br>**Log**: parse `ElapsedMins` |
+| **Epic 1** | Feature 1.2 | Story 1.2.1, 1.2.2, 1.2.3 | Pain Point 1: Multi-Doctor Admission Decision Latency | Specialist Pick-Up & Response Latency | `CLAIM_BROADCAST`, `SUBMIT_SPECIALIST_CONSULT` | `claimed_at - created_at`, `completed_at - claimed_at` | **SQL**: `AVG(claimed_at - created_at)`<br>**Log**: parse `ElapsedClaimMins` |
+| **Epic 1** | Feature 1.3 | Story 1.3.1, 1.3.2 | Pain Point 1 & 2: Urgency Gating & Safety Escalation | Primary vs Specialist Concordance Rate | `SUBMIT_SPECIALIST_CONSULT` (`Concordant`) | `primary_acuity_tier = secondary_acuity_tier` | **SQL**: `SUM(concordant) / COUNT(*)`<br>**Log**: tally `Concordant=true` |
+| **Epic 1** | Feature 1.4 | Story 1.4.1, 1.4.2 | Pain Point 2: ED-to-BMU Manual Phone Requests | BMU Phone Call Reduction (100% Digital) | `SUBMIT_ED_ASSESSMENT` | `COUNT(admission_requests)` | **SQL**: `COUNT(*)` digital requests vs phone baseline |
+| **Epic 2** | Feature 2.1 | Story 2.1.1, 2.1.2 | Pain Point 2: Direct Digital BMU Bed Requests | BMU Suggestion Acceptance Rate (>85%) | `ALLOCATE_BED`, `OVERRIDE_ALLOCATION` | `is_recommendation_accepted`, `override_reason_code` | **SQL**: `SUM(is_accepted) / COUNT(*)`<br>**Log**: `allocs / (allocs + overrides)` |
+| **Epic 2** | Feature 2.2 | Story 2.2.1, 2.2.2 | Pain Point 4 & 6: Bed State Orchestration | Bed Turnover Cleaning Latency (<30 mins) | `CLEAN_BED` (`ElapsedCleaningMins`) | `last_cleaned_at - cleaning_started_at` | **SQL**: `AVG(elapsed_clean_mins)`<br>**Log**: parse `ElapsedCleaningMins <= 30` |
+| **Epic 2** | Feature 2.3 | Story 2.3.1, 2.3.2, 2.3.3 | Pain Point 4: Ghost Capacity & Multi-Bed Locking | Capacity Utilization Gain & Ghost Bed Reduction | `APPROVE_BATCH_HOLDING_WARD`, `APPROVE_COHORT_SWAP` | `placed_via_batch`, `beds.status` | **SQL**: `SUM(batch_placed) / COUNT(*)`<br>**Log**: tally `APPROVE_COHORT_SWAP` |
+| **Epic 2** | Feature 2.4 | Story 2.4.1, 2.4.2 | Pain Point 3: Under-utilized Diversion (Sister Hosp/HaH) | % Accepted Diversions (30-min Bilateral SLA) | `DIVERSION_REFERRAL` | `diversion_recommended`, `referrals.bilateral_response_mins` | **SQL**: `SUM(diversion) / COUNT(*)` and `% <= 30 mins` |
+| **Epic 2** | Feature 2.5 | Story 2.5.1, 2.5.2 | Pain Point 5: Lack of Wait Duration Visibility | Prolonged-Wait Communication Rate | `TAG_DELAY_REASON` | `delay_reason_tag` where dwell $> 60\text{m}$ | **SQL**: `COUNT(tagged) / COUNT(dwell > 60m)` |
+| **Epic 3** | Feature 3.1 | Story 3.1.1, 3.1.2 | Pain Point 5: Lack of Wait Duration Visibility | Patient Portal Login & Access Rate | `TRACK_PATIENT_ACCESS` | `first_tracker_accessed_at IS NOT NULL` | **SQL**: `COUNT(accessed) / COUNT(dispatched)`<br>**Log**: unique token accesses |
+| **Epic 3** | Feature 3.2 | Story 3.2.1, 3.2.2 | Pain Point 5: Lack of Wait Duration Visibility | 2-Hour Periodic Update Delivery Rate (100%) | `DISPATCH_PERIODIC_UPDATE` | `last_periodic_update_sent_at` | **SQL**: compliance for requests boarding $\ge 120\text{m}$<br>**Log**: count dispatches |
+| **Epic 3** | Feature 3.3 | Story 3.3.1, 3.3.2 | Pain Point 3: Under-utilized Diversion Insights | Early MSW & Financial Counseling Connect Rate | `CONNECT_MSW_HOTLINE`, `CONNECT_FINANCIAL_COUNSELING` | `patient_audit_interactions` | **SQL/Log**: Total click-to-call conversions |
+| **Epic 4** | Feature 4.1 | Story 4.1.1, 4.1.2 | Pain Point 6: Manual Caregiver Prep Bottlenecks | Early Caregiver Engagement Completion Rate | `COMPLETE_CAREGIVER_CHECKLIST` | `checklist_completed_at < DATE(discharged_at)` | **SQL**: checklists completed before discharge morning |
+| **Epic 4** | Feature 4.2 | Story 4.2.1, 4.2.2 | Pain Point 6: Medication Bottlenecks & Exit Block | Bedside Discharge Medication Adoption Rate | `DELIVER_BEDSIDE_MEDICATION` | `medication_orders.status = 'DELIVERED_BEDSIDE'` | **SQL**: `COUNT(delivered_bedside) / COUNT(orders)` |
+| **Epic 4** | Feature 4.3 | Story 4.3.1, 4.3.2 | Pain Point 6: Bed Turnover Bottlenecks | Discharge Before 12:00 PM & 30-min Cleaning SLA | `VACATE_PATIENT` (`DischargedBeforeNoon`) | `EXTRACT(HOUR FROM discharged_at) < 12` | **SQL**: `COUNT(discharged < 12) / COUNT(*)`<br>**Log**: tally `DischargedBeforeNoon=true` |
+
+---
+
+## KPI Extraction & Computation Recipes
+
+To support subsequent planning, automated reporting, and SLA alerting, every metric can be computed using either of the two standard extraction mechanisms:
+
+### 1. Direct Relational Database Extraction (SQL Queries)
+
+Ideal for batch reporting, business intelligence dashboards (e.g. Metabase, Tableau), and retrospective audits:
+
+```sql
+-- Comprehensive Hospital Operational KPI Extraction Script
+-- 1. Primary ED Assessment Turnaround Time (Minutes)
+SELECT 
+  ROUND(AVG(EXTRACT(EPOCH FROM (requested_at - created_at)) / 60.0), 1) AS avg_ed_turnaround_mins,
+  PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (requested_at - created_at)) / 60.0) AS p50_mins,
+  PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (requested_at - created_at)) / 60.0) AS p95_mins
+FROM admission_requests;
+
+-- 2. Specialist Consult Concordance Rate (%)
+SELECT 
+  COUNT(*) AS total_consulted_cases,
+  SUM(CASE WHEN primary_acuity_tier = secondary_acuity_tier THEN 1 ELSE 0 END) AS concordant_cases,
+  ROUND(100.0 * SUM(CASE WHEN primary_acuity_tier = secondary_acuity_tier THEN 1 ELSE 0 END) / COUNT(*), 2) AS concordance_rate_pct
+FROM admission_requests
+WHERE secondary_acuity_tier IS NOT NULL;
+
+-- 3. BMU Suggestion Acceptance Rate (%)
+SELECT 
+  COUNT(*) AS total_allocations,
+  SUM(CASE WHEN is_recommendation_accepted = true THEN 1 ELSE 0 END) AS accepted_suggestions,
+  ROUND(100.0 * SUM(CASE WHEN is_recommendation_accepted = true THEN 1 ELSE 0 END) / COUNT(*), 2) AS suggestion_acceptance_rate_pct
+FROM admission_requests
+WHERE assigned_bed_id IS NOT NULL;
+
+-- 4. Discharge Before Midday Rate (%)
+SELECT 
+  COUNT(*) AS total_discharges,
+  SUM(CASE WHEN EXTRACT(HOUR FROM discharged_at) < 12 THEN 1 ELSE 0 END) AS discharged_before_noon_count,
+  ROUND(100.0 * SUM(CASE WHEN EXTRACT(HOUR FROM discharged_at) < 12 THEN 1 ELSE 0 END) / COUNT(*), 2) AS discharge_before_noon_pct
+FROM admission_requests
+WHERE discharged_at IS NOT NULL;
+
+-- 5. Bed Turnover Cleaning 30-Minute SLA Compliance (%)
+SELECT 
+  COUNT(*) AS total_turnovers,
+  ROUND(AVG(EXTRACT(EPOCH FROM (last_cleaned_at - cleaning_started_at)) / 60.0), 1) AS avg_turnover_mins,
+  ROUND(100.0 * SUM(CASE WHEN EXTRACT(EPOCH FROM (last_cleaned_at - cleaning_started_at)) / 60.0 <= 30.0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS sla_compliance_pct
+FROM beds
+WHERE last_cleaned_at IS NOT NULL AND cleaning_started_at IS NOT NULL;
+
+-- 6. Public Patient Milestone Tracker Access Rate (%)
+SELECT 
+  COUNT(*) AS total_dispatched_requests,
+  SUM(CASE WHEN first_tracker_accessed_at IS NOT NULL THEN 1 ELSE 0 END) AS accessed_tracker_count,
+  ROUND(100.0 * SUM(CASE WHEN first_tracker_accessed_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS tracker_access_rate_pct
+FROM admission_requests
+WHERE status IN ('BED_REQUESTED', 'BED_ALLOCATED', 'ADMITTED_INPATIENT');
+```
+
+---
+
+### 2. Structured Log-Based Extraction (CLI & Ingestion Scripts)
+
+Ideal for lightweight prototype verification, real-time alerts, and streaming SIEM analytics (CloudWatch, OpenSearch, Datadog):
+
+```bash
+# A. BMU Suggestion Acceptance Rate
+allocs=$(grep -c 'action="ALLOCATE_BED"' application.log)
+overrides=$(grep -c 'action="OVERRIDE_ALLOCATION"' application.log)
+echo "scale=2; ($allocs / ($allocs + $overrides)) * 100" | bc | awk '{print "Suggestion Acceptance Rate: " $1 "%"}'
+
+# B. Housekeeping 30-Minute Cleaning SLA Compliance Rate
+grep 'action="CLEAN_BED"' application.log | \
+  sed -n 's/.*ElapsedCleaningMins=\([0-9.]*\).*/\1/p' | \
+  awk '{sum+=$1; count++; if($1<=30.0) ok++} END {
+    print "Average Cleaning Latency:", sum/count, "mins";
+    print "30-min SLA Compliance:", (ok/count)*100, "%";
+  }'
+
+# C. Primary vs Specialist Concordance Rate
+total_consults=$(grep -c 'action="SUBMIT_SPECIALIST_CONSULT"' application.log)
+concordant=$(grep 'action="SUBMIT_SPECIALIST_CONSULT"' application.log | grep -c 'Concordant=true')
+echo "scale=2; ($concordant / $total_consults) * 100" | bc | awk '{print "Concordance Rate: " $1 "%"}'
+
+# D. Discharge Before Midday Rate
+vacates=$(grep -c 'action="VACATE_PATIENT"' application.log)
+before_noon=$(grep 'action="VACATE_PATIENT"' application.log | grep -c 'DischargedBeforeNoon=true')
+echo "scale=2; ($before_noon / $vacates) * 100" | bc | awk '{print "Discharge Before 12 PM Rate: " $1 "%"}'
+
+# E. Public Patient Milestone Tracker Access Rate
+dispatched=$(grep -c 'action="SUBMIT_ED_ASSESSMENT"' application.log)
+accessed=$(grep -o 'target="PatientToken:[^"]*"' application.log | sort -u | wc -l)
+echo "scale=2; ($accessed / $dispatched) * 100" | bc | awk '{print "Public Tracker Adoption Rate: " $1 "%"}'
+```

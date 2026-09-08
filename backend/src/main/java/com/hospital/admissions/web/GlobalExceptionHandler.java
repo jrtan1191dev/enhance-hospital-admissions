@@ -1,15 +1,22 @@
 package com.hospital.admissions.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -20,6 +27,42 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    public GlobalExceptionHandler() {
+        setMessageSource(new org.springframework.context.support.StaticMessageSource());
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex,
+            @Nullable Object body,
+            HttpHeaders headers,
+            HttpStatusCode statusCode,
+            WebRequest request) {
+
+        HttpServletRequest servletRequest = (request instanceof ServletWebRequest servletWebRequest)
+                ? servletWebRequest.getRequest()
+                : null;
+
+        logDiagnostic(statusCode, ex, servletRequest);
+
+        ResponseEntity<Object> response = super.handleExceptionInternal(ex, body, headers, statusCode, request);
+        if (response != null && response.getBody() instanceof ProblemDetail problem) {
+            if (problem.getProperties() == null || !problem.getProperties().containsKey("timestamp")) {
+                problem.setProperty("timestamp", Instant.now());
+            }
+        }
+        return response;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ProblemDetail handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        logDiagnostic(HttpStatus.BAD_REQUEST, ex, request);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
@@ -63,7 +106,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
-    private void logDiagnostic(HttpStatus status, Exception ex, HttpServletRequest request) {
+    private void logDiagnostic(HttpStatusCode statusCode, Exception ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.resolve(statusCode.value());
+        String reasonPhrase = (status != null) ? status.getReasonPhrase() : statusCode.toString();
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String who = (auth != null && auth.isAuthenticated() && auth.getName() != null)
                 ? auth.getName()
@@ -75,10 +121,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             where = request.getMethod() + " " + request.getRequestURI() + (query != null ? "?" + query : "");
         }
 
-        String what = status.value() + " " + status.getReasonPhrase()
-                + " (" + ex.getClass().getSimpleName() + "): " + ex.getMessage();
+        String details = (ex.getMessage() != null) ? ex.getMessage() : "No message provided";
+        String what = statusCode.value() + " " + reasonPhrase
+                + " (" + ex.getClass().getSimpleName() + "): " + details;
 
-        if (status.is5xxServerError()) {
+        if (statusCode.is5xxServerError()) {
             log.error("[SERVER_ERROR] who=\"{}\" where=\"{}\" what=\"{}\"", who, where, what, ex);
         } else {
             log.warn("[CLIENT_ERROR] who=\"{}\" where=\"{}\" what=\"{}\"", who, where, what);

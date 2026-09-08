@@ -1,21 +1,49 @@
 package com.hospital.admissions.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 class GlobalExceptionHandlerTest {
 
     private MockMvc mockMvc;
+    private ListAppender<ILoggingEvent> listAppender;
+    private Logger logger;
+
+    static class TestBody {
+        @NotNull
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
     @RestController
     static class TestFaultyController {
@@ -43,6 +71,15 @@ class GlobalExceptionHandlerTest {
         public void throwUnhandled() {
             throw new RuntimeException("Unexpected database crash");
         }
+
+        @PostMapping("/test/validation")
+        public void throwValidation(@Valid @RequestBody TestBody body) {
+        }
+
+        @GetMapping("/test/constraint-violation")
+        public void throwConstraintViolation() {
+            throw new ConstraintViolationException("Parameter invalid", java.util.Set.of());
+        }
     }
 
     @BeforeEach
@@ -51,6 +88,18 @@ class GlobalExceptionHandlerTest {
                 .standaloneSetup(new TestFaultyController())
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
+
+        this.logger = (Logger) LoggerFactory.getLogger(GlobalExceptionHandler.class);
+        this.listAppender = new ListAppender<>();
+        this.listAppender.start();
+        this.logger.addAppender(listAppender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (this.logger != null && this.listAppender != null) {
+            this.logger.detachAppender(listAppender);
+        }
     }
 
     @Test
@@ -118,8 +167,71 @@ class GlobalExceptionHandlerTest {
             mockMvc.perform(get("/test/not-found?reason=urgent").accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.status").value(404));
+
+            assertThat(listAppender.list)
+                    .anyMatch(event -> event.getLevel() == Level.WARN
+                            && event.getFormattedMessage().contains("[CLIENT_ERROR]")
+                            && event.getFormattedMessage().contains("dr_tan_ed")
+                            && event.getFormattedMessage().contains("GET /test/not-found?reason=urgent"));
         } finally {
             org.springframework.security.core.context.SecurityContextHolder.clearContext();
         }
+    }
+
+    @Test
+    @DisplayName("MethodArgumentNotValidException produces 400 ProblemDetail and logs [CLIENT_ERROR]")
+    void testMethodArgumentNotValidExceptionLogsClientError() throws Exception {
+        mockMvc.perform(post("/test/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        assertThat(listAppender.list)
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getFormattedMessage().contains("[CLIENT_ERROR]")
+                        && event.getFormattedMessage().contains("400")
+                        && event.getFormattedMessage().contains("MethodArgumentNotValidException")
+                        && event.getFormattedMessage().contains("POST /test/validation"));
+    }
+
+    @Test
+    @DisplayName("HttpMessageNotReadableException produces 400 ProblemDetail and logs [CLIENT_ERROR]")
+    void testHttpMessageNotReadableExceptionLogsClientError() throws Exception {
+        mockMvc.perform(post("/test/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ invalid json }")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        assertThat(listAppender.list)
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getFormattedMessage().contains("[CLIENT_ERROR]")
+                        && event.getFormattedMessage().contains("400")
+                        && event.getFormattedMessage().contains("HttpMessageNotReadableException")
+                        && event.getFormattedMessage().contains("POST /test/validation"));
+    }
+
+    @Test
+    @DisplayName("ConstraintViolationException produces 400 ProblemDetail and logs [CLIENT_ERROR]")
+    void testConstraintViolationExceptionLogsClientError() throws Exception {
+        mockMvc.perform(get("/test/constraint-violation")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Parameter invalid"))
+                .andExpect(jsonPath("$.timestamp").exists());
+
+        assertThat(listAppender.list)
+                .anyMatch(event -> event.getLevel() == Level.WARN
+                        && event.getFormattedMessage().contains("[CLIENT_ERROR]")
+                        && event.getFormattedMessage().contains("400")
+                        && event.getFormattedMessage().contains("ConstraintViolationException")
+                        && event.getFormattedMessage().contains("GET /test/constraint-violation"));
     }
 }

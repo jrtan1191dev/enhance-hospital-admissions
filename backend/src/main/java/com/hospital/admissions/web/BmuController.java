@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/bmu")
+@RequestMapping("/api/v1/bmu")
 @RequiredArgsConstructor
 public class BmuController {
 
@@ -57,6 +57,7 @@ public class BmuController {
     @PostMapping("/diversion/refer")
     public ResponseEntity<SisterHospitalReferralResponse> referToSisterHospital(
             @Valid @RequestBody DiversionReferralRequest request) {
-        return ResponseEntity.ok(bmuService.referToSisterHospital(request.getAdmissionRequestId(), request.getFacility()));
+        return ResponseEntity
+                .ok(bmuService.referToSisterHospital(request.getAdmissionRequestId(), request.getFacility()));
     }
 }

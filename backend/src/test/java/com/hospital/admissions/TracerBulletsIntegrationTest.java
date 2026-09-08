@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,7 +50,7 @@ class TracerBulletsIntegrationTest {
     @DisplayName("Tracer Bullet 1: ED Assessment -> Specialist Claim -> BMU Allocation")
     void testTracerBullet1_EdToBmuAllocation() throws Exception {
         // Step 1: Verify ED patients list
-        mockMvc.perform(get("/api/clinicians/ed/patients")
+        mockMvc.perform(get("/api/v1/clinicians/ed/patients")
                         .header("X-User-Role", "ED_ATTENDING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -57,7 +58,7 @@ class TracerBulletsIntegrationTest {
         Patient p101 = patientRepository.findByQueueToken("TOKEN-P101").orElseThrow();
 
         // Step 2: Fetch BMU Queue (P101 was pre-seeded in BED_REQUESTED)
-        MvcResult queueResult = mockMvc.perform(get("/api/bmu/queue")
+        MvcResult queueResult = mockMvc.perform(get("/api/v1/bmu/queue")
                         .header("X-User-Role", "BMU_COORDINATOR"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -72,7 +73,7 @@ class TracerBulletsIntegrationTest {
                 .findFirst().orElseThrow();
 
         // Step 3: Get BMU recommendations for P101 (Male, Cardio, B2, Telemetry, FallRisk 65)
-        MvcResult recResult = mockMvc.perform(get("/api/bmu/recommendations/" + p101Req.getId())
+        MvcResult recResult = mockMvc.perform(get("/api/v1/bmu/recommendations/" + p101Req.getId())
                         .header("X-User-Role", "BMU_COORDINATOR"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -96,7 +97,8 @@ class TracerBulletsIntegrationTest {
                 .bedId(topRec.getBedId())
                 .build();
 
-        mockMvc.perform(post("/api/bmu/allocate")
+        mockMvc.perform(post("/api/v1/bmu/allocate")
+                        .with(csrf())
                         .header("X-User-Role", "BMU_COORDINATOR")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(allocReq)))
@@ -113,7 +115,7 @@ class TracerBulletsIntegrationTest {
     @DisplayName("Tracer Bullet 2: Patient Milestone Tracker -> Nurse Checkin/Vacate -> Housekeeping Clean")
     void testTracerBullet2_PatientTrackerAndTurnoverLoop() throws Exception {
         // Step 1: Patient Milestone Tracker views status
-        mockMvc.perform(get("/api/patients/track/TOKEN-P101")
+        mockMvc.perform(get("/api/v1/patients/track/TOKEN-P101")
                         .header("X-User-Role", "PATIENT"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.patientName").value("Tan Ah Meng"))
@@ -124,7 +126,8 @@ class TracerBulletsIntegrationTest {
                 .findFirst().orElseThrow();
 
         // Step 2: Inpatient Ward Nurse checks in patient -> Bed turns OCCUPIED_TAKEN (Grey)
-        mockMvc.perform(post("/api/patients/beds/" + bed8A03.getId() + "/checkin")
+        mockMvc.perform(post("/api/v1/patients/beds/" + bed8A03.getId() + "/checkin")
+                        .with(csrf())
                         .header("X-User-Role", "WARD_NURSE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("OCCUPIED_TAKEN"));
@@ -133,7 +136,8 @@ class TracerBulletsIntegrationTest {
         assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.OCCUPIED_TAKEN);
 
         // Step 3: Ward Nurse vacates patient upon discharge -> Bed turns EMPTY_PENDING_CLEANING (Mustard Yellow - vacated, empty, not yet cleaned)
-        mockMvc.perform(post("/api/patients/beds/" + bed8A03.getId() + "/vacate")
+        mockMvc.perform(post("/api/v1/patients/beds/" + bed8A03.getId() + "/vacate")
+                        .with(csrf())
                         .header("X-User-Role", "WARD_NURSE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("EMPTY_PENDING_CLEANING"));
@@ -142,7 +146,8 @@ class TracerBulletsIntegrationTest {
         assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.EMPTY_PENDING_CLEANING);
 
         // Step 4: Housekeeping completes 30m terminal cleaning -> Bed turns EMPTY_CLEANED (White - empty, cleaned)
-        mockMvc.perform(post("/api/patients/beds/" + bed8A03.getId() + "/clean")
+        mockMvc.perform(post("/api/v1/patients/beds/" + bed8A03.getId() + "/clean")
+                        .with(csrf())
                         .header("X-User-Role", "HOUSEKEEPING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("EMPTY_CLEANED"));

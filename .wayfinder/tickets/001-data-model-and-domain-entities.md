@@ -23,8 +23,8 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
 - **Primary Keys**: `java.util.UUID` with `@GeneratedValue(strategy = GenerationType.UUID)` for globally unique, standards-compliant IDs.
 - **JPA Mappings**: Standard bidirectional object graph (`@OneToMany`, `@ManyToOne`, `@OneToOne`) with DTO projections and Jackson `@JsonIgnoreProperties` / `@JsonBackReference` to prevent circular serialization.
 - **Hierarchy**: Strict physical hierarchy of **Level $\rightarrow$ Ward $\rightarrow$ Bed** (cubicle entity explicitly eliminated).
-- **Database Engine**: In-memory **H2 Database** (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) with `spring.jpa.hibernate.ddl-auto=create-drop`.
-- **Seed Data**: A Spring Boot `CommandLineRunner` (`DataInitializer`) automatically populates levels and wards (e.g. Level 8 Ward 8A, Level 8 Ward 8B, Level 9 Ward 9A), beds in initial `WHITE`/`GREEN`/`GREY` states, and synthetic waiting ED patients upon application boot.
+- **Database Engine**: In-memory **H2 Database** (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) with `spring.jpa.hibernate.ddl-auto=create-drop` under the `prototype` profile. In `prod`, standard persistent RDBMS (PostgreSQL) is configured.
+- **Seed Data**: A Spring Boot `CommandLineRunner` (`DataInitializer`) annotated with `@Profile("prototype")` automatically populates levels and wards (e.g. Level 8 Ward 8A, Level 8 Ward 8B, Level 9 Ward 9A), beds in initial `WHITE`/`GREEN`/`GREY` states, and synthetic waiting ED patients upon boot. In production, this runner is inactive.
 
 ---
 

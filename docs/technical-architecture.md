@@ -48,7 +48,7 @@ To ensure both long-term enterprise readiness and immediate prototype velocity, 
 | **Sister Hospital & Diversion Integration** | Authenticated mTLS / OAuth2 REST and FHIR API calls to real community hospitals (OCH, AH, SACH) and MIC@Home. | **Mock Sister Hospital Gateway** (`MockSisterHospitalGateway` under `@Profile("prototype")`) returning simulated 30-min SLA acceptance. |
 | **Real-Time Communication** | Full-duplex WebSockets with STOMP broker, distributed Pub/Sub (Redis/Kafka), and push notifications. | **Direct REST + Lightweight Polling**: Frontend fetches via TanStack Query (2–3s polling on active boards) + manual refetch triggers. |
 | **Constraint Solver** | Distributed Timefold / OptaPlanner engine executing continuous optimization across multi-hospital clusters. | **Pure Java Synchronous Heuristic Engine**: On-demand calculation of hard filters and weighted soft scores executed in milliseconds. |
-| **Authentication & RBAC** | Singpass / HealthHub OIDC integration, hospital Active Directory OAuth2/JWT with fine-grained RBAC. | **Zero-Auth Topbar Role Switcher**: Topbar toggle between clinical personas (`[🩺 ED Attending]`, `[👨‍⚕️ Specialist]`, `[🏢 BMU]`, `[📱 Patient Admission Tracker]`, `[🧹 Ward & EVS]`) with route guards. |
+| **Authentication, RBAC & Audit** | Singpass / HealthHub OIDC integration, hospital Active Directory OAuth2/JWT with fine-grained RBAC, and immutable SIEM audit logs. | **Zero-Auth Topbar Role Switcher with Seeded Security Context**: Seamless 1-click persona switching; `PrototypeSecurityFilter` maps active role to seeded user account (`dr_tan_ed`, `bmu_coord_wong`) with real SLF4J/MDC audit logs. |
 | **Physical Hierarchy** | Level $\rightarrow$ Ward $\rightarrow$ Bed (Strictly no cubicles). | **Level $\rightarrow$ Ward $\rightarrow$ Bed** (Strictly preserved in prototype). |
 
 ### 2.1 Spring Profile Architecture: Production-Ready Default vs. Prototype Profile Isolation
@@ -72,33 +72,61 @@ graph TD
 
     subgraph Dependency Injection Boundary
         GatewayInterface[SisterHospitalGateway Interface]
+        EhrGatewayInterface[HospitalEhrGateway Interface]
+        SolverInterface[BedAllocationSolver Interface]
+        SecFilter[Security Filter Chain]
     end
 
     subgraph Spring Profile: prototype (Strictly Isolated Prototype)
         MockGateway[MockSisterHospitalGateway<br/>@Profile prototype]
+        MockEhr[MockHospitalEhrGateway<br/>@Profile prototype]
+        ProtoSolver[HeuristicBedAllocationSolver<br/>Pure Java 2-Phase Engine]
+        ProtoSec[PrototypeSecurityFilter<br/>Maps X-User-Role to seeded user]
         H2DB[(In-Memory H2 DB<br/>@Profile prototype)]
         Seeder[DataInitializer CommandLineRunner<br/>@Profile prototype]
     end
 
     subgraph Spring Profile: default (Production-Ready)
         ProdGateway[HttpSisterHospitalGateway<br/>@Profile default / !prototype]
+        ProdEhr[FhirHospitalEhrGateway<br/>HAPI FHIR R4 Client]
+        ProdSolver[TimefoldBedAllocationSolver<br/>Timefold / OptaPlanner]
+        ProdSec[OAuth2ResourceServerFilter<br/>Validates signed hospital JWTs]
         PostgresDB[(Clustered PostgreSQL DB<br/>Standard application.yml)]
-        EHRFeed[Live Hospital ADT / FHIR Ingestion<br/>Default Provider]
     end
 
     Service --> GatewayInterface
+    Service --> EhrGatewayInterface
+    Service --> SolverInterface
     GatewayInterface -.->|Injected when active=prototype| MockGateway
     GatewayInterface -.->|Injected by default| ProdGateway
+    EhrGatewayInterface -.->|Injected when active=prototype| MockEhr
+    EhrGatewayInterface -.->|Injected by default| ProdEhr
+    SolverInterface -.->|Injected when active=prototype| ProtoSolver
+    SolverInterface -.->|Injected by default| ProdSolver
+    SecFilter -.->|Injected when active=prototype| ProtoSec
+    SecFilter -.->|Injected by default| ProdSec
 ```
 
 #### Profile-Gated Component Matrix:
-1. **`SisterHospitalGateway`**:
+1. **`BedAllocationSolver` (Mathematical Optimization)**:
+   - `HeuristicBedAllocationSolver` (`@Profile("prototype")`): Pure Java synchronous two-phase pack-then-batch and cohort-swap heuristic engine (ADR-002). Instantaneous (<50ms) evaluations on in-memory hospital wards without third-party solver licenses. Active strictly under `prototype`.
+   - `TimefoldBedAllocationSolver` (Default implementation): Enterprise constraint solver powered by Timefold / OptaPlanner for multi-hospital regional cluster optimization.
+2. **`SisterHospitalGateway`**:
    - `MockSisterHospitalGateway` (`@Profile("prototype")`): Simulates Outram Community Hospital (OCH), Alexandra Hospital (AH), St. Andrew's Community Hospital (SACH), and MIC@Home. Generates synthetic reference IDs (e.g., `OCH-REF-2026-9014`), initiates a 30-minute bilateral SLA countdown, and flips admission status to `DIVERTED_SISTER_HOSPITAL` or `DIVERTED_HAH`. Active strictly under `prototype`.
    - `HttpSisterHospitalGateway` (Default implementation via `@Profile("default")` or `@ConditionalOnMissingBean`): Calls actual external hospital cluster APIs over HTTPS with mutual TLS (mTLS), OAuth2 tokens, and circuit-breaker fault tolerance.
-2. **`DataInitializer` (Synthetic Seed Data)**:
+3. **`HospitalEhrGateway` (HL7/FHIR Ingestion)**:
+   - `MockHospitalEhrGateway` (`@Profile("prototype")`): Returns deterministic synthetic pre-population diagnostic baselines (`AssessmentPrepopDto`) for simulated ED patients (P101–P104) with vitals and cardiac/respiratory lab values.
+   - `FhirHospitalEhrGateway` (Default implementation): Leverages HAPI FHIR R4 client to query real EHR `Observation`, `Encounter`, and `DiagnosticReport` resources via authenticated SMART on FHIR / mTLS.
+4. **Security & Seeded User Identities**:
+   - `PrototypeSecurityFilter` (`@Profile("prototype")`): Intercepts `X-User-Role` / `X-User-Id` header from the UI role-switcher and populates `SecurityContextHolder` with seeded accounts (`dr_tan_ed`, `dr_lim_cardio`, `bmu_coord_wong`, `patient_p101`, `nurse_sarah`). Zero login friction for evaluators while maintaining full authenticated principal semantics.
+   - `OAuth2ResourceServerFilter` (Default implementation): Validates signed hospital Keycloak/Active Directory JWTs for clinical staff and Singpass/HealthHub OIDC tokens for patients.
+5. **Structured IM8 Audit Logging**:
+   - Real structured log statements emitted across all environments via SLF4J / Logback with MDC context (`[AUDIT] user="..." role="..." action="..." target="..."`).
+   - In production, log shippers stream audit statements to immutable SIEM storage (e.g. CloudWatch / OpenSearch / Splunk). In prototype, output to console logs for live evaluator transparency.
+6. **`DataInitializer` (Synthetic Seed Data)**:
    - Annotated with `@Profile("prototype")`. Seeds Ward 8A, Ward 8B, Ward 9A, and initial ED patients (P101–P104) on startup.
    - Completely disabled by default, ensuring no synthetic records ever enter a live hospital environment.
-3. **Database Configuration**:
+7. **Database Configuration**:
    - `application.yml` (Default): Configures production connection pools, persistent PostgreSQL, and managed database migrations.
    - `application-prototype.yml` (`@Profile("prototype")`): Overrides with in-memory H2 (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) and `create-drop` for local prototype evaluation only.
    - `dev` and `qa` environments will be independently configured with their respective staging databases and services as their requirements are defined.
@@ -117,7 +145,7 @@ enhance-hospital-admissions/
 │       ├── domain/                 # JPA Entities, Enums
 │       ├── repository/             # Spring Data JPA Repositories
 │       ├── service/                # HeuristicEngine, AssessmentService, AllocationService
-│       ├── gateway/                # SisterHospitalGateway (interface), MockSisterHospitalGateway (@Profile("prototype"))
+│       ├── gateway/                # SisterHospitalGateway, HospitalEhrGateway (Mocks under @Profile("prototype"), Default prod adapters)
 │       ├── web/                    # Exactly 3 Controllers (Clinician, Bmu, PatientTracker)
 │       └── bootstrap/              # DataInitializer (@Profile("prototype") Synthetic Seed Data)
 ├── frontend/                       # React 18 TypeScript Single Page Application

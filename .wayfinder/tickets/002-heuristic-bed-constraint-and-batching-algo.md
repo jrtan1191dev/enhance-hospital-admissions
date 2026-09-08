@@ -9,6 +9,7 @@
 ## Question
 
 How should the two-phase pack-then-batch and dynamic cohort-swap algorithm be implemented in lightweight Java/Spring Boot without external solvers?
+
 1. Exact scoring functions for hard constraints (gender cohorting, isolation, ward class tier) and soft optimization (service clustering, fall risk bed proximity).
 2. Phase 1 Consolidation: Algorithm logic for identifying and filling matching partially filled wards (`Grey`/`Green` + `White` beds).
 3. Phase 2 Holding Ward Creation: Algorithm logic for detecting clusters ($\ge 3$ patients) and selecting candidate all-`White` flex wards.
@@ -17,7 +18,9 @@ How should the two-phase pack-then-batch and dynamic cohort-swap algorithm be im
 ## Resolution (ADR-002: Bare-Minimum Heuristic Bed Allocation & Dynamic Batching Algorithm)
 
 ### 1. Refined Bed Status Machine
+
 Bed status encompasses four distinct operational states:
+
 1. `EMPTY_PENDING_CLEANING`: Bed is physically vacated by discharged patient, but 30-min housekeeping sanitization is pending/in progress. (Ineligible for assignment).
 2. `EMPTY_CLEANED` (`WHITE`): Vacant, sanitized, inspected, and immediately available for matching.
 3. `EMPTY_ASSIGNED` (`GREEN`): Allocated to an ED patient by BMU; patient has not yet physically arrived at the ward.
@@ -26,7 +29,9 @@ Bed status encompasses four distinct operational states:
 ---
 
 ### 2. Configurable Weights via BMU Configuration Portal
+
 Algorithm scoring parameters are stored in a configurable entity (`BmuAlgorithmConfig`), editable in real time via the BMU Configuration Portal:
+
 - `wardClassMatchWeight`: Default `100` (Hard constraint filter)
 - `genderCohortMatchWeight`: Default `100` (Hard constraint filter)
 - `infectionClusterMatchWeight`: Default `100` (Hard constraint filter)
@@ -38,6 +43,7 @@ Algorithm scoring parameters are stored in a configurable entity (`BmuAlgorithmC
 ---
 
 ### 3. Queue Ordering & Ranking Logic
+
 1. **Primary Queue Sort**: Sorted by clinical acuity severity:
    $$\text{Tier 1 (Critical)} > \text{Tier 2 (Acute Urgent)} > \text{Tier 3 (Acute Stable)} > \text{Tier 4 (Subacute)} > \text{Tier 5 (Observation)}$$
 2. **Secondary Queue Sort**: For patients within the same acuity tier, sorted by `requestedAt` timestamp (FIFO dwell time).
@@ -45,6 +51,7 @@ Algorithm scoring parameters are stored in a configurable entity (`BmuAlgorithmC
 ---
 
 ### 4. Two-Phase Algorithm & Dynamic Cohort-Swap
+
 - **Phase 1 (Consolidation Packing)**:
   - Evaluates all `EMPTY_CLEANED` beds against the top-priority waiting patient.
   - **Hard Filters**: Disqualify beds if ward class mismatches, if ward locked gender or locked infection status contradicts the patient, or if mandatory telemetry/negative pressure is missing.
@@ -62,6 +69,7 @@ Algorithm scoring parameters are stored in a configurable entity (`BmuAlgorithmC
 ---
 
 ### 5. Architectural Strategy: Target vs. Prototype
+
 - **Target Production Architecture (Future Roadmap)**: Event-driven reactive pipeline where domain events (e.g. `PatientVacatedEvent`, `BedCleanedEvent`) trigger asynchronous recalculations via an event bus.
 - **Prototype Implementation Decision**: **Pure Java synchronous on-demand evaluation.**
   - Recommendations and batch suggestions are computed synchronously in-memory by Spring Boot services whenever `GET /api/bmu/queue` or `GET /api/bmu/beds/recommendations/{requestId}` is called.

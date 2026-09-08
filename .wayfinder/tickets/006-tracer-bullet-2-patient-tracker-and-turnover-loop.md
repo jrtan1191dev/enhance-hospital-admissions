@@ -9,6 +9,7 @@
 ## Question
 
 How does Tracer Bullet 2 complete the circular hospital lifecycle?
+
 1. Public Mobile View: Dispatch-activated token-based tracker showing Milestone progression, estimated wait, and pax in queue.
 2. Ward Nurse UI: "Patient Vacated" button triggering bed status change from `Grey` $\rightarrow$ "Turnover Cleaning In Progress".
 3. Housekeeping Mobile UI: 30-minute cleaning SLA countdown timer and "Terminal Cleaning Complete" sign-off flipping bed status back to `White` for immediate BMU re-allocation.
@@ -16,6 +17,7 @@ How does Tracer Bullet 2 complete the circular hospital lifecycle?
 ## Resolution (ADR-006: MVP Tracer Bullet Vertical Slice 2 Architecture)
 
 ### 1. Public Patient View (`/patient`)
+
 - **Mobile Smartphone Simulator Frame**: Rendered in a clean mobile frame with an evaluator quick-selector dropdown at the top to test any active patient's tracking view with 1 click (no manual token copy-pasting required).
 - **Milestone Progression (Stages 1–4)**:
   - `Milestone 1: Admission Decision Confirmed & Bed Queued`
@@ -28,6 +30,7 @@ How does Tracer Bullet 2 complete the circular hospital lifecycle?
 ---
 
 ### 2. Inpatient Ward Nurse & Housekeeping Workflow (`/ward`)
+
 - **Ward Nurse View**:
   - Bed roster displays admitted and in-transit patients.
   - "Check-In Patient": Confirms physical arrival at bed $\rightarrow$ bed flips from `EMPTY_ASSIGNED` (`GREEN`) to `OCCUPIED_TAKEN` (`GREY`).
@@ -42,5 +45,6 @@ How does Tracer Bullet 2 complete the circular hospital lifecycle?
 ---
 
 ### 3. Circular Lifecycle Completion
+
 Tracer Bullet 2 connects seamlessly with Tracer Bullet 1 to complete the full hospital operational loop:
 $$\text{ED Assessment (White Bed Selected)} \to \text{BMU Assigned (Green)} \to \text{Ward Check-in (Grey)} \to \text{Patient Vacated (Pending Clean)} \to \text{Housekeeping Sign-off (White)}$$

@@ -38,6 +38,7 @@ To maintain clean separation of concerns, high maintainability, and zero risk of
 ### 2. Sister Hospital Gateway Contract & Mock Implementation
 
 #### Interface (`SisterHospitalGateway`)
+
 ```java
 public interface SisterHospitalGateway {
     TransferDispatchResult dispatchReferral(UUID admissionRequestId, String targetHospitalCode, String clinicalNotes);
@@ -46,6 +47,7 @@ public interface SisterHospitalGateway {
 ```
 
 #### Prototype Implementation (`MockSisterHospitalGateway`)
+
 - Annotated with `@Component` and `@Profile("prototype")`.
 - Simulates supported external transfer destinations:
   - `OCH`: Outram Community Hospital (Subacute step-down & rehabilitation)
@@ -59,6 +61,7 @@ public interface SisterHospitalGateway {
 - Emits diversion payload to the Patient Admission Tracker, rendering the rehabilitation care explainer card.
 
 #### Production-Ready Default Implementation (`HttpSisterHospitalGateway`)
+
 - Annotated with `@Component` and `@Profile("default")` (or `@Profile("!prototype")`).
 - Default enterprise adapter calling real Sister Hospital EHR APIs or national FHIR referral endpoints using Spring `RestClient` / `WebClient` with mTLS certificates, OAuth2 Bearer tokens, and circuit-breaker resilience (Resilience4j).
 

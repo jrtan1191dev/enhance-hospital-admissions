@@ -76,6 +76,25 @@ public class PatientTrackerService {
                 + (optRequest.map(r -> r.getRequestedWardClass().name()).orElse("B2")) + " applied)";
         String guidance = "Please remain seated in the ED observation area. Our portering team will escort you once your bed is prepared.";
 
+        if (optRequest.isPresent()) {
+            AdmissionRequest req = optRequest.get();
+            if (req.getFirstTrackerAccessedAt() == null) {
+                req.setFirstTrackerAccessedAt(LocalDateTime.now());
+                admissionRequestRepository.save(req);
+
+                java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+                details.put("PatientId", patient.getId());
+                details.put("AdmissionStatus", status);
+                details.put("MilestoneStep", status == AdmissionStatus.BED_REQUESTED ? "QUEUE_WAITING" : status.name());
+                details.put("QueuePos", queuePosition);
+                details.put("EstWaitMins", estimatedWaitMinutes);
+
+                auditLogger.logAction("PUBLIC_TOKEN", "TRACK_PATIENT_ACCESS",
+                        "PatientToken:" + queueToken,
+                        AuditLogger.formatDetails(details));
+            }
+        }
+
         return PatientMilestoneResponse.builder()
                 .patientId(patient.getId())
                 .patientName(patient.getName())
@@ -123,20 +142,31 @@ public class PatientTrackerService {
         Bed bed = bedRepository.findById(bedId)
                 .orElseThrow(() -> new IllegalArgumentException("Bed not found: " + bedId));
 
+        LocalDateTime now = LocalDateTime.now();
+        int vacateHour = now.getHour();
+        boolean dischargedBeforeNoon = vacateHour < 12;
+
         bed.setStatus(BedStatus.EMPTY_PENDING_CLEANING);
+        bed.setCleaningStartedAt(now);
         Bed savedBed = bedRepository.save(bed);
 
         if (bed.getCurrentPatient() != null) {
             admissionRequestRepository.findByPatient_Id(bed.getCurrentPatient().getId()).ifPresent(req -> {
                 req.setStatus(AdmissionStatus.DISCHARGED);
-                req.setDischargedAt(LocalDateTime.now());
+                req.setDischargedAt(now);
                 admissionRequestRepository.save(req);
             });
         }
 
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("BedNumber", bed.getBedNumber());
+        details.put("VacateTimestamp", now);
+        details.put("VacateHour", vacateHour);
+        details.put("DischargedBeforeNoon", dischargedBeforeNoon);
+
         auditLogger.logAction(currentUser, "VACATE_PATIENT",
                 "Bed:" + bedId,
-                "BedNumber=" + bed.getBedNumber() + " transitioned to EMPTY_PENDING_CLEANING");
+                AuditLogger.formatDetails(details));
 
         return savedBed;
     }
@@ -148,14 +178,25 @@ public class PatientTrackerService {
         Bed bed = bedRepository.findById(bedId)
                 .orElseThrow(() -> new IllegalArgumentException("Bed not found: " + bedId));
 
+        LocalDateTime now = LocalDateTime.now();
+        long elapsedCleaningMins = (bed.getCleaningStartedAt() != null) ?
+                Math.max(1, java.time.Duration.between(bed.getCleaningStartedAt(), now).toMinutes()) : 24L;
+        boolean within30mSla = elapsedCleaningMins <= 30;
+
         bed.setStatus(BedStatus.EMPTY_CLEANED);
-        bed.setLastCleanedAt(LocalDateTime.now());
+        bed.setLastCleanedAt(now);
         bed.setCurrentPatient(null);
         Bed savedBed = bedRepository.save(bed);
 
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("BedNumber", bed.getBedNumber());
+        details.put("HousekeeperId", currentUser);
+        details.put("ElapsedCleaningMins", elapsedCleaningMins);
+        details.put("Within30mSla", within30mSla);
+
         auditLogger.logAction(currentUser, "CLEAN_BED",
                 "Bed:" + bedId,
-                "BedNumber=" + bed.getBedNumber() + " transitioned to EMPTY_CLEANED");
+                AuditLogger.formatDetails(details));
 
         return savedBed;
     }

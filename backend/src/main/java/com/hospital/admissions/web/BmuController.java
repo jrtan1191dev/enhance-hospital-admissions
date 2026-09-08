@@ -36,6 +36,15 @@ public class BmuController {
 
     @PostMapping("/allocate")
     public ResponseEntity<AdmissionRequest> allocateBed(@Valid @RequestBody BedAllocationRequest request) {
+        if (request.getOverrideReason() != null || request.getRank() != null || request.getScore() != null) {
+            return ResponseEntity.ok(bmuService.allocateBed(
+                    request.getAdmissionRequestId(),
+                    request.getBedId(),
+                    request.getRank(),
+                    request.getScore(),
+                    request.getOverrideReason()
+            ));
+        }
         return ResponseEntity.ok(bmuService.allocateBed(request.getAdmissionRequestId(), request.getBedId()));
     }
 

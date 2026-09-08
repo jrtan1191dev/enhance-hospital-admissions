@@ -29,4 +29,15 @@ public class EdAssessmentSubmitRequest {
     private WardClass requestedWardClass;
 
     private boolean needsTelemetry;
+    private Boolean recommendedAccepted;
+    private Double elapsedMins;
+
+    public EdAssessmentSubmitRequest(UUID patientId, SpecialtyCluster suspectedDiagnosisService, AcuityTier primaryAcuityTier, WardClass requestedWardClass, boolean needsTelemetry) {
+        this.patientId = patientId;
+        this.suspectedDiagnosisService = suspectedDiagnosisService;
+        this.primaryAcuityTier = primaryAcuityTier;
+        this.requestedWardClass = requestedWardClass;
+        this.needsTelemetry = needsTelemetry;
+        this.recommendedAccepted = true;
+    }
 }

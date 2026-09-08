@@ -42,5 +42,6 @@ public class Bed extends AuditableEntity {
     @JoinColumn(name = "current_patient_id")
     private Patient currentPatient;
 
+    private LocalDateTime cleaningStartedAt;
     private LocalDateTime lastCleanedAt;
 }

@@ -89,6 +89,9 @@ export interface AdmissionRequest {
   operationalDelayReason?: string;
   diversionRecommended?: boolean;
   sisterHospitalReferralId?: string;
+  isRecommendationAccepted?: boolean;
+  overrideReasonCode?: string;
+  delayReasonTag?: string;
 }
 
 export interface AssessmentBroadcast {
@@ -154,6 +157,8 @@ export interface EdAssessmentSubmitRequest {
   primaryAcuityTier: AcuityTier;
   requestedWardClass: WardClass;
   needsTelemetry: boolean;
+  recommendedAccepted?: boolean;
+  elapsedMins?: number;
 }
 
 export interface SpecialistConsultRequest {
@@ -165,6 +170,9 @@ export interface SpecialistConsultRequest {
 export interface BedAllocationRequest {
   admissionRequestId: string;
   bedId: string;
+  rank?: number;
+  score?: number;
+  overrideReason?: string;
 }
 
 export interface DiversionReferralRequest {

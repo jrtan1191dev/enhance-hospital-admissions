@@ -34,6 +34,7 @@ export function EdRoute() {
   const [fallRisk, setFallRisk] = useState<boolean>(true);
   const [isolation, setIsolation] = useState<InfectionStatus>('NONE');
   const [clinicalNotes, setClinicalNotes] = useState<string>('Pre-populated diagnostic synthesis: Elevated Troponin with chest pain.');
+  const [selectionTime, setSelectionTime] = useState<number>(Date.now());
 
   // Fetch Waiting Patients via TanStack Query queryOptions
   const { data: patients = [], isLoading, error } = useQuery(edQueries.patients());
@@ -49,6 +50,7 @@ export function EdRoute() {
   const handleSelectPatient = (patient: Patient) => {
     setSelectedPatient(patient);
     setSuccessMessage(null);
+    setSelectionTime(Date.now());
     if (patient.labTroponin && patient.labTroponin !== 'Normal') {
       setAcuityTier('TIER_2_ACUTE_URGENT');
       setSpecialty('CARDIOLOGY');
@@ -68,12 +70,28 @@ export function EdRoute() {
     e.preventDefault();
     if (!selectedPatient) return;
 
+    const isTroponin = !!(selectedPatient.labTroponin && selectedPatient.labTroponin !== 'Normal');
+    const recTier: AcuityTier = isTroponin ? 'TIER_2_ACUTE_URGENT' : 'TIER_3_ACUTE_STABLE';
+    const recSpecialty: SpecialtyCluster = isTroponin ? 'CARDIOLOGY' : 'GENERAL_MEDICINE';
+    const recTelemetry = isTroponin;
+    const recWardClass = selectedPatient.wardClassPreference || 'B2';
+
+    const recommendedAccepted =
+      acuityTier === recTier &&
+      specialty === recSpecialty &&
+      telemetry === recTelemetry &&
+      wardClass === recWardClass;
+
+    const elapsedMins = Math.max(0.1, Math.round(((Date.now() - selectionTime) / 60000) * 10) / 10);
+
     submitMutation.mutate({
       patientId: selectedPatient.id,
       suspectedDiagnosisService: specialty,
       primaryAcuityTier: acuityTier,
       requestedWardClass: wardClass,
       needsTelemetry: telemetry,
+      recommendedAccepted,
+      elapsedMins,
     });
   };
 

@@ -50,6 +50,11 @@ public class ClinicianService {
                 .requestedAt(LocalDateTime.now())
                 .build();
 
+        boolean recommendedAccepted = req.getRecommendedAccepted() != null ? req.getRecommendedAccepted() : true;
+        double elapsedMins = req.getElapsedMins() != null ? req.getElapsedMins() :
+                (patient.getCreatedAt() != null ? Math.max(1.0, java.time.Duration.between(patient.getCreatedAt(), LocalDateTime.now()).toMinutes()) : 12.5);
+
+        admissionRequest.setIsRecommendationAccepted(recommendedAccepted);
         admissionRequest = admissionRequestRepository.save(admissionRequest);
 
         AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
@@ -60,9 +65,16 @@ public class ClinicianService {
 
         broadcastRepository.save(broadcast);
 
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("PrimaryAcuity", req.getPrimaryAcuityTier());
+        details.put("WardClass", req.getRequestedWardClass());
+        details.put("Cluster", req.getSuspectedDiagnosisService());
+        details.put("RecommendedAccepted", recommendedAccepted);
+        details.put("ElapsedMins", String.format(java.util.Locale.US, "%.1f", elapsedMins));
+
         auditLogger.logAction(currentUser, "SUBMIT_ED_ASSESSMENT",
                 "AdmissionRequest:" + admissionRequest.getId(),
-                "PrimaryAcuity=" + req.getPrimaryAcuityTier() + ", WardClass=" + req.getRequestedWardClass() + ", Cluster=" + req.getSuspectedDiagnosisService());
+                AuditLogger.formatDetails(details));
 
         return admissionRequest;
     }
@@ -87,9 +99,17 @@ public class ClinicianService {
 
         broadcast = broadcastRepository.save(broadcast);
 
+        double elapsedClaimMins = broadcast.getCreatedAt() != null ?
+                Math.max(0.5, java.time.Duration.between(broadcast.getCreatedAt(), LocalDateTime.now()).toMinutes()) : 4.5;
+
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("TargetCluster", broadcast.getTargetCluster());
+        details.put("Specialist", currentUser);
+        details.put("ElapsedClaimMins", String.format(java.util.Locale.US, "%.1f", elapsedClaimMins));
+
         auditLogger.logAction(currentUser, "CLAIM_BROADCAST",
                 "AssessmentBroadcast:" + broadcastId,
-                "Specialist=" + currentUser);
+                AuditLogger.formatDetails(details));
 
         return broadcast;
     }
@@ -107,13 +127,21 @@ public class ClinicianService {
         AdmissionRequest request = broadcast.getAdmissionRequest();
         request.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
         request.setDiversionRecommended(req.isDiversionRecommended());
+        boolean isConcordant = request.getPrimaryAcuityTier() == req.getSecondaryAcuityTier();
+        request.setIsDiscordant(!isConcordant);
         admissionRequestRepository.save(request);
 
         broadcast = broadcastRepository.save(broadcast);
 
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("PrimaryAcuity", request.getPrimaryAcuityTier());
+        details.put("SecondaryAcuity", req.getSecondaryAcuityTier());
+        details.put("Concordant", isConcordant);
+        details.put("DiversionEndorsed", req.isDiversionRecommended());
+
         auditLogger.logAction(currentUser, "SUBMIT_SPECIALIST_CONSULT",
                 "AssessmentBroadcast:" + broadcastId,
-                "SecondaryAcuity=" + req.getSecondaryAcuityTier() + ", Diversion=" + req.isDiversionRecommended());
+                AuditLogger.formatDetails(details));
 
         return broadcast;
     }

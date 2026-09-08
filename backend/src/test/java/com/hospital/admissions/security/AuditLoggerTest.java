@@ -27,10 +27,25 @@ class AuditLoggerTest {
     }
 
     @Test
-    @DisplayName("logAction with null or blank user defaults to SYSTEM")
-    void testLogAction_NullUser() {
-        auditLogger.logAction(null, "CLEAN_BED", "Bed:456", "Auto cleaned");
-        auditLogger.logAction("   ", "CLEAN_BED", "Bed:456", "Auto cleaned");
+    @DisplayName("logAction with Map formats details key-values and cleans up MDC")
+    void testLogAction_WithMap() {
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("BedNumber", "8A-01");
+        details.put("ElapsedCleaningMins", 22);
+        details.put("Within30mSla", true);
+
+        auditLogger.logAction("nurse_jane", "CLEAN_BED", "Bed:456", details);
+
+        assertThat(MDC.get("auditUser")).isNull();
+        assertThat(MDC.get("auditAction")).isNull();
+        assertThat(MDC.get("auditTarget")).isNull();
+    }
+
+    @Test
+    @DisplayName("logAction with null or empty Map handles gracefully")
+    void testLogAction_EmptyOrNullMap() {
+        auditLogger.logAction("nurse_jane", "TRACK_ACCESS", "PatientToken:tok123", (java.util.Map<String, Object>) null);
+        auditLogger.logAction("nurse_jane", "TRACK_ACCESS", "PatientToken:tok123", java.util.Map.of());
 
         assertThat(MDC.get("auditUser")).isNull();
     }

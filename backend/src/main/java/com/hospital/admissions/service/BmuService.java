@@ -56,6 +56,11 @@ public class BmuService {
 
     @Transactional
     public AdmissionRequest allocateBed(UUID admissionRequestId, UUID bedId) {
+        return allocateBed(admissionRequestId, bedId, 1, 85.0, null);
+    }
+
+    @Transactional
+    public AdmissionRequest allocateBed(UUID admissionRequestId, UUID bedId, Integer rank, Double score, String overrideReason) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
         AdmissionRequest request = admissionRequestRepository.findById(admissionRequestId)
@@ -75,11 +80,34 @@ public class BmuService {
         request.setStatus(AdmissionStatus.BED_ALLOCATED);
         request.setAssignedBed(bed);
         request.setAllocatedAt(LocalDateTime.now());
+
+        boolean isOverride = (overrideReason != null && !overrideReason.isBlank());
+        request.setIsRecommendationAccepted(!isOverride);
+        if (isOverride) {
+            request.setOverrideReasonCode(overrideReason);
+        }
+
         AdmissionRequest savedRequest = admissionRequestRepository.save(request);
 
-        auditLogger.logAction(currentUser, "ALLOCATE_BED",
-                "AdmissionRequest:" + admissionRequestId,
-                "AssignedBed=" + bed.getBedNumber() + " (" + bed.getWard().getName() + ")");
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("AssignedBed", bed.getBedNumber());
+        details.put("Ward", bed.getWard().getName());
+
+        if (isOverride) {
+            details.put("SelectedRank", rank != null ? rank : 2);
+            details.put("OverrideReason", overrideReason);
+            details.put("Override", true);
+            auditLogger.logAction(currentUser, "OVERRIDE_ALLOCATION",
+                    "AdmissionRequest:" + admissionRequestId,
+                    AuditLogger.formatDetails(details));
+        } else {
+            details.put("Rank", rank != null ? rank : 1);
+            details.put("Score", score != null ? score : 85.0);
+            details.put("Override", false);
+            auditLogger.logAction(currentUser, "ALLOCATE_BED",
+                    "AdmissionRequest:" + admissionRequestId,
+                    AuditLogger.formatDetails(details));
+        }
 
         return savedRequest;
     }
@@ -129,9 +157,15 @@ public class BmuService {
         request.setSisterHospitalReferralId(response.getReferralId());
         admissionRequestRepository.save(request);
 
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("Facility", response.getDestinationFacility());
+        details.put("ReferralId", response.getReferralId());
+        details.put("SlaWindowMins", 30);
+        details.put("AcuityTier", request.getPrimaryAcuityTier());
+
         auditLogger.logAction(currentUser, "DIVERSION_REFERRAL",
                 "AdmissionRequest:" + admissionRequestId,
-                "Facility=" + response.getDestinationFacility() + ", ReferralId=" + response.getReferralId());
+                AuditLogger.formatDetails(details));
 
         return response;
     }

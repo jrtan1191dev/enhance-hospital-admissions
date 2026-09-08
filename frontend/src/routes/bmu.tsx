@@ -460,6 +460,9 @@ export function BmuRoute() {
                                 allocateMutation.mutate({
                                   admissionRequestId: selectedRequest.id,
                                   bedId: rec.bedId,
+                                  rank: idx + 1,
+                                  score: rec.score,
+                                  overrideReason: idx > 0 ? 'NON_TOP_RANK_SELECTION' : undefined,
                                 })
                               }
                             >

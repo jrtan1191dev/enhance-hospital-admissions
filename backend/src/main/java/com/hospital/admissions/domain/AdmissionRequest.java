@@ -55,4 +55,13 @@ public class AdmissionRequest extends AuditableEntity {
 
     private boolean diversionRecommended;
     private String sisterHospitalReferralId;
+
+    private Boolean isRecommendationAccepted;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("discordant")
+    private Boolean isDiscordant;
+
+    private String overrideReasonCode;
+    private String delayReasonTag;
+    private LocalDateTime firstTrackerAccessedAt;
 }

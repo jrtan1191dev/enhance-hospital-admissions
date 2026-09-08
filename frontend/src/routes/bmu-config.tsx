@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { bmuQueries, useUpdateBmuConfig } from '../services/queries';
-import type { BmuAlgorithmConfig } from '../types/admissions';
+import type { BmuAlgorithmConfig, BmuConfigUpdateRequest } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -74,12 +74,12 @@ function ConfigForm({
 }: {
   config: BmuAlgorithmConfig;
   isSaving: boolean;
-  onSave: (data: Partial<BmuAlgorithmConfig>) => void;
+  onSave: (data: BmuConfigUpdateRequest) => void;
 }) {
-  const [specialtyWeight, setSpecialtyWeight] = useState(config.specialtyMatchWeight ?? 40);
-  const [consolidationWeight, setConsolidationWeight] = useState(config.consolidationWeight ?? 30);
-  const [fallRiskWeight, setFallRiskWeight] = useState(config.fallRiskProximityWeight ?? 15);
-  const [batchThreshold, setBatchThreshold] = useState(config.batchThreshold ?? 3);
+  const [specialtyWeight, setSpecialtyWeight] = useState(config.weightSpecialtyCluster ?? 40);
+  const [consolidationWeight, setConsolidationWeight] = useState(config.weightConsolidation ?? 30);
+  const [fallRiskWeight, setFallRiskWeight] = useState(config.weightFallRiskStation ?? 15);
+  const [batchThreshold, setBatchThreshold] = useState(config.batchHoldingWardThreshold ?? 3);
 
   const handleApplyPreset = (spec: number, cons: number, fall: number, batch: number) => {
     setSpecialtyWeight(spec);
@@ -91,10 +91,10 @@ function ConfigForm({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      specialtyMatchWeight: specialtyWeight,
-      consolidationWeight: consolidationWeight,
-      fallRiskProximityWeight: fallRiskWeight,
-      batchThreshold: batchThreshold,
+      weightSpecialtyCluster: specialtyWeight,
+      weightConsolidation: consolidationWeight,
+      weightFallRiskStation: fallRiskWeight,
+      batchHoldingWardThreshold: batchThreshold,
     });
   };
 

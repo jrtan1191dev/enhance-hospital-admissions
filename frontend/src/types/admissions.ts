@@ -28,16 +28,13 @@ export type BedStatus =
   | 'OCCUPIED_TAKEN';        // GREY (Patient physically admitted/occupied)
 
 export type AdmissionStatus = 
-  | 'ASSESSMENT_PREPOPULATED'
-  | 'PRIMARY_ASSESSMENT_SUBMITTED'
+  | 'ASSESSMENT_PENDING'
   | 'BED_REQUESTED'
   | 'BED_ALLOCATED'
-  | 'DIVERTED_SISTER_HOSPITAL'
-  | 'DIVERTED_HAH'
-  | 'ADMITTED'
+  | 'ADMITTED_INPATIENT'
   | 'DISCHARGED';
 
-export type BroadcastStatus = 'UNCLAIMED' | 'CLAIMED' | 'CONSULTED';
+export type BroadcastStatus = 'OPEN' | 'CLAIMED' | 'AUTO_ESCALATED' | 'COMPLETED';
 
 export interface Patient {
   id: string;
@@ -90,58 +87,65 @@ export interface AdmissionRequest {
   assignedBed?: Bed;
   createdAt: string;
   operationalDelayReason?: string;
+  diversionRecommended?: boolean;
+  sisterHospitalReferralId?: string;
 }
 
 export interface AssessmentBroadcast {
   id: string;
   admissionRequest: AdmissionRequest;
-  cluster: SpecialtyCluster;
+  targetCluster: SpecialtyCluster;
   status: BroadcastStatus;
-  claimedByDoctor?: string;
-  consultImpression?: string;
-  recommendedAcuityTier?: AcuityTier;
-  specialistDiversionEndorsed?: boolean;
+  claimedBySpecialistId?: string;
+  claimedAt?: string;
+  consultNotes?: string;
 }
 
 export interface BmuAlgorithmConfig {
   id: string;
-  specialtyMatchWeight: number;
-  consolidationWeight: number;
-  fallRiskProximityWeight: number;
-  batchThreshold: number;
+  weightSpecialtyCluster: number;
+  weightConsolidation: number;
+  weightFallRiskStation: number;
+  batchHoldingWardThreshold: number;
+}
+
+export interface BmuConfigUpdateRequest {
+  weightSpecialtyCluster: number;
+  weightConsolidation: number;
+  weightFallRiskStation: number;
+  batchHoldingWardThreshold: number;
 }
 
 export interface BedRecommendation {
   bedId: string;
   bedNumber: string;
-  wardCode: string;
+  level: number;
+  wardName: string;
   score: number;
-  breakdown: string[];
-  recommended: boolean;
+  scoreBreakdown: string[];
+  isRecommended: boolean;
 }
 
 export interface PatientMilestoneResponse {
+  patientId?: string;
   patientName: string;
   queueToken: string;
-  milestoneNumber: number;
-  milestoneLabel: string;
+  admissionStatus: AdmissionStatus;
+  queuePosition: number;
   estimatedWaitMinutes: number;
-  paxAheadInQueue: number;
   assignedBedNumber?: string;
-  assignedWardCode?: string;
-  delayReason?: string;
-  financialExplainer?: {
-    coPayEstimate: string;
-    rehabilitationPathway: string;
-    mswContact: string;
-  };
+  assignedWardName?: string;
+  assignedLevel?: number;
+  coPayEstimate?: string;
+  careGuidance?: string;
 }
 
 export interface SisterHospitalReferralResponse {
   referralId: string;
-  facility: string;
-  slaCountdownMinutes: number;
+  destinationFacility: string;
   status: string;
+  slaWindowMinutes: number;
+  notes?: string;
 }
 
 export interface EdAssessmentSubmitRequest {
@@ -153,10 +157,9 @@ export interface EdAssessmentSubmitRequest {
 }
 
 export interface SpecialistConsultRequest {
-  specialistId: string;
-  consultImpression: string;
-  recommendedAcuityTier: AcuityTier;
-  specialistDiversionEndorsed: boolean;
+  secondaryAcuityTier: AcuityTier;
+  consultNotes?: string;
+  diversionRecommended: boolean;
 }
 
 export interface BedAllocationRequest {

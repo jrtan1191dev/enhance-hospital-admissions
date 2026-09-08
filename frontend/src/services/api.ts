@@ -6,6 +6,7 @@ import type {
   BedAllocationRequest,
   BedRecommendation,
   BmuAlgorithmConfig,
+  BmuConfigUpdateRequest,
   DiversionReferralRequest,
   EdAssessmentSubmitRequest,
   Patient,
@@ -73,7 +74,7 @@ export const api = {
     http.post<AdmissionRequest>('/api/v1/bmu/allocate', data).then((r) => r.data),
   getInventory: () => http.get<Ward[]>('/api/v1/bmu/inventory').then((r) => r.data),
   getConfig: () => http.get<BmuAlgorithmConfig>('/api/v1/bmu/config').then((r) => r.data),
-  updateConfig: (data: Partial<BmuAlgorithmConfig>) =>
+  updateConfig: (data: BmuConfigUpdateRequest) =>
     http.put<BmuAlgorithmConfig>('/api/v1/bmu/config', data).then((r) => r.data),
   referToSisterHospital: (data: DiversionReferralRequest) =>
     http.post<SisterHospitalReferralResponse>('/api/v1/bmu/diversion/refer', data).then((r) => r.data),

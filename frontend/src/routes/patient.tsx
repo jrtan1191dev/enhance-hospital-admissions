@@ -7,8 +7,6 @@ import {
   CheckCircle2,
   Clock,
   Users,
-  AlertCircle,
-  PhoneCall,
   BedDouble,
   ShieldCheck,
 } from 'lucide-react';
@@ -31,7 +29,41 @@ export function PatientRoute() {
     patientQueries.track(selectedToken)
   );
 
-  const currentMilestone = tracker?.milestoneNumber || 1;
+  // Derive milestone step and label from backend admissionStatus
+  const getMilestoneStep = (status?: string): number => {
+    switch (status) {
+      case 'ASSESSMENT_PENDING':
+      case 'BED_REQUESTED':
+        return 1;
+      case 'BED_ALLOCATED':
+        return 2;
+      case 'ADMITTED_INPATIENT':
+      case 'DISCHARGED':
+        return 4;
+      default:
+        return 1;
+    }
+  };
+
+  const getMilestoneLabel = (status?: string): string => {
+    switch (status) {
+      case 'ASSESSMENT_PENDING':
+        return 'ED Assessment & Triage in Progress';
+      case 'BED_REQUESTED':
+        return 'Admission Confirmed — Awaiting Bed Allocation';
+      case 'BED_ALLOCATED':
+        return 'Bed Allocated — Housekeeping & Sanitization';
+      case 'ADMITTED_INPATIENT':
+        return 'Admitted to Inpatient Ward';
+      case 'DISCHARGED':
+        return 'Patient Discharged';
+      default:
+        return 'Evaluating Patient Journey';
+    }
+  };
+
+  const currentMilestone = getMilestoneStep(tracker?.admissionStatus);
+  const milestoneLabel = getMilestoneLabel(tracker?.admissionStatus);
 
   return (
     <div className="space-y-6">
@@ -112,7 +144,7 @@ export function PatientRoute() {
                   <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm space-y-1">
                     <p className="text-[11px] text-emerald-100 font-medium">Admission Status Update</p>
                     <h3 className="font-bold text-base leading-tight">{tracker.patientName}</h3>
-                    <p className="text-xs text-emerald-100/90">{tracker.milestoneLabel}</p>
+                    <p className="text-xs text-emerald-100/90">{milestoneLabel}</p>
                   </div>
 
                   {/* Operational Metrics Cards */}
@@ -131,7 +163,7 @@ export function PatientRoute() {
                         <Users className="h-3 w-3 text-purple-600" /> Ahead in Queue
                       </div>
                       <div className="text-base font-bold text-slate-900 mt-1">
-                        {tracker.paxAheadInQueue} <span className="text-[10px] font-normal text-slate-500">pax</span>
+                        {tracker.queuePosition} <span className="text-[10px] font-normal text-slate-500">pax</span>
                       </div>
                     </div>
                   </div>
@@ -145,20 +177,15 @@ export function PatientRoute() {
                         </div>
                         <div>
                           <div className="font-bold text-sm">Bed {tracker.assignedBedNumber}</div>
-                          <div className="text-[11px] text-blue-700">Ward {tracker.assignedWardCode}</div>
+                          <div className="text-[11px] text-blue-700">
+                            {tracker.assignedWardName}
+                            {tracker.assignedLevel ? ` (Level ${tracker.assignedLevel})` : ''}
+                          </div>
                         </div>
                       </div>
                       <Badge variant="outline" className="text-[10px] bg-white text-blue-700 font-medium border-blue-200">
                         Assigned
                       </Badge>
-                    </div>
-                  )}
-
-                  {/* Delay Reason Notice if any */}
-                  {tracker.delayReason && (
-                    <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
-                      <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <span>{tracker.delayReason}</span>
                     </div>
                   )}
 
@@ -201,7 +228,7 @@ export function PatientRoute() {
                   </div>
 
                   {/* Financial & Care Explainer Module */}
-                  {tracker.financialExplainer && (
+                  {(tracker.coPayEstimate || tracker.careGuidance) && (
                     <div className="bg-slate-100/90 p-3 rounded-xl text-xs space-y-1.5 border border-slate-200/60">
                       <div className="flex items-center justify-between text-[11px] font-bold text-slate-800">
                         <span className="flex items-center gap-1.5">
@@ -210,15 +237,16 @@ export function PatientRoute() {
                         </span>
                         <span className="text-[9px] text-slate-500 font-normal bg-white px-1.5 py-0.5 rounded border border-slate-200">FYI</span>
                       </div>
-                      <p className="text-[10px] text-slate-600 leading-normal">
-                        {tracker.financialExplainer.coPayEstimate}
-                      </p>
-                      <div className="pt-1 flex items-center justify-between text-[10px] text-blue-700 font-medium">
-                        <span className="flex items-center gap-1">
-                          <PhoneCall className="h-3 w-3" /> MSW Contact:
-                        </span>
-                        <span className="font-mono">{tracker.financialExplainer.mswContact}</span>
-                      </div>
+                      {tracker.coPayEstimate && (
+                        <p className="text-[10px] text-slate-600 leading-normal">
+                          {tracker.coPayEstimate}
+                        </p>
+                      )}
+                      {tracker.careGuidance && (
+                        <p className="text-[10px] text-slate-500 italic leading-normal pt-0.5">
+                          {tracker.careGuidance}
+                        </p>
+                      )}
                     </div>
                   )}
                 </>

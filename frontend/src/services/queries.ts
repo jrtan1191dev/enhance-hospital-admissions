@@ -2,7 +2,7 @@ import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query
 import { api } from './api';
 import type {
   BedAllocationRequest,
-  BmuAlgorithmConfig,
+  BmuConfigUpdateRequest,
   DiversionReferralRequest,
   EdAssessmentSubmitRequest,
   SpecialistConsultRequest,
@@ -152,7 +152,7 @@ export function useReferSisterHospital(onSuccess?: () => void) {
 export function useUpdateBmuConfig(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<BmuAlgorithmConfig>) => api.updateConfig(data),
+    mutationFn: (data: BmuConfigUpdateRequest) => api.updateConfig(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bmuQueries.config().queryKey });
       queryClient.invalidateQueries({ queryKey: [...bmuQueries.all(), 'recommendations'] });

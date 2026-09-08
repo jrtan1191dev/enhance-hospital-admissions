@@ -47,12 +47,14 @@ export function SpecialistRoute() {
 
   const handleOpenConsult = (broadcast: AssessmentBroadcast) => {
     setConsultModalBroadcast(broadcast);
-    setRecommendedTier(broadcast.admissionRequest.primaryAcuityTier);
+    setRecommendedTier(
+      broadcast.admissionRequest.secondaryAcuityTier || broadcast.admissionRequest.primaryAcuityTier
+    );
     setConsultImpression(
-      broadcast.consultImpression ||
+      broadcast.consultNotes ||
         'Agree with ED assessment. Patient requires continuous telemetry bed in cardiology ward.'
     );
-    setDiversionEndorsed(broadcast.specialistDiversionEndorsed || false);
+    setDiversionEndorsed(broadcast.admissionRequest.diversionRecommended || false);
   };
 
   const handleSubmitConsult = (e: React.FormEvent) => {
@@ -61,10 +63,9 @@ export function SpecialistRoute() {
     consultMutation.mutate({
       id: consultModalBroadcast.id,
       data: {
-        specialistId: 'dr_lim_cardio',
-        consultImpression: consultImpression,
-        recommendedAcuityTier: recommendedTier,
-        specialistDiversionEndorsed: diversionEndorsed,
+        secondaryAcuityTier: recommendedTier,
+        consultNotes: consultImpression,
+        diversionRecommended: diversionEndorsed,
       },
     });
   };
@@ -111,7 +112,7 @@ export function SpecialistRoute() {
           </span>
         </button>
         {CLUSTERS.map((cluster) => {
-          const count = broadcasts.filter((b) => b.cluster === cluster).length;
+          const count = broadcasts.filter((b) => b.targetCluster === cluster).length;
           const icons: Record<string, string> = {
             CARDIOLOGY: '❤️ Cardiology',
             GENERAL_MEDICINE: '🏥 Gen Medicine',
@@ -156,8 +157,8 @@ export function SpecialistRoute() {
           {broadcasts.map((broadcast) => {
             const req = broadcast.admissionRequest;
             const patient = req.patient;
-            const isClaimed = broadcast.status === 'CLAIMED' || broadcast.status === 'CONSULTED';
-            const isConsulted = broadcast.status === 'CONSULTED';
+            const isClaimed = broadcast.status === 'CLAIMED' || broadcast.status === 'COMPLETED';
+            const isConsulted = broadcast.status === 'COMPLETED';
 
             const borderAccent = isConsulted
               ? 'border-l-4 border-l-emerald-500'
@@ -189,7 +190,7 @@ export function SpecialistRoute() {
                     </Badge>
                   </div>
                   <CardDescription className="text-xs flex items-center justify-between pt-1">
-                    <span>Cluster: <strong>{broadcast.cluster}</strong></span>
+                    <span>Cluster: <strong>{broadcast.targetCluster}</strong></span>
                     <span>{patient.gender}, {patient.age}y • Class {patient.wardClassPreference}</span>
                   </CardDescription>
                 </CardHeader>
@@ -234,12 +235,12 @@ export function SpecialistRoute() {
                     <div className="p-3 bg-purple-50/80 rounded-xl border border-purple-200/70 text-xs text-purple-950 space-y-1">
                       <div className="font-semibold flex items-center gap-1">
                         <MessageSquare className="h-3.5 w-3.5 text-purple-600" />
-                        Consult Impression ({broadcast.claimedByDoctor}):
+                        Consult Impression ({broadcast.claimedBySpecialistId || 'Specialist'}):
                       </div>
-                      <p className="italic text-purple-900 text-[11px] leading-relaxed">{broadcast.consultImpression}</p>
+                      <p className="italic text-purple-900 text-[11px] leading-relaxed">{broadcast.consultNotes}</p>
                       <div className="flex items-center gap-2 pt-1 font-medium">
-                        <span>Recommended: <strong>{broadcast.recommendedAcuityTier}</strong></span>
-                        {broadcast.specialistDiversionEndorsed && (
+                        <span>Recommended: <strong>{req.secondaryAcuityTier}</strong></span>
+                        {req.diversionRecommended && (
                           <Badge variant="success" className="text-[10px]">Diversion Endorsed</Badge>
                         )}
                       </div>
@@ -289,7 +290,7 @@ export function SpecialistRoute() {
             <DialogDescription>
               {consultModalBroadcast && (
                 <span>
-                  Patient: <strong>{consultModalBroadcast.admissionRequest.patient.name}</strong> ({consultModalBroadcast.admissionRequest.patient.nric}) • Cluster: {consultModalBroadcast.cluster}
+                  Patient: <strong>{consultModalBroadcast.admissionRequest.patient.name}</strong> ({consultModalBroadcast.admissionRequest.patient.nric}) • Cluster: {consultModalBroadcast.targetCluster}
                 </span>
               )}
             </DialogDescription>

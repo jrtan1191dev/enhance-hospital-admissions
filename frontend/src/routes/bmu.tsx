@@ -430,9 +430,9 @@ export function BmuRoute() {
                               <div className="flex items-center gap-1.5">
                                 <span className="text-slate-900 text-sm">Bed {rec.bedNumber}</span>
                                 <Badge variant="outline" className="text-[10px] font-mono">
-                                  Ward {rec.wardCode}
+                                  {rec.wardName} (L{rec.level})
                                 </Badge>
-                                {idx === 0 && (
+                                {(rec.isRecommended || idx === 0) && (
                                   <Badge variant="success" className="text-[9px] px-1 py-0">
                                     #1 Match
                                   </Badge>
@@ -442,7 +442,7 @@ export function BmuRoute() {
                             </div>
 
                             <div className="flex flex-wrap gap-1 mt-1.5">
-                              {rec.breakdown.map((item, bIdx) => (
+                              {(rec.scoreBreakdown || []).map((item, bIdx) => (
                                 <span
                                   key={bIdx}
                                   className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono"

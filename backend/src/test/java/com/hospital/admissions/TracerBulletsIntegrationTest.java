@@ -157,4 +157,33 @@ class TracerBulletsIntegrationTest {
         assertThat(bed8A03.getCurrentPatient()).isNull();
         assertThat(bed8A03.getLastCleanedAt()).isNotNull();
     }
+
+    @Test
+    @DisplayName("Tracer Bullet 3: Submit ED Assessment creates AdmissionRequest and Broadcast")
+    void testSubmitEdAssessment() throws Exception {
+        Patient p102 = patientRepository.findByQueueToken("TOKEN-P102").orElseThrow();
+
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(p102.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B2)
+                .needsTelemetry(false)
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("BED_REQUESTED"))
+                .andExpect(jsonPath("$.suspectedDiagnosisService").value("GENERAL_MEDICINE"))
+                .andExpect(jsonPath("$.primaryAcuityTier").value("TIER_3_ACUTE_STABLE"))
+                .andExpect(jsonPath("$.requestedWardClass").value("B2"));
+
+        List<AssessmentBroadcast> broadcasts = broadcastRepository.findAll();
+        assertThat(broadcasts).anyMatch(b -> b.getTargetCluster() == SpecialtyCluster.GENERAL_MEDICINE
+                && b.getAdmissionRequest().getPatient().getId().equals(p102.getId()));
+    }
 }

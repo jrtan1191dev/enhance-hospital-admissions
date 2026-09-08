@@ -225,6 +225,68 @@ export function BmuRoute() {
         </div>
       )}
 
+      {/* Hospital Capacity Executive KPI Cards */}
+      {(() => {
+        const allBeds = inventory.flatMap((w) => w.beds || []);
+        const totalCount = allBeds.length;
+        const occupied = allBeds.filter((b) => b.status === 'OCCUPIED_TAKEN').length;
+        const assigned = allBeds.filter((b) => b.status === 'EMPTY_ASSIGNED').length;
+        const cleaning = allBeds.filter((b) => b.status === 'EMPTY_PENDING_CLEANING').length;
+        const clean = allBeds.filter((b) => b.status === 'EMPTY_CLEANED').length;
+        const occRate = totalCount > 0 ? Math.round(((occupied + assigned) / totalCount) * 100) : 0;
+
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-2xs">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hospital Occupancy</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className="text-2xl font-bold text-slate-900">{occRate}%</span>
+                <span className="text-xs text-slate-500 font-mono">({occupied + assigned}/{totalCount})</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${occRate}%` }} />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/40 shadow-2xs">
+              <div className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Green (In-Transit)
+              </div>
+              <div className="text-2xl font-bold text-emerald-950 mt-1">{assigned}</div>
+              <div className="text-[11px] text-emerald-700 mt-1">Assigned, moving to bed</div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-slate-300 bg-white shadow-2xs">
+              <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-slate-400" />
+                White (Available)
+              </div>
+              <div className="text-2xl font-bold text-slate-900 mt-1">{clean}</div>
+              <div className="text-[11px] text-slate-500 mt-1">Ready for allocation</div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/50 shadow-2xs">
+              <div className="text-xs font-semibold text-amber-900 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                Mustard Yellow
+              </div>
+              <div className="text-2xl font-bold text-amber-950 mt-1">{cleaning}</div>
+              <div className="text-[11px] text-amber-800 mt-1">Turnover cleaning (30m)</div>
+            </div>
+
+            <div className="p-4 rounded-xl border border-slate-300 bg-slate-100/70 shadow-2xs col-span-2 sm:col-span-1">
+              <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-slate-600" />
+                Grey (Occupied)
+              </div>
+              <div className="text-2xl font-bold text-slate-900 mt-1">{occupied}</div>
+              <div className="text-[11px] text-slate-600 mt-1">Inpatient receiving care</div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Main Allocation Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Prioritized Admission Queue (TanStack Table) */}

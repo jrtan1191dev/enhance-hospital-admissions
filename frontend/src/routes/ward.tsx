@@ -136,7 +136,7 @@ export function WardRoute() {
       {/* Ward Nursing View */}
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Layers className="h-5 w-5 text-blue-600" />
@@ -147,20 +147,32 @@ export function WardRoute() {
               </CardDescription>
             </div>
 
-            {/* Ward Selector Buttons */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 mr-1">Select Ward:</span>
-              {wards.map((w) => (
-                <Button
-                  key={w.wardCode}
-                  size="sm"
-                  variant={activeWard?.wardCode === w.wardCode ? 'default' : 'outline'}
-                  onClick={() => setActiveWardCode(w.wardCode)}
-                  className="text-xs font-semibold"
-                >
-                  Ward {w.wardCode} ({w.specialty})
-                </Button>
-              ))}
+            {/* Ward Selector Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+              {wards.map((w) => {
+                const total = w.beds?.length || 0;
+                const occ = w.beds?.filter((b) => b.status === 'OCCUPIED_TAKEN' || b.status === 'EMPTY_ASSIGNED').length || 0;
+                const isSelected = activeWard?.wardCode === w.wardCode;
+                return (
+                  <button
+                    key={w.wardCode}
+                    type="button"
+                    onClick={() => setActiveWardCode(w.wardCode)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
+                      isSelected
+                        ? 'bg-white text-blue-900 shadow-2xs font-semibold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                    }`}
+                  >
+                    <span>Ward {w.wardCode} ({w.specialty.replace('_', ' ')})</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-semibold ${
+                      isSelected ? 'bg-blue-100 text-blue-800' : 'bg-slate-200/70 text-slate-600'
+                    }`}>
+                      {occ}/{total}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </CardHeader>
@@ -173,15 +185,18 @@ export function WardRoute() {
           ) : (
             <div className="space-y-4">
               {/* Active Ward Meta Banner */}
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-slate-900 text-base">Ward {activeWard.wardCode}</span>
-                  <Badge variant="outline">Level {activeWard.levelNumber}</Badge>
+                  <Badge variant="outline" className="font-mono">Level {activeWard.levelNumber}</Badge>
                   <Badge variant="secondary">{activeWard.wardClass}</Badge>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700">{activeWard.specialty}</Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">{activeWard.specialty}</Badge>
                 </div>
-                <div className="text-slate-600">
-                  Cohort Lock: <strong>{activeWard.genderCohortLocked || 'Unlocked (Flex)'}</strong>
+                <div className="flex items-center gap-3 text-slate-600">
+                  <span>Cohort Lock: <strong>{activeWard.genderCohortLocked || 'Unlocked (Flex)'}</strong></span>
+                  {activeWard.infectionLocked && activeWard.infectionLocked !== 'NONE' && (
+                    <Badge variant="destructive" className="text-[10px]">{activeWard.infectionLocked}</Badge>
+                  )}
                 </div>
               </div>
 
@@ -193,26 +208,31 @@ export function WardRoute() {
                   const isPendingClean = bed.status === 'EMPTY_PENDING_CLEANING'; // Mustard Yellow
                   const isClean = bed.status === 'EMPTY_CLEANED';      // White
 
-                  let borderClass = 'border-slate-200 bg-white';
+                  let borderClass = 'border-slate-200 bg-white shadow-2xs';
                   let statusBadge = <Badge variant="outline" className="text-[10px]">Clean & Ready (White)</Badge>;
 
                   if (isAssigned) {
-                    borderClass = 'border-emerald-300 bg-emerald-50/50 ring-1 ring-emerald-300';
-                    statusBadge = <Badge variant="success" className="text-[10px]">Patient in Transit (Green)</Badge>;
+                    borderClass = 'border-emerald-300 bg-gradient-to-b from-emerald-50/70 to-white ring-1 ring-emerald-300 shadow-xs';
+                    statusBadge = (
+                      <Badge variant="success" className="text-[10px] flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                        In Transit (Green)
+                      </Badge>
+                    );
                   } else if (isOccupied) {
-                    borderClass = 'border-slate-400 bg-slate-100';
+                    borderClass = 'border-slate-300 bg-slate-50/80 shadow-2xs';
                     statusBadge = <Badge variant="secondary" className="text-[10px] bg-slate-200 text-slate-800">Occupied (Grey)</Badge>;
                   } else if (isPendingClean) {
-                    borderClass = 'border-amber-300 bg-amber-50/60';
-                    statusBadge = <Badge variant="warning" className="text-[10px]">Pending Clean (Mustard Yellow)</Badge>;
+                    borderClass = 'border-amber-300 bg-gradient-to-b from-amber-50/70 to-white shadow-xs';
+                    statusBadge = <Badge variant="warning" className="text-[10px]">Pending Clean (Yellow)</Badge>;
                   }
 
                   return (
                     <div
                       key={bed.id}
-                      className={`p-4 rounded-xl border flex flex-col justify-between transition-all ${borderClass}`}
+                      className={`p-4 rounded-xl border flex flex-col justify-between transition-all hover:shadow-xs ${borderClass}`}
                     >
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-base text-slate-900">Bed {bed.bedNumber}</span>
                           {statusBadge}
@@ -221,36 +241,36 @@ export function WardRoute() {
                         {/* Bed attributes */}
                         <div className="flex flex-wrap gap-1 text-[10px]">
                           {bed.telemetryCapable && (
-                            <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
-                              Telemetry
+                            <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-medium flex items-center gap-1">
+                              ⚡ Telemetry Monitored
                             </span>
                           )}
                           {bed.nearNursingStation && (
-                            <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">
-                              Near Station
+                            <span className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-medium">
+                              🏥 Near Nurse Station
                             </span>
                           )}
                         </div>
 
                         {/* Patient info if assigned or occupied */}
                         {bed.assignedPatient ? (
-                          <div className="p-2.5 bg-white/80 rounded-lg border border-slate-200 text-xs space-y-1 mt-2">
-                            <div className="font-bold text-slate-900 flex justify-between">
-                              <span>{bed.assignedPatient.name}</span>
-                              <span className="font-mono text-[10px] text-slate-500">
+                          <div className="p-3 bg-white rounded-xl border border-slate-200/90 text-xs space-y-1.5 shadow-2xs">
+                            <div className="font-bold text-slate-900 flex justify-between items-center">
+                              <span className="text-sm">{bed.assignedPatient.name}</span>
+                              <span className="font-mono text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                                 {bed.assignedPatient.queueToken}
                               </span>
                             </div>
-                            <div className="text-[11px] text-slate-600">
+                            <div className="text-[11px] text-slate-500 font-mono">
                               {bed.assignedPatient.gender}, {bed.assignedPatient.age}y • Class {bed.assignedPatient.wardClassPreference}
                             </div>
-                            <div className="text-[11px] text-slate-700 truncate">
+                            <div className="text-[11px] text-slate-700 truncate pt-0.5">
                               <strong>Dx:</strong> {bed.assignedPatient.suspectedDiagnosis || 'Under medical management'}
                             </div>
                           </div>
                         ) : (
-                          <div className="py-4 text-center text-xs text-slate-400 italic">
-                            No patient currently assigned to this bed.
+                          <div className="py-6 text-center text-xs text-slate-400 italic bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
+                            Available for BMU placement
                           </div>
                         )}
                       </div>

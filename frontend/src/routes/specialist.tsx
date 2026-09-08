@@ -94,26 +94,50 @@ export function SpecialistRoute() {
         </div>
       )}
 
-      {/* Specialty Cluster Filter Buttons */}
-      <div className="flex flex-wrap items-center gap-2 bg-white p-3 rounded-lg border border-slate-200">
-        <span className="text-xs font-semibold text-slate-500 mr-2">Filter Cluster:</span>
-        <Button
-          size="sm"
-          variant={selectedCluster === undefined ? 'default' : 'outline'}
+      {/* Specialty Cluster Filter Tabs */}
+      <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-xl border border-slate-200 shadow-2xs">
+        <button
+          type="button"
           onClick={() => setSelectedCluster(undefined)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+            selectedCluster === undefined
+              ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+          }`}
         >
-          All Clusters
-        </Button>
-        {CLUSTERS.map((cluster) => (
-          <Button
-            key={cluster}
-            size="sm"
-            variant={selectedCluster === cluster ? 'default' : 'outline'}
-            onClick={() => setSelectedCluster(cluster)}
-          >
-            {cluster.replace('_', ' ')}
-          </Button>
-        ))}
+          <span>🌐 All Clusters</span>
+          <span className="text-[10px] bg-slate-200/80 px-1.5 py-0.2 rounded-full font-mono font-semibold">
+            {broadcasts.length}
+          </span>
+        </button>
+        {CLUSTERS.map((cluster) => {
+          const count = broadcasts.filter((b) => b.cluster === cluster).length;
+          const icons: Record<string, string> = {
+            CARDIOLOGY: '❤️ Cardiology',
+            GENERAL_MEDICINE: '🏥 Gen Medicine',
+            SURGERY: '🔪 Surgery',
+            ORTHOPAEDICS: '🦴 Orthopaedics',
+          };
+          return (
+            <button
+              key={cluster}
+              type="button"
+              onClick={() => setSelectedCluster(cluster)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                selectedCluster === cluster
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <span>{icons[cluster] || cluster}</span>
+              {count > 0 && (
+                <span className="text-[10px] bg-purple-100 text-purple-800 px-1.5 py-0.2 rounded-full font-mono font-semibold">
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Broadcast Cards Grid */}
@@ -135,13 +159,19 @@ export function SpecialistRoute() {
             const isClaimed = broadcast.status === 'CLAIMED' || broadcast.status === 'CONSULTED';
             const isConsulted = broadcast.status === 'CONSULTED';
 
+            const borderAccent = isConsulted
+              ? 'border-l-4 border-l-emerald-500'
+              : isClaimed
+              ? 'border-l-4 border-l-purple-500'
+              : 'border-l-4 border-l-blue-500';
+
             return (
-              <Card key={broadcast.id} className="border-slate-200 shadow-xs hover:border-slate-300 transition-colors">
+              <Card key={broadcast.id} className={`border-slate-200 shadow-xs hover:shadow-sm hover:border-slate-300 transition-all ${borderAccent}`}>
                 <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 text-base">{patient.name}</span>
-                      <Badge variant="outline" className="text-[10px] font-mono">
+                      <Badge variant="outline" className="text-[10px] font-mono bg-white">
                         {patient.queueToken}
                       </Badge>
                     </div>
@@ -150,7 +180,7 @@ export function SpecialistRoute() {
                         isConsulted
                           ? 'success'
                           : isClaimed
-                          ? 'warning'
+                          ? 'purple'
                           : 'secondary'
                       }
                       className="text-xs"
@@ -166,45 +196,47 @@ export function SpecialistRoute() {
 
                 <CardContent className="pt-4 space-y-3">
                   {/* Clinical Baseline */}
-                  <div className="p-3 bg-slate-50 rounded-lg text-xs space-y-1">
+                  <div className="p-3 bg-slate-50 rounded-xl text-xs space-y-1.5 border border-slate-100">
                     <div className="text-slate-700">
-                      <strong>Suspected Diagnosis:</strong> {patient.suspectedDiagnosis || 'Cardiac/Medical evaluation'}
+                      <strong>Suspected:</strong> {patient.suspectedDiagnosis || 'Cardiac/Medical evaluation'}
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-slate-600 font-mono text-[11px] pt-1">
-                      <div>BP: {patient.vitalsBp || '--'}</div>
-                      <div>SpO2: {patient.vitalsSpo2 || '--'}%</div>
-                      <div className="text-red-600 font-semibold">Trop: {patient.labTroponin || 'Normal'}</div>
+                      <div className="bg-white p-1.5 rounded border border-slate-200/70 text-center">BP: {patient.vitalsBp || '--'}</div>
+                      <div className="bg-white p-1.5 rounded border border-slate-200/70 text-center">SpO2: {patient.vitalsSpo2 || '--'}%</div>
+                      <div className="bg-white p-1.5 rounded border border-slate-200/70 text-center text-red-600 font-semibold">Trop: {patient.labTroponin || 'Normal'}</div>
                     </div>
                   </div>
 
                   {/* ED Attending Lead Details */}
                   <div className="text-xs text-slate-600 space-y-1">
-                    <div>
-                      <strong>ED Attending Priority:</strong>{' '}
-                      <Badge variant="outline" className="text-[10px] font-semibold text-blue-700 bg-blue-50">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-medium text-slate-500">ED Attending Priority:</span>
+                      <Badge variant="outline" className="text-[10px] font-semibold text-blue-700 bg-blue-50 border-blue-200">
                         {req.primaryAcuityTier}
                       </Badge>
                     </div>
-                    {patient.telemetryRequired && (
-                      <Badge variant="outline" className="text-[10px] mr-1 bg-amber-50 text-amber-800 border-amber-200">
-                        Telemetry Required
-                      </Badge>
-                    )}
-                    {patient.infectionStatus !== 'NONE' && (
-                      <Badge variant="destructive" className="text-[10px]">
-                        {patient.infectionStatus}
-                      </Badge>
-                    )}
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {patient.telemetryRequired && (
+                        <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-800 border-amber-200">
+                          Telemetry Required
+                        </Badge>
+                      )}
+                      {patient.infectionStatus !== 'NONE' && (
+                        <Badge variant="destructive" className="text-[10px]">
+                          {patient.infectionStatus}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   {/* Specialist Impression (if already consulted) */}
                   {isConsulted && (
-                    <div className="p-3 bg-purple-50 rounded-lg border border-purple-100 text-xs text-purple-950 space-y-1">
+                    <div className="p-3 bg-purple-50/80 rounded-xl border border-purple-200/70 text-xs text-purple-950 space-y-1">
                       <div className="font-semibold flex items-center gap-1">
                         <MessageSquare className="h-3.5 w-3.5 text-purple-600" />
                         Consult Impression ({broadcast.claimedByDoctor}):
                       </div>
-                      <p className="italic text-purple-900">{broadcast.consultImpression}</p>
+                      <p className="italic text-purple-900 text-[11px] leading-relaxed">{broadcast.consultImpression}</p>
                       <div className="flex items-center gap-2 pt-1 font-medium">
                         <span>Recommended: <strong>{broadcast.recommendedAcuityTier}</strong></span>
                         {broadcast.specialistDiversionEndorsed && (
@@ -222,10 +254,10 @@ export function SpecialistRoute() {
                         variant="outline"
                         onClick={() => claimMutation.mutate(broadcast.id)}
                         disabled={claimMutation.isPending}
-                        className="text-xs"
+                        className="text-xs cursor-pointer"
                       >
                         <Lock className="h-3.5 w-3.5 mr-1" />
-                        Claim Broadcast Case
+                        Claim Case
                       </Button>
                     )}
 
@@ -233,7 +265,7 @@ export function SpecialistRoute() {
                       size="sm"
                       variant={isConsulted ? 'outline' : 'default'}
                       onClick={() => handleOpenConsult(broadcast)}
-                      className="text-xs bg-purple-600 hover:bg-purple-700 text-white"
+                      className="text-xs bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
                     >
                       <MessageSquare className="h-3.5 w-3.5 mr-1" />
                       {isConsulted ? 'Edit Consult' : 'Submit Consult Impression'}

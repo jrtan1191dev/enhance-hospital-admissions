@@ -22,7 +22,7 @@ mindmap
       Feature 1.4: Direct Digital Bed Request Dispatch & 5-Tier Priority
     Epic 2: BMU Bed Capacity & Dynamic Flex-Cubicle Batching
       Feature 2.1: Constraint-Satisfaction Bed Recommendation & 1-Click Approval
-      Feature 2.2: Three-State Bed Lifecycle Machine (White/Green/Grey)
+      Feature 2.2: Four-State Bed Lifecycle Machine (Mustard Yellow/White/Green/Grey)
       Feature 2.3: Dynamic Flex-Cubicle Batching & Holding Room Creation
       Feature 2.4: Alternative Care-Pathway & Diversion Operational Authority
       Feature 2.5: Long-Wait Monitoring & Delay Communication
@@ -294,40 +294,42 @@ Scenario: BMU Coordinator overrides recommendation with mandatory structured rea
 
 ---
 
-## Feature 2.2: Three-State Bed Lifecycle Machine (`White` / `Green` / `Grey`)
+## Feature 2.2: Four-State Bed Lifecycle Machine (`Mustard Yellow` / `White` / `Green` / `Grey`)
 
 ### Story 2.2.1: Bed State Transitions & Real-Time Status Tracking
 
 **As a** BMU Coordinator and Ward Nurse,  
-**I want** the system to enforce a strict three-state lifecycle (`White`, `Green`, `Grey`) across all inpatient beds,  
-**So that** bed availability and transit states are transparent across ED, BMU, and ward staff.
+**I want** the system to enforce a strict four-state lifecycle (`Mustard Yellow`, `White`, `Green`, `Grey`) across all inpatient beds,  
+**So that** bed availability, transit states, and turnover statuses are transparent across ED, BMU, and ward staff.
 
 ```gherkin
-Scenario: Bed transitions through full lifecycle from White to Green to Grey
-  Given Bed 8B-01 is currently marked "White" (Clean, sanitized, and unallocated)
+Scenario: Bed transitions through full lifecycle from White to Green to Grey to Mustard Yellow
+  Given Bed 8B-01 is currently marked "White" (Empty, cleaned, sanitized, and unallocated)
   When BMU allocates Bed 8B-01 to patient "P101"
   Then Bed 8B-01 transitions to "Green" (Assigned / In-Transit)
   And the cubicle is provisionally locked to patient "P101"'s cohort profile
   When patient "P101" is received by the ward nurse at Bed 8B-01 and checked in
   Then Bed 8B-01 transitions to "Grey" (Taken / Physically Occupied)
+  When patient "P101" is discharged and the nurse marks "Patient Vacated"
+  Then Bed 8B-01 transitions to "Mustard Yellow" (Vacated, empty, but not yet cleaned)
 ```
 
 ---
 
-### Story 2.2.2: Cleaning Gate to White
+### Story 2.2.2: Cleaning Gate to White (Empty, Cleaned)
 
 **As a** Housekeeping Supervisor and BMU Coordinator,  
-**I want** vacated beds to remain unavailable during the 30-minute terminal cleaning SLA and transition to `White` only after cleaning sign-off,  
+**I want** vacated beds to enter `Mustard Yellow`, remain unavailable during the 30-minute terminal cleaning SLA, and transition to `White` only after cleaning sign-off,  
 **So that** uncleaned or contaminated beds are never prematurely allocated to waiting patients.
 
 ```gherkin
-Scenario: Discharged bed remains unavailable until housekeeping completion
+Scenario: Discharged bed in Mustard Yellow remains unavailable until housekeeping completion
   Given patient "P090" vacates Bed 6A-03 and the nurse marks "Patient Vacated"
   When the bed enters the turnover workflow
-  Then Bed 6A-03 transitions to status "Turnover Cleaning In Progress"
+  Then Bed 6A-03 transitions to status "Mustard Yellow" (Vacated, empty, but not yet cleaned)
   And the bed cannot be selected or recommended as "White"
   When Housekeeping completes sanitization and taps "Clean & Inspected" on their mobile terminal
-  Then Bed 6A-03 transitions to "White" (Available & Clean)
+  Then Bed 6A-03 transitions to "White" (Available & Clean - "empty, cleaned")
   And BMU receives an automated notification that Bed 6A-03 is ready for immediate allocation
 ```
 
@@ -681,17 +683,17 @@ Scenario: Nurse marks patient vacated and triggers automated housekeeping dispat
 
 ---
 
-### Story 4.3.2: Clean Bed Sign-Off & Automatic Flip to `White`
+### Story 4.3.2: Clean Bed Sign-Off & Automatic Flip to `White` (Empty, Cleaned)
 
 **As a** Housekeeping / Environmental Services (EVS) Specialist and BMU Coordinator,  
-**I want** to sign off terminal cleaning on my mobile terminal to immediately flip the bed status to `White`,  
+**I want** to sign off terminal cleaning on my mobile terminal to immediately flip the bed status from `Mustard Yellow` to `White` ("empty, cleaned"),  
 **So that** the BMU capacity engine and allocation algorithms can instantly assign the bed to the next waiting ED patient.
 
 ```gherkin
 Scenario: Housekeeping signs off terminal cleaning within 30-minute SLA
-  Given the EVS specialist completes terminal cleaning and sanitization of Bed 8B-04 at "11:55 AM" (elapsed 25 mins)
+  Given the EVS specialist completes terminal cleaning and sanitization of Bed 8B-04 at "11:55 AM" (elapsed 25 mins, status "Mustard Yellow")
   When the specialist taps "Terminal Cleaning Complete & Inspected" on their terminal
-  Then Bed 8B-04 immediately flips status to "White" (Available & Clean)
+  Then Bed 8B-04 immediately flips status to "White" (Available & Clean - "empty, cleaned")
   And BMU bed allocation algorithms immediately include Bed 8B-04 in live Phase 1 or Phase 2 batching recommendations
   And the turnover SLA performance log records: "Success: Turnover completed in 25 mins (SLA: 30 mins)"
 ```

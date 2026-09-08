@@ -11,7 +11,7 @@
 What is the most lightweight, robust real-time communication mechanism in Spring Boot + React to power:
 
 1. Multi-doctor assessment broadcast push notifications to on-call specialty feeds.
-2. Real-time BMU bed queue updates and live 3-state (`White`/`Green`/`Grey`) grid refreshes.
+2. Real-time BMU bed queue updates and live 4-state (`Mustard Yellow`/`White`/`Green`/`Grey`) grid refreshes.
 3. Patient & Family Milestone Tracker updates and 2-hour periodic refreshes.
 Should we use Spring Boot WebSockets with STOMP, Server-Sent Events (SSE), or standard polling for the prototype?
 

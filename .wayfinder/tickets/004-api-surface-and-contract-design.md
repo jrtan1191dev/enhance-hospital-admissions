@@ -37,14 +37,14 @@ Handles all clinical workflows across ED triage, specialist broadcast, and ward 
 - `POST /api/clinicians/specialist/broadcasts/{id}/claim`: On-call specialist claims a case. Returns HTTP 409 if already claimed.
 - `POST /api/clinicians/specialist/broadcasts/{id}/consult`: Specialist submits consult impression, acuity, and diversion endorsement. Auto-updates discordance flag.
 - `POST /api/clinicians/ward/receive`: Ward nurse checks in arriving patient $\rightarrow$ bed flips `EMPTY_ASSIGNED` (`GREEN`) $\rightarrow$ `OCCUPIED_TAKEN` (`GREY`).
-- `POST /api/clinicians/ward/vacate`: Ward nurse marks patient discharged $\rightarrow$ bed flips `OCCUPIED_TAKEN` (`GREY`) $\rightarrow$ `EMPTY_PENDING_CLEANING`.
+- `POST /api/clinicians/ward/vacate`: Ward nurse marks patient discharged $\rightarrow$ bed flips `OCCUPIED_TAKEN` (`GREY`) $\rightarrow$ `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - vacated, empty, pending clean).
 
 #### Controller 2: `BmuController` (`/api/bmu`)
 
 Handles bed management, allocation heuristics, dynamic batching, and housekeeping sign-off:
 
 - `GET /api/bmu/queue`: Prioritized admission request queue (sorted by Acuity Severity > arrival time).
-- `GET /api/bmu/wards`: Complete hospital ward inventory (Level $\rightarrow$ Ward $\rightarrow$ Beds with statuses `EMPTY_CLEANED`, `EMPTY_PENDING_CLEANING`, `EMPTY_ASSIGNED`, `OCCUPIED_TAKEN`).
+- `GET /api/bmu/wards`: Complete hospital ward inventory (Level $\rightarrow$ Ward $\rightarrow$ Beds with statuses `MUSTARD YELLOW` [`EMPTY_PENDING_CLEANING`], `WHITE` [`EMPTY_CLEANED`], `GREEN` [`EMPTY_ASSIGNED`], `GREY` [`OCCUPIED_TAKEN`]).
 - `GET /api/bmu/recommendations/{requestId}`: Synchronously computes hard filters and soft scoring to return **Top 3 Recommended Beds**.
 - `POST /api/bmu/allocations/approve`: BMU coordinator 1-click approves bed assignment $\rightarrow$ bed flips to `EMPTY_ASSIGNED` (`GREEN`).
 - `POST /api/bmu/allocations/override`: Coordinator overrides recommendation with mandatory structured reason code.
@@ -52,7 +52,7 @@ Handles bed management, allocation heuristics, dynamic batching, and housekeepin
 - `POST /api/bmu/batch-holding-wards/approve`: 1-click approves batch holding ward allocation $\rightarrow$ batch porters dispatched.
 - `GET /api/bmu/cohort-swap-suggestions`: Detects isolated `EMPTY_ASSIGNED` beds blocking flex wards during surge conditions.
 - `POST /api/bmu/cohort-swap/approve`: Executes cohort swap re-allocation.
-- `POST /api/bmu/beds/{bedId}/clean`: Housekeeping marks sanitization complete $\rightarrow$ bed flips `EMPTY_PENDING_CLEANING` $\rightarrow$ `EMPTY_CLEANED` (`WHITE`).
+- `POST /api/bmu/beds/{bedId}/clean`: Housekeeping marks sanitization complete $\rightarrow$ bed flips `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`) $\rightarrow$ `EMPTY_CLEANED` (`WHITE` - empty, cleaned).
 - `GET /api/bmu/config` & `PUT /api/bmu/config`: View/update algorithm scoring weights via BMU Configuration Portal.
 
 #### Controller 3: `PatientTrackerController` (`/api/patients`)

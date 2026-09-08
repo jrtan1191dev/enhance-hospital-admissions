@@ -13,7 +13,7 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
 1. `Patient` (demographics, gender, infection status, requested Ward Class A/B1/B2/C, ADL/mobility, fall risk)
 2. `AdmissionRequest` (acuity tiers 1–5, primary ED assessment, specialist consult assessments, effective BMU tier, queue timestamps)
 3. `AssessmentBroadcast` (service cluster, targeted on-call roster, claimed specialist, SLA timeout timer, discordance flag)
-4. `Bed` (bed number, current state: `WHITE`, `GREEN`, `GREY`, equipment capabilities: telemetry, negative pressure)
+4. `Bed` (bed number, current state: `MUSTARD YELLOW`, `WHITE`, `GREEN`, `GREY`, equipment capabilities: telemetry, negative pressure)
 5. `Ward` (ward code, level/floor number, ward class, gender/infection cohort lock, service cluster, holding ward flag)
 
 ## Resolution (ADR-001: Relational Domain Entities & In-Memory H2 Persistence)
@@ -24,18 +24,17 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
 - **JPA Mappings**: Standard bidirectional object graph (`@OneToMany`, `@ManyToOne`, `@OneToOne`) with DTO projections and Jackson `@JsonIgnoreProperties` / `@JsonBackReference` to prevent circular serialization.
 - **Hierarchy**: Strict physical hierarchy of **Level $\rightarrow$ Ward $\rightarrow$ Bed** (cubicle entity explicitly eliminated).
 - **Database Engine**: Standard persistent RDBMS (PostgreSQL) is configured by default for production readiness. In the `prototype` profile, in-memory **H2 Database** (`jdbc:h2:mem:hospital_db;DB_CLOSE_DELAY=-1`) with `spring.jpa.hibernate.ddl-auto=create-drop` is used instead.
-- **Seed Data**: A Spring Boot `CommandLineRunner` (`DataInitializer`) annotated with `@Profile("prototype")` automatically populates levels and wards (e.g. Level 8 Ward 8A, Level 8 Ward 8B, Level 9 Ward 9A), beds in initial `WHITE`/`GREEN`/`GREY` states, and synthetic waiting ED patients upon boot. In the default production-ready configuration, this runner is inactive.
+- **Seed Data**: A Spring Boot `CommandLineRunner` (`DataInitializer`) annotated with `@Profile("prototype")` automatically populates levels and wards (e.g. Level 8 Ward 8A, Level 8 Ward 8B, Level 9 Ward 9A), beds in initial `MUSTARD YELLOW`/`WHITE`/`GREEN`/`GREY` states, and synthetic waiting ED patients upon boot. In the default production-ready configuration, this runner is inactive.
 
 ---
 
 ### 2. Core Entities & Enums
 
 #### A. Enums
-
 - `WardClass`: `A`, `B1`, `B2`, `C`
 - `Gender`: `MALE`, `FEMALE`
 - `InfectionStatus`: `NON_INFECTIOUS`, `RESPIRATORY`, `MRSA`
-- `BedStatus`: `WHITE`, `GREEN`, `GREY`, `CLEANING_IN_PROGRESS`
+- `BedStatus`: `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - vacated, empty, pending clean), `EMPTY_CLEANED` (`WHITE` - empty, cleaned), `EMPTY_ASSIGNED` (`GREEN`), `OCCUPIED_TAKEN` (`GREY`)
 - `AcuityTier`: `TIER_1_CRITICAL`, `TIER_2_ACUTE_URGENT`, `TIER_3_ACUTE_STABLE`, `TIER_4_SUBACUTE_DIVERSION`, `TIER_5_SHORT_STAY`
 - `AdmissionStatus`: `ASSESSMENT_IN_PROGRESS`, `BED_REQUESTED`, `BED_ALLOCATED`, `IN_TRANSIT`, `ADMITTED`, `DIVERTED_SISTER_HOSPITAL`, `DIVERTED_HAH`, `DISCHARGED`
 - `BroadcastStatus`: `OPEN`, `CLAIMED`, `AUTO_ESCALATED`, `COMPLETED`
@@ -57,7 +56,7 @@ What is the exact relational domain model and Spring Data JPA entity schema for:
    - `UUID id`
    - `String bedNumber` (e.g., "8A-01")
    - `@ManyToOne @JoinColumn(name = "ward_id") Ward ward`
-   - `@Enumerated(EnumType.STRING) BedStatus status` (`WHITE`, `GREEN`, `GREY`, `CLEANING_IN_PROGRESS`)
+   - `@Enumerated(EnumType.STRING) BedStatus status` (`EMPTY_PENDING_CLEANING` / `MUSTARD YELLOW`, `EMPTY_CLEANED` / `WHITE`, `EMPTY_ASSIGNED` / `GREEN`, `OCCUPIED_TAKEN` / `GREY`)
    - `boolean hasTelemetry`
    - `boolean isNegativePressure`
    - `boolean isBariatric`

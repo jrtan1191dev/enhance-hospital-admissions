@@ -186,9 +186,9 @@ sequenceDiagram
     Note over Backend: Bed 8A-04: GREEN -> GREY (OCCUPIED_TAKEN)
     Backend-->>Patient: Milestone 4 (Admitted to Ward 8A)
     Nurse->>Backend: Vacate Patient on Discharge
-    Note over Backend: Bed 8A-04: GREY -> EMPTY_PENDING_CLEANING
+    Note over Backend: Bed 8A-04: GREY -> MUSTARD_YELLOW (EMPTY_PENDING_CLEANING)
     Housekeeper->>Backend: Sign-Off Terminal Cleaning (30-min SLA)
-    Note over Backend: Bed 8A-04: EMPTY_PENDING_CLEANING -> WHITE (EMPTY_CLEANED)
+    Note over Backend: Bed 8A-04: MUSTARD_YELLOW -> WHITE (EMPTY_CLEANED)
 ```
 
 ---
@@ -209,7 +209,7 @@ $$\text{Level (Floor)} \longrightarrow \text{Ward} \longrightarrow \text{Bed}$$
 - `WardClass`: `A`, `B1`, `B2`, `C`
 - `Gender`: `MALE`, `FEMALE`
 - `InfectionStatus`: `NON_INFECTIOUS`, `RESPIRATORY`, `MRSA`
-- `BedStatus`: `EMPTY_PENDING_CLEANING`, `EMPTY_CLEANED`, `EMPTY_ASSIGNED`, `OCCUPIED_TAKEN`
+- `BedStatus`: `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`), `EMPTY_CLEANED` (`WHITE`), `EMPTY_ASSIGNED` (`GREEN`), `OCCUPIED_TAKEN` (`GREY`)
 - `AcuityTier`: `TIER_1_CRITICAL`, `TIER_2_ACUTE_URGENT`, `TIER_3_ACUTE_STABLE`, `TIER_4_SUBACUTE_DIVERSION`, `TIER_5_SHORT_STAY`
 - `AdmissionStatus`: `ASSESSMENT_IN_PROGRESS`, `BED_REQUESTED`, `BED_ALLOCATED`, `IN_TRANSIT`, `ADMITTED`, `DIVERTED_SISTER_HOSPITAL`, `DIVERTED_HAH`, `DISCHARGED`
 - `BroadcastStatus`: `OPEN`, `CLAIMED`, `AUTO_ESCALATED`, `COMPLETED`
@@ -231,7 +231,7 @@ $$\text{Level (Floor)} \longrightarrow \text{Ward} \longrightarrow \text{Bed}$$
    - `UUID id`: Primary key.
    - `String bedNumber`: Physical bed designation (e.g., "8A-01", "8A-04").
    - `Ward ward`: `@ManyToOne @JoinColumn(name = "ward_id")`.
-   - `BedStatus status`: Operational state (`EMPTY_PENDING_CLEANING`, `EMPTY_CLEANED`, `EMPTY_ASSIGNED`, `OCCUPIED_TAKEN`).
+   - `BedStatus status`: Operational state (`EMPTY_PENDING_CLEANING` [`MUSTARD YELLOW`], `EMPTY_CLEANED` [`WHITE` - empty, cleaned], `EMPTY_ASSIGNED` [`GREEN`], `OCCUPIED_TAKEN` [`GREY`]).
    - `boolean hasTelemetry`: Continuous cardiac/vital telemetry monitoring capability.
    - `boolean isNegativePressure`: Airborne pathogen containment capability.
    - `boolean isBariatric`: Enhanced weight-bearing capability.
@@ -396,8 +396,8 @@ stateDiagram-v2
     EMPTY_PENDING_CLEANING --> EMPTY_CLEANED: EVS Terminal Clean Sign-Off (30m SLA)
 ```
 
-- `EMPTY_PENDING_CLEANING`: Physically vacated; 30-min housekeeping sanitization in progress. Ineligible for assignment.
-- `EMPTY_CLEANED` (`WHITE`): Vacant, sanitized, inspected, and immediately available for algorithmic matching.
+- `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`): Patient has been discharged, and the bed is vacated and empty, but not yet cleaned (30-min housekeeping sanitization in progress; ineligible for assignment).
+- `EMPTY_CLEANED` (`WHITE`): Vacant, sanitized, inspected, and immediately available for algorithmic matching ("empty, cleaned").
 - `EMPTY_ASSIGNED` (`GREEN`): Allocated to an ED patient by BMU; patient is in transit or awaiting porter transfer.
 - `OCCUPIED_TAKEN` (`GREY`): Physically occupied by patient.
 
@@ -434,7 +434,7 @@ $$\text{Score}(B) = S_{\text{specialty}} + S_{\text{consolidation}} + S_{\text{p
 Where:
 
 - $S_{\text{specialty}} = \begin{cases} W_{\text{serviceCluster}}, & \text{if } W.\text{serviceCluster} = P.\text{suspectedDiagnosisService} \\ 0, & \text{otherwise} \end{cases}$ (Default: `+40`)
-- $S_{\text{consolidation}} = \begin{cases} W_{\text{consolidation}}, & \text{if } W \text{ has } \ge 1 \text{ bed in } \{\text{OCCUPIED\_TAKEN}, \text{EMPTY\_ASSIGNED}\} \\ 0, & \text{otherwise (All-White ward)} \end{cases}$ (Default: `+30`)
+- $S_{\text{consolidation}} = \begin{cases} W_{\text{consolidation}}, & \text{if } W \text{ has } \ge 1 \text{ bed in } \{\text{OCCUPIED\_TAKEN}, \text{EMPTY\_ASSIGNED}\} \\ 0, & \text{otherwise (All-White empty/cleaned ward)} \end{cases}$ (Default: `+30`)
 - $S_{\text{proximity}} = \begin{cases} W_{\text{fallRisk}}, & \text{if } P.\text{fallRiskScore} \ge 45 \land B.\text{isNearNursingStation} \\ 0, & \text{otherwise} \end{cases}$ (Default: `+15`)
 
 > [!NOTE]
@@ -491,24 +491,24 @@ The backend exposes exactly **three `@RestController` classes** utilizing standa
 | `GET` | `/specialist/broadcasts` | Query: `?serviceCluster=CARDIOLOGY` | `200 OK`: `List<BroadcastFeedDto>` | Retrieves active specialty broadcast feed. |
 | `POST` | `/specialist/broadcasts/{id}/claim` | `ClaimRequestDto` | `200 OK`: `BroadcastFeedDto` / `409 Conflict` | Specialist claims broadcast case. |
 | `POST` | `/specialist/broadcasts/{id}/consult` | `ConsultSubmissionDto` | `200 OK`: `AdmissionRequestDto` | Specialist records impression, confirms acuity tier, and endorses/rejects diversion. |
-| `POST` | `/ward/receive` | `WardCheckInDto` (`requestId`, `bedId`) | `200 OK`: `BedDto` | Ward nurse checks in patient $\rightarrow$ bed flips `EMPTY_ASSIGNED` $\rightarrow$ `OCCUPIED_TAKEN`. |
-| `POST` | `/ward/vacate` | `WardVacateDto` (`bedId`) | `200 OK`: `BedDto` | Ward nurse marks patient discharged $\rightarrow$ bed flips `OCCUPIED_TAKEN` $\rightarrow$ `EMPTY_PENDING_CLEANING`. |
+| `POST` | `/ward/receive` | `WardCheckInDto` (`requestId`, `bedId`) | `200 OK`: `BedDto` | Ward nurse checks in patient $\rightarrow$ bed flips `EMPTY_ASSIGNED` (`GREEN`) $\rightarrow$ `OCCUPIED_TAKEN` (`GREY`). |
+| `POST` | `/ward/vacate` | `WardVacateDto` (`bedId`) | `200 OK`: `BedDto` | Ward nurse marks patient discharged $\rightarrow$ bed flips `OCCUPIED_TAKEN` (`GREY`) $\rightarrow$ `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - vacated, empty, pending clean). |
 
 ### 7.2 `BmuController` (`/api/bmu`)
 
 | Method | Path | Request Body | Response Status & Body | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/queue` | _None_ | `200 OK`: `List<QueueItemDto>` | Prioritized queue sorted by Acuity Tier > FIFO dwell time. |
-| `GET` | `/wards` | _None_ | `200 OK`: `List<WardHierarchyDto>` | Complete hospital bed grid (Level $\rightarrow$ Ward $\rightarrow$ Beds with 4 states). |
+| `GET` | `/wards` | _None_ | `200 OK`: `List<WardHierarchyDto>` | Complete hospital bed grid (Level $\rightarrow$ Ward $\rightarrow$ Beds with 4 states: `MUSTARD YELLOW`, `WHITE`, `GREEN`, `GREY`). |
 | `GET` | `/recommendations/{requestId}` | _None_ | `200 OK`: `List<BedRecommendationDto>` | Computes hard filters & soft scores; returns Top 3 candidate beds. |
-| `POST` | `/allocations/approve` | `AllocationApprovalDto` (`requestId`, `bedId`) | `200 OK`: `AdmissionRequestDto` | 1-click bed allocation approval $\rightarrow$ bed flips `WHITE` $\rightarrow$ `GREEN`. |
+| `POST` | `/allocations/approve` | `AllocationApprovalDto` (`requestId`, `bedId`) | `200 OK`: `AdmissionRequestDto` | 1-click bed allocation approval $\rightarrow$ bed flips `WHITE` (empty, cleaned) $\rightarrow$ `GREEN`. |
 | `POST` | `/allocations/override` | `AllocationOverrideDto` (`requestId`, `bedId`, `reason`) | `200 OK`: `AdmissionRequestDto` | Overrides recommendation with mandatory structured reason code. |
 | `GET` | `/batch-suggestions` | _None_ | `200 OK`: `List<BatchSuggestionDto>` | Surfaces cluster suggestions ($\ge 3$ patients) targeting all-White flex wards. |
 | `POST` | `/batch-holding-wards/approve` | `BatchApprovalDto` (`suggestionId`) | `200 OK`: `List<AdmissionRequestDto>` | 1-click batch holding ward approval. |
 | `GET` | `/cohort-swap-suggestions` | _None_ | `200 OK`: `List<CohortSwapDto>` | Identifies isolated `GREEN` beds blocking flex wards. |
 | `POST` | `/cohort-swap/approve` | `CohortSwapApprovalDto` (`swapId`) | `200 OK`: `SwapResultDto` | Executes dynamic cohort swap. |
 | `POST` | `/diversions/dispatch` | `DiversionDispatchDto` (`requestId`, `targetHospitalCode`, `notes`) | `200 OK`: `AdmissionRequestDto` | Dispatches referral to Sister Hospital (OCH, AH, SACH) or MIC@Home via `SisterHospitalGateway`. |
-| `POST` | `/beds/{bedId}/clean` | _None_ | `200 OK`: `BedDto` | EVS housekeeper signs off clean $\rightarrow$ bed flips `EMPTY_PENDING_CLEANING` $\rightarrow$ `EMPTY_CLEANED`. |
+| `POST` | `/beds/{bedId}/clean` | _None_ | `200 OK`: `BedDto` | EVS housekeeper signs off clean $\rightarrow$ bed flips `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`) $\rightarrow$ `EMPTY_CLEANED` (`WHITE` - empty, cleaned). |
 | `GET` | `/config` | _None_ | `200 OK`: `BmuAlgorithmConfigDto` | Retrieves active algorithm weights. |
 | `PUT` | `/config` | `BmuAlgorithmConfigDto` | `200 OK`: `BmuAlgorithmConfigDto` | Updates algorithm weights via BMU Configuration Portal. |
 
@@ -566,10 +566,10 @@ graph TD
 - **Prioritized Admission Queue**: Acuity-sorted queue with dwell timers and discordance badges.
 - **Top 3 Recommended Beds Card**: Selecting a queue patient renders the top 3 algorithmic matches with breakdown chips (`+40 Specialty`, `+30 Consolidation`, `+15 Proximity`).
 - **Interactive Bed Inventory Matrix**: Real-time Level $\rightarrow$ Ward $\rightarrow$ Bed visualization using color-coded bed cards:
-  - ⚪ `EMPTY_CLEANED` (White)
-  - 🟢 `EMPTY_ASSIGNED` (Green)
-  - 🔘 `OCCUPIED_TAKEN` (Grey)
-  - 🟡 `EMPTY_PENDING_CLEANING` (Yellow / Cleaning)
+  - 🟡 `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - Discharged, vacated, empty, pending cleaning)
+  - ⚪ `EMPTY_CLEANED` (`WHITE` - Empty, cleaned, available)
+  - 🟢 `EMPTY_ASSIGNED` (`GREEN` - Allocated, in transit)
+  - 🔘 `OCCUPIED_TAKEN` (`GREY` - Occupied)
 - **Batch Holding Ward Suggestion Banner**: Appears when $\ge 3$ compatible patients are detected, targeting flex wards.
 - **Configuration Portal (`/bmu/config`)**: Interactive sliders for tuning consolidation bonuses, specialty cluster weights, and batching thresholds.
 
@@ -587,8 +587,8 @@ graph TD
 
 #### 5. Inpatient Ward & EVS View (`/ward`)
 
-- **Ward Nurse Panel**: Bed-by-bed roster for Ward 8A/8B/9A. Buttons for "Check-In Patient" (turns Green $\to$ Grey) and "Vacate Patient" (turns Grey $\to$ Yellow).
-- **Housekeeping / EVS Panel**: Active turnover queue with 30-minute SLA countdown timer. "Terminal Cleaning Complete" button turns Yellow $\to$ White, instantly updating BMU recommendations.
+- **Ward Nurse Panel**: Bed-by-bed roster for Ward 8A/8B/9A. Buttons for "Check-In Patient" (turns Green $\to$ Grey) and "Vacate Patient" (turns Grey $\to$ Mustard Yellow - vacated, empty, pending cleaning).
+- **Housekeeping / EVS Panel**: Active turnover queue with 30-minute SLA countdown timer. "Terminal Cleaning Complete" button turns Mustard Yellow $\to$ White (empty, cleaned), instantly updating BMU recommendations.
 
 ---
 
@@ -603,7 +603,7 @@ graph LR
     Step1["1. ED Attending submits Tan Ah Meng (P101)"] --> Step2["2. Specialist claims case & adds Cath Lab consult"]
     Step2 --> Step3["3. BMU views queue & clicks P101"]
     Step3 --> Step4["4. Heuristic engine scores Bed 8A-04 as #1 (+70 pts)"]
-    Step4 --> Step5["5. BMU approves bed -> Bed 8A-04 flips WHITE to GREEN"]
+    Step4 --> Step5["5. BMU approves bed -> Bed 8A-04 flips WHITE (empty, cleaned) to GREEN"]
 ```
 
 **Concrete Seed Dataset (`DataInitializer`)**:
@@ -612,12 +612,12 @@ graph LR
   - Bed `8A-01`: `OCCUPIED_TAKEN` (`GREY`, Male)
   - Bed `8A-02`: `OCCUPIED_TAKEN` (`GREY`, Male)
   - Bed `8A-03`: `EMPTY_ASSIGNED` (`GREEN`, Male, awaiting transfer)
-  - Bed `8A-04`: `EMPTY_CLEANED` (`WHITE`, Telemetry enabled) $\longleftarrow$ **Primary target bed**
-  - Bed `8A-05`: `EMPTY_PENDING_CLEANING` (Housekeeping turnover pending)
+  - Bed `8A-04`: `EMPTY_CLEANED` (`WHITE` [empty, cleaned], Telemetry enabled) $\longleftarrow$ **Primary target bed**
+  - Bed `8A-05`: `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - vacated, empty, pending cleaning)
 - **Level 8 Ward 8B (Holding Ward / Class B2 / Flex Unlocked)**:
-  - Beds `8B-01` to `8B-04`: All `EMPTY_CLEANED` (`WHITE`) $\longleftarrow$ **Candidate batch holding ward**
+  - Beds `8B-01` to `8B-04`: All `EMPTY_CLEANED` (`WHITE` [empty, cleaned]) $\longleftarrow$ **Candidate batch holding ward**
 - **Level 9 Ward 9A (General Medicine / Class C / Locked Female)**:
-  - Beds `9A-01` to `9A-06`: 4 `OCCUPIED_TAKEN` (`GREY`), 2 `EMPTY_CLEANED` (`WHITE`)
+  - Beds `9A-01` to `9A-06`: 4 `OCCUPIED_TAKEN` (`GREY`), 2 `EMPTY_CLEANED` (`WHITE` [empty, cleaned])
 - **Simulated ED Patient Queue**:
   - `P101` ("Tan Ah Meng", Male, 68): NSTEMI, Telemetry required, Ward Class B2
   - `P102` ("Siti Rahmah", Female, 55): Chest pain, Ward Class B2
@@ -635,8 +635,8 @@ graph LR
     StepA["1. Patient opens tracker via token"] --> StepB["2. Observes Milestone 2 (Bed Assigned, 45m wait)"]
     StepB --> StepC["3. Ward Nurse clicks 'Check-In Patient' -> Bed turns GREY"]
     StepC --> StepD["4. Patient tracker updates to Milestone 4 (Admitted)"]
-    StepD --> StepE["5. Ward Nurse clicks 'Vacate Patient' -> Bed turns YELLOW"]
-    StepE --> StepF["6. EVS signs off 30m clean -> Bed turns WHITE for next patient"]
+    StepD --> StepE["5. Ward Nurse clicks 'Vacate Patient' -> Bed turns MUSTARD YELLOW"]
+    StepE --> StepF["6. EVS signs off 30m clean -> Bed turns WHITE (empty, cleaned) for next patient"]
 ```
 
 ---
@@ -653,7 +653,7 @@ graph LR
 | **US-06** | Priority Admission Queue Orchestration | `BmuController#getQueue` | Acuity-first sorting with secondary FIFO dwell time. |
 | **US-07** | Two-Phase Pack-Then-Batch Heuristics | `HeuristicEngine#computeRecommendations` | Hard constraints filter + soft scoring (+30 consolidation, +40 specialty). |
 | **US-08** | Dynamic Holding Ward Batch Suggestion | `BmuController#getBatchSuggestions` | Surfaces clusters $\ge 3$ targeting all-White flex wards. |
-| **US-09** | Housekeeping Terminal Cleaning Sign-Off | `BmuController#cleanBed` | EVS turnover sign-off transitions bed from `EMPTY_PENDING_CLEANING` to `WHITE`. |
+| **US-09** | Housekeeping Terminal Cleaning Sign-Off | `BmuController#cleanBed` | EVS turnover sign-off transitions bed from `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`) to `EMPTY_CLEANED` (`WHITE` - empty, cleaned). |
 | **US-10** | Public Patient Milestone Tracker | `PatientTrackerController#getTracker` | Token-based mobile tracker with 4 milestones and delay reasons. |
 | **US-11** | Proactive Financial & Care Guidance | `PatientTrackerDto.financialExplainer` | Co-pay subsidy estimates and 1-click MSW contact hotlines. |
 | **US-12** | BMU Configuration Weight Tuning | `BmuController#updateConfig` | Real-time weight tuning via `/bmu/config`. |

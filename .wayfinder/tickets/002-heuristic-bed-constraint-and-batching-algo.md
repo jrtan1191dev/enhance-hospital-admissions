@@ -12,7 +12,7 @@ How should the two-phase pack-then-batch and dynamic cohort-swap algorithm be im
 
 1. Exact scoring functions for hard constraints (gender cohorting, isolation, ward class tier) and soft optimization (service clustering, fall risk bed proximity).
 2. Phase 1 Consolidation: Algorithm logic for identifying and filling matching partially filled wards (`Grey`/`Green` + `White` beds).
-3. Phase 2 Holding Ward Creation: Algorithm logic for detecting clusters ($\ge 3$ patients) and selecting candidate all-`White` flex wards.
+3. Phase 2 Holding Ward Creation: Algorithm logic for detecting clusters ($\ge 3$ patients) and selecting candidate all-`White` (empty, cleaned) flex wards.
 4. Dynamic Cohort-Swap Re-Optimization: Detection logic for isolated `Green` beds blocking an otherwise empty flex ward and proposing swaps to BMU before ED departure.
 
 ## Resolution (ADR-002: Bare-Minimum Heuristic Bed Allocation & Dynamic Batching Algorithm)
@@ -21,8 +21,8 @@ How should the two-phase pack-then-batch and dynamic cohort-swap algorithm be im
 
 Bed status encompasses four distinct operational states:
 
-1. `EMPTY_PENDING_CLEANING`: Bed is physically vacated by discharged patient, but 30-min housekeeping sanitization is pending/in progress. (Ineligible for assignment).
-2. `EMPTY_CLEANED` (`WHITE`): Vacant, sanitized, inspected, and immediately available for matching.
+1. `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`): Bed is physically vacated by a discharged patient, empty, but not yet cleaned (30-min housekeeping sanitization is pending/in progress; ineligible for assignment).
+2. `EMPTY_CLEANED` (`WHITE`): Vacant, sanitized, inspected, and immediately available for matching ("empty, cleaned").
 3. `EMPTY_ASSIGNED` (`GREEN`): Allocated to an ED patient by BMU; patient has not yet physically arrived at the ward.
 4. `OCCUPIED_TAKEN` (`GREY`): Patient has arrived at the ward and is occupying the bed.
 

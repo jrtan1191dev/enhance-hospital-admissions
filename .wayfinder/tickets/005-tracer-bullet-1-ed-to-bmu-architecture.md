@@ -10,10 +10,10 @@
 
 What is the bare-minimum executable code skeleton and UI stub structure connecting React to Spring Boot for Tracer Bullet 1?
 
-1. Seed dataset: Synthetic ward layout (Level 8 Ward 8A, Level 8 Ward 8B with `White`/`Green`/`Grey` beds) and simulated waiting ED patients.
+1. Seed dataset: Synthetic ward layout (Level 8 Ward 8A, Level 8 Ward 8B with `Mustard Yellow`/`White`/`Green`/`Grey` beds) and simulated waiting ED patients.
 2. ED Attending UI: 1-click submit pre-populated assessment.
 3. Inpatient Specialist UI: Service-cluster on-call consult feed view.
-4. BMU Dashboard UI: Live queue, Top 3 bed recommendation card, and 1-click approval transitioning bed `White` $\rightarrow$ `Green` $\rightarrow$ `Grey`.
+4. BMU Dashboard UI: Live queue, Top 3 bed recommendation card, and 1-click approval transitioning bed `White` $\rightarrow$ `Green` $\rightarrow$ `Grey` $\rightarrow$ `Mustard Yellow` $\rightarrow$ `White`.
 
 ## Resolution (ADR-005: MVP Tracer Bullet Vertical Slice 1 Architecture)
 
@@ -41,12 +41,12 @@ Populates on boot only when the `prototype` profile is active:
   - Bed 8A-01: `OCCUPIED_TAKEN` (`GREY`, Male)
   - Bed 8A-02: `OCCUPIED_TAKEN` (`GREY`, Male)
   - Bed 8A-03: `EMPTY_ASSIGNED` (`GREEN`, Male, awaiting porter)
-  - Bed 8A-04: `EMPTY_CLEANED` (`WHITE`, Telemetry enabled) $\leftarrow$ Candidate target for Tan Ah Meng
-  - Bed 8A-05: `EMPTY_PENDING_CLEANING` (Housekeeping turnover pending)
+  - Bed 8A-04: `EMPTY_CLEANED` (`WHITE` [empty, cleaned], Telemetry enabled) $\leftarrow$ Candidate target for Tan Ah Meng
+  - Bed 8A-05: `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - vacated, empty, pending cleaning)
 - **Level 8 Ward 8B (Holding Ward / Class B2 / Flex Unlocked)**:
-  - 4 beds (8B-01, 8B-02, 8B-03, 8B-04): all `EMPTY_CLEANED` (`WHITE`) $\leftarrow$ Candidate target for dynamic batch holding ward
+  - 4 beds (8B-01, 8B-02, 8B-03, 8B-04): all `EMPTY_CLEANED` (`WHITE` [empty, cleaned]) $\leftarrow$ Candidate target for dynamic batch holding ward
 - **Level 9 Ward 9A (General Medicine / Class C / Locked Female)**:
-  - Beds 9A-01 to 9A-06: 4 `OCCUPIED_TAKEN` (`GREY`), 2 `EMPTY_CLEANED` (`WHITE`)
+  - Beds 9A-01 to 9A-06: 4 `OCCUPIED_TAKEN` (`GREY`), 2 `EMPTY_CLEANED` (`WHITE` [empty, cleaned])
 - **Simulated Waiting ED Patients**:
   - `P101` ("Tan Ah Meng", Male, 68): NSTEMI, Troponin 150 ng/L, Telemetry required, Ward Class B2
   - `P102` ("Siti Rahmah", Female, 55): Chest pain, Ward Class B2
@@ -70,5 +70,5 @@ Populates on boot only when the `prototype` profile is active:
    - Queue table displays `P101` at top priority (Tier 2).
    - Selecting `P101` calls `GET /api/bmu/recommendations/{id}` $\rightarrow$ returns Top 3 beds (Bed 8A-04 ranked #1: +40 specialty, +30 consolidation, telemetry enabled).
    - Coordinator clicks "Approve Bed 8A-04" $\rightarrow$ calls `POST /api/bmu/allocations/approve`.
-   - Result: Bed 8A-04 instantly flips from `EMPTY_CLEANED` (`WHITE`) $\rightarrow$ `EMPTY_ASSIGNED` (`GREEN`).
+   - Result: Bed 8A-04 instantly flips from `EMPTY_CLEANED` (`WHITE` [empty, cleaned]) $\rightarrow$ `EMPTY_ASSIGNED` (`GREEN`).
    - BMU dashboard also displays "Batch Holding Ward Suggestion" for the 3 waiting female patients (P102, P103, P104) targeting Ward 8B.

@@ -11,8 +11,8 @@
 How does Tracer Bullet 2 complete the circular hospital lifecycle?
 
 1. Public Mobile View: Dispatch-activated token-based tracker showing Milestone progression, estimated wait, and pax in queue.
-2. Ward Nurse UI: "Patient Vacated" button triggering bed status change from `Grey` $\rightarrow$ "Turnover Cleaning In Progress".
-3. Housekeeping Mobile UI: 30-minute cleaning SLA countdown timer and "Terminal Cleaning Complete" sign-off flipping bed status back to `White` for immediate BMU re-allocation.
+2. Ward Nurse UI: "Patient Vacated" button triggering bed status change from `Grey` $\rightarrow$ `Mustard Yellow` ("Vacated, Pending Cleaning").
+3. Housekeeping Mobile UI: 30-minute cleaning SLA countdown timer and "Terminal Cleaning Complete" sign-off flipping bed status from `Mustard Yellow` back to `White` ("empty, cleaned") for immediate BMU re-allocation.
 
 ## Resolution (ADR-006: MVP Tracer Bullet Vertical Slice 2 Architecture)
 
@@ -35,11 +35,11 @@ How does Tracer Bullet 2 complete the circular hospital lifecycle?
   - Bed roster displays admitted and in-transit patients.
   - "Check-In Patient": Confirms physical arrival at bed $\rightarrow$ bed flips from `EMPTY_ASSIGNED` (`GREEN`) to `OCCUPIED_TAKEN` (`GREY`).
   - "Patient Vacated": Marks morning discharge completion $\rightarrow$ calls `POST /api/clinicians/ward/vacate`.
-  - Bed status transitions immediately from `OCCUPIED_TAKEN` (`GREY`) $\rightarrow$ `EMPTY_PENDING_CLEANING`.
+  - Bed status transitions immediately from `OCCUPIED_TAKEN` (`GREY`) $\rightarrow$ `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW` - vacated, empty, pending clean).
 - **Housekeeping / EVS View**:
   - Displays beds currently undergoing turnover with an active 30-minute SLA countdown timer.
   - "Terminal Cleaning Complete & Inspected": EVS specialist submits clean sign-off $\rightarrow$ calls `POST /api/bmu/beds/{id}/clean`.
-  - Bed status immediately transitions from `EMPTY_PENDING_CLEANING` back to **`EMPTY_CLEANED` (`WHITE`)**.
+  - Bed status immediately transitions from `EMPTY_PENDING_CLEANING` (`MUSTARD YELLOW`) back to **`EMPTY_CLEANED` (`WHITE` - empty, cleaned)**.
   - BMU allocation algorithms immediately detect the new `EMPTY_CLEANED` bed in real time for the next waiting ED patient.
 
 ---
@@ -47,4 +47,4 @@ How does Tracer Bullet 2 complete the circular hospital lifecycle?
 ### 3. Circular Lifecycle Completion
 
 Tracer Bullet 2 connects seamlessly with Tracer Bullet 1 to complete the full hospital operational loop:
-$$\text{ED Assessment (White Bed Selected)} \to \text{BMU Assigned (Green)} \to \text{Ward Check-in (Grey)} \to \text{Patient Vacated (Pending Clean)} \to \text{Housekeeping Sign-off (White)}$$
+$$\text{ED Assessment (White [empty, cleaned] Bed Selected)} \to \text{BMU Assigned (Green)} \to \text{Ward Check-in (Grey)} \to \text{Patient Vacated (Mustard Yellow - Pending Clean)} \to \text{Housekeeping Sign-off (White - empty, cleaned)}$$

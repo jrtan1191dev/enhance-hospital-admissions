@@ -55,6 +55,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return response;
     }
 
+    @ExceptionHandler(com.hospital.admissions.exception.SafetyInvariantViolationException.class)
+    public ProblemDetail handleSafetyInvariantViolation(com.hospital.admissions.exception.SafetyInvariantViolationException ex, HttpServletRequest request) {
+        logDiagnostic(HttpStatus.UNPROCESSABLE_ENTITY, ex, request);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        problem.setTitle("Safety Invariant Violation");
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.BAD_REQUEST, ex, request);
@@ -96,6 +105,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.CONFLICT,
                 "The resource was updated concurrently by another user. Please refresh and try again.");
         problem.setTitle("Conflict");
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
+        logDiagnostic(HttpStatus.FORBIDDEN, ex, request);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
+        problem.setTitle("Forbidden");
         problem.setProperty("timestamp", Instant.now());
         return problem;
     }

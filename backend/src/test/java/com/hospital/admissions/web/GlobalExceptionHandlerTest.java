@@ -81,6 +81,11 @@ class GlobalExceptionHandlerTest {
             throw new ConstraintViolationException("Parameter invalid", java.util.Set.of());
         }
 
+        @GetMapping("/test/safety-invariant")
+        public void throwSafetyInvariant() {
+            throw new com.hospital.admissions.exception.SafetyInvariantViolationException("Biological gender cohorting violation in multi-bed ward");
+        }
+
         @GetMapping("/test/optimistic-lock")
         public void throwOptimisticLock() {
             throw new org.springframework.orm.ObjectOptimisticLockingFailureException(
@@ -148,6 +153,17 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    @DisplayName("SafetyInvariantViolationException returns 422 Unprocessable Entity ProblemDetail")
+    void testSafetyInvariantViolation() throws Exception {
+        mockMvc.perform(get("/test/safety-invariant").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.status").value(422))
+                .andExpect(jsonPath("$.title").value("Safety Invariant Violation"))
+                .andExpect(jsonPath("$.detail").value("Biological gender cohorting violation in multi-bed ward"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 

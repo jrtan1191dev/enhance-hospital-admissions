@@ -6,8 +6,9 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { bmuQueries, specialistQueries, useAllocateBed, useAssignAdmittingCluster, useReferSisterHospital, useRequestReconciliation } from '../services/queries';
-import type { AdmissionRequest, Bed, SpecialtyCluster } from '../types/admissions';
+import { bmuQueries, specialistQueries, useAllocateBed, useDeallocateBed, useAssignAdmittingCluster, useReferSisterHospital, useRequestReconciliation, useApproveBatchHoldingWard, useApproveCohortSwap, useRecallDiversion, useExtendDiversionSla, useLogTelephoneFollowUp, useAttachDelayTag } from '../services/queries';
+import type { AdmissionRequest, Bed, SpecialtyCluster, DelayReasonCode } from '../types/admissions';
+import { DELAY_REASON_TALKING_POINTS } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -37,6 +38,7 @@ import {
   Clock,
   FileText,
   GitCompare,
+  PhoneCall,
 } from 'lucide-react';
 
 export function BmuRoute() {
@@ -45,6 +47,15 @@ export function BmuRoute() {
   const [diversionModalOpen, setDiversionModalOpen] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState('Outram Community Hospital (OCH)');
   const [notification, setNotification] = useState<string | null>(null);
+  const [overrideModalOpen, setOverrideModalOpen] = useState(false);
+  const [pendingOverrideBed, setPendingOverrideBed] = useState<{ bedId: string; bedNumber: string; rank: number; score: number } | null>(null);
+  const [overrideReasonCode, setOverrideReasonCode] = useState<string>('GOVERNMENT_SUBSIDY_CLASS_UPGRADE');
+  const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
+  const [followUpNotes, setFollowUpNotes] = useState('');
+  const [delayTagModalOpen, setDelayTagModalOpen] = useState(false);
+  const [selectedDelayCode, setSelectedDelayCode] = useState<DelayReasonCode>('HOUSEKEEPING_DELAY');
+  const [delayNote, setDelayNote] = useState('');
+  const [targetDelayRequest, setTargetDelayRequest] = useState<AdmissionRequest | null>(null);
 
   // Queries via queries.ts queryOptions
   const { data: queue = [], isLoading: queueLoading } = useQuery(bmuQueries.queue());
@@ -53,10 +64,37 @@ export function BmuRoute() {
   const { data: recommendations = [], isLoading: recsLoading } = useQuery(
     bmuQueries.recommendations(selectedRequest?.id)
   );
+  const { data: batchSuggestions = [] } = useQuery(bmuQueries.batchSuggestions());
+  const { data: cohortSwapSuggestions = [] } = useQuery(bmuQueries.cohortSwapSuggestions());
+
+  // Batch Holding Ward Mutation Hook
+  const approveBatchMutation = useApproveBatchHoldingWard(() => {
+    setNotification('Batch holding ward approved! Beds allocated and ward cohort locked.');
+    setTimeout(() => setNotification(null), 5000);
+  }, (err) => {
+    setNotification('Failed to approve batch holding ward: ' + err.message);
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  // Dynamic Cohort Swap Mutation Hook
+  const approveCohortSwapMutation = useApproveCohortSwap(() => {
+    setNotification('Cohort swap approved! Reservation transferred and flex ward liberated.');
+    setTimeout(() => setNotification(null), 5000);
+  }, (err) => {
+    setNotification('Cohort swap rejected (Conflict / ED Departure): ' + err.message);
+    setTimeout(() => setNotification(null), 5000);
+  });
 
   // Bed Allocation Mutation Hook
   const allocateMutation = useAllocateBed(() => {
     setNotification('Bed successfully allocated/reallocated! Bed state transitioned to GREEN (In-Transit).');
+    setSelectedRequest(null);
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  // Bed Deallocation Mutation Hook
+  const deallocateMutation = useDeallocateBed(() => {
+    setNotification('Bed successfully deallocated! Bed returned to WHITE (EMPTY_CLEANED) and request reset to BED_REQUESTED.');
     setSelectedRequest(null);
     setTimeout(() => setNotification(null), 5000);
   });
@@ -74,6 +112,65 @@ export function BmuRoute() {
     setSelectedRequest(null);
     setTimeout(() => setNotification(null), 5000);
   });
+
+  // Diversion Escalation Mutations
+  const recallDiversionMutation = useRecallDiversion(() => {
+    setNotification('Diversion recalled! Patient returned to acute admission queue.');
+    setSelectedRequest(null);
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  const extendSlaMutation = useExtendDiversionSla(() => {
+    setNotification('Diversion SLA extended by +15 minutes.');
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  const logFollowUpMutation = useLogTelephoneFollowUp(() => {
+    setNotification('Telephone follow-up logged in operational delay history.');
+    setFollowUpModalOpen(false);
+    setFollowUpNotes('');
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  const attachDelayTagMutation = useAttachDelayTag(() => {
+    setNotification('Operational delay tag successfully attached.');
+    setDelayTagModalOpen(false);
+    setDelayNote('');
+    setTargetDelayRequest(null);
+    setTimeout(() => setNotification(null), 5000);
+  }, (err) => {
+    setNotification('Failed to attach delay tag: ' + err.message);
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  // Helper for Acuity Dwell SLA calculations
+  const getDwellSlaInfo = (request: AdmissionRequest) => {
+    const reqTime = request.requestedAt ? new Date(request.requestedAt).getTime() : new Date(request.createdAt).getTime();
+    const dwellMinutes = Math.max(0, Math.floor((Date.now() - reqTime) / 60000));
+    
+    const effectiveTier = request.effectiveAcuityTier || request.primaryAcuityTier;
+    let slaThresholdMinutes = 120; // default Tier 3
+    if (effectiveTier === 'TIER_1_CRITICAL') {
+      slaThresholdMinutes = 0; // immediate
+    } else if (effectiveTier === 'TIER_2_ACUTE_URGENT') {
+      slaThresholdMinutes = 60;
+    } else if (effectiveTier === 'TIER_3_ACUTE_STABLE') {
+      slaThresholdMinutes = 120;
+    } else if (effectiveTier === 'TIER_4_SUBACUTE_DIVERSION') {
+      slaThresholdMinutes = 180;
+    }
+
+    const isBreached = effectiveTier === 'TIER_1_CRITICAL' 
+      ? (request.status === 'BED_REQUESTED' && dwellMinutes > 0)
+      : dwellMinutes > slaThresholdMinutes;
+
+    return {
+      dwellMinutes,
+      slaThresholdMinutes,
+      isBreached,
+      effectiveTier,
+    };
+  };
 
   // Clinical Reconciliation Mutation Hook
   const reconcileMutation = useRequestReconciliation(() => {
@@ -149,14 +246,65 @@ export function BmuRoute() {
                 <Clock className="h-3 w-3 text-indigo-500" /> Reconcile Pending
               </Badge>
             )}
+            {row.original.diversionRecommended && (
+              <Badge className="text-[10px] bg-teal-100 text-teal-800 border-teal-300 flex items-center gap-1 font-semibold">
+                <CheckCircle2 className="h-3 w-3 text-teal-600" />
+                {row.original.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home Endorsed' : 'Subacute Endorsed'}
+              </Badge>
+            )}
+            {row.original.sisterHospitalReferralId && (
+              <Badge className="text-[10px] bg-purple-100 text-purple-800 border-purple-300 flex items-center gap-1 font-semibold">
+                Referral: {row.original.sisterHospitalReferralId}
+              </Badge>
+            )}
+            {row.original.virtualBedNumber && (
+              <Badge className="text-[10px] bg-blue-100 text-blue-800 border-blue-300 flex items-center gap-1 font-semibold">
+                Virtual: {row.original.virtualBedNumber}
+              </Badge>
+            )}
           </div>
           {row.original.clinicalConditionUpdated && (
             <Badge variant="warning" className="text-[10px] bg-amber-100 text-amber-900 border-amber-300 flex items-center gap-1 font-semibold animate-pulse">
-              <AlertTriangle className="h-3 w-3 text-amber-600" /> Condition Updated
+              <Sparkles className="h-3 w-3 text-amber-600" /> CLINICAL_CONDITION_UPDATED
             </Badge>
           )}
         </div>
       ),
+    },
+    {
+      id: 'dwellSla',
+      header: 'Dwell & SLA',
+      cell: ({ row }) => {
+        const info = getDwellSlaInfo(row.original);
+        return (
+          <div className="space-y-1">
+            <div className={`text-xs font-mono flex items-center gap-1 ${
+              info.isBreached
+                ? 'text-rose-700 font-bold'
+                : info.dwellMinutes > info.slaThresholdMinutes * 0.75
+                ? 'text-amber-700 font-semibold'
+                : 'text-slate-600'
+            }`}>
+              <Clock className={`h-3 w-3 ${info.isBreached ? 'text-rose-600 animate-pulse' : 'text-slate-400'}`} />
+              <span>{info.dwellMinutes}m dwell</span>
+            </div>
+            {info.isBreached ? (
+              <Badge variant="destructive" className="text-[9px] uppercase tracking-wider font-mono font-bold animate-pulse">
+                SLA Breach ({info.slaThresholdMinutes === 0 ? 'Immediate' : `>${info.slaThresholdMinutes}m`})
+              </Badge>
+            ) : (
+              <span className="text-[10px] text-slate-400 block font-mono">
+                SLA: {info.slaThresholdMinutes === 0 ? 'Immediate' : `${info.slaThresholdMinutes}m`}
+              </span>
+            )}
+            {row.original.delayReasonTag && (
+              <Badge variant="outline" className="text-[9px] bg-amber-50 text-amber-900 border-amber-300 font-mono block truncate max-w-[130px]" title={row.original.operationalDelayReason || row.original.delayReasonTag}>
+                {row.original.delayReasonTag}
+              </Badge>
+            )}
+          </div>
+        );
+      },
     },
     {
       id: 'classNeeds',
@@ -232,6 +380,21 @@ export function BmuRoute() {
             className="text-xs text-slate-600 hover:text-slate-900 px-2 cursor-pointer"
           >
             <GitCompare className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            title="Tag Operational Delay"
+            onClick={(e) => {
+              e.stopPropagation();
+              setTargetDelayRequest(row.original);
+              setSelectedDelayCode('HOUSEKEEPING_DELAY');
+              setDelayNote(row.original.operationalDelayReason || '');
+              setDelayTagModalOpen(true);
+            }}
+            className="text-[11px] h-7 px-2 border-amber-200 text-amber-800 hover:bg-amber-50 cursor-pointer"
+          >
+            Tag Delay
           </Button>
           {row.original.discordant && !row.original.reconciliationRequested && (
             <Button
@@ -376,6 +539,115 @@ export function BmuRoute() {
           </div>
         );
       })()}
+
+      {/* Dynamic Holding Ward Batching Suggestion Banner */}
+      {batchSuggestions.length > 0 && (
+        <div className="space-y-3">
+          {batchSuggestions.map((suggestion) => (
+            <Card key={suggestion.suggestionId} className="border-indigo-300 bg-indigo-50/50 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold">
+                        Surge Cluster Detected ({suggestion.admissionRequestIds.length} Patients)
+                      </Badge>
+                      <span className="text-xs font-semibold text-indigo-950">
+                        Target Flex Ward: {suggestion.targetWardName}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-700 flex flex-wrap items-center gap-3">
+                      <span><strong>Ward Class:</strong> {suggestion.commonWardClass}</span>
+                      <span>•</span>
+                      <span><strong>Cohort Gender:</strong> {suggestion.commonGender}</span>
+                      <span>•</span>
+                      <span><strong>Infection:</strong> {suggestion.commonInfectionStatus}</span>
+                      <span>•</span>
+                      <span><strong>Unlocked Capacity:</strong> {suggestion.unlockedCapacityCount} beds</span>
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      <strong>Patients (FIFO Dwell Sliced):</strong> {suggestion.patientNames.join(', ')}
+                      {suggestion.unlockedCapacityCount > suggestion.admissionRequestIds.length && (
+                        <span className="ml-2 text-indigo-700 font-medium">
+                          ({suggestion.unlockedCapacityCount - suggestion.admissionRequestIds.length} residual bed(s) remain clean under cohort lock)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    disabled={approveBatchMutation.isPending}
+                    onClick={() =>
+                      approveBatchMutation.mutate({
+                        suggestionId: suggestion.suggestionId,
+                        targetWardId: suggestion.targetWardId,
+                        admissionRequestIds: suggestion.admissionRequestIds,
+                      })
+                    }
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs cursor-pointer shadow-xs whitespace-nowrap"
+                  >
+                    {approveBatchMutation.isPending ? 'Allocating Batch...' : `Approve Batch Holding Ward (${suggestion.admissionRequestIds.length} Beds)`}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Dynamic Cohort-Swap Re-Optimization Proposals */}
+      {cohortSwapSuggestions.length > 0 && (
+        <div className="space-y-3">
+          {cohortSwapSuggestions.map((suggestion) => (
+            <Card key={suggestion.suggestionId} className="border-teal-400 bg-teal-50/50 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="space-y-2 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-teal-700 text-white text-[11px] font-semibold">
+                        Dynamic Cohort-Swap Proposal
+                      </Badge>
+                      <Badge variant="outline" className="bg-white text-teal-800 border-teal-300 text-[11px] font-mono font-semibold">
+                        +{suggestion.unlockedCapacityCount} Beds Liberated in {suggestion.currentWardName}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-white p-3 rounded-lg border border-teal-200">
+                      <div>
+                        <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Current Isolated Bed (Blocks Ward)</span>
+                        <div className="font-semibold text-slate-900 mt-0.5">{suggestion.patientName}</div>
+                        <div className="text-slate-600 text-[11px]">Bed: <strong>{suggestion.currentBedNumber}</strong> ({suggestion.currentWardName})</div>
+                        <div className="text-[11px] text-amber-700 font-medium mt-0.5">Blocks {suggestion.unlockedCapacityCount}-bed flex ward from accepting surge batches</div>
+                      </div>
+
+                      <div className="border-t sm:border-t-0 sm:border-l sm:pl-3 border-teal-100">
+                        <span className="text-[11px] font-semibold text-teal-700 uppercase tracking-wider block">Proposed Transfer Target (Partially Occupied)</span>
+                        <div className="font-semibold text-teal-950 mt-0.5">{suggestion.patientName}</div>
+                        <div className="text-teal-800 text-[11px]">Target Bed: <strong>{suggestion.targetBedNumber}</strong> ({suggestion.targetWardName})</div>
+                        <div className="text-[11px] text-emerald-700 font-medium mt-0.5">Consolidates partially occupied cohort without conflicts</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    disabled={approveCohortSwapMutation.isPending}
+                    onClick={() =>
+                      approveCohortSwapMutation.mutate({
+                        admissionRequestId: suggestion.admissionRequestId,
+                        targetBedId: suggestion.targetBedId,
+                      })
+                    }
+                    className="bg-teal-700 hover:bg-teal-800 text-white text-xs cursor-pointer shadow-xs whitespace-nowrap self-stretch sm:self-center"
+                  >
+                    {approveCohortSwapMutation.isPending ? 'Executing Swap...' : 'Approve Cohort Swap'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Main Allocation Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -530,8 +802,113 @@ export function BmuRoute() {
                     </div>
                   </div>
 
-                  {/* Specialist Endorsed Diversion Action */}
-                  {selectedRequest.diversionRecommended && (
+                  {/* Operational Delay Tag Banner */}
+                  {selectedRequest.delayReasonTag && (
+                    <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg text-xs space-y-1.5">
+                      <div className="flex items-center justify-between font-bold text-amber-950">
+                        <span className="flex items-center gap-1.5">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          Operational Delay: {selectedRequest.delayReasonTag}
+                        </span>
+                        <Badge variant="outline" className="text-[10px] bg-white border-amber-400 text-amber-900 font-mono">
+                          Active Delay Tag
+                        </Badge>
+                      </div>
+                      {selectedRequest.operationalDelayReason && (
+                        <p className="text-[11px] text-slate-700 bg-white p-2 rounded border border-amber-200">
+                          {selectedRequest.operationalDelayReason}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Active Referral SLA Lifecycle & Countdown */}
+                  {selectedRequest.sisterHospitalReferralId ? (() => {
+                    const dispatchedTime = selectedRequest.referralDispatchedAt ? new Date(selectedRequest.referralDispatchedAt).getTime() : new Date(selectedRequest.createdAt).getTime();
+                    const slaMins = selectedRequest.referralSlaMinutes || 30;
+                    const elapsedMins = Math.floor((Date.now() - dispatchedTime) / 60000);
+                    const remainingMins = slaMins - elapsedMins;
+                    const isExpired = remainingMins <= 0;
+
+                    return (
+                      <div className={`p-3 rounded-lg border text-xs space-y-2.5 ${
+                        isExpired
+                          ? 'bg-rose-50 border-rose-300 text-rose-950'
+                          : 'bg-purple-50 border-purple-200 text-purple-950'
+                      }`}>
+                        <div className="flex items-center justify-between font-semibold">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className={`h-4 w-4 ${isExpired ? 'text-rose-600 animate-pulse' : 'text-purple-600'}`} />
+                            <span>{isExpired ? 'Bilateral SLA Expired' : 'Active Diversion Referral'}</span>
+                          </div>
+                          <Badge className={`text-[10px] font-mono ${
+                            isExpired ? 'bg-rose-600 text-white' : 'bg-purple-600 text-white'
+                          }`}>
+                            {selectedRequest.sisterHospitalReferralId}
+                          </Badge>
+                        </div>
+
+                        {selectedRequest.virtualBedNumber && (
+                          <div className="p-2 bg-white rounded border border-purple-200 font-mono text-purple-900 flex items-center justify-between">
+                            <span>MIC@Home Virtual Bed:</span>
+                            <Badge className="bg-purple-100 text-purple-800 text-[11px] font-bold">
+                              {selectedRequest.virtualBedNumber} (DIVERTED_HAH)
+                            </Badge>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span>Destination: <strong>{selectedRequest.referralFacility || 'Sister Hospital'}</strong></span>
+                          <span className={isExpired ? 'text-rose-700 font-bold' : 'text-purple-700 font-medium'}>
+                            {isExpired
+                              ? `Overdue by ${Math.abs(remainingMins)} mins`
+                              : `${remainingMins} mins remaining of ${slaMins}m SLA`}
+                          </span>
+                        </div>
+
+                        {selectedRequest.operationalDelayReason && (
+                          <p className="text-[11px] bg-white p-1.5 rounded border border-purple-100 text-slate-700">
+                            <strong>Note:</strong> {selectedRequest.operationalDelayReason}
+                          </p>
+                        )}
+
+                        {/* Actionable Escalation Triggers upon SLA Expiration */}
+                        {isExpired && (
+                          <div className="space-y-1.5 pt-1 border-t border-rose-200">
+                            <div className="text-[11px] font-bold text-rose-800 flex items-center gap-1">
+                              <AlertTriangle className="h-3.5 w-3.5 text-rose-600" />
+                              Partner Response Overdue — Take Escalation Action:
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                              <Button
+                                size="sm"
+                                disabled={recallDiversionMutation.isPending}
+                                onClick={() => recallDiversionMutation.mutate(selectedRequest.id)}
+                                className="bg-rose-600 hover:bg-rose-700 text-white text-[10px] h-7 px-2 cursor-pointer"
+                              >
+                                {recallDiversionMutation.isPending ? 'Recalling...' : 'Recall to Acute'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={extendSlaMutation.isPending}
+                                onClick={() => extendSlaMutation.mutate(selectedRequest.id)}
+                                className="bg-amber-600 hover:bg-amber-700 text-white text-[10px] h-7 px-2 cursor-pointer"
+                              >
+                                {extendSlaMutation.isPending ? 'Extending...' : 'Extend +15m'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => setFollowUpModalOpen(true)}
+                                className="bg-slate-700 hover:bg-slate-800 text-white text-[10px] h-7 px-2 cursor-pointer"
+                              >
+                                Log Follow-Up
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })() : selectedRequest.diversionRecommended ? (
                     <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-teal-900 flex items-center gap-1.5">
@@ -549,24 +926,20 @@ export function BmuRoute() {
                       </p>
                       <Button
                         size="sm"
-                        disabled={diversionMutation.isPending}
                         className="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs cursor-pointer shadow-xs"
                         onClick={() => {
                           const facility = selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC'
                               ? 'Mobile Inpatient Care at Home (MIC@Home)'
                               : 'Outram Community Hospital (OCH)';
                           setSelectedFacility(facility);
-                          diversionMutation.mutate({
-                            admissionRequestId: selectedRequest.id,
-                            facility,
-                          });
+                          setDiversionModalOpen(true);
                         }}
                       >
                         <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                        Enact Diversion ({selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home' : 'OCH'})
+                        Open Digital Referral Packet & Dispatch ({selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home' : 'OCH'})
                       </Button>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Discordance Alert Banner */}
                   {selectedRequest.discordant && (
@@ -602,6 +975,24 @@ export function BmuRoute() {
                       Class: <strong>{selectedRequest.patient.wardClassPreference}</strong> • Telemetry: <strong>{selectedRequest.effectiveTelemetry || selectedRequest.patient.telemetryRequired ? 'Yes' : 'No'}</strong> • Fall Risk: <strong>{selectedRequest.patient.fallRiskScore}</strong>
                     </div>
                   </div>
+
+                  {selectedRequest.status === 'BED_ALLOCATED' && selectedRequest.assignedBed && (
+                    <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-center justify-between text-xs">
+                      <div>
+                        <div className="font-semibold text-amber-900">Tentatively Allocated</div>
+                        <div className="text-amber-700 text-[11px]">Bed {selectedRequest.assignedBed.bedNumber} (EMPTY_ASSIGNED)</div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={deallocateMutation.isPending}
+                        className="text-xs text-rose-700 border-rose-300 hover:bg-rose-50"
+                        onClick={() => deallocateMutation.mutate(selectedRequest.id)}
+                      >
+                        Deallocate Bed
+                      </Button>
+                    </div>
+                  )}
 
                   {/* Top Recommended Beds */}
                   <div>
@@ -657,38 +1048,69 @@ export function BmuRoute() {
                                 ))}
                               </div>
 
-                              <Button
-                                size="sm"
-                                disabled={allocateMutation.isPending || isCurrentBed}
-                                className={`w-full mt-2.5 text-white font-medium text-xs h-8 ${
-                                  isCurrentBed
-                                    ? 'bg-slate-400 cursor-not-allowed'
+                              {rec.isSafetyViolated ? (
+                                <div className="mt-2.5 p-2 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex flex-col gap-1">
+                                  <div className="flex items-center gap-1 font-semibold text-rose-700">
+                                    <AlertTriangle className="h-3.5 w-3.5" />
+                                    Absolute Safety Invariant Violated
+                                  </div>
+                                  <p className="text-[10px] text-rose-600">
+                                    {rec.safetyViolationReason || 'Biological gender or airborne isolation safety violation. Zero override allowed.'}
+                                  </p>
+                                  <Button
+                                    size="sm"
+                                    disabled
+                                    className="w-full mt-1 bg-slate-200 text-slate-400 cursor-not-allowed text-xs h-7"
+                                  >
+                                    Allocation Forbidden
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  disabled={allocateMutation.isPending || isCurrentBed}
+                                  className={`w-full mt-2.5 text-white font-medium text-xs h-8 ${
+                                    isCurrentBed
+                                      ? 'bg-slate-400 cursor-not-allowed'
+                                      : rec.isOperationalOverride || idx > 0
+                                      ? 'bg-amber-600 hover:bg-amber-700'
+                                      : selectedRequest.status === 'BED_ALLOCATED'
+                                      ? 'bg-blue-600 hover:bg-blue-700'
+                                      : 'bg-emerald-600 hover:bg-emerald-700'
+                                  }`}
+                                  onClick={() => {
+                                    if (rec.isOperationalOverride || idx > 0) {
+                                      setPendingOverrideBed({
+                                        bedId: rec.bedId,
+                                        bedNumber: rec.bedNumber,
+                                        rank: idx + 1,
+                                        score: rec.score,
+                                      });
+                                      setOverrideModalOpen(true);
+                                    } else {
+                                      allocateMutation.mutate({
+                                        admissionRequestId: selectedRequest.id,
+                                        bedId: rec.bedId,
+                                        rank: 1,
+                                        score: rec.score,
+                                        overrideReason:
+                                          selectedRequest.status === 'BED_ALLOCATED'
+                                            ? 'DYNAMIC_BED_REALLOCATION'
+                                            : undefined,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                  {isCurrentBed
+                                    ? `Currently Reserved (Bed ${rec.bedNumber})`
+                                    : rec.isOperationalOverride || idx > 0
+                                    ? `Override & Allocate Bed ${rec.bedNumber}`
                                     : selectedRequest.status === 'BED_ALLOCATED'
-                                    ? 'bg-amber-600 hover:bg-amber-700'
-                                    : 'bg-emerald-600 hover:bg-emerald-700'
-                                }`}
-                                onClick={() =>
-                                  allocateMutation.mutate({
-                                    admissionRequestId: selectedRequest.id,
-                                    bedId: rec.bedId,
-                                    rank: idx + 1,
-                                    score: rec.score,
-                                    overrideReason:
-                                      selectedRequest.status === 'BED_ALLOCATED'
-                                        ? 'DYNAMIC_BED_REALLOCATION'
-                                        : idx > 0
-                                        ? 'NON_TOP_RANK_SELECTION'
-                                        : undefined,
-                                  })
-                                }
-                              >
-                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                                {isCurrentBed
-                                  ? `Currently Reserved (Bed ${rec.bedNumber})`
-                                  : selectedRequest.status === 'BED_ALLOCATED'
-                                  ? `Reallocate to Bed ${rec.bedNumber}`
-                                  : `Allocate Bed ${rec.bedNumber}`}
-                              </Button>
+                                    ? `Reallocate to Bed ${rec.bedNumber}`
+                                    : `Allocate Bed ${rec.bedNumber}`}
+                                </Button>
+                              )}
                             </div>
                           );
                         })}
@@ -696,15 +1118,28 @@ export function BmuRoute() {
                     )}
                   </div>
 
-                  {/* Operational Diversion Authority */}
-                  <div className="pt-2 border-t border-slate-200">
+                  {/* Operational Authority: Delay Tagging & Diversion */}
+                  <div className="pt-2 border-t border-slate-200 flex gap-2">
                     <Button
                       variant="outline"
-                      className="w-full text-xs text-purple-700 border-purple-200 hover:bg-purple-50"
+                      className="flex-1 text-xs text-amber-800 border-amber-300 hover:bg-amber-50 cursor-pointer"
+                      onClick={() => {
+                        setTargetDelayRequest(selectedRequest);
+                        setSelectedDelayCode('HOUSEKEEPING_DELAY');
+                        setDelayNote(selectedRequest.operationalDelayReason || '');
+                        setDelayTagModalOpen(true);
+                      }}
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-600" />
+                      Tag Delay
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 text-xs text-purple-700 border-purple-200 hover:bg-purple-50 cursor-pointer"
                       onClick={() => setDiversionModalOpen(true)}
                     >
                       <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                      Enact Diversion to Sister Hospital / MIC@Home
+                      Enact Diversion
                     </Button>
                   </div>
                 </div>
@@ -821,7 +1256,7 @@ export function BmuRoute() {
 
       {/* Diversion Modal Dialog (shadcn Dialog) */}
       <Dialog open={diversionModalOpen} onOpenChange={setDiversionModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ExternalLink className="h-5 w-5 text-purple-600" />
@@ -830,58 +1265,238 @@ export function BmuRoute() {
             <DialogDescription>
               {selectedRequest && (
                 <span>
-                  Refer patient <strong>{selectedRequest.patient.name}</strong> to an alternative care pathway under BMU operational authority.
+                  Digital Referral Packet for <strong>{selectedRequest.patient.name}</strong> ({selectedRequest.patient.nric})
                 </span>
               )}
             </DialogDescription>
           </DialogHeader>
 
-          {selectedRequest && (
-            <div className="space-y-4 py-2 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Target Diversion Facility / Program
-                </label>
-                <select
-                  value={selectedFacility}
-                  onChange={(e) => setSelectedFacility(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 font-medium"
-                >
-                  <option value="Outram Community Hospital (OCH)">Outram Community Hospital (OCH)</option>
-                  <option value="Alexandra Hospital (AH)">Alexandra Hospital (AH)</option>
-                  <option value="St. Andrew's Community Hospital (SACH)">St. Andrew's Community Hospital (SACH)</option>
-                  <option value="MIC@Home (Hospital-at-Home Virtual Ward)">MIC@Home (Hospital-at-Home Virtual Ward)</option>
-                </select>
-              </div>
+          {selectedRequest && (() => {
+            const reqBroadcasts = broadcasts.filter(b => b.admissionRequest?.id === selectedRequest.id);
+            const impressions = reqBroadcasts.map(b => b.consultNotes).filter(Boolean);
 
-              <div className="p-3 bg-purple-50 rounded-lg text-purple-900 space-y-1">
-                <div className="font-semibold flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" /> 30-Minute Bilateral SLA
+            return (
+              <div className="space-y-3.5 py-2 text-xs">
+                {/* Pre-populated Patient Demographics & Vitals */}
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                  <div className="font-semibold text-slate-800 text-[11px] uppercase tracking-wider">
+                    Patient Demographics & Clinical Summary
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">NRIC / Token</span>
+                      <span className="font-medium text-slate-800">{selectedRequest.patient.nric} ({selectedRequest.patient.queueToken})</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Age / Gender</span>
+                      <span className="font-medium text-slate-800">{selectedRequest.patient.age}y / {selectedRequest.patient.gender}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Blood Pressure</span>
+                      <span className="font-medium text-slate-800">{selectedRequest.patient.vitalsBp || '120/80'} mmHg</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Heart Rate / SpO2</span>
+                      <span className="font-medium text-slate-800">{selectedRequest.patient.vitalsHr || 75} bpm / {selectedRequest.patient.vitalsSpo2 || 98}%</span>
+                    </div>
+                  </div>
+                  {selectedRequest.patient.suspectedDiagnosis && (
+                    <div className="pt-1 border-t border-slate-200">
+                      <span className="text-[10px] text-slate-400 block">Suspected Diagnosis</span>
+                      <span className="font-medium text-slate-800">{selectedRequest.patient.suspectedDiagnosis}</span>
+                    </div>
+                  )}
+                  {impressions.length > 0 && (
+                    <div className="pt-1 border-t border-slate-200">
+                      <span className="text-[10px] text-slate-400 block">Consult Impressions & Recommendations</span>
+                      <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                        {impressions.map((imp, idx) => (
+                          <li key={idx}>{imp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-                <p className="text-[11px]">
-                  Referral packet will be dispatched electronically to the destination admissions desk. A 30-minute bilateral SLA timer is initiated.
-                </p>
-              </div>
 
-              <DialogFooter className="pt-2">
-                <Button variant="outline" onClick={() => setDiversionModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  disabled={diversionMutation.isPending}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                  onClick={() =>
-                    diversionMutation.mutate({
-                      admissionRequestId: selectedRequest.id,
-                      facility: selectedFacility,
-                    })
-                  }
-                >
-                  {diversionMutation.isPending ? 'Dispatching...' : 'Dispatch Referral'}
-                </Button>
-              </DialogFooter>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Target Diversion Facility / Program
+                  </label>
+                  <select
+                    value={selectedFacility}
+                    onChange={(e) => setSelectedFacility(e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 font-medium"
+                  >
+                    <option value="Outram Community Hospital (OCH)">Outram Community Hospital (OCH)</option>
+                    <option value="Alexandra Hospital (AH)">Alexandra Hospital (AH)</option>
+                    <option value="St. Andrew's Community Hospital (SACH)">St. Andrew's Community Hospital (SACH)</option>
+                    <option value="MIC@Home (Hospital-at-Home Virtual Ward)">MIC@Home (Hospital-at-Home Virtual Ward)</option>
+                  </select>
+                </div>
+
+                <div className="p-3 bg-purple-50 rounded-lg text-purple-900 space-y-1">
+                  <div className="font-semibold flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" /> 30-Minute Bilateral SLA
+                  </div>
+                  <p className="text-[11px]">
+                    Referral packet will be dispatched electronically to the destination admissions desk. A 30-minute bilateral SLA timer is initiated.
+                  </p>
+                </div>
+
+                <DialogFooter className="pt-2">
+                  <Button variant="outline" onClick={() => setDiversionModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    disabled={diversionMutation.isPending}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    onClick={() => {
+                      diversionMutation.mutate({
+                        admissionRequestId: selectedRequest.id,
+                        facility: selectedFacility,
+                      });
+                      setDiversionModalOpen(false);
+                    }}
+                  >
+                    {diversionMutation.isPending ? 'Dispatching...' : 'Dispatch Referral'}
+                  </Button>
+                </DialogFooter>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Log Telephone Follow-Up Dialog */}
+      <Dialog open={followUpModalOpen} onOpenChange={setFollowUpModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <PhoneCall className="h-5 w-5 text-slate-700" />
+              Log Telephone Follow-Up
+            </DialogTitle>
+            <DialogDescription>
+              Record communication details with partner facility for request #{selectedRequest?.id.slice(0, 8)}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Coordinator Communication Notes
+              </label>
+              <textarea
+                rows={4}
+                value={followUpNotes}
+                onChange={(e) => setFollowUpNotes(e.target.value)}
+                placeholder="Spoke with receiving admissions desk coordinator; awaiting bed status update..."
+                className="w-full border border-slate-300 rounded-md p-2 text-slate-800"
+              />
             </div>
-          )}
+            <DialogFooter className="pt-2">
+              <Button variant="outline" onClick={() => setFollowUpModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={logFollowUpMutation.isPending || !followUpNotes.trim()}
+                className="bg-slate-800 hover:bg-slate-900 text-white"
+                onClick={() => {
+                  if (selectedRequest && followUpNotes.trim()) {
+                    logFollowUpMutation.mutate({
+                      requestId: selectedRequest.id,
+                      notes: followUpNotes.trim(),
+                    });
+                  }
+                }}
+              >
+                {logFollowUpMutation.isPending ? 'Saving...' : 'Save Follow-Up Note'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attach Operational Delay Tag Dialog */}
+      <Dialog open={delayTagModalOpen} onOpenChange={setDelayTagModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              Tag Operational Delay
+            </DialogTitle>
+            <DialogDescription>
+              {targetDelayRequest && (
+                <span>
+                  Attach structured delay reason for <strong>{targetDelayRequest.patient.name}</strong> ({targetDelayRequest.patient.queueToken}).
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Delay Reason Code
+              </label>
+              <select
+                value={selectedDelayCode}
+                onChange={(e) => {
+                  const code = e.target.value as DelayReasonCode;
+                  setSelectedDelayCode(code);
+                  if (!delayNote) {
+                    setDelayNote(DELAY_REASON_TALKING_POINTS[code]);
+                  }
+                }}
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 font-medium"
+              >
+                <option value="HOUSEKEEPING_DELAY">HOUSEKEEPING_DELAY (Terminal Cleaning / EVS Turnover)</option>
+                <option value="BED_SHORTAGE">BED_SHORTAGE (High Census / Awaiting Discharges)</option>
+                <option value="SPECIALIZED_ISOLATION_CLEANING">SPECIALIZED_ISOLATION_CLEANING (Negative Pressure / Bio-clean)</option>
+                <option value="SURGE_TRAUMA_EVENT">SURGE_TRAUMA_EVENT (Acute Trauma Surge / Bed Mobilization)</option>
+              </select>
+            </div>
+
+            <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 space-y-1">
+              <span className="font-semibold block text-[11px]">Contextual Family Talking Points (Sent to ED):</span>
+              <p className="text-[11px] text-amber-950 italic">
+                "{DELAY_REASON_TALKING_POINTS[selectedDelayCode]}"
+              </p>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Operational Delay Note (Optional Explanatory Details)
+              </label>
+              <textarea
+                rows={3}
+                value={delayNote}
+                onChange={(e) => setDelayNote(e.target.value)}
+                placeholder="e.g. Ward 8A bed undergoing 30-min UV terminal disinfection; expected ready in 15 mins."
+                className="w-full border border-slate-300 rounded-md p-2 text-slate-800"
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button variant="outline" onClick={() => setDelayTagModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={attachDelayTagMutation.isPending}
+                className="bg-amber-600 hover:bg-amber-700 text-white cursor-pointer"
+                onClick={() => {
+                  if (targetDelayRequest) {
+                    attachDelayTagMutation.mutate({
+                      requestId: targetDelayRequest.id,
+                      data: {
+                        delayReasonCode: selectedDelayCode,
+                        note: delayNote || DELAY_REASON_TALKING_POINTS[selectedDelayCode],
+                      },
+                    });
+                  }
+                }}
+              >
+                {attachDelayTagMutation.isPending ? 'Tagging...' : 'Attach Delay Tag'}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -1054,6 +1669,81 @@ export function BmuRoute() {
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Structured Override Reason Dialog Modal */}
+      <Dialog open={overrideModalOpen} onOpenChange={setOverrideModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-700">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              Operational Constraint Override
+            </DialogTitle>
+            <DialogDescription>
+              Allocating Bed {pendingOverrideBed?.bedNumber} requires a mandatory institutional justification code. Overrides generate an immutable OVERRIDE_ALLOCATION audit record.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <label className="text-xs font-semibold text-slate-700">
+              Structured Reason Code:
+            </label>
+            <select
+              value={overrideReasonCode}
+              onChange={(e) => setOverrideReasonCode(e.target.value)}
+              className="w-full text-xs rounded border border-slate-300 p-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            >
+              <option value="GOVERNMENT_SUBSIDY_CLASS_UPGRADE">
+                GOVERNMENT_SUBSIDY_CLASS_UPGRADE (Subsidized Ward Class Upgrade)
+              </option>
+              <option value="EMERGENCY_PORTABLE_TELEMETRY_DEPLOYED">
+                EMERGENCY_PORTABLE_TELEMETRY_DEPLOYED (Deploy Portable Wireless Telemetry)
+              </option>
+              <option value="ATTENDING_CLINICAL_REQUEST">
+                ATTENDING_CLINICAL_REQUEST (Attending Physician Request)
+              </option>
+              <option value="WARD_STAFFING_LIMITATION">
+                WARD_STAFFING_LIMITATION (Nursing / Staffing Limitation)
+              </option>
+              <option value="FAMILY_PROXIMITY_REQUEST">
+                FAMILY_PROXIMITY_REQUEST (Family / Social Consideration)
+              </option>
+            </select>
+          </div>
+
+          <DialogFooter className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setOverrideModalOpen(false);
+                setPendingOverrideBed(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+              disabled={allocateMutation.isPending}
+              onClick={() => {
+                if (selectedRequest && pendingOverrideBed) {
+                  allocateMutation.mutate({
+                    admissionRequestId: selectedRequest.id,
+                    bedId: pendingOverrideBed.bedId,
+                    rank: pendingOverrideBed.rank,
+                    score: pendingOverrideBed.score,
+                    overrideReason: overrideReasonCode,
+                  });
+                  setOverrideModalOpen(false);
+                  setPendingOverrideBed(null);
+                }
+              }}
+            >
+              Confirm Override & Allocate
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

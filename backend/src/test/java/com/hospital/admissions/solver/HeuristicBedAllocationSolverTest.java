@@ -222,6 +222,43 @@ class HeuristicBedAllocationSolverTest {
     }
 
     @Test
+    @DisplayName("recommendBeds eliminates wards without negative pressure for respiratory airborne infection patients")
+    void testRecommendBeds_NegativePressureAirborneIsolation() {
+        Patient respPatient = Patient.builder()
+                .id(UUID.randomUUID())
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.RESPIRATORY)
+                .build();
+
+        AdmissionRequest request = AdmissionRequest.builder()
+                .patient(respPatient)
+                .requestedWardClass(WardClass.B2)
+                .build();
+
+        Ward standardWard = Ward.builder()
+                .id(UUID.randomUUID())
+                .name("Ward 8A")
+                .wardClass(WardClass.B2)
+                .isNegativePressure(false)
+                .capacity(1)
+                .build();
+
+        Bed cleanBed = Bed.builder()
+                .id(UUID.randomUUID())
+                .bedNumber("8A-01")
+                .ward(standardWard)
+                .status(BedStatus.EMPTY_CLEANED)
+                .build();
+
+        when(bedRepository.findByStatus(BedStatus.EMPTY_CLEANED)).thenReturn(List.of(cleanBed));
+
+        List<BedRecommendation> recommendations = solver.recommendBeds(request, null);
+
+        // Eliminated due to lack of negative pressure
+        assertThat(recommendations).isEmpty();
+    }
+
+    @Test
     @DisplayName("recommendBeds prioritizes admittingSpecialtyCluster over suspectedDiagnosisService and prunes on effectiveTelemetry")
     void testRecommendBeds_ConsumesAdmittingSpecialtyClusterAndEffectiveTelemetry() {
         BmuAlgorithmConfig config = BmuAlgorithmConfig.builder()

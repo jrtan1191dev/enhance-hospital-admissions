@@ -5,5 +5,6 @@ public enum AdmissionStatus {
     BED_REQUESTED,
     BED_ALLOCATED,
     ADMITTED_INPATIENT,
-    DISCHARGED
+    DISCHARGED,
+    DIVERTED_HAH
 }

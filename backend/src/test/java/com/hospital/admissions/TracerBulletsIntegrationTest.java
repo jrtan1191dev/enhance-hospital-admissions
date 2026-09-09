@@ -686,7 +686,7 @@ class TracerBulletsIntegrationTest {
                 .name("Reallocation Flow Patient")
                 .nricMasked("S****999Z")
                 .age(62)
-                .gender(Gender.FEMALE)
+                .gender(Gender.MALE)
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(20)
                 .queueToken("TOKEN-REALLOC-" + java.util.UUID.randomUUID())
@@ -797,6 +797,91 @@ class TracerBulletsIntegrationTest {
         Bed bedAfterReallocA = bedRepository.findById(bedA.getId()).orElseThrow();
         assertThat(bedAfterReallocA.getStatus()).isEqualTo(BedStatus.EMPTY_CLEANED);
         assertThat(bedAfterReallocA.getCurrentPatient()).isNull();
+    }
+
+    @Test
+    @DisplayName("Tracer Bullet 10: Acuity Dwell SLA Tracking, Closed-Loop Delay Tagging, and Auto-Archival")
+    void testTracerBullet10_AcuityDwellSla_DelayTagging_AutoArchival() throws Exception {
+        // Step 1: Create patient and admission request with Tier 2 Urgent and dwell time > 60m
+        Patient patient = Patient.builder()
+                .name("SLA Test Patient")
+                .nricMasked("S****888X")
+                .age(58)
+                .gender(Gender.FEMALE)
+                .queueToken("Q-SLA-10")
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(20)
+                .needsTelemetry(false)
+                .build();
+        patient = patientRepository.save(patient);
+
+        AdmissionRequest admission = AdmissionRequest.builder()
+                .patient(patient)
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B2)
+                .requestedAt(LocalDateTime.now().minusMinutes(75))
+                .status(AdmissionStatus.BED_REQUESTED)
+                .build();
+        admission = admissionRequestRepository.save(admission);
+
+        // Step 2: Attempt delay tagging by non-BMU persona (ED Attending) -> Rejected 403 Forbidden
+        DelayTagRequest delayReq = DelayTagRequest.builder()
+                .delayReasonCode(DelayReasonCode.HOUSEKEEPING_DELAY)
+                .note("EVS terminal sanitization in progress")
+                .build();
+
+        mockMvc.perform(post("/api/v1/bmu/requests/" + admission.getId() + "/delay-tag")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(delayReq)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.title").value("Forbidden"));
+
+        // Step 3: Authorized BMU Coordinator attaches delay reason tag -> 200 OK
+        mockMvc.perform(post("/api/v1/bmu/requests/" + admission.getId() + "/delay-tag")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(delayReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.delayReasonTag").value("HOUSEKEEPING_DELAY"))
+                .andExpect(jsonPath("$.operationalDelayReason").value("EVS terminal sanitization in progress"));
+
+        AdmissionRequest taggedAdmission = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(taggedAdmission.getDelayReasonTag()).isEqualTo("HOUSEKEEPING_DELAY");
+        assertThat(taggedAdmission.getOperationalDelayReason()).isEqualTo("EVS terminal sanitization in progress");
+
+        // Step 4: Allocate Bed -> Transitions to BED_ALLOCATED, archives active delay tag
+        Ward ward = wardRepository.findAll().stream()
+                .filter(w -> w.getWardClass() == WardClass.B2 && (w.getLockedGender() == null || w.getLockedGender() == Gender.FEMALE))
+                .findFirst()
+                .orElseThrow();
+        Bed targetBed = bedRepository.findByWard_Id(ward.getId()).stream()
+                .filter(b -> b.getStatus() == BedStatus.EMPTY_CLEANED)
+                .findFirst()
+                .orElseThrow();
+
+        BedAllocationRequest allocReq = new BedAllocationRequest();
+        allocReq.setAdmissionRequestId(admission.getId());
+        allocReq.setBedId(targetBed.getId());
+        allocReq.setRank(1);
+        allocReq.setScore(90.0);
+
+        mockMvc.perform(post("/api/v1/bmu/allocate")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(allocReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("BED_ALLOCATED"));
+
+        AdmissionRequest allocatedAdmission = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(allocatedAdmission.getStatus()).isEqualTo(AdmissionStatus.BED_ALLOCATED);
+        assertThat(allocatedAdmission.getDelayReasonTag()).isNull();
+        assertThat(allocatedAdmission.getArchivedDelayReasonTag()).isEqualTo("HOUSEKEEPING_DELAY");
     }
 }
 

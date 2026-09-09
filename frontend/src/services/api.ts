@@ -2,11 +2,16 @@ import axios from 'axios';
 import type {
   AdmissionRequest,
   AssessmentBroadcast,
+  BatchApprovalRequest,
+  BatchSuggestion,
+  CohortSwapApprovalRequest,
+  CohortSwapSuggestion,
   Bed,
   BedAllocationRequest,
   BedRecommendation,
   BmuAlgorithmConfig,
   BmuConfigUpdateRequest,
+  DelayTagRequest,
   DiversionReferralRequest,
   EdAssessmentSubmitRequest,
   Patient,
@@ -80,12 +85,30 @@ export const api = {
     http.get<BedRecommendation[]>(`/api/v1/bmu/recommendations/${requestId}`).then((r) => r.data),
   allocateBed: (data: BedAllocationRequest) =>
     http.post<AdmissionRequest>('/api/v1/bmu/allocate', data).then((r) => r.data),
+  deallocateBed: (admissionRequestId: string) =>
+    http.post<AdmissionRequest>('/api/v1/bmu/deallocate', { admissionRequestId }).then((r) => r.data),
   getInventory: () => http.get<Ward[]>('/api/v1/bmu/inventory').then((r) => r.data),
   getConfig: () => http.get<BmuAlgorithmConfig>('/api/v1/bmu/config').then((r) => r.data),
   updateConfig: (data: BmuConfigUpdateRequest) =>
     http.put<BmuAlgorithmConfig>('/api/v1/bmu/config', data).then((r) => r.data),
   referToSisterHospital: (data: DiversionReferralRequest) =>
     http.post<SisterHospitalReferralResponse>('/api/v1/bmu/diversion/refer', data).then((r) => r.data),
+  getBatchSuggestions: () =>
+    http.get<BatchSuggestion[]>('/api/v1/bmu/batch-suggestions').then((r) => r.data),
+  approveBatchHoldingWard: (data: BatchApprovalRequest) =>
+    http.post<AdmissionRequest[]>('/api/v1/bmu/batch-holding-wards/approve', data).then((r) => r.data),
+  getCohortSwapSuggestions: () =>
+    http.get<CohortSwapSuggestion[]>('/api/v1/bmu/cohort-swap-suggestions').then((r) => r.data),
+  approveCohortSwap: (data: CohortSwapApprovalRequest) =>
+    http.post<AdmissionRequest>('/api/v1/bmu/cohort-swap/approve', data).then((r) => r.data),
+  recallDiversion: (requestId: string) =>
+    http.post<AdmissionRequest>(`/api/v1/bmu/diversion/${requestId}/recall`).then((r) => r.data),
+  extendDiversionSla: (requestId: string) =>
+    http.post<AdmissionRequest>(`/api/v1/bmu/diversion/${requestId}/extend-sla`).then((r) => r.data),
+  logTelephoneFollowUp: (requestId: string, notes: string) =>
+    http.post<AdmissionRequest>(`/api/v1/bmu/diversion/${requestId}/follow-up`, { notes }).then((r) => r.data),
+  attachDelayTag: (requestId: string, data: DelayTagRequest) =>
+    http.post<AdmissionRequest>(`/api/v1/bmu/requests/${requestId}/delay-tag`, data).then((r) => r.data),
 
   // Patient & Turnover Controller
   trackPatient: (token: string) =>

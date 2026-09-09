@@ -1,8 +1,11 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from './api';
 import type {
+  BatchApprovalRequest,
   BedAllocationRequest,
   BmuConfigUpdateRequest,
+  CohortSwapApprovalRequest,
+  DelayTagRequest,
   DiversionReferralRequest,
   EdAssessmentSubmitRequest,
   SpecialistConsultRequest,
@@ -72,6 +75,18 @@ export const bmuQueries = {
     queryOptions({
       queryKey: [...bmuQueries.all(), 'config'] as const,
       queryFn: api.getConfig,
+    }),
+  batchSuggestions: () =>
+    queryOptions({
+      queryKey: [...bmuQueries.all(), 'batchSuggestions'] as const,
+      queryFn: api.getBatchSuggestions,
+      refetchInterval: 3000,
+    }),
+  cohortSwapSuggestions: () =>
+    queryOptions({
+      queryKey: [...bmuQueries.all(), 'cohortSwapSuggestions'] as const,
+      queryFn: api.getCohortSwapSuggestions,
+      refetchInterval: 3000,
     }),
 };
 
@@ -212,13 +227,114 @@ export function useAllocateBed(onSuccess?: () => void) {
   });
 }
 
+export function useDeallocateBed(onSuccess?: () => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (admissionRequestId: string) => api.deallocateBed(admissionRequestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.();
+    },
+  });
+}
+
+export function useApproveBatchHoldingWard(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: BatchApprovalRequest) => api.approveBatchHoldingWard(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+export function useApproveCohortSwap(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CohortSwapApprovalRequest) => api.approveCohortSwap(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
 export function useReferSisterHospital(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: DiversionReferralRequest) => api.referToSisterHospital(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: bmuQueries.queue().queryKey });
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
       onSuccess?.();
+    },
+  });
+}
+
+export function useRecallDiversion(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (requestId: string) => api.recallDiversion(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+export function useExtendDiversionSla(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (requestId: string) => api.extendDiversionSla(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+export function useLogTelephoneFollowUp(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { requestId: string; notes: string }) =>
+      api.logTelephoneFollowUp(variables.requestId, variables.notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+export function useAttachDelayTag(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { requestId: string; data: DelayTagRequest }) =>
+      api.attachDelayTag(variables.requestId, variables.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      queryClient.invalidateQueries({ queryKey: edQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
     },
   });
 }

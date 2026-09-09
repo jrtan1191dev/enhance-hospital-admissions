@@ -44,4 +44,7 @@ public class Bed extends AuditableEntity {
 
     private LocalDateTime cleaningStartedAt;
     private LocalDateTime lastCleanedAt;
+
+    @Version
+    private Long version;
 }

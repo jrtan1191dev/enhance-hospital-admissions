@@ -41,6 +41,17 @@ public class Ward extends AuditableEntity {
     @Column(nullable = false)
     private int capacity;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isNegativePressure = false;
+
+    @Enumerated(EnumType.STRING)
+    private InfectionStatus lockedInfectionStatus;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isHoldingWard = false;
+
     @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     @JsonIgnore

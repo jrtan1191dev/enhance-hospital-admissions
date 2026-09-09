@@ -7,7 +7,8 @@ import {
   type ColumnDef,
 } from '@tanstack/react-table';
 import { edQueries, specialistQueries, useSubmitEdAssessment } from '../services/queries';
-import type { AcuityTier, InfectionStatus, Patient, SpecialtyCluster, WardClass } from '../types/admissions';
+import type { AcuityTier, InfectionStatus, Patient, SpecialtyCluster, WardClass, DelayReasonCode } from '../types/admissions';
+import { DELAY_REASON_TALKING_POINTS } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -338,7 +339,7 @@ export function EdRoute() {
                         </div>
                       </TableCell>
                       <TableCell className="py-3 text-xs">
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1">
                           {admission.effectiveTelemetry || admission.primaryTelemetry ? (
                             <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
                               <HeartPulse className="h-3 w-3" /> Telemetry
@@ -355,6 +356,11 @@ export function EdRoute() {
                             <Badge variant="destructive" className="text-[10px] bg-red-100 text-red-800 border-red-300 flex items-center gap-1 font-semibold animate-pulse">
                               <AlertTriangle className="h-3 w-3 text-red-600" />
                               Reconciliation Requested
+                            </Badge>
+                          )}
+                          {admission.clinicalConditionUpdated && (
+                            <Badge variant="warning" className="text-[10px] bg-amber-100 text-amber-900 border-amber-300 flex items-center gap-1 font-semibold animate-pulse">
+                              <Sparkles className="h-3 w-3 text-amber-600" /> CLINICAL_CONDITION_UPDATED
                             </Badge>
                           )}
                         </div>
@@ -377,6 +383,23 @@ export function EdRoute() {
                             <Badge variant="destructive" className="text-[9px] py-0 px-1 font-mono uppercase animate-pulse">
                               Auto-Escalated
                             </Badge>
+                          )}
+                          {admission.delayReasonTag && (
+                            <div className="mt-1 p-2 bg-amber-50 border border-amber-200 rounded text-[11px] space-y-1 max-w-[280px]">
+                              <div className="font-semibold text-amber-900 flex items-center gap-1">
+                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                                <span>Operational Delay: {admission.delayReasonTag}</span>
+                              </div>
+                              <p className="text-[10px] text-slate-700 leading-tight">
+                                <strong className="text-slate-900">Family Talking Points: </strong>
+                                {DELAY_REASON_TALKING_POINTS[admission.delayReasonTag as DelayReasonCode] || admission.operationalDelayReason}
+                              </p>
+                              {admission.operationalDelayReason && (
+                                <p className="text-[9px] text-slate-500 italic">
+                                  BMU Note: {admission.operationalDelayReason}
+                                </p>
+                              )}
+                            </div>
                           )}
                         </div>
                       </TableCell>

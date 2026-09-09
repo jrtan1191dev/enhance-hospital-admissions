@@ -32,7 +32,8 @@ export type AdmissionStatus =
   | 'BED_REQUESTED'
   | 'BED_ALLOCATED'
   | 'ADMITTED_INPATIENT'
-  | 'DISCHARGED';
+  | 'DISCHARGED'
+  | 'DIVERTED_HAH';
 
 export type BroadcastStatus = 'OPEN' | 'CLAIMED' | 'AUTO_ESCALATED' | 'COMPLETED';
 
@@ -128,6 +129,12 @@ export interface AdmissionRequest {
   isRecommendationAccepted?: boolean;
   overrideReasonCode?: string;
   delayReasonTag?: string;
+  archivedDelayReasonTag?: string;
+  archivedOperationalDelayReason?: string;
+  referralDispatchedAt?: string;
+  referralSlaMinutes?: number;
+  referralFacility?: string;
+  virtualBedNumber?: string;
 }
 
 export interface AssessmentBroadcast {
@@ -168,6 +175,10 @@ export interface BedRecommendation {
   score: number;
   scoreBreakdown: string[];
   isRecommended: boolean;
+  isSafetyViolated?: boolean;
+  safetyViolationReason?: string;
+  isOperationalOverride?: boolean;
+  operationalOverrideReason?: string;
 }
 
 export interface PatientMilestoneResponse {
@@ -219,6 +230,48 @@ export interface DiversionReferralRequest {
   facility: string;
 }
 
+export interface BatchSuggestion {
+  suggestionId: string;
+  targetWardId: string;
+  targetWardName: string;
+  patientIds: string[];
+  patientNames: string[];
+  admissionRequestIds: string[];
+  commonWardClass: WardClass;
+  commonGender: Gender;
+  commonInfectionStatus: InfectionStatus;
+  unlockedCapacityCount: number;
+}
+
+export interface BatchApprovalRequest {
+  suggestionId: string;
+  targetWardId: string;
+  admissionRequestIds: string[];
+}
+
+export interface CohortSwapSuggestion {
+  suggestionId: string;
+  admissionRequestId: string;
+  patientId: string;
+  patientName: string;
+  patientGender: Gender;
+  patientWardClass: WardClass;
+  currentBedId: string;
+  currentBedNumber: string;
+  currentWardId: string;
+  currentWardName: string;
+  targetBedId: string;
+  targetBedNumber: string;
+  targetWardId: string;
+  targetWardName: string;
+  unlockedCapacityCount: number;
+}
+
+export interface CohortSwapApprovalRequest {
+  admissionRequestId: string;
+  targetBedId: string;
+}
+
 export type RolePersona = 
   | 'ED_ATTENDING'
   | 'SPECIALIST'
@@ -226,3 +279,22 @@ export type RolePersona =
   | 'PATIENT'
   | 'WARD_NURSE'
   | 'HOUSEKEEPING';
+
+export type DelayReasonCode = 
+  | 'HOUSEKEEPING_DELAY'
+  | 'BED_SHORTAGE'
+  | 'SPECIALIZED_ISOLATION_CLEANING'
+  | 'SURGE_TRAUMA_EVENT';
+
+export interface DelayTagRequest {
+  delayReasonCode: DelayReasonCode;
+  note?: string;
+  operationalDelayReason?: string;
+}
+
+export const DELAY_REASON_TALKING_POINTS: Record<DelayReasonCode, string> = {
+  HOUSEKEEPING_DELAY: 'A bed in the assigned ward has been identified and our environmental services team is currently completing terminal cleaning and sanitization to ensure maximum patient safety.',
+  BED_SHORTAGE: 'Hospital wards are currently experiencing high census. Our central bed management unit is actively reviewing bed turnover and prioritizing acute placement.',
+  SPECIALIZED_ISOLATION_CLEANING: 'Your room requires specialized isolation infection-control protocols and bio-cleaning before safe transfer. Housekeeping is expediting this.',
+  SURGE_TRAUMA_EVENT: 'The emergency department is managing a temporary acute surge in critical emergency admissions. Additional clinical staff and bed allocations are being mobilized.',
+};

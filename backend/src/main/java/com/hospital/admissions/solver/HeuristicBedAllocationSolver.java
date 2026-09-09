@@ -50,7 +50,11 @@ public class HeuristicBedAllocationSolver implements BedAllocationSolver {
                 continue;
             }
 
-            // Hard Constraint 4: Infection Control Isolation
+            // Hard Constraint 4: Infection Control Isolation & Negative Pressure
+            if (patient != null && patient.getInfectionStatus() == InfectionStatus.RESPIRATORY && !ward.isNegativePressure()) {
+                continue;
+            }
+
             List<Bed> wardBeds = bedRepository.findByWard_Id(ward.getId());
             if (patient != null && patient.getInfectionStatus() != InfectionStatus.NON_INFECTIOUS && ward.getCapacity() > 1) {
                 // In multi-bed wards, only allow if ward is currently completely empty to cohort, or isolated

@@ -79,5 +79,20 @@ public class AdmissionRequest extends AuditableEntity {
 
     private String overrideReasonCode;
     private String delayReasonTag;
+    private String operationalDelayReason;
+    private String archivedDelayReasonTag;
+    private String archivedOperationalDelayReason;
     private LocalDateTime firstTrackerAccessedAt;
+
+    private LocalDateTime referralDispatchedAt;
+    @Builder.Default
+    private Integer referralSlaMinutes = 30;
+    private String referralFacility;
+    private String virtualBedNumber;
+
+    @Builder.Default
+    private Boolean waitingInEd = true;
+
+    @Version
+    private Long version;
 }

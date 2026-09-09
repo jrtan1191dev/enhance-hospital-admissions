@@ -6,8 +6,8 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { bmuQueries, specialistQueries, useAllocateBed, useReferSisterHospital, useRequestReconciliation } from '../services/queries';
-import type { AdmissionRequest, Bed } from '../types/admissions';
+import { bmuQueries, specialistQueries, useAllocateBed, useAssignAdmittingCluster, useReferSisterHospital, useRequestReconciliation } from '../services/queries';
+import type { AdmissionRequest, Bed, SpecialtyCluster } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -56,8 +56,14 @@ export function BmuRoute() {
 
   // Bed Allocation Mutation Hook
   const allocateMutation = useAllocateBed(() => {
-    setNotification('Bed successfully allocated! Bed state transitioned to GREEN (In-Transit).');
+    setNotification('Bed successfully allocated/reallocated! Bed state transitioned to GREEN (In-Transit).');
     setSelectedRequest(null);
+    setTimeout(() => setNotification(null), 5000);
+  });
+
+  // Authoritative Admitting Specialty Cluster Mutation Hook
+  const assignClusterMutation = useAssignAdmittingCluster(() => {
+    setNotification('Authoritative admitting specialty cluster updated! Algorithmic recommendations refreshed.');
     setTimeout(() => setNotification(null), 5000);
   });
 
@@ -163,6 +169,29 @@ export function BmuRoute() {
           )}
         </div>
       ),
+    },
+    {
+      id: 'specialtyCluster',
+      header: 'Specialty Cluster',
+      cell: ({ row }) => {
+        const admitting = row.original.admittingSpecialtyCluster;
+        const suspected = row.original.suspectedDiagnosisService;
+        return (
+          <div className="text-xs space-y-0.5">
+            {admitting ? (
+              <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-800 border-blue-300 font-semibold">
+                {admitting} (Admitting)
+              </Badge>
+            ) : suspected ? (
+              <Badge variant="outline" className="text-[10px] text-slate-700">
+                {suspected} (ED)
+              </Badge>
+            ) : (
+              <span className="text-slate-400 text-[10px]">-</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'status',
@@ -429,7 +458,7 @@ export function BmuRoute() {
                   <Layers className="h-10 w-10 mx-auto text-slate-300 mb-2" />
                   Click "Select" on any waiting admission request to review algorithmic bed matches or trigger diversion.
                 </div>
-              ) : selectedRequest.status !== 'BED_REQUESTED' ? (
+              ) : selectedRequest.status !== 'BED_REQUESTED' && selectedRequest.status !== 'BED_ALLOCATED' ? (
                 <div className="p-4 bg-slate-50 rounded-lg text-xs space-y-2">
                   <div className="font-semibold text-slate-800">
                     Request already resolved: <Badge variant="outline">{selectedRequest.status}</Badge>
@@ -442,6 +471,101 @@ export function BmuRoute() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Tentative Reservation Status Banner for BED_ALLOCATED */}
+                  {selectedRequest.status === 'BED_ALLOCATED' && (
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs space-y-1">
+                      <div className="flex items-center justify-between font-semibold text-emerald-900">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          Tentative Bed Reservation
+                        </div>
+                        <Badge variant="success" className="text-[10px]">
+                          {selectedRequest.status}
+                        </Badge>
+                      </div>
+                      <p className="text-emerald-800">
+                        Currently reserved: <strong>Bed {selectedRequest.assignedBed?.bedNumber}</strong> (Ward {selectedRequest.assignedBed?.ward?.wardCode || selectedRequest.assignedBed?.ward?.specialty || ''}).
+                      </p>
+                      <p className="text-[11px] text-emerald-700">
+                        Dynamic reallocation enabled. Selecting another recommended bed below safely reverts the current bed without phantom capacity locks.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Authoritative Admitting Specialty Cluster Selector */}
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-800">Authoritative Admitting Specialty:</span>
+                      <Badge variant="outline" className="text-[10px] bg-white font-mono">
+                        {selectedRequest.admittingSpecialtyCluster || selectedRequest.suspectedDiagnosisService || 'UNASSIGNED'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={selectedRequest.admittingSpecialtyCluster || selectedRequest.suspectedDiagnosisService || ''}
+                        onChange={(e) => {
+                          const val = e.target.value as SpecialtyCluster;
+                          if (val) {
+                            assignClusterMutation.mutate({
+                              requestId: selectedRequest.id,
+                              cluster: val,
+                            });
+                            setSelectedRequest({
+                              ...selectedRequest,
+                              admittingSpecialtyCluster: val,
+                            });
+                          }
+                        }}
+                        disabled={assignClusterMutation.isPending}
+                        className="flex-1 text-xs bg-white border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium text-slate-800"
+                      >
+                        <option value="CARDIOLOGY">Cardiology</option>
+                        <option value="GENERAL_MEDICINE">General Medicine</option>
+                        <option value="SURGERY">Surgery</option>
+                        <option value="ORTHOPAEDICS">Orthopaedics</option>
+                      </select>
+                      {assignClusterMutation.isPending && (
+                        <span className="text-[10px] text-slate-500">Updating...</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Specialist Endorsed Diversion 1-Click Action */}
+                  {selectedRequest.diversionPathway && selectedRequest.diversionPathway !== 'NONE' && (
+                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-900 space-y-2">
+                      <div className="flex items-center justify-between font-semibold">
+                        <span className="flex items-center gap-1.5 text-purple-800">
+                          <ExternalLink className="h-4 w-4" /> Specialist Endorsed Diversion
+                        </span>
+                        <Badge variant="purple" className="text-[10px]">
+                          {selectedRequest.diversionPathway}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-purple-700">
+                        Specialist consult recommended diversion pathway. Execute referral directly to initiate 30-min SLA timer.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 font-medium"
+                        disabled={diversionMutation.isPending}
+                        onClick={() => {
+                          const facility =
+                            selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC'
+                              ? 'MIC@Home'
+                              : 'Outram Community Hospital (OCH)';
+                          setSelectedFacility(facility);
+                          diversionMutation.mutate({
+                            admissionRequestId: selectedRequest.id,
+                            facility,
+                          });
+                        }}
+                      >
+                        <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                        1-Click Enact Diversion ({selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home' : 'OCH'})
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Discordance Alert Banner */}
                   {selectedRequest.discordant && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 space-y-1.5">
@@ -473,7 +597,7 @@ export function BmuRoute() {
                       <span>{selectedRequest.patient.gender}, {selectedRequest.patient.age}y</span>
                     </div>
                     <div className="text-slate-600">
-                      Class: <strong>{selectedRequest.patient.wardClassPreference}</strong> • Telemetry: <strong>{selectedRequest.patient.telemetryRequired ? 'Yes' : 'No'}</strong> • Fall Risk: <strong>{selectedRequest.patient.fallRiskScore}</strong>
+                      Class: <strong>{selectedRequest.patient.wardClassPreference}</strong> • Telemetry: <strong>{selectedRequest.effectiveTelemetry || selectedRequest.patient.telemetryRequired ? 'Yes' : 'No'}</strong> • Fall Risk: <strong>{selectedRequest.patient.fallRiskScore}</strong>
                     </div>
                   </div>
 
@@ -488,60 +612,84 @@ export function BmuRoute() {
                       <div className="text-xs text-slate-500 py-4 text-center">No compatible beds currently available.</div>
                     ) : (
                       <div className="space-y-2.5">
-                        {recommendations.slice(0, 3).map((rec, idx) => (
-                          <div
-                            key={rec.bedId}
-                            className={`p-3 rounded-lg border text-xs transition-all ${
-                              idx === 0
-                                ? 'bg-emerald-50/60 border-emerald-300 ring-1 ring-emerald-400'
-                                : 'bg-white border-slate-200'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between font-semibold">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-slate-900 text-sm">Bed {rec.bedNumber}</span>
-                                <Badge variant="outline" className="text-[10px] font-mono">
-                                  {rec.wardName} (L{rec.level})
-                                </Badge>
-                                {(rec.isRecommended || idx === 0) && (
-                                  <Badge variant="success" className="text-[9px] px-1 py-0">
-                                    #1 Match
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="text-emerald-700 font-bold text-sm">Score: +{rec.score}</span>
-                            </div>
-
-                            <div className="flex flex-wrap gap-1 mt-1.5">
-                              {(rec.scoreBreakdown || []).map((item, bIdx) => (
-                                <span
-                                  key={bIdx}
-                                  className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono"
-                                >
-                                  {item}
-                                </span>
-                              ))}
-                            </div>
-
-                            <Button
-                              size="sm"
-                              className="w-full mt-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs h-8"
-                              disabled={allocateMutation.isPending}
-                              onClick={() =>
-                                allocateMutation.mutate({
-                                  admissionRequestId: selectedRequest.id,
-                                  bedId: rec.bedId,
-                                  rank: idx + 1,
-                                  score: rec.score,
-                                  overrideReason: idx > 0 ? 'NON_TOP_RANK_SELECTION' : undefined,
-                                })
-                              }
+                        {recommendations.slice(0, 3).map((rec, idx) => {
+                          const isCurrentBed = selectedRequest.assignedBed?.id === rec.bedId;
+                          return (
+                            <div
+                              key={rec.bedId}
+                              className={`p-3 rounded-lg border text-xs transition-all ${
+                                isCurrentBed
+                                  ? 'bg-blue-50/60 border-blue-300 ring-1 ring-blue-400'
+                                  : idx === 0
+                                  ? 'bg-emerald-50/60 border-emerald-300 ring-1 ring-emerald-400'
+                                  : 'bg-white border-slate-200'
+                              }`}
                             >
-                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                              1-Click Allocate Bed {rec.bedNumber}
-                            </Button>
-                          </div>
-                        ))}
+                              <div className="flex items-center justify-between font-semibold">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-slate-900 text-sm">Bed {rec.bedNumber}</span>
+                                  <Badge variant="outline" className="text-[10px] font-mono">
+                                    {rec.wardName} (L{rec.level})
+                                  </Badge>
+                                  {isCurrentBed ? (
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 bg-blue-100 text-blue-800 border-blue-300">
+                                      Current Tentative Bed
+                                    </Badge>
+                                  ) : (rec.isRecommended || idx === 0) ? (
+                                    <Badge variant="success" className="text-[9px] px-1 py-0">
+                                      #1 Match
+                                    </Badge>
+                                  ) : null}
+                                </div>
+                                <span className="text-emerald-700 font-bold text-sm">Score: +{rec.score}</span>
+                              </div>
+
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {(rec.scoreBreakdown || []).map((item, bIdx) => (
+                                  <span
+                                    key={bIdx}
+                                    className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono"
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+
+                              <Button
+                                size="sm"
+                                className={`w-full mt-2.5 text-white font-medium text-xs h-8 ${
+                                  isCurrentBed
+                                    ? 'bg-slate-400 cursor-not-allowed'
+                                    : selectedRequest.status === 'BED_ALLOCATED'
+                                    ? 'bg-amber-600 hover:bg-amber-700'
+                                    : 'bg-emerald-600 hover:bg-emerald-700'
+                                }`}
+                                disabled={allocateMutation.isPending || isCurrentBed}
+                                onClick={() =>
+                                  allocateMutation.mutate({
+                                    admissionRequestId: selectedRequest.id,
+                                    bedId: rec.bedId,
+                                    rank: idx + 1,
+                                    score: rec.score,
+                                    overrideReason:
+                                      selectedRequest.status === 'BED_ALLOCATED'
+                                        ? 'DYNAMIC_BED_REALLOCATION'
+                                        : idx > 0
+                                        ? 'NON_TOP_RANK_SELECTION'
+                                        : undefined,
+                                  })
+                                }
+                              >
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                {isCurrentBed
+                                  ? `Currently Reserved (Bed ${rec.bedNumber})`
+                                  : selectedRequest.status === 'BED_ALLOCATED'
+                                  ? `1-Click Reallocate to Bed ${rec.bedNumber}`
+                                  : `1-Click Allocate Bed ${rec.bedNumber}`}
+                              </Button>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

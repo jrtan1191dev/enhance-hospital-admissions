@@ -50,6 +50,9 @@ class TracerBulletsIntegrationTest {
     private AssessmentBroadcastRepository broadcastRepository;
 
     @Autowired
+    private WardRepository wardRepository;
+
+    @Autowired
     private ClinicianService clinicianService;
 
     @Test
@@ -674,4 +677,126 @@ class TracerBulletsIntegrationTest {
         // Clinical condition updated alert flagged
         assertThat(amendedAdmission.getClinicalConditionUpdated()).isTrue();
     }
+
+    @Test
+    @DisplayName("Tracer Bullet 9: BMU Admitting Specialty Placement & Dynamic Bed Reallocation")
+    void testTracerBullet9_AdmittingSpecialtyPlacementAndDynamicReallocation() throws Exception {
+        // Step 1: Create dedicated patient and submit ED assessment
+        Patient pRealloc = patientRepository.save(Patient.builder()
+                .name("Reallocation Flow Patient")
+                .nricMasked("S****999Z")
+                .age(62)
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(20)
+                .queueToken("TOKEN-REALLOC-" + java.util.UUID.randomUUID())
+                .build());
+
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(pRealloc.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B2)
+                .needsTelemetry(true)
+                .requiresSpecialistConsult(false)
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk());
+
+        AdmissionRequest admission = admissionRequestRepository.findAll().stream()
+                .filter(a -> a.getPatient().getId().equals(pRealloc.getId()))
+                .findFirst().orElseThrow();
+        assertThat(admission.getStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
+
+        // Step 2: BMU coordinator assigns authoritative admitting specialty cluster (CARDIOLOGY)
+        com.hospital.admissions.dto.AdmittingClusterRequest clusterReq =
+                com.hospital.admissions.dto.AdmittingClusterRequest.builder()
+                        .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                        .build();
+
+        mockMvc.perform(post("/api/v1/bmu/requests/" + admission.getId() + "/admitting-cluster")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(clusterReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.admittingSpecialtyCluster").value("CARDIOLOGY"));
+
+        AdmissionRequest updatedReq = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(updatedReq.getAdmittingSpecialtyCluster()).isEqualTo(SpecialtyCluster.CARDIOLOGY);
+
+        // Step 3: Setup two available beds in B2 ward
+        Ward targetWard = wardRepository.findAll().stream()
+                .filter(w -> w.getWardClass() == WardClass.B2)
+                .findFirst().orElseThrow();
+
+        Bed bedA = bedRepository.save(Bed.builder()
+                .bedNumber("TEST-REALLOC-A-" + java.util.UUID.randomUUID())
+                .ward(targetWard)
+                .status(BedStatus.EMPTY_CLEANED)
+                .hasTelemetry(true)
+                .isNearNursingStation(false)
+                .build());
+
+        Bed bedB = bedRepository.save(Bed.builder()
+                .bedNumber("TEST-REALLOC-B-" + java.util.UUID.randomUUID())
+                .ward(targetWard)
+                .status(BedStatus.EMPTY_CLEANED)
+                .hasTelemetry(true)
+                .isNearNursingStation(true)
+                .build());
+
+        // Step 4: Allocate Bed A tentatively
+        com.hospital.admissions.dto.BedAllocationRequest allocReqA = new com.hospital.admissions.dto.BedAllocationRequest();
+        allocReqA.setAdmissionRequestId(admission.getId());
+        allocReqA.setBedId(bedA.getId());
+        allocReqA.setRank(1);
+        allocReqA.setScore(85.0);
+
+        mockMvc.perform(post("/api/v1/bmu/allocate")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(allocReqA)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("BED_ALLOCATED"))
+                .andExpect(jsonPath("$.assignedBed.id").value(bedA.getId().toString()));
+
+        Bed bedAfterAllocA = bedRepository.findById(bedA.getId()).orElseThrow();
+        assertThat(bedAfterAllocA.getStatus()).isEqualTo(BedStatus.EMPTY_ASSIGNED);
+        assertThat(bedAfterAllocA.getCurrentPatient().getId()).isEqualTo(pRealloc.getId());
+
+        // Step 5: Dynamic Reallocation to Bed B - old Bed A must be reverted to EMPTY_CLEANED (zero ghost beds)
+        com.hospital.admissions.dto.BedAllocationRequest allocReqB = new com.hospital.admissions.dto.BedAllocationRequest();
+        allocReqB.setAdmissionRequestId(admission.getId());
+        allocReqB.setBedId(bedB.getId());
+        allocReqB.setRank(2);
+        allocReqB.setScore(95.0);
+        allocReqB.setOverrideReason("Better proximity to nursing station for continuous telemetry monitoring");
+
+        mockMvc.perform(post("/api/v1/bmu/allocate")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(allocReqB)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("BED_ALLOCATED"))
+                .andExpect(jsonPath("$.assignedBed.id").value(bedB.getId().toString()));
+
+        // Verify Bed B is EMPTY_ASSIGNED to patient
+        Bed bedAfterReallocB = bedRepository.findById(bedB.getId()).orElseThrow();
+        assertThat(bedAfterReallocB.getStatus()).isEqualTo(BedStatus.EMPTY_ASSIGNED);
+        assertThat(bedAfterReallocB.getCurrentPatient().getId()).isEqualTo(pRealloc.getId());
+
+        // Verify Bed A is safely reverted back to EMPTY_CLEANED and currentPatient is null
+        Bed bedAfterReallocA = bedRepository.findById(bedA.getId()).orElseThrow();
+        assertThat(bedAfterReallocA.getStatus()).isEqualTo(BedStatus.EMPTY_CLEANED);
+        assertThat(bedAfterReallocA.getCurrentPatient()).isNull();
+    }
 }
+

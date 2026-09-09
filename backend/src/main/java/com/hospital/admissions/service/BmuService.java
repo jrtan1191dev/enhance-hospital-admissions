@@ -76,6 +76,14 @@ public class BmuService {
             throw new IllegalStateException("Bed " + bed.getBedNumber() + " is not EMPTY_CLEANED. Current status: " + bed.getStatus());
         }
 
+        // Dynamic Reallocation: If request was already tentatively allocated to a different bed, free the old bed
+        if (request.getAssignedBed() != null && !request.getAssignedBed().getId().equals(bedId)) {
+            Bed oldBed = request.getAssignedBed();
+            oldBed.setStatus(BedStatus.EMPTY_CLEANED);
+            oldBed.setCurrentPatient(null);
+            bedRepository.save(oldBed);
+        }
+
         bed.setStatus(BedStatus.EMPTY_ASSIGNED);
         bed.setCurrentPatient(request.getPatient());
         bedRepository.save(bed);
@@ -196,4 +204,27 @@ public class BmuService {
 
         return saved;
     }
+
+    @Transactional
+    public AdmissionRequest assignAdmittingCluster(UUID admissionRequestId, SpecialtyCluster cluster) {
+        String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : "bmu_coordinator";
+        AdmissionRequest request = admissionRequestRepository.findById(admissionRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Admission request not found: " + admissionRequestId));
+
+        request.setAdmittingSpecialtyCluster(cluster);
+        AdmissionRequest saved = admissionRequestRepository.save(request);
+
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("AdmittingSpecialtyCluster", cluster);
+        details.put("EffectiveAcuity", request.getEffectiveAcuityTier());
+
+        auditLogger.logAction(currentUser, "ASSIGN_ADMITTING_CLUSTER",
+                "AdmissionRequest:" + admissionRequestId,
+                AuditLogger.formatDetails(details));
+
+        return saved;
+    }
 }
+

@@ -220,4 +220,93 @@ class HeuristicBedAllocationSolverTest {
         // Should be eliminated due to Hard Constraint 4 (Infection control in occupied multi-bed ward)
         assertThat(recommendations).isEmpty();
     }
+
+    @Test
+    @DisplayName("recommendBeds prioritizes admittingSpecialtyCluster over suspectedDiagnosisService and prunes on effectiveTelemetry")
+    void testRecommendBeds_ConsumesAdmittingSpecialtyClusterAndEffectiveTelemetry() {
+        BmuAlgorithmConfig config = BmuAlgorithmConfig.builder()
+                .weightSpecialtyCluster(40)
+                .weightConsolidation(0)
+                .weightFallRiskStation(0)
+                .build();
+
+        Patient patient = Patient.builder()
+                .id(UUID.randomUUID())
+                .name("Cluster Placement Patient")
+                .gender(Gender.FEMALE)
+                .needsTelemetry(false) // ED initial was false
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(20)
+                .build();
+
+        // Effective telemetry elevated to true via specialist consult; BMU assigned CARDIOLOGY cluster
+        AdmissionRequest request = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .patient(patient)
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                .primaryTelemetry(false)
+                .effectiveTelemetry(true)
+                .requestedWardClass(WardClass.B2)
+                .build();
+
+        Ward wardCardio = Ward.builder()
+                .id(UUID.randomUUID())
+                .name("Cardiology 8A")
+                .wardClass(WardClass.B2)
+                .serviceCluster(SpecialtyCluster.CARDIOLOGY)
+                .capacity(4)
+                .build();
+
+        Ward wardGenMed = Ward.builder()
+                .id(UUID.randomUUID())
+                .name("General Medicine 7A")
+                .wardClass(WardClass.B2)
+                .serviceCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .capacity(4)
+                .build();
+
+        Bed bedCardioWithTel = Bed.builder()
+                .id(UUID.randomUUID())
+                .bedNumber("8A-01")
+                .ward(wardCardio)
+                .hasTelemetry(true)
+                .status(BedStatus.EMPTY_CLEANED)
+                .build();
+
+        Bed bedCardioNoTel = Bed.builder()
+                .id(UUID.randomUUID())
+                .bedNumber("8A-02")
+                .ward(wardCardio)
+                .hasTelemetry(false)
+                .status(BedStatus.EMPTY_CLEANED)
+                .build();
+
+        Bed bedGenMedWithTel = Bed.builder()
+                .id(UUID.randomUUID())
+                .bedNumber("7A-01")
+                .ward(wardGenMed)
+                .hasTelemetry(true)
+                .status(BedStatus.EMPTY_CLEANED)
+                .build();
+
+        when(bedRepository.findByStatus(BedStatus.EMPTY_CLEANED))
+                .thenReturn(List.of(bedCardioWithTel, bedCardioNoTel, bedGenMedWithTel));
+        when(bedRepository.findByWard_Id(wardCardio.getId())).thenReturn(List.of(bedCardioWithTel, bedCardioNoTel));
+        when(bedRepository.findByWard_Id(wardGenMed.getId())).thenReturn(List.of(bedGenMedWithTel));
+
+        List<BedRecommendation> results = solver.recommendBeds(request, config);
+
+        // Bed 8A-02 pruned because effectiveTelemetry=true requires telemetry
+        assertThat(results).extracting(BedRecommendation::getBedNumber)
+                .containsExactlyInAnyOrder("8A-01", "7A-01");
+
+        // Bed 8A-01 matches authoritative admittingSpecialtyCluster (CARDIOLOGY) -> score 40
+        BedRecommendation cardioMatch = results.stream().filter(r -> r.getBedNumber().equals("8A-01")).findFirst().orElseThrow();
+        assertThat(cardioMatch.getScore()).isEqualTo(40);
+
+        // Bed 7A-01 does not match authoritative admittingSpecialtyCluster -> score 0
+        BedRecommendation genMedMatch = results.stream().filter(r -> r.getBedNumber().equals("7A-01")).findFirst().orElseThrow();
+        assertThat(genMedMatch.getScore()).isEqualTo(0);
+    }
 }

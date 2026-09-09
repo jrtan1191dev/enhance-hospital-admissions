@@ -346,4 +346,73 @@ class BmuServiceTest {
         verify(admissionRequestRepository).save(req);
         verify(auditLogger).logAction(eq("bmu_coord"), eq("REQUEST_CLINICAL_RECONCILIATION"), eq("AdmissionRequest:" + reqId), anyString());
     }
+
+    @Test
+    @DisplayName("assignAdmittingCluster: Sets authoritative cluster and emits ASSIGN_ADMITTING_CLUSTER audit event")
+    void testAssignAdmittingCluster_UpdatesClusterAndLogsAudit() {
+        UUID reqId = UUID.randomUUID();
+        AdmissionRequest req = AdmissionRequest.builder()
+                .id(reqId)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .build();
+
+        when(admissionRequestRepository.findById(reqId)).thenReturn(Optional.of(req));
+        when(admissionRequestRepository.save(req)).thenReturn(req);
+
+        AdmissionRequest result = bmuService.assignAdmittingCluster(reqId, SpecialtyCluster.CARDIOLOGY);
+
+        assertThat(result.getAdmittingSpecialtyCluster()).isEqualTo(SpecialtyCluster.CARDIOLOGY);
+        verify(admissionRequestRepository).save(req);
+        verify(auditLogger).logAction(eq("bmu_coord"), eq("ASSIGN_ADMITTING_CLUSTER"), eq("AdmissionRequest:" + reqId), anyString());
+    }
+
+    @Test
+    @DisplayName("allocateBed: Reallocating a tentatively allocated bed reverts the old bed to EMPTY_CLEANED")
+    void testAllocateBed_DynamicReallocation_RevertsOldBedToEmptyCleaned() {
+        UUID reqId = UUID.randomUUID();
+        Patient patient = Patient.builder().id(UUID.randomUUID()).name("Reallocation Patient").build();
+
+        Ward ward = Ward.builder().id(UUID.randomUUID()).name("Ward 8A").build();
+
+        UUID oldBedId = UUID.randomUUID();
+        Bed oldBed = Bed.builder()
+                .id(oldBedId)
+                .bedNumber("8A-01")
+                .ward(ward)
+                .status(BedStatus.EMPTY_ASSIGNED)
+                .currentPatient(patient)
+                .build();
+
+        AdmissionRequest req = AdmissionRequest.builder()
+                .id(reqId)
+                .patient(patient)
+                .status(AdmissionStatus.BED_ALLOCATED)
+                .assignedBed(oldBed)
+                .build();
+
+        UUID newBedId = UUID.randomUUID();
+        Bed newBed = Bed.builder()
+                .id(newBedId)
+                .bedNumber("8A-02")
+                .ward(ward)
+                .status(BedStatus.EMPTY_CLEANED)
+                .build();
+
+        when(admissionRequestRepository.findById(reqId)).thenReturn(Optional.of(req));
+        when(bedRepository.findById(newBedId)).thenReturn(Optional.of(newBed));
+        when(admissionRequestRepository.save(req)).thenReturn(req);
+
+        AdmissionRequest result = bmuService.allocateBed(reqId, newBedId);
+
+        assertThat(result.getAssignedBed()).isEqualTo(newBed);
+        assertThat(newBed.getStatus()).isEqualTo(BedStatus.EMPTY_ASSIGNED);
+        assertThat(newBed.getCurrentPatient()).isEqualTo(patient);
+
+        // Verify old bed was freed back to EMPTY_CLEANED without ghost reservation
+        assertThat(oldBed.getStatus()).isEqualTo(BedStatus.EMPTY_CLEANED);
+        assertThat(oldBed.getCurrentPatient()).isNull();
+        verify(bedRepository).save(oldBed);
+        verify(bedRepository).save(newBed);
+    }
 }

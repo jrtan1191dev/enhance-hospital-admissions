@@ -74,4 +74,11 @@ public class BmuController {
     public ResponseEntity<AdmissionRequest> requestReconciliation(@PathVariable UUID id) {
         return ResponseEntity.ok(bmuService.requestReconciliation(id));
     }
+
+    @PostMapping("/requests/{id}/admitting-cluster")
+    public ResponseEntity<AdmissionRequest> assignAdmittingCluster(
+            @PathVariable UUID id,
+            @Valid @RequestBody com.hospital.admissions.dto.AdmittingClusterRequest request) {
+        return ResponseEntity.ok(bmuService.assignAdmittingCluster(id, request.getAdmittingSpecialtyCluster()));
+    }
 }

@@ -169,6 +169,21 @@ export function useRequestReconciliation(onSuccess?: () => void, onError?: (erro
   });
 }
 
+export function useAssignAdmittingCluster(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { requestId: string; cluster: SpecialtyCluster }) =>
+      api.assignAdmittingCluster(variables.requestId, variables.cluster),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
 export function useChainConsult(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({

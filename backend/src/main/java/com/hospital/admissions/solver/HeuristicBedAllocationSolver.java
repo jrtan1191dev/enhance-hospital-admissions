@@ -43,13 +43,16 @@ public class HeuristicBedAllocationSolver implements BedAllocationSolver {
             }
 
             // Hard Constraint 3: Telemetry Requirement
-            if (patient.isNeedsTelemetry() && !bed.isHasTelemetry()) {
+            boolean requiresTelemetry = Boolean.TRUE.equals(request.getEffectiveTelemetry())
+                    || Boolean.TRUE.equals(request.getPrimaryTelemetry())
+                    || (patient != null && patient.isNeedsTelemetry());
+            if (requiresTelemetry && !bed.isHasTelemetry()) {
                 continue;
             }
 
             // Hard Constraint 4: Infection Control Isolation
             List<Bed> wardBeds = bedRepository.findByWard_Id(ward.getId());
-            if (patient.getInfectionStatus() != InfectionStatus.NON_INFECTIOUS && ward.getCapacity() > 1) {
+            if (patient != null && patient.getInfectionStatus() != InfectionStatus.NON_INFECTIOUS && ward.getCapacity() > 1) {
                 // In multi-bed wards, only allow if ward is currently completely empty to cohort, or isolated
                 long occupiedCount = wardBeds.stream()
                         .filter(b -> b.getStatus() == BedStatus.OCCUPIED_TAKEN || b.getStatus() == BedStatus.EMPTY_ASSIGNED)
@@ -65,7 +68,10 @@ public class HeuristicBedAllocationSolver implements BedAllocationSolver {
 
             // Rule 1: Specialty Cluster Alignment
             int specialtyWeight = config != null ? config.getWeightSpecialtyCluster() : 40;
-            if (ward.getServiceCluster().equals(request.getSuspectedDiagnosisService())) {
+            SpecialtyCluster targetCluster = request.getAdmittingSpecialtyCluster() != null
+                    ? request.getAdmittingSpecialtyCluster()
+                    : request.getSuspectedDiagnosisService();
+            if (targetCluster != null && targetCluster.equals(ward.getServiceCluster())) {
                 score += specialtyWeight;
                 breakdown.add("+" + specialtyWeight + " Specialty (" + ward.getServiceCluster() + ")");
             }

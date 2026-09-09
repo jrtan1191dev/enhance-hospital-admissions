@@ -177,4 +177,28 @@ class BmuControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reconciliationRequested").value(true));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/bmu/requests/{id}/admitting-cluster returns 200 and updated cluster")
+    void testAssignAdmittingCluster() throws Exception {
+        UUID reqId = UUID.randomUUID();
+        com.hospital.admissions.dto.AdmittingClusterRequest clusterReq =
+                com.hospital.admissions.dto.AdmittingClusterRequest.builder()
+                        .admittingSpecialtyCluster(com.hospital.admissions.domain.SpecialtyCluster.CARDIOLOGY)
+                        .build();
+
+        AdmissionRequest updated = AdmissionRequest.builder()
+                .id(reqId)
+                .admittingSpecialtyCluster(com.hospital.admissions.domain.SpecialtyCluster.CARDIOLOGY)
+                .build();
+
+        when(bmuService.assignAdmittingCluster(eq(reqId), eq(com.hospital.admissions.domain.SpecialtyCluster.CARDIOLOGY)))
+                .thenReturn(updated);
+
+        mockMvc.perform(post("/api/v1/bmu/requests/" + reqId + "/admitting-cluster")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(clusterReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.admittingSpecialtyCluster").value("CARDIOLOGY"));
+    }
 }

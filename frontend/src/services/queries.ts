@@ -136,6 +136,39 @@ export function useSubmitConsult(onSuccess?: () => void) {
   });
 }
 
+export function useAmendConsult(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { id: string; data: SpecialistConsultRequest }) =>
+      api.amendConsult(variables.id, variables.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
+      queryClient.invalidateQueries({ queryKey: bmuQueries.queue().queryKey });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
+      onError?.(error);
+    },
+  });
+}
+
+export function useRequestReconciliation(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (requestId: string) => api.requestReconciliation(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bmuQueries.queue().queryKey });
+      queryClient.invalidateQueries({ queryKey: edQueries.all() });
+      queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
 export function useChainConsult(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({

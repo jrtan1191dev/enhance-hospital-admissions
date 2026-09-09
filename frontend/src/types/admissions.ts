@@ -114,6 +114,7 @@ export interface AdmissionRequest {
   requestedWardClass?: WardClass;
   requiresSpecialistConsult?: boolean;
   reconciliationRequested?: boolean;
+  clinicalConditionUpdated?: boolean;
   admittingSpecialtyCluster?: SpecialtyCluster;
   discordant: boolean;
   status: AdmissionStatus;

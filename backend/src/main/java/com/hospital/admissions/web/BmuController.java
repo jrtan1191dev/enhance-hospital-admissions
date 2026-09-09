@@ -69,4 +69,9 @@ public class BmuController {
         return ResponseEntity
                 .ok(bmuService.referToSisterHospital(request.getAdmissionRequestId(), request.getFacility()));
     }
+
+    @PostMapping("/requests/{id}/reconcile")
+    public ResponseEntity<AdmissionRequest> requestReconciliation(@PathVariable UUID id) {
+        return ResponseEntity.ok(bmuService.requestReconciliation(id));
+    }
 }

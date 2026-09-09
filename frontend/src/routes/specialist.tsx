@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { specialistQueries, useClaimBroadcast, useSubmitConsult, useChainConsult } from '../services/queries';
+import { specialistQueries, useClaimBroadcast, useSubmitConsult, useAmendConsult, useChainConsult } from '../services/queries';
 import type { AcuityTier, AssessmentBroadcast, SpecialtyCluster, DiversionPathway } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -89,6 +89,19 @@ export function SpecialistRoute() {
     setTimeout(() => setStatusMessage(null), 4000);
   });
 
+  // Centralized Consult Amendment Mutation Hook
+  const amendMutation = useAmendConsult(
+    () => {
+      setStatusMessage('Consult impression amended and updated in-place on BMU queue.');
+      setConsultModalBroadcast(null);
+      setTimeout(() => setStatusMessage(null), 4000);
+    },
+    (err: Error) => {
+      setErrorMessage(`Consult amendment failed: ${err.message}`);
+      setTimeout(() => setErrorMessage(null), 6000);
+    }
+  );
+
   // Centralized Chain Consult Mutation Hook
   const chainMutation = useChainConsult(
     () => {
@@ -147,16 +160,25 @@ export function SpecialistRoute() {
   const handleSubmitConsult = (e: React.FormEvent) => {
     e.preventDefault();
     if (!consultModalBroadcast) return;
-    consultMutation.mutate({
-      id: consultModalBroadcast.id,
-      data: {
-        secondaryAcuityTier: recommendedTier,
-        secondaryTelemetry,
-        consultNotes: consultImpression,
-        diversionRecommended: diversionEndorsed || diversionPathway !== 'NONE',
-        diversionPathway,
-      },
-    });
+    const payload = {
+      secondaryAcuityTier: recommendedTier,
+      secondaryTelemetry,
+      consultNotes: consultImpression,
+      diversionRecommended: diversionEndorsed || diversionPathway !== 'NONE',
+      diversionPathway,
+    };
+
+    if (consultModalBroadcast.status === 'COMPLETED') {
+      amendMutation.mutate({
+        id: consultModalBroadcast.id,
+        data: payload,
+      });
+    } else {
+      consultMutation.mutate({
+        id: consultModalBroadcast.id,
+        data: payload,
+      });
+    }
   };
 
   return (
@@ -301,7 +323,7 @@ export function SpecialistRoute() {
                         {patient.queueToken}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {broadcast.parentBroadcastId && (
                         <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1 font-semibold">
                           <GitBranch className="h-3 w-3" /> Chained
@@ -318,11 +340,17 @@ export function SpecialistRoute() {
                           {isOverdue ? 'SLA OVERDUE' : `SLA: ${formatCountdown(remainingSecs)}`}
                         </Badge>
                       )}
+                      {req.reconciliationRequested && (
+                        <Badge variant="destructive" className="text-[10px] bg-red-100 text-red-800 border-red-300 flex items-center gap-1 font-semibold animate-pulse">
+                          <AlertTriangle className="h-3 w-3 text-red-600" />
+                          Reconciliation Requested
+                        </Badge>
+                      )}
                       <Badge
                         variant={
-                          isOpen
-                            ? isOverdue ? 'destructive' : 'secondary'
-                            : isEscalated
+                          broadcast.status === 'COMPLETED'
+                            ? 'success'
+                            : broadcast.status === 'AUTO_ESCALATED'
                             ? 'destructive'
                             : broadcast.status === 'CLAIMED'
                             ? 'purple'
@@ -460,10 +488,14 @@ export function SpecialistRoute() {
                       size="sm"
                       variant={isConsulted ? 'outline' : 'default'}
                       onClick={() => handleOpenConsult(broadcast)}
-                      className="text-xs bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                      className={`text-xs cursor-pointer ${
+                        isConsulted
+                          ? 'border-purple-300 text-purple-700 hover:bg-purple-50'
+                          : 'bg-purple-600 hover:bg-purple-700 text-white'
+                      }`}
                     >
                       <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                      {isConsulted ? 'Edit Consult' : 'Submit Consult Impression'}
+                      {isConsulted ? 'Amend Consult' : 'Submit Consult Impression'}
                     </Button>
                   </div>
                 </CardContent>
@@ -572,8 +604,16 @@ export function SpecialistRoute() {
                 <Button type="button" variant="outline" onClick={() => setConsultModalBroadcast(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={consultMutation.isPending} className="bg-purple-600 hover:bg-purple-700 text-white">
-                  {consultMutation.isPending ? 'Saving...' : 'Submit Consult (1-Click)'}
+                <Button
+                  type="submit"
+                  disabled={consultMutation.isPending || amendMutation.isPending}
+                  className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                >
+                  {consultMutation.isPending || amendMutation.isPending
+                    ? 'Saving...'
+                    : consultModalBroadcast.status === 'COMPLETED'
+                    ? 'Save In-Place Amendment'
+                    : 'Submit Consult (1-Click)'}
                 </Button>
               </DialogFooter>
             </form>

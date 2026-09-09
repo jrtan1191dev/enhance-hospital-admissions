@@ -66,11 +66,15 @@ export const api = {
     http.post<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/claim`).then((r) => r.data),
   submitConsult: (id: string, data: SpecialistConsultRequest) =>
     http.post<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/consult`, data).then((r) => r.data),
+  amendConsult: (id: string, data: SpecialistConsultRequest) =>
+    http.put<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/consult`, data).then((r) => r.data),
   chainConsult: (id: string, data: import('../types/admissions').ChainConsultRequest) =>
     http.post<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/chain`, data).then((r) => r.data),
 
   // BMU Controller
   getPrioritizedQueue: () => http.get<AdmissionRequest[]>('/api/v1/bmu/queue').then((r) => r.data),
+  requestReconciliation: (requestId: string) =>
+    http.post<AdmissionRequest>(`/api/v1/bmu/requests/${requestId}/reconcile`).then((r) => r.data),
   getRecommendations: (requestId: string) =>
     http.get<BedRecommendation[]>(`/api/v1/bmu/recommendations/${requestId}`).then((r) => r.data),
   allocateBed: (data: BedAllocationRequest) =>

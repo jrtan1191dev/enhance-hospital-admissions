@@ -6,7 +6,7 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { bmuQueries, specialistQueries, useAllocateBed, useReferSisterHospital } from '../services/queries';
+import { bmuQueries, specialistQueries, useAllocateBed, useReferSisterHospital, useRequestReconciliation } from '../services/queries';
 import type { AdmissionRequest, Bed } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -69,6 +69,12 @@ export function BmuRoute() {
     setTimeout(() => setNotification(null), 5000);
   });
 
+  // Clinical Reconciliation Mutation Hook
+  const reconcileMutation = useRequestReconciliation(() => {
+    setNotification('Clinical reconciliation request dispatched to ED attending and consulting specialists.');
+    setTimeout(() => setNotification(null), 5000);
+  });
+
   // Table Columns for Admission Queue (TanStack Table)
   const columns: ColumnDef<AdmissionRequest>[] = [
     {
@@ -111,24 +117,36 @@ export function BmuRoute() {
     },
     {
       accessorKey: 'discordant',
-      header: 'Safety Alignment',
+      header: 'Safety Alignment & Alerts',
       cell: ({ row }) => (
-        <div>
-          {row.original.discordant ? (
-            <Badge
-              variant="destructive"
-              className="text-[10px] flex items-center gap-1 cursor-pointer font-semibold animate-pulse"
-              onClick={(e) => {
-                e.stopPropagation();
-                setComparisonRequest(row.original);
-              }}
-              title="Click to view comparative notes"
-            >
-              <AlertTriangle className="h-3 w-3" /> Discordance Flagged
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="text-[10px] text-slate-600 bg-slate-100">
-              Aligned
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-1">
+            {row.original.discordant ? (
+              <Badge
+                variant="destructive"
+                className="text-[10px] flex items-center gap-1 cursor-pointer font-semibold animate-pulse"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setComparisonRequest(row.original);
+                }}
+                title="Click to view comparative notes"
+              >
+                <AlertTriangle className="h-3 w-3" /> Discordance Flagged
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-[10px] text-slate-600 bg-slate-100">
+                Aligned
+              </Badge>
+            )}
+            {row.original.reconciliationRequested && (
+              <Badge variant="outline" className="text-[10px] bg-indigo-50 text-indigo-700 border-indigo-200 flex items-center gap-1 font-medium">
+                <Clock className="h-3 w-3 text-indigo-500" /> Reconcile Pending
+              </Badge>
+            )}
+          </div>
+          {row.original.clinicalConditionUpdated && (
+            <Badge variant="warning" className="text-[10px] bg-amber-100 text-amber-900 border-amber-300 flex items-center gap-1 font-semibold animate-pulse">
+              <AlertTriangle className="h-3 w-3 text-amber-600" /> Condition Updated
             </Badge>
           )}
         </div>
@@ -186,6 +204,18 @@ export function BmuRoute() {
           >
             <GitCompare className="h-3.5 w-3.5" />
           </Button>
+          {row.original.discordant && !row.original.reconciliationRequested && (
+            <Button
+              size="sm"
+              variant="outline"
+              title="Request Clinical Reconciliation"
+              disabled={reconcileMutation.isPending}
+              onClick={() => reconcileMutation.mutate(row.original.id)}
+              className="text-[11px] h-7 px-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 cursor-pointer"
+            >
+              Reconcile
+            </Button>
+          )}
         </div>
       ),
     },
@@ -749,6 +779,33 @@ export function BmuRoute() {
                     Under hospital safety policy, the highest acuity tier and continuous telemetry constraints are automatically elevated for bed placement reservation.
                   </p>
                 </div>
+
+                {/* Clinical Discordance Reconciliation Prompt */}
+                {comparisonRequest.discordant && (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 bg-indigo-50/80 border border-indigo-200 rounded-xl text-xs">
+                    <div>
+                      <div className="font-bold text-indigo-950 flex items-center gap-1.5">
+                        <Clock className="h-4 w-4 text-indigo-600" />
+                        Clinical Reconciliation Alert
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-0.5">
+                        Alert ED attending and specialists to reconcile acuity/telemetry discordance. Tentative bed assignment continues non-blockingly.
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0 text-xs bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-100 cursor-pointer"
+                      disabled={reconcileMutation.isPending || comparisonRequest.reconciliationRequested}
+                      onClick={() => {
+                        reconcileMutation.mutate(comparisonRequest.id);
+                        setComparisonRequest({ ...comparisonRequest, reconciliationRequested: true });
+                      }}
+                    >
+                      {comparisonRequest.reconciliationRequested ? 'Reconciliation Pending' : 'Trigger Reconciliation'}
+                    </Button>
+                  </div>
+                )}
 
                 {/* Side-by-Side Comparison Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

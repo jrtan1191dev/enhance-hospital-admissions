@@ -161,4 +161,20 @@ class BmuControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.referralId").value("REF-OCH-001"));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/bmu/requests/{id}/reconcile returns 200 and admission request with reconciliationRequested")
+    void testRequestReconciliation() throws Exception {
+        UUID reqId = UUID.randomUUID();
+        AdmissionRequest req = AdmissionRequest.builder()
+                .id(reqId)
+                .reconciliationRequested(true)
+                .build();
+
+        when(bmuService.requestReconciliation(eq(reqId))).thenReturn(req);
+
+        mockMvc.perform(post("/api/v1/bmu/requests/" + reqId + "/reconcile"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reconciliationRequested").value(true));
+    }
 }

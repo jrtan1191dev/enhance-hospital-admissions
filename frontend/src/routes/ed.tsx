@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
-import { Stethoscope, CheckCircle2, AlertCircle, HeartPulse, ShieldAlert, Sparkles, Users, Clock } from 'lucide-react';
+import { Stethoscope, CheckCircle2, AlertCircle, AlertTriangle, HeartPulse, ShieldAlert, Sparkles, Users, Clock } from 'lucide-react';
 
 export function EdRoute() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -264,6 +264,12 @@ export function EdRoute() {
           <Badge variant={activeTab === 'ASSESSED' ? 'default' : 'secondary'} className="text-xs">
             {assessedAdmissions.length}
           </Badge>
+          {assessedAdmissions.some((a) => a.reconciliationRequested) && (
+            <span className="flex h-2 w-2 relative" title="Clinical Reconciliation Pending">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </span>
+          )}
         </button>
       </div>
 
@@ -343,6 +349,12 @@ export function EdRoute() {
                           {admission.discordant && (
                             <Badge variant="destructive" className="text-[10px]">
                               Discordant
+                            </Badge>
+                          )}
+                          {admission.reconciliationRequested && (
+                            <Badge variant="destructive" className="text-[10px] bg-red-100 text-red-800 border-red-300 flex items-center gap-1 font-semibold animate-pulse">
+                              <AlertTriangle className="h-3 w-3 text-red-600" />
+                              Reconciliation Requested
                             </Badge>
                           )}
                         </div>

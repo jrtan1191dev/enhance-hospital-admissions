@@ -254,6 +254,97 @@ public class ClinicianService {
     }
 
     @Transactional
+    public AssessmentBroadcast amendConsult(UUID broadcastId, SpecialistConsultRequest req) {
+        String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : "specialist";
+
+        AssessmentBroadcast broadcast = broadcastRepository.findById(broadcastId)
+                .orElseThrow(() -> new IllegalArgumentException("Broadcast not found: " + broadcastId));
+
+        if (req.getSecondaryAcuityTier() != null) {
+            broadcast.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
+        }
+        if (req.getSecondaryTelemetry() != null) {
+            broadcast.setSecondaryTelemetry(req.getSecondaryTelemetry());
+        }
+        if (req.getConsultNotes() != null && !req.getConsultNotes().isBlank()) {
+            if (broadcast.getConsultNotes() != null && !broadcast.getConsultNotes().isBlank()
+                    && !req.getConsultNotes().contains(broadcast.getConsultNotes())) {
+                broadcast.setConsultNotes(broadcast.getConsultNotes() + " | Amendment: " + req.getConsultNotes());
+            } else {
+                broadcast.setConsultNotes(req.getConsultNotes());
+            }
+        }
+        if (req.getDiversionPathway() != null) {
+            broadcast.setDiversionPathway(req.getDiversionPathway());
+        }
+
+        broadcast = broadcastRepository.save(broadcast);
+
+        AdmissionRequest request = broadcast.getAdmissionRequest();
+        request.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
+        if (req.getSecondaryTelemetry() != null) {
+            request.setSecondaryTelemetry(req.getSecondaryTelemetry());
+        }
+        boolean isDiversion = req.isDiversionRecommended() ||
+                (req.getDiversionPathway() != null && req.getDiversionPathway() != DiversionPathway.NONE);
+        request.setDiversionRecommended(isDiversion);
+        if (req.getDiversionPathway() != null) {
+            request.setDiversionPathway(req.getDiversionPathway());
+        }
+
+        // Re-evaluate Consensus & Safety-First Discordance across all broadcasts
+        List<AssessmentBroadcast> allBroadcasts = broadcastRepository.findByAdmissionRequest_Id(request.getId());
+        if (allBroadcasts == null || allBroadcasts.isEmpty()) {
+            allBroadcasts = List.of(broadcast);
+        }
+
+        AcuityTier highestAcuity = request.getPrimaryAcuityTier();
+        boolean primaryTel = Boolean.TRUE.equals(request.getPrimaryTelemetry());
+        boolean anyTelemetry = primaryTel;
+        boolean anyDiscordant = false;
+
+        for (AssessmentBroadcast b : allBroadcasts) {
+            if (b.getSecondaryAcuityTier() != null) {
+                if (highestAcuity == null || b.getSecondaryAcuityTier().ordinal() < highestAcuity.ordinal()) {
+                    highestAcuity = b.getSecondaryAcuityTier();
+                }
+                if (request.getPrimaryAcuityTier() != null && b.getSecondaryAcuityTier() != request.getPrimaryAcuityTier()) {
+                    anyDiscordant = true;
+                }
+            }
+            if (Boolean.TRUE.equals(b.getSecondaryTelemetry())) {
+                anyTelemetry = true;
+            }
+            if (b.getSecondaryTelemetry() != null && b.getSecondaryTelemetry() != primaryTel) {
+                anyDiscordant = true;
+            }
+        }
+
+        request.setEffectiveAcuityTier(highestAcuity);
+        request.setEffectiveTelemetry(anyTelemetry);
+        request.setIsDiscordant(anyDiscordant);
+        request.setClinicalConditionUpdated(true);
+
+        admissionRequestRepository.save(request);
+
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("PrimaryAcuity", request.getPrimaryAcuityTier());
+        details.put("SecondaryAcuity", req.getSecondaryAcuityTier());
+        details.put("EffectiveAcuity", request.getEffectiveAcuityTier());
+        details.put("EffectiveTelemetry", request.getEffectiveTelemetry());
+        details.put("Discordant", anyDiscordant);
+        details.put("ClinicalConditionUpdated", true);
+
+        auditLogger.logAction(currentUser, "AMEND_SPECIALIST_CONSULT",
+                "AssessmentBroadcast:" + broadcastId,
+                AuditLogger.formatDetails(details));
+
+        return broadcast;
+    }
+
+    @Transactional
     public AssessmentBroadcast chainConsult(UUID broadcastId, com.hospital.admissions.dto.ChainConsultRequest req) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
 

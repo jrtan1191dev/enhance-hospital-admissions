@@ -213,4 +213,33 @@ class ClinicianControllerTest {
                 .andExpect(jsonPath("$.targetCluster").value("ORTHOPAEDICS"))
                 .andExpect(jsonPath("$.parentBroadcastId").value(broadcastId.toString()));
     }
+
+    @Test
+    @DisplayName("PUT /api/v1/clinicians/specialist/broadcasts/{id}/consult returns 200 and amended broadcast")
+    void testAmendConsult() throws Exception {
+        UUID broadcastId = UUID.randomUUID();
+        SpecialistConsultRequest req = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .secondaryTelemetry(true)
+                .consultNotes("Amended consult: Acute peritonitis diagnosed.")
+                .build();
+
+        AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .secondaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .secondaryTelemetry(true)
+                .consultNotes("Amended consult: Acute peritonitis diagnosed.")
+                .status(BroadcastStatus.COMPLETED)
+                .build();
+
+        when(clinicianService.amendConsult(eq(broadcastId), any(SpecialistConsultRequest.class)))
+                .thenReturn(broadcast);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/clinicians/specialist/broadcasts/" + broadcastId + "/consult")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.secondaryAcuityTier").value("TIER_1_CRITICAL"))
+                .andExpect(jsonPath("$.secondaryTelemetry").value(true));
+    }
 }

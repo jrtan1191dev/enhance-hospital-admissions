@@ -324,4 +324,26 @@ class BmuServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Admission request not found");
     }
+
+    @Test
+    @DisplayName("requestReconciliation: Sets reconciliationRequested to true and emits REQUEST_CLINICAL_RECONCILIATION audit event")
+    void testRequestReconciliation_SetsReconciliationRequestedAndLogsAudit() {
+        UUID reqId = UUID.randomUUID();
+        AdmissionRequest req = AdmissionRequest.builder()
+                .id(reqId)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .isDiscordant(true)
+                .reconciliationRequested(false)
+                .build();
+
+        when(admissionRequestRepository.findById(reqId)).thenReturn(Optional.of(req));
+        when(admissionRequestRepository.save(req)).thenReturn(req);
+
+        AdmissionRequest result = bmuService.requestReconciliation(reqId);
+
+        assertThat(result.getReconciliationRequested()).isTrue();
+        verify(admissionRequestRepository).save(req);
+        verify(auditLogger).logAction(eq("bmu_coord"), eq("REQUEST_CLINICAL_RECONCILIATION"), eq("AdmissionRequest:" + reqId), anyString());
+    }
 }

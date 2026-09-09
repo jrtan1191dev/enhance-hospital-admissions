@@ -55,6 +55,13 @@ public class ClinicianController {
         return ResponseEntity.ok(clinicianService.submitConsult(id, request));
     }
 
+    @PutMapping("/specialist/broadcasts/{id}/consult")
+    public ResponseEntity<AssessmentBroadcast> amendConsult(
+            @PathVariable UUID id,
+            @Valid @RequestBody SpecialistConsultRequest request) {
+        return ResponseEntity.ok(clinicianService.amendConsult(id, request));
+    }
+
     @PostMapping("/specialist/broadcasts/{id}/chain")
     public ResponseEntity<AssessmentBroadcast> chainConsult(
             @PathVariable UUID id,

@@ -716,5 +716,112 @@ class ClinicianServiceTest {
         assertThat(admissionRequest.getIsDiscordant()).isTrue();
         verify(admissionRequestRepository).save(admissionRequest);
     }
+
+    @Test
+    @DisplayName("amendConsult: In-place consult amendment updates effective acuity, preserves dwell time requestedAt, sets conditionUpdated, and logs audit")
+    void testAmendConsult_UpdatesEffectiveAcuity_PreservesRequestedAt_SetsConditionUpdated() {
+        UUID admissionId = UUID.randomUUID();
+        LocalDateTime originalRequestedAt = LocalDateTime.of(2026, 9, 9, 14, 0);
+
+        AdmissionRequest admissionRequest = AdmissionRequest.builder()
+                .id(admissionId)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .primaryTelemetry(false)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .effectiveTelemetry(false)
+                .isDiscordant(true)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .requestedAt(originalRequestedAt)
+                .clinicalConditionUpdated(false)
+                .build();
+
+        UUID broadcastId = UUID.randomUUID();
+        AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.COMPLETED)
+                .secondaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .secondaryTelemetry(false)
+                .consultNotes("Initial assessment: Acute chest pain.")
+                .claimedBySpecialistId("dr_lim_cardio")
+                .build();
+
+        // Specialist amends: Troponin now positive, patient elevated to Tier 1 Critical with Telemetry
+        SpecialistConsultRequest amendReq = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .secondaryTelemetry(true)
+                .consultNotes("Patient troponin peaked, acute STEMI detected. Elevate to ICU/telemetry bed immediately.")
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(broadcast));
+        when(broadcastRepository.save(broadcast)).thenReturn(broadcast);
+        when(broadcastRepository.findByAdmissionRequest_Id(admissionId)).thenReturn(List.of(broadcast));
+
+        AssessmentBroadcast amended = clinicianService.amendConsult(broadcastId, amendReq);
+
+        assertThat(amended.getSecondaryAcuityTier()).isEqualTo(AcuityTier.TIER_1_CRITICAL);
+        assertThat(amended.getSecondaryTelemetry()).isTrue();
+        assertThat(amended.getConsultNotes()).contains("STEMI detected");
+
+        // AdmissionRequest verification
+        assertThat(admissionRequest.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_1_CRITICAL);
+        assertThat(admissionRequest.getEffectiveTelemetry()).isTrue();
+        assertThat(admissionRequest.getIsDiscordant()).isTrue();
+        assertThat(admissionRequest.getClinicalConditionUpdated()).isTrue();
+        // Preserves queue dwell time
+        assertThat(admissionRequest.getRequestedAt()).isEqualTo(originalRequestedAt);
+
+        verify(admissionRequestRepository).save(admissionRequest);
+        verify(auditLogger).logAction(eq("dr_test"), eq("AMEND_SPECIALIST_CONSULT"), eq("AssessmentBroadcast:" + broadcastId), anyString());
+    }
+
+    @Test
+    @DisplayName("amendConsult: When amendment aligns secondary assessment with primary ED assessment, discordance automatically clears")
+    void testAmendConsult_WhenAlignsWithPrimary_ClearsDiscordance() {
+        UUID admissionId = UUID.randomUUID();
+        LocalDateTime originalRequestedAt = LocalDateTime.of(2026, 9, 9, 14, 0);
+
+        AdmissionRequest admissionRequest = AdmissionRequest.builder()
+                .id(admissionId)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .primaryTelemetry(false)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .effectiveTelemetry(true)
+                .isDiscordant(true)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .requestedAt(originalRequestedAt)
+                .build();
+
+        UUID broadcastId = UUID.randomUUID();
+        AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.COMPLETED)
+                .secondaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .secondaryTelemetry(true)
+                .consultNotes("Initial discordance.")
+                .claimedBySpecialistId("dr_lim_cardio")
+                .build();
+
+        // Specialist amends to align with ED attending assessment: Tier 3 and false telemetry
+        SpecialistConsultRequest amendReq = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .secondaryTelemetry(false)
+                .consultNotes("Repeat ECG normal, concordant with ED attending's initial assessment.")
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(broadcast));
+        when(broadcastRepository.save(broadcast)).thenReturn(broadcast);
+        when(broadcastRepository.findByAdmissionRequest_Id(admissionId)).thenReturn(List.of(broadcast));
+
+        clinicianService.amendConsult(broadcastId, amendReq);
+
+        assertThat(admissionRequest.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_3_ACUTE_STABLE);
+        assertThat(admissionRequest.getEffectiveTelemetry()).isFalse();
+        assertThat(admissionRequest.getIsDiscordant()).isFalse(); // Auto-cleared discordance!
+        assertThat(admissionRequest.getClinicalConditionUpdated()).isTrue();
+    }
 }
 

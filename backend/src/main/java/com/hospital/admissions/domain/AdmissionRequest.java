@@ -43,6 +43,7 @@ public class AdmissionRequest extends AuditableEntity {
 
     private Boolean requiresSpecialistConsult;
     private Boolean reconciliationRequested;
+    private Boolean clinicalConditionUpdated;
 
     @Enumerated(EnumType.STRING)
     private SpecialtyCluster admittingSpecialtyCluster;

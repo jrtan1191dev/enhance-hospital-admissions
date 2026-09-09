@@ -172,4 +172,28 @@ public class BmuService {
 
         return response;
     }
+
+    @Transactional
+    public AdmissionRequest requestReconciliation(UUID admissionRequestId) {
+        String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : "bmu_coordinator";
+
+        AdmissionRequest request = admissionRequestRepository.findById(admissionRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Admission request not found: " + admissionRequestId));
+
+        request.setReconciliationRequested(true);
+        AdmissionRequest saved = admissionRequestRepository.save(request);
+
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("EffectiveAcuity", request.getEffectiveAcuityTier());
+        details.put("Discordant", request.getIsDiscordant());
+        details.put("ReconciliationRequested", true);
+
+        auditLogger.logAction(currentUser, "REQUEST_CLINICAL_RECONCILIATION",
+                "AdmissionRequest:" + admissionRequestId,
+                AuditLogger.formatDetails(details));
+
+        return saved;
+    }
 }

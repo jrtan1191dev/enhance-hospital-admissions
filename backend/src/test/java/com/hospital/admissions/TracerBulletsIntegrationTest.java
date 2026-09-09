@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -546,5 +547,131 @@ class TracerBulletsIntegrationTest {
                 .andExpect(jsonPath("$[0].effectiveAcuityTier").value("TIER_1_CRITICAL"))
                 .andExpect(jsonPath("$[0].effectiveTelemetry").value(true))
                 .andExpect(jsonPath("$[0].discordant").value(true));
+    }
+
+    @Test
+    @DisplayName("Tracer Bullet 8: In-Place Consult Amendments & Non-Blocking BMU Clinical Reconciliation")
+    void testTracerBullet8_InPlaceConsultAmendmentsAndNonBlockingReconciliation() throws Exception {
+        // Step 1: Create dedicated patient and submit ED assessment requiring Cardiology consult
+        Patient pAmend = patientRepository.save(Patient.builder()
+                .name("Amendment Flow Patient")
+                .nricMasked("S****888X")
+                .age(58)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(15)
+                .queueToken("TOKEN-AMEND-" + java.util.UUID.randomUUID())
+                .build());
+
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(pAmend.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B2)
+                .needsTelemetry(false)
+                .requiresSpecialistConsult(true)
+                .targetClusters(java.util.Set.of(SpecialtyCluster.CARDIOLOGY))
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk());
+
+        AdmissionRequest admission = admissionRequestRepository.findAll().stream()
+                .filter(a -> a.getPatient().getId().equals(pAmend.getId()))
+                .findFirst().orElseThrow();
+        LocalDateTime originalRequestedAt = admission.getRequestedAt();
+
+        AssessmentBroadcast broadcast = broadcastRepository.findByAdmissionRequest_Id(admission.getId()).get(0);
+
+        // Claim and complete consult with higher acuity (TIER_2_ACUTE_URGENT) and telemetry
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/claim")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isOk());
+
+        SpecialistConsultRequest consultReq = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .secondaryTelemetry(true)
+                .consultNotes("Specialist impression: Urgent telemetry monitoring required.")
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/consult")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(consultReq)))
+                .andExpect(status().isOk());
+
+        AdmissionRequest queuedReq = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(queuedReq.getStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
+        assertThat(queuedReq.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_2_ACUTE_URGENT);
+        assertThat(queuedReq.getEffectiveTelemetry()).isTrue();
+        assertThat(queuedReq.getIsDiscordant()).isTrue();
+
+        // Step 2: BMU coordinator triggers 1-click clinical reconciliation request
+        mockMvc.perform(post("/api/v1/bmu/requests/" + admission.getId() + "/reconcile")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reconciliationRequested").value(true));
+
+        AdmissionRequest reconciledReq = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(reconciledReq.getReconciliationRequested()).isTrue();
+
+        // Step 3: Tentative bed allocation proceeds without being blocked by pending reconciliation
+        Ward targetWard = bedRepository.findAll().get(0).getWard();
+        Bed availableBed = bedRepository.save(Bed.builder()
+                .bedNumber("TEST-AMEND-BED")
+                .ward(targetWard)
+                .status(BedStatus.EMPTY_CLEANED)
+                .hasTelemetry(true)
+                .isNearNursingStation(false)
+                .build());
+
+        com.hospital.admissions.dto.BedAllocationRequest allocReq = new com.hospital.admissions.dto.BedAllocationRequest();
+        allocReq.setAdmissionRequestId(admission.getId());
+        allocReq.setBedId(availableBed.getId());
+        allocReq.setRank(1);
+        allocReq.setScore(90.0);
+
+        mockMvc.perform(post("/api/v1/bmu/allocate")
+                        .with(csrf())
+                        .header("X-User-Role", "BMU_COORDINATOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(allocReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("BED_ALLOCATED"))
+                .andExpect(jsonPath("$.reconciliationRequested").value(true));
+
+        // Step 4: Specialist amends consult in-place via PUT
+        SpecialistConsultRequest amendReq = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .secondaryTelemetry(false)
+                .consultNotes("Re-evaluated post-medication: Patient stabilized, telemetry no longer critical. Aligned with ED.")
+                .build();
+
+        mockMvc.perform(put("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/consult")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(amendReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.secondaryAcuityTier").value("TIER_3_ACUTE_STABLE"))
+                .andExpect(jsonPath("$.secondaryTelemetry").value(false));
+
+        AdmissionRequest amendedAdmission = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        // In-place effective acuity updated
+        assertThat(amendedAdmission.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_3_ACUTE_STABLE);
+        assertThat(amendedAdmission.getEffectiveTelemetry()).isFalse();
+        // Discordance auto-cleared
+        assertThat(amendedAdmission.getIsDiscordant()).isFalse();
+        // Queue dwell time preserved
+        assertThat(amendedAdmission.getRequestedAt()).isEqualTo(originalRequestedAt);
+        // Clinical condition updated alert flagged
+        assertThat(amendedAdmission.getClinicalConditionUpdated()).isTrue();
     }
 }

@@ -55,11 +55,12 @@ To ensure both long-term enterprise readiness and immediate prototype velocity, 
 
 > [!IMPORTANT]
 > **Prototype Decision & Production Transition Path**:
-> All mocked components—including Sister Hospital APIs, synthetic patient queues, diagnostic scan prepopulation, and in-memory H2 database storage—are **explicitly made as prototype decisions**. 
-> 
-> To release in production, these mocks **must be replaced with calls to the actual Sister Hospitals' and hospital EHR APIs**. 
-> 
+> All mocked components—including Sister Hospital APIs, synthetic patient queues, diagnostic scan prepopulation, and in-memory H2 database storage—are **explicitly made as prototype decisions**.
+>
+> To release in production, these mocks **must be replaced with calls to the actual Sister Hospitals' and hospital EHR APIs**.
+>
 > To ensure high maintainability and prevent synthetic code from leaking into production, the codebase is **production-ready by default**:
+>
 > - **Production-Ready Default**: In standard runs where no profile is specified, Spring Dependency Injection wires default production beans connecting to real external hospital APIs and enterprise PostgreSQL.
 > - **Strict Prototype Profile Isolation (`prototype`)**: All decisions, constraints, mock gateways, and synthetic datasets discussed up to this point are **strictly and exclusively bound to the `prototype` profile (`@Profile("prototype")`)**. When active (`spring.profiles.active=prototype`), Spring DI injects mock implementations without modifying any core business logic or domain services.
 > - **Separate Staging Environments (`dev`, `qa`)**: Profiles such as `dev` and `qa` represent distinct future environments whose specific configurations and integrations will be detailed later. They are **strictly decoupled from `prototype`** and must not be mixed with prototype mocks, in-memory databases, or synthetic data shortcuts.
@@ -107,7 +108,8 @@ graph TD
     SecFilter -.->|Injected by default| ProdSec
 ```
 
-#### Profile-Gated Component Matrix:
+#### Profile-Gated Component Matrix
+
 1. **`BedAllocationSolver` (Mathematical Optimization)**:
    - `HeuristicBedAllocationSolver` (`@Profile("prototype")`): Pure Java synchronous two-phase pack-then-batch and cohort-swap heuristic engine (ADR-002). Instantaneous (<50ms) evaluations on in-memory hospital wards without third-party solver licenses. Active strictly under `prototype`.
    - `TimefoldBedAllocationSolver` (Default implementation): Enterprise constraint solver powered by Timefold / OptaPlanner for multi-hospital regional cluster optimization.

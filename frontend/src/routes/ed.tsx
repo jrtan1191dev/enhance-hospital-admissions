@@ -191,7 +191,7 @@ export function EdRoute() {
             Emergency Department (ED) Clinical Intake
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Automated diagnostic parameter synthesis with 1-click clinical directives submission and parallel specialist broadcast.
+            Automated diagnostic parameter synthesis with clinical directives submission and parallel specialist broadcast.
           </p>
         </div>
         <Badge variant="outline" className="self-start sm:self-center px-3 py-1 text-xs bg-blue-50 text-blue-700 border-blue-200">
@@ -713,7 +713,7 @@ export function EdRoute() {
                       ? 'Submitting Assessment...'
                       : requiresSpecialistConsult
                       ? 'Broadcast for Specialist Consult Pool'
-                      : 'Confirm Direct Admission (1-Click to BMU)'}
+                      : 'Confirm Direct Admission'}
                   </Button>
                 </form>
               )}

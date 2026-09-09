@@ -288,7 +288,7 @@ function ConfigForm({
           disabled={isSaving}
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-6 cursor-pointer shadow-xs"
         >
-          {isSaving ? 'Saving...' : 'Save Configuration (1-Click)'}
+          {isSaving ? 'Saving...' : 'Save Configuration'}
         </Button>
       </div>
     </form>

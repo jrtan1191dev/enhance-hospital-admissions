@@ -22,7 +22,7 @@ const NAV_ITEMS = [
     label: 'ED Clinical Intake',
     icon: '🩺',
     badge: 'Urgent',
-    description: 'Triage, synthesized vitals & 1-click bed request',
+    description: 'Triage, synthesized vitals & bed request',
   },
   {
     path: '/specialist',

@@ -613,7 +613,7 @@ export function SpecialistRoute() {
                     ? 'Saving...'
                     : consultModalBroadcast.status === 'COMPLETED'
                     ? 'Save In-Place Amendment'
-                    : 'Submit Consult (1-Click)'}
+                    : 'Submit Consult'}
                 </Button>
               </DialogFooter>
             </form>

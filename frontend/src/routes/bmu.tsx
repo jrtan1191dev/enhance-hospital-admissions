@@ -530,28 +530,30 @@ export function BmuRoute() {
                     </div>
                   </div>
 
-                  {/* Specialist Endorsed Diversion 1-Click Action */}
-                  {selectedRequest.diversionPathway && selectedRequest.diversionPathway !== 'NONE' && (
-                    <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-900 space-y-2">
-                      <div className="flex items-center justify-between font-semibold">
-                        <span className="flex items-center gap-1.5 text-purple-800">
-                          <ExternalLink className="h-4 w-4" /> Specialist Endorsed Diversion
+                  {/* Specialist Endorsed Diversion Action */}
+                  {selectedRequest.diversionRecommended && (
+                    <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-teal-900 flex items-center gap-1.5">
+                          <CheckCircle2 className="h-4 w-4 text-teal-600" />
+                          Specialist Endorsed Alternative Care Pathway
                         </span>
-                        <Badge variant="purple" className="text-[10px]">
-                          {selectedRequest.diversionPathway}
+                        <Badge className="bg-teal-100 text-teal-800 text-[10px] font-mono">
+                          {selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home' : 'OCH Subacute'}
                         </Badge>
                       </div>
-                      <p className="text-[11px] text-purple-700">
-                        Specialist consult recommended diversion pathway. Execute referral directly to initiate 30-min SLA timer.
+                      <p className="text-[11px] text-teal-700">
+                        {selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC'
+                          ? 'Patient meets clinical stability criteria for home-based hospitalization under daily tele-monitoring & mobile nursing visits.'
+                          : 'Patient endorsed for step-down rehabilitation at Outram Community Hospital to preserve acute tertiary beds.'}
                       </p>
                       <Button
                         size="sm"
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs h-7 font-medium"
                         disabled={diversionMutation.isPending}
+                        className="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs cursor-pointer shadow-xs"
                         onClick={() => {
-                          const facility =
-                            selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC'
-                              ? 'MIC@Home'
+                          const facility = selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC'
+                              ? 'Mobile Inpatient Care at Home (MIC@Home)'
                               : 'Outram Community Hospital (OCH)';
                           setSelectedFacility(facility);
                           diversionMutation.mutate({
@@ -561,7 +563,7 @@ export function BmuRoute() {
                         }}
                       >
                         <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                        1-Click Enact Diversion ({selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home' : 'OCH'})
+                        Enact Diversion ({selectedRequest.diversionPathway === 'HOSPITAL_AT_HOME_MIC' ? 'MIC@Home' : 'OCH'})
                       </Button>
                     </div>
                   )}
@@ -657,6 +659,7 @@ export function BmuRoute() {
 
                               <Button
                                 size="sm"
+                                disabled={allocateMutation.isPending || isCurrentBed}
                                 className={`w-full mt-2.5 text-white font-medium text-xs h-8 ${
                                   isCurrentBed
                                     ? 'bg-slate-400 cursor-not-allowed'
@@ -664,7 +667,6 @@ export function BmuRoute() {
                                     ? 'bg-amber-600 hover:bg-amber-700'
                                     : 'bg-emerald-600 hover:bg-emerald-700'
                                 }`}
-                                disabled={allocateMutation.isPending || isCurrentBed}
                                 onClick={() =>
                                   allocateMutation.mutate({
                                     admissionRequestId: selectedRequest.id,
@@ -684,8 +686,8 @@ export function BmuRoute() {
                                 {isCurrentBed
                                   ? `Currently Reserved (Bed ${rec.bedNumber})`
                                   : selectedRequest.status === 'BED_ALLOCATED'
-                                  ? `1-Click Reallocate to Bed ${rec.bedNumber}`
-                                  : `1-Click Allocate Bed ${rec.bedNumber}`}
+                                  ? `Reallocate to Bed ${rec.bedNumber}`
+                                  : `Allocate Bed ${rec.bedNumber}`}
                               </Button>
                             </div>
                           );

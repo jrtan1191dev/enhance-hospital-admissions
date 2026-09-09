@@ -64,7 +64,7 @@ export function Header() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-900 text-lg tracking-tight">PatientFlow & BedCapacity</span>
+                <span className="font-bold text-slate-900 text-lg tracking-tight">Patient Admission & Discharge Management Application</span>
                 <Badge variant="secondary" className="text-[10px] font-mono px-1.5 py-0 bg-blue-50 text-blue-700 border-blue-200">
                   v1.0-PROTOTYPE
                 </Badge>

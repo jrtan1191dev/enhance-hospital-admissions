@@ -15,14 +15,13 @@ In traditional workflows, patients and caregivers face several critical pain poi
 
 The system introduces a secure, token-activated mobile **Patient & Family Public Milestone Tracker** accessible on any mobile smartphone without requiring native app downloads, complex account registrations, or login credentials:
 
-1. **Dispatch-Gated Activation & 4-Stage Milestone Stepper**: The public tracking token remains in a quiescent triage state until the primary ED attending formally signs and dispatches the bed request to the Bed Management Unit (BMU). Upon dispatch, the tracker activates at Milestone 1 and guides the patient through a transparent 4-stage journey:
+1. **Dispatch-Gated Activation & 3-Stage Milestone Stepper**: The public tracking token remains in a quiescent triage state ("ED Clinical Assessment in Progress") while emergency department doctor and specialist evaluations are ongoing. Upon attending physician sign-off and dispatch of the bed request to BMU (`BED_REQUESTED`), the tracker activates at Milestone 1 and guides the patient through a transparent 3-stage journey:
    - *Milestone 1*: Admission Decision Confirmed & Bed Queued (Bed request actively matched by BMU).
    - *Milestone 2*: Bed Assigned & Preparing Room (Matching ward identified; housekeeping sanitization underway).
-   - *Milestone 3*: Transfer to Inpatient Ward in Progress (Porter dispatched for bedside escort).
-   - *Milestone 4*: Admitted to Inpatient Ward Bed (Patient received and checked in by ward nursing staff).
-2. **Transparent Queue Metrics & Clinical Priority Context**: Displays the real-time estimated wait duration (in minutes), the number of patients ahead in the matching ward category, and empathetic contextual explanations stating that hospital bed allocations are prioritized by acute clinical urgency and infection control safety rather than arrival order.
-3. **Automated 2-Hour Status Refreshes & Empathetic Delay Disclosures**: Delivers automated status updates pushed via SMS/push notifications every 2 hours or immediately upon milestone advancement. When BMU coordinators attach structured operational delay tags (e.g., `SPECIALIZED_ISOLATION_CLEANING`, `HOUSEKEEPING_DELAY`), the tracker translates technical operational tags into compassionate, patient-friendly explanations with direct contact links to ward liaisons.
-4. **Interactive Financial & Care Explainer (FYI Insights)**: Integrates non-intimidating informational advisory cards that outline estimated daily out-of-pocket co-pays, government means-tested subsidy percentages, MediShield Life coverage, and typical length-of-stay benchmarks for rehabilitation or step-down pathways. Direct 1-click action buttons enable caregivers to dial Medical Social Work (MSW) or Financial Counseling hotlines directly from their device.
+   - *Milestone 3*: Admitted to Inpatient Ward Bed (Patient received and checked in by ward nursing staff).
+2. **Transparent Queue Metrics & Clinical Priority Context**: Displays real-time estimated wait duration (dynamically adjusted with operational delay buffers), the number of patients ahead in the matching ward class (`requestedWardClass`), and empathetic contextual explanations stating that hospital bed allocations are prioritized by acute clinical urgency (`effectiveAcuityTier`) and infection control safety rather than arrival order.
+3. **Automated 5-Minute Status Refreshes & Empathetic Delay Disclosures**: Delivers automated status updates pushed via simulated SMS/notifications periodically (5 minutes in prototype mode, 2 hours in production) or immediately upon milestone advancement. When BMU coordinators attach operational delay tags (hybrid standard enum + free-text custom reason), the tracker translates technical operational tags into compassionate, patient-friendly explanations with ward liaison contact details. Active delay tags are automatically cleared/archived when the request advances to `BED_ALLOCATED`.
+4. **Interactive Financial & Care Explainer (FYI Insights)**: Integrates non-intimidating informational advisory cards in the frontend that outline estimated daily out-of-pocket co-pays, government means-tested subsidy percentages (Class A, B1, B2, C), MediShield Life coverage, and alternative care benchmarks (e.g., 14 to 21 days for Community Hospital transfers or virtual ward details for MIC@Home). Direct 1-click action buttons enable caregivers to dial Medical Social Work (MSW) or Financial Counseling hotlines directly from their device.
 
 ---
 
@@ -33,19 +32,18 @@ The system introduces a secure, token-activated mobile **Patient & Family Public
 1. As a Patient or Family Member, I want my mobile tracker link to remain in pre-admission triage status while ED doctor evaluations are ongoing, so that I am not confused or alarmed by interim clinical deliberations before an admission decision is confirmed.
 2. As a Patient or Family Member, I want to receive an automated SMS notification containing a secure, personalized token URL the moment the ED attending physician signs off and dispatches my bed request to BMU, so that I can immediately track my admission progress.
 3. As a Patient or Family Member, I want to open the tracking link directly in any standard mobile web browser without downloading a native mobile app or entering passwords, so that tracking is effortless during an emergency.
-4. As a Patient or Family Member, I want to see a clear 4-stage visual milestone stepper (`Admission Confirmed` $\to$ `Bed Assigned & Sanitizing` $\to$ `Porter Escort in Progress` $\to$ `Admitted to Ward`), so that I understand where I am in the hospital admission process.
+4. As a Patient or Family Member, I want to see a clear 3-stage visual milestone stepper (`Admission Confirmed` $\to$ `Bed Assigned & Sanitizing` $\to$ `Admitted to Ward`), so that I understand where I am in the hospital admission process.
 5. As a Patient or Family Member, I want the tracker to automatically advance to Milestone 2 when BMU approves a bed allocation, so that I know a physical room has been secured for my care.
 6. As a Patient or Family Member, I want the tracker to display my assigned bed number, ward name, and floor level once a bed has been assigned, so that my family knows our inpatient destination.
-7. As a Patient or Family Member, I want the tracker to advance to Milestone 3 when ward porters are dispatched to transport me, so that I can prepare my personal belongings for ward transfer.
-8. As a Patient or Family Member, I want the tracker to advance to Milestone 4 when the ward nurse completes my bedside check-in, so that my family members receive confirmation of my safe arrival in the ward.
-9. As a Patient or Family Member, I want to see a dynamically calculated estimated wait duration (e.g., "~45 mins"), so that I have realistic expectations of boarding time.
-10. As a Patient or Family Member, I want to see the number of patients ahead of me in the queue for my matching ward category, so that queue progress is transparent.
-11. As a Patient or Family Member, I want the tracker to display clear context explaining that hospital admissions are prioritized by acute clinical urgency and safety rather than first-come-first-served order, so that I understand why arrival sequence does not dictate bed allocation.
-12. As an Evaluator or Prototype Demonstrator, I want a patient quick-picker dropdown in the simulator interface, so that I can switch between simulated patient tokens (`TOKEN-P101`, `TOKEN-P102`) in one click without manually typing URLs.
+7. As a Patient or Family Member, I want the tracker to advance to Milestone 3 when the ward nurse completes my bedside check-in, so that my family members receive confirmation of my safe arrival in the ward.
+8. As a Patient or Family Member, I want to see a dynamically calculated estimated wait duration (e.g., "~45 mins"), with additive operational buffers applied when delays occur, so that I have realistic expectations of boarding time.
+9. As a Patient or Family Member, I want to see the number of patients ahead of me in the queue for my matching ward class category (`requestedWardClass`), prioritized by effective acuity tier, so that queue progress is transparent.
+10. As a Patient or Family Member, I want the tracker to display clear context explaining that hospital admissions are prioritized by acute clinical urgency and safety rather than first-come-first-served order, so that I understand why arrival sequence does not dictate bed allocation.
+11. As an Evaluator or Prototype Demonstrator, I want a patient quick-picker dropdown in the simulator interface, so that I can switch between simulated patient tokens (`TOKEN-P101`, `TOKEN-P102`) in one click without manually typing URLs.
 
 ### Feature 3.2: Automated Status Updates & Delay Explanations
 
-1. As a Patient or Family Member, I want to receive an automated status update on my phone every 2 hours while waiting in the bed queue, so that I remain reassured that my admission is actively being handled without needing to ask the nurse.
+1. As a Patient or Family Member, I want to receive an automated status update on my phone periodically (every 5 minutes in prototype evaluation) while waiting in the bed queue, so that I remain reassured that my admission is actively being handled without needing to ask the nurse.
 2. As a Patient or Family Member, I want to receive an instant push notification or SMS whenever my milestone changes, so that I am immediately notified of important transitions.
 3. As a Patient or Family Member, I want the tracker to display clear, empathetic explanations when my wait is prolonged due to operational factors, so that I understand what is causing the delay rather than being left in an information void.
 4. As a Patient or Family Member, I want specialized cleaning delays (e.g., UV terminal sanitization of an airborne isolation room) to be explained in terms of patient safety and infection prevention, so that I feel protected rather than frustrated.
@@ -69,33 +67,38 @@ The system introduces a secure, token-activated mobile **Patient & Family Public
 
 ### 1. Modules & Domain Boundaries
 
-- **Patient Journey & Milestone Tracking Service (`PatientTrackerService`)**: Resolves public tokens to active `AdmissionRequest` entities, evaluates current journey milestones (1 through 4), calculates estimated wait durations, and maps clinical delay tags to empathetic user-facing copy.
-- **Dynamic Queue Position Calculator**: Evaluates pending `BED_REQUESTED` queues sorted by clinical acuity tier and admission request timestamp to compute the patient's ordinal position and queue depth in their matching category.
-- **Financial & Care Advisory Synthesis Engine**: Generates customized subsidy breakdowns, co-pay estimates, and rehabilitation benchmarks based on the patient's requested Ward Class and clinical admission directives.
+- **Patient Journey & Milestone Tracking Service (`PatientTrackerService`)**: Resolves public tokens to active `AdmissionRequest` entities, evaluates current journey milestones (1 through 3), calculates estimated wait durations with delay buffers, and maps clinical delay tags to empathetic user-facing copy.
+- **Dynamic Queue Position Calculator**: Evaluates pending `BED_REQUESTED` queues partitioned by `requestedWardClass` and sorted by `effectiveAcuityTier` and `requestedAt` timestamp to compute the patient's ordinal position and queue depth in their matching category.
+- **Financial & Care Advisory (Frontend FYI Insights)**: Displays structured static subsidy breakdowns, co-pay estimates, and rehabilitation benchmarks based on the patient's `requestedWardClass` and diversion pathway (`COMMUNITY_HOSPITAL_TRANSFER` or `MIC_AT_HOME`).
 - **Public Patient Tracker Controller (`PatientTrackerController`)**: Exposes unauthenticated, token-scoped REST endpoints returning sanitized, patient-safe DTOs with no leakage of internal clinical notes, diagnostic data, or other patients' PII.
-- **Automated Milestone Notification Scheduler**: Periodically identifies active admission requests and dispatches 2-hour queue refresh messages and milestone progression alerts.
+- **Automated Milestone Notification Scheduler**: Periodically identifies active admission requests waiting $\ge 5$ minutes and dispatches periodic queue refresh messages (`DISPATCH_PERIODIC_UPDATE`) and milestone progression alerts.
 
 ### 2. Domain Glossary & Milestone State Mapping
 
 - **Public Token (`queueToken`)**: Secure alphanumeric token (e.g., `TOKEN-P101`, `TOKEN-P102`) generated upon admission creation.
 - **Milestone Stepper States**:
+  - **`Quiescent Pre-Milestone: ED Assessment in Progress`**: Displayed when `AdmissionRequest.status` is `ASSESSMENT_PENDING`.
   - **`Milestone 1: Admission Decision Confirmed`**: Triggered when `AdmissionRequest.status` is `BED_REQUESTED`.
-  - **`Milestone 2: Bed Assigned & Sanitization`**: Triggered when `AdmissionRequest.status` is `BED_ALLOCATED`.
-  - **`Milestone 3: Porter Transfer in Progress`**: Triggered when `AdmissionRequest.status` is `IN_TRANSIT` (or porter transfer dispatched).
-  - **`Milestone 4: Admitted to Inpatient Bed`**: Triggered when `AdmissionRequest.status` is `ADMITTED_INPATIENT`.
+  - **`Milestone 2: Bed Assigned & Preparing Room`**: Triggered when `AdmissionRequest.status` is `BED_ALLOCATED`.
+  - **`Milestone 3: Admitted to Inpatient Bed`**: Triggered when `AdmissionRequest.status` is `ADMITTED_INPATIENT`.
 - **Operational Delay Reason Mapping**:
-  - `HOUSEKEEPING_DELAY` $\to$ *"Your ward bed is currently undergoing final housekeeping sanitization and linen preparation."*
-  - `BED_SHORTAGE` $\to$ *"Our clinical coordinators are actively prioritizing ward beds across the hospital to ensure optimal clinical placement."*
-  - `SPECIALIZED_ISOLATION_CLEANING` $\to$ *"Your specialized isolation room is completing a mandatory 30-minute UV disinfection cycle for your safety."*
-  - `SURGE_TRAUMA_EVENT` $\to$ *"The emergency department is currently managing critical trauma arrivals. Thank you for your patience as urgent cases are stabilized."*
+  - Standard Enum (`OperationalDelayTag`):
+    - `HOUSEKEEPING_DELAY` $\to$ *"Your ward bed is currently undergoing final housekeeping sanitization and linen preparation."* (+20 mins wait buffer)
+    - `BED_SHORTAGE` $\to$ *"Our clinical coordinators are actively prioritizing ward beds across the hospital to ensure optimal clinical placement."* (+30 mins wait buffer)
+    - `SPECIALIZED_ISOLATION_CLEANING` $\to$ *"Your specialized isolation room is completing a mandatory 30-minute UV disinfection cycle for your safety."* (+30 mins wait buffer)
+    - `SURGE_TRAUMA_EVENT` $\to$ *"The emergency department is currently managing critical trauma arrivals. Thank you for your patience as urgent cases are stabilized."* (+45 mins wait buffer)
+  - Custom / Free-text (`OTHER`):
+    - Free-form remarks entered by BMU coordinators fall back to empathetic clinical coordination copy with liaison hotline contact info.
+  - Active delays are automatically archived/cleared upon transition to `BED_ALLOCATED`.
 
 ### 3. API Surface & REST Contracts
 
-- `GET /api/v1/patients/track/{token}`: Returns real-time milestone progress, queue position, estimated wait minutes, assigned bed details, operational delay disclosures, and financial guidance.
+- `GET /api/v1/patients/track/{token}`: Returns real-time milestone progress, queue position, estimated wait minutes, assigned bed details, operational delay disclosures, and ward class / diversion flags.
 - `GET /api/v1/patients/tokens`: Returns list of available patient records with their public tokens (strictly active under `@Profile("prototype")` to power the UI simulator patient quick-picker).
-- `POST /api/v1/patients/beds/{bedId}/checkin`: Ward nurse checks in patient arrival $\to$ updates bed to `OCCUPIED_TAKEN` and admission request to `ADMITTED_INPATIENT` (advancing tracker to Milestone 4).
+- `POST /api/v1/patients/beds/{bedId}/checkin`: Ward nurse checks in patient arrival $\to$ updates bed to `OCCUPIED_TAKEN` and admission request to `ADMITTED_INPATIENT` (advancing tracker to Milestone 3).
 - `POST /api/v1/patients/beds/{bedId}/vacate`: Ward nurse marks patient discharged $\to$ updates bed to `EMPTY_PENDING_CLEANING` and admission request to `DISCHARGED`.
 - `POST /api/v1/patients/beds/{bedId}/clean`: Housekeeping clean sign-off $\to$ updates bed to `EMPTY_CLEANED`.
+- `POST /api/v1/patients/simulate-periodic-update`: Triggers scheduled notification cycle under `@Profile("prototype")`.
 
 ```typescript
 // Core Data Contracts (Prototype-Verified Shape)
@@ -104,28 +107,26 @@ interface PatientMilestoneResponse {
   patientName: string;
   queueToken: string;
   admissionStatus: AdmissionStatus;
+  requestedWardClass: WardClass;
   queuePosition: number;
+  patientsAhead: number;
   estimatedWaitMinutes: number;
   assignedBedNumber?: string;
   assignedWardName?: string;
   assignedLevel?: number;
   delayReason?: string;
+  delayContactHotline?: string;
   coPayEstimate?: string;
   careGuidance?: string;
-  financialExplainer?: {
-    dailyCoPayRange: string;
-    subsidyPercentage: string;
-    medisaveEligible: boolean;
-    rehabStayBenchmark?: string;
-    mswContactHotline: string;
-  };
+  diversionRecommended?: boolean;
+  diversionPathway?: DiversionPathway;
 }
 ```
 
 ### 4. Architectural Decisions (ADR Alignment)
 
 - **ADR-001 (Relational Design & Spatial Hierarchy)**: Bed assignments display Level $\to$ Ward $\to$ Bed hierarchy with no cubicles (e.g., "Bed 8A-04, Ward 8A, Level 8").
-- **ADR-003 (Polling & Real-Time Synchronization)**: The mobile tracker frontend leverages TanStack Query with active 3-second background polling (`refetchInterval: 3000`), ensuring that milestone transitions (e.g., bed allocation, porter dispatch, nurse check-in) reflect on screen instantaneously without manual page refreshes.
+- **ADR-003 (Polling & Real-Time Synchronization)**: The mobile tracker frontend leverages TanStack Query with active 3-second background polling (`refetchInterval: 3000`), ensuring that milestone transitions (e.g., bed allocation, nurse check-in) reflect on screen instantaneously without manual page refreshes.
 - **ADR-004 (Strict REST & Sanitized Responses)**: Endpoints return strict, minimal DTOs. Sensitive diagnostic reports, doctor notes, and clinical discordance details are strictly excluded from patient-facing responses. Invalid tokens return RFC 7807 `ProblemDetail` with HTTP 404 Not Found.
 - **ADR-005 & ADR-006 (Zero-Auth Token Security & Persona Switching)**: Public tracker access is secured via unguessable opaque tokens rather than clinical login sessions. In prototype mode, a topbar persona switcher allows evaluators to simulate the mobile phone view within a centered mobile frame.
 
@@ -229,7 +230,7 @@ Tests must verify external observable behavior and domain invariants through HTT
 - **Milestone Progression**: 
   - `BED_REQUESTED` status must yield Milestone 1 with active queue position and estimated wait.
   - `BED_ALLOCATED` status must yield Milestone 2 with assigned bed, ward, and level details.
-  - `ADMITTED_INPATIENT` status must yield Milestone 4 with 0 mins remaining wait and queue position 0.
+  - `ADMITTED_INPATIENT` status must yield Milestone 3 with 0 mins remaining wait and queue position 0.
 - **Privacy & PII Protection**: Verify that clinical consult impressions, primary doctor notes, and internal discordance flags are completely absent from the JSON response.
 - **Empathetic Delay Copy**: Structured delay reason tags on the admission request must translate into empathetic user-facing disclosures in the response payload.
 - **Financial Advisory Consistency**: Verify that requested ward classes (Class A vs. Class B2/C) correctly reflect subsidized co-pay ranges and appropriate guidance text.

@@ -14,10 +14,9 @@ In standard inpatient operations, several compounding factors cause beds to rema
 
 The system provides an automated, closed-loop **Inpatient Discharge Runway & Rapid Bed Turnover Logistics** platform:
 
-1. **Multi-Day Runway & Potential Discharge Indicator (D-2 / D-3)**: Enables inpatient attending physicians to record an Estimated Date of Discharge (EDD) paired with clinical confidence ratings (High, Medium, Low) during morning ward rounds 48 to 72 hours in advance. Visual "Potential Discharge" indicators (D-2 / D-3) highlight imminent departures across ward consoles and provide the BMU with predictive capacity forecasts.
-2. **Proactive Early Caregiver Readiness Protocols**: Activates early digital engagement checklists 2 to 3 days before discharge, prompting ward nurses and medical social workers to verify caregiver training, home equipment setup, and transport bookings in advance. Blockers are resolved early, ensuring that caregivers are prepared for morning departures before 11:30 AM.
-3. **Automated Day-of-Discharge Morning Sign-Off & Bedside Medication Delivery**: Morning physician sign-off (targeted before 09:30 AM) instantly triggers the automated Inpatient Pharmacy Dispensing Queue with an expedited 11:00 AM delivery SLA. Ward medication runners deliver pre-packed discharge medications directly to the patient's bedside, where nurses verify orders via barcode wristband scanning, eliminating outpatient pharmacy visits.
-4. **30-Minute Housekeeping Turnover & BMU Bed Release**: The moment a patient vacates the bed, the ward nurse taps "Patient Vacated" on the console. The bed immediately transitions from `OCCUPIED_TAKEN` (`Grey`) to `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) and dispatches an automated terminal cleaning task with a 30-minute SLA countdown to the EVS mobile terminal. Upon sanitization completion, the housekeeper taps "Terminal Cleaning Complete & Inspected," immediately flipping the bed to `EMPTY_CLEANED` (`White`) and releasing capacity into the BMU live allocation engine.
+1. **Multi-Day Runway & Potential Discharge Indicator (D-2 / D-3)**: Enables inpatient attending physicians and ward nurses to record an Estimated Date of Discharge (EDD) paired with clinical confidence ratings (High, Medium, Low) during morning ward rounds 48 to 72 hours in advance. Visual "Potential Discharge" indicators (D-2 / D-3) highlight imminent departures across ward consoles and provide the BMU with predictive capacity forecasts.
+2. **Automated Day-of-Discharge Morning Sign-Off & Bedside Medication Delivery (Ward Console Integrated)**: Morning physician or charge nurse sign-off (targeted before 09:30 AM) triggers discharge medication dispensing directly within the ward workflow (`PACKING_IN_PROGRESS`). Upon bedside delivery, the ward team confirms receipt (`DELIVERED_BEDSIDE`), advancing the patient journey to "Ready to Vacate" and eliminating outpatient pharmacy delays.
+3. **30-Minute Housekeeping Turnover & BMU Bed Release**: The moment a patient vacates the bed, the ward nurse taps "Patient Vacated" on the console. The bed immediately transitions from `OCCUPIED_TAKEN` (`Grey`) to `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) and initiates a live 30-minute SLA countdown (`ON_TRACK`, `APPROACHING_SLA`, `BREACHED`). Upon sanitization completion, the housekeeper taps "Sign-Off Clean," immediately flipping the bed to `EMPTY_CLEANED` (`White`) and releasing capacity back into the BMU live allocation engine.
 
 ---
 
@@ -25,37 +24,29 @@ The system provides an automated, closed-loop **Inpatient Discharge Runway & Rap
 
 ### Feature 4.1: Multi-Day Runway & Potential Discharge Indicator (D-2 / D-3)
 
-1. As an Inpatient Attending Physician, I want to record an Estimated Date of Discharge (EDD) and confidence level (High, Medium, Low) during morning ward rounds, so that ward nurses and care coordinators can identify potential discharges 2 to 3 days in advance.
-2. As an Inpatient Attending Physician, I want to update or extend the EDD with clinical rationale if the patient's condition changes, so that discharge planning remains aligned with actual clinical trajectory.
-3. As an Inpatient Ward Charge Nurse, I want the ward bed roster to highlight patients flagged with D-2 and D-3 Potential Discharge Indicators, so that nursing staff can initiate early discharge preparation protocols.
+1. As an Inpatient Attending Physician or Ward Charge Nurse, I want to record an Estimated Date of Discharge (EDD) and confidence level (High, Medium, Low) during morning ward rounds, so that ward staff and bed planners can identify potential discharges 2 to 3 days in advance.
+2. As an Inpatient Attending Physician or Ward Charge Nurse, I want to update or extend the EDD with clinical rationale if the patient's condition changes, so that discharge planning remains aligned with actual clinical trajectory.
+3. As an Inpatient Ward Charge Nurse, I want the ward bed roster to highlight patients flagged with D-2 and D-3 Potential Discharge Indicators, so that nursing staff can anticipate imminent discharges.
 4. As a BMU Coordinator, I want to view upcoming discharge projections 24 to 72 hours out categorized by ward and specialty cluster, so that capacity planning can anticipate bed vacancies before physical discharge occurs.
-5. As an Inpatient Ward Nurse, I want the system to prompt me to initiate caregiver engagement protocols 2 to 3 days prior to discharge, so that caregiver preparation is completed without last-minute delays.
-6. As an Inpatient Ward Nurse, I want a structured caregiver discharge readiness checklist tracking caregiver training (e.g., insulin injection, wound care), home medical equipment delivery, and transport bookings, so that all discharge requirements are verified systematically.
-7. As an Inpatient Ward Nurse, I want the system to flag unresolved caregiver readiness blockers 24 hours prior to discharge (D-1), so that care coordinators and social workers can intervene before the discharge morning.
-8. As a Patient or Family Caregiver, I want to receive proactive notifications regarding my planned discharge date and pending caregiver preparation tasks, so that I can arrange transportation and schedule time off work.
-9. As a Medical Social Worker, I want to identify patients whose discharge readiness is blocked by complex social, caregiving, or financial barriers, so that specialized transitional support can be arranged early.
+5. As a Patient or Family Caregiver, I want to see our planned Estimated Date of Discharge on the public tracker, so that we have clear expectations of our discharge timeline.
 
 ### Feature 4.2: Automated Day-of-Discharge Bedside Medication Delivery
 
-1. As an Inpatient Attending Physician, I want a 1-click "Final Discharge Sign-Off" action during morning rounds (before 09:30 AM), so that discharge authorizations are completed early without administrative delays.
-2. As an Inpatient Pharmacist, I want the physician's morning discharge sign-off to immediately route the patient's discharge prescription into the Inpatient Pharmacy Dispensing Queue, so that medications are pre-packed hours before the patient vacates.
-3. As an Inpatient Pharmacist, I want discharge prescriptions to be flagged with an expedited "Discharge Medication: Delivery by 11:00 AM" SLA, so that discharge orders are prioritized over routine ward stock replenishment.
-4. As a Ward Medication Runner, I want a mobile task queue displaying pre-packed discharge medication orders ready for delivery to ward beds, so that I can efficiently batch deliveries to specific wards.
-5. As a Ward Medication Runner, I want to accept and confirm delivery tasks on my mobile terminal, so that medication custody transitions are tracked in real time.
-6. As an Inpatient Ward Nurse, I want to verify bedside medication deliveries by scanning the medication package barcode and patient wristband, so that medication reconciliation is completed safely at the bedside.
-7. As a Patient or Family Member, I want pre-packed discharge medications delivered directly to my bedside with verbal pharmacist or nurse instructions, so that I do not have to wait in long lines at the outpatient pharmacy counter.
-8. As a Patient or Family Member, I want my mobile journey tracker to display "Medications Received at Bedside — Ready to Vacate", so that I know my clinical discharge requirements are 100% complete.
+1. As an Inpatient Attending Physician or Ward Charge Nurse, I want a 1-click "Final Discharge Sign-Off" action on the ward console during morning rounds (before 09:30 AM), so that discharge authorizations are completed early without administrative delays.
+2. As a Ward Nurse, I want the morning discharge sign-off to immediately transition the patient's medication status to `PACKING_IN_PROGRESS`, so that medications are pre-packed hours before the patient vacates.
+3. As a Ward Nurse or Medication Runner, I want a 1-click "Confirm Bedside Delivery" action on the ward console, so that bedside medication handoff is recorded without requiring complex standalone pharmacy portals.
+4. As a Patient or Family Member, I want pre-packed discharge medications delivered directly to my bedside, so that I do not have to wait in long lines at the outpatient pharmacy counter.
+5. As a Patient or Family Member, I want my mobile journey tracker to display "Medications Received at Bedside — Ready to Vacate", so that I know my clinical discharge requirements are 100% complete.
 
 ### Feature 4.3: 30-Minute Housekeeping Turnover & BMU Bed Release
 
 1. As an Inpatient Ward Nurse, I want a 1-click "Patient Vacated" action on the ward console the moment a patient physically departs, so that bed vacancy is recorded without delay.
 2. As an Inpatient Ward Nurse, I want vacating a bed to automatically transition its status from `OCCUPIED_TAKEN` (`Grey`) to `EMPTY_PENDING_CLEANING` (`Mustard Yellow`), so that uncleaned beds are immediately blocked from premature allocation.
-3. As an EVS Housekeeping Supervisor, I want vacated beds to immediately dispatch an automated terminal cleaning task with a 30-minute SLA countdown to on-duty housekeepers' mobile terminals, so that cleaning teams are deployed promptly.
-4. As an EVS Housekeeping Specialist, I want to view specific room infection protocols (e.g., contact isolation wipe-down, 30-minute UV sanitization for airborne isolation) on my mobile terminal, so that appropriate sanitization procedures are followed.
-5. As an EVS Housekeeping Specialist, I want to tap "Terminal Cleaning Complete & Inspected" on my mobile terminal upon sanitization sign-off, so that the cleaning completion is recorded digitally.
-6. As a BMU Coordinator, I want completed housekeeping sign-offs to immediately flip the bed status from `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) to `EMPTY_CLEANED` (`White`), so that capacity is released back to the hospital.
-7. As a BMU Coordinator, I want newly cleaned `White` beds to instantly appear in live recommendation algorithms for waiting ED patients, so that bed turnover latency is eliminated.
-8. As a Hospital Facilities Director, I want turnover performance metrics (elapsed time from nurse vacate to housekeeper sign-off vs. 30-minute SLA) to be tracked and logged in audit trails, so that housekeeping efficiency and turnaround compliance can be continuously measured.
+3. As an EVS Housekeeping Supervisor and Specialist, I want vacated beds to display a dynamic 30-minute SLA countdown on the ward turnover queue, indicating whether turnover is `ON_TRACK`, `APPROACHING_SLA`, or `BREACHED` with overdue minutes.
+4. As an EVS Housekeeping Specialist, I want to tap "Sign-Off Clean" upon terminal sanitization completion, immediately recording turnover time and compliance.
+5. As a BMU Coordinator, I want completed housekeeping sign-offs to immediately flip the bed status from `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) to `EMPTY_CLEANED` (`White`), so that capacity is released back to the hospital.
+6. As a BMU Coordinator, I want newly cleaned `White` beds to instantly appear in live recommendation algorithms for waiting ED patients, so that bed turnover latency is eliminated.
+7. As a Hospital Facilities Director, I want turnover performance metrics (elapsed cleaning minutes vs. 30-minute SLA) to be tracked and logged in audit trails, so that housekeeping efficiency and turnaround compliance can be continuously measured.
 
 ---
 
@@ -63,11 +54,10 @@ The system provides an automated, closed-loop **Inpatient Discharge Runway & Rap
 
 ### 1. Modules & Domain Boundaries
 
-- **Discharge Runway & EDD Forecasting Service**: Manages Estimated Date of Discharge (EDD) records, confidence indicators, and ward-level runway calculations (D-3, D-2, D-1). Computes 24–72 hour aggregate capacity projections for BMU coordinators.
-- **Caregiver Readiness & Engagement Module**: Manages structured pre-discharge checklists (home equipment, caregiver skills training, transport booking) and alerts clinical coordinators to overdue items.
-- **Expedited Pharmacy Dispensing & Bedside Runner Service**: Ingests discharge prescriptions triggered by morning physician sign-off, manages the expedited pharmacy dispensing queue with 11:00 AM SLA targets, and coordinates mobile medication runner dispatch to ward beds.
-- **Ward Nursing Bed Management Service (`WardService` / `PatientTrackerService`)**: Manages physical bed transitions across `EMPTY_ASSIGNED` (`Green`), `OCCUPIED_TAKEN` (`Grey`), and `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) via nurse check-in and vacate actions.
-- **EVS Housekeeping Turnover Engine**: Dispatches terminal cleaning tasks with 30-minute SLA timers, tracks sanitization protocols, and executes the state flip from `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) to `EMPTY_CLEANED` (`White`).
+- **Discharge Runway & EDD Forecasting Service (`WardService` / `AdmissionRequest`)**: Manages Estimated Date of Discharge (EDD) records, confidence indicators, and dynamic ward-level runway calculations (`RUNWAY_D3`, `RUNWAY_D2`, `RUNWAY_D1`, `READY_FOR_MORNING_SIGNOFF`). Computes 24–72 hour aggregate capacity projections for BMU coordinators.
+- **Bedside Medication Delivery Coordination**: Manages streamlined day-of-discharge medication statuses (`NOT_DISPATCHED`, `PACKING_IN_PROGRESS`, `DELIVERED_BEDSIDE`) directly in the Ward Console.
+- **Ward Nursing Bed Management Service (`PatientTrackerService`)**: Manages physical bed transitions across `EMPTY_ASSIGNED` (`Green`), `OCCUPIED_TAKEN` (`Grey`), and `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) via nurse check-in and vacate actions.
+- **EVS Housekeeping Turnover Engine**: Calculates dynamic 30-minute SLA countdowns (`ON_TRACK`, `APPROACHING_SLA`, `BREACHED`), logs cleaning performance metrics, and executes the state flip from `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) to `EMPTY_CLEANED` (`White`).
 
 ### 2. Domain Glossary & Enumerations
 
@@ -77,19 +67,16 @@ The system provides an automated, closed-loop **Inpatient Discharge Runway & Rap
   - `EMPTY_CLEANED` (`White`): Cleaned, sanitized, inspected, and unallocated ("empty, cleaned").
   - `EMPTY_ASSIGNED` (`Green`): Allocated to patient, patient in transit from ED.
 - **`EddConfidence`**: `HIGH`, `MEDIUM`, `LOW`.
-- **`DischargeReadinessStage`**: `RUNWAY_D3`, `RUNWAY_D2`, `RUNWAY_D1`, `READY_FOR_MORNING_SIGNOFF`, `MEDICATIONS_AT_BEDSIDE`, `VACATED`.
-- **`MedicationDeliveryStatus`**: `PRESCRIPTION_QUEUED`, `PACKING_IN_PROGRESS`, `RUNNER_DISPATCHED`, `DELIVERED_BEDSIDE`.
+- **`DischargeRunwayStage`**: `RUNWAY_D3`, `RUNWAY_D2`, `RUNWAY_D1`, `READY_FOR_MORNING_SIGNOFF`, `MEDICATIONS_PENDING`, `READY_TO_VACATE`, `VACATED`.
+- **`MedicationDeliveryStatus`**: `NOT_DISPATCHED`, `PACKING_IN_PROGRESS`, `DELIVERED_BEDSIDE`.
 - **`TurnoverSlaStatus`**: `ON_TRACK`, `APPROACHING_SLA`, `BREACHED`.
 
 ### 3. API Surface & REST Contracts
 
 - `POST /api/v1/ward/patients/{patientId}/edd`: Sets or updates Estimated Date of Discharge and confidence rating.
-- `GET /api/v1/ward/runway`: Retrieves active discharge runways across all wards with caregiver readiness statuses.
-- `PUT /api/v1/ward/patients/{patientId}/caregiver-checklist`: Updates individual checklist tasks (`caregiverTrained`, `equipmentDelivered`, `transportBooked`).
-- `POST /api/v1/ward/patients/{patientId}/discharge-signoff`: Physician executes final morning discharge sign-off; transitions readiness state and auto-queues discharge medications.
-- `GET /api/v1/pharmacy/discharge-queue`: Retrieves active discharge medication orders prioritized by ward delivery SLA.
-- `POST /api/v1/pharmacy/orders/{orderId}/dispense`: Pharmacist marks order packed and ready for runner pickup.
-- `POST /api/v1/pharmacy/orders/{orderId}/deliver`: Ward runner and nurse complete bedside barcode scan verification.
+- `GET /api/v1/ward/runway`: Retrieves active discharge runways across all wards with dynamic runway stages.
+- `POST /api/v1/ward/patients/{patientId}/discharge-signoff`: Clinician executes final morning discharge sign-off; transitions readiness state and auto-queues discharge medications.
+- `POST /api/v1/ward/patients/{patientId}/deliver-medication`: Confirms bedside delivery of discharge medications.
 - `POST /api/v1/patients/beds/{bedId}/vacate`: Ward nurse marks patient vacated $\to$ bed transitions `OCCUPIED_TAKEN` (`Grey`) $\to$ `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) and initiates 30-minute cleaning SLA countdown.
 - `POST /api/v1/patients/beds/{bedId}/clean`: Housekeeping specialist signs off terminal cleaning $\to$ bed transitions `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) $\to$ `EMPTY_CLEANED` (`White`).
 
@@ -101,15 +88,11 @@ interface DischargeRunwayDto {
   bedNumber: string;
   wardCode: string;
   levelNumber: number;
-  estimatedDateOfDischarge: string;
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
-  runwayStage: 'RUNWAY_D3' | 'RUNWAY_D2' | 'RUNWAY_D1' | 'READY_FOR_SIGNOFF';
-  caregiverChecklist: {
-    caregiverTrained: boolean;
-    homeEquipmentReady: boolean;
-    transportBooked: boolean;
-  };
-  medicationStatus?: 'QUEUED' | 'PACKED' | 'DELIVERED_BEDSIDE';
+  estimatedDateOfDischarge?: string;
+  confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
+  runwayStage: 'RUNWAY_D3' | 'RUNWAY_D2' | 'RUNWAY_D1' | 'READY_FOR_SIGNOFF' | 'MEDICATIONS_PENDING' | 'READY_TO_VACATE';
+  dischargeSignoffAt?: string;
+  medicationStatus: 'NOT_DISPATCHED' | 'PACKING_IN_PROGRESS' | 'DELIVERED_BEDSIDE';
 }
 
 interface TurnoverTaskDto {
@@ -118,10 +101,9 @@ interface TurnoverTaskDto {
   wardCode: string;
   levelNumber: number;
   vacatedAt: string;
-  slaDeadline: string;
+  cleaningStartedAt: string;
   remainingMinutes: number;
   slaStatus: 'ON_TRACK' | 'APPROACHING_SLA' | 'BREACHED';
-  specialIsolationProtocol?: string;
 }
 ```
 
@@ -131,7 +113,7 @@ interface TurnoverTaskDto {
 - **ADR-002 (Bed State Machine & Heuristic Recalculation)**: Vacated beds enter `EMPTY_PENDING_CLEANING` and are strictly excluded from BMU algorithms until housekeeping flips status to `EMPTY_CLEANED`. Once flipped, BMU allocation heuristics immediately include the bed in live candidate rankings.
 - **ADR-003 (Polling & Immediate Cache Invalidation)**: Ward consoles and EVS queues utilize TanStack Query with active 3-second background polling (`refetchInterval: 3000`), supplemented by query invalidation upon mutate actions (`useVacatePatient`, `useCleanBed`).
 - **ADR-004 (Strict Validation & RFC 7807)**: API endpoints validate requests using Jakarta Bean Validation. Calling `clean` on a bed that is not in `EMPTY_PENDING_CLEANING` returns HTTP 400 Bad Request with Problem Details.
-- **ADR-005 & ADR-006 (Persona Switching & Audit Trails)**: Evaluators can simulate both ward nurses (`nurse_sarah`) and housekeeping specialists (`evs_cleaner_ali`) with zero login friction via topbar role switching, emitting structured SLF4J audit events (`VACATE_PATIENT`, `CLEAN_BED`).
+- **ADR-005 & ADR-006 (Persona Switching & Audit Trails)**: Evaluators can simulate ward clinicians (`nurse_sarah`, `doctor_chen`) and housekeeping specialists (`evs_cleaner_ali`) with zero login friction via topbar role switching, emitting structured SLF4J audit events (`VACATE_PATIENT`, `CLEAN_BED`, `DISCHARGE_SIGNOFF`, `DISPENSE_MEDICATION`, `DELIVER_BEDSIDE_MEDICATION`).
 
 ---
 
@@ -142,20 +124,17 @@ All Epic 4 discharge runway, pharmacy bedside delivery, and bed turnover KPIs ar
 ### 1. Structured Audit Log Events
 
 - `RECORD_EDD`:
-  - `target`: `Patient:{id}`
-  - `details`: `EDD={date}, Confidence={HIGH|MEDIUM|LOW}, RunwayStage={stage}`
-- `COMPLETE_CAREGIVER_CHECKLIST`:
-  - `target`: `Patient:{id}`
-  - `details`: `CaregiverTrained={true|false}, EquipmentReady={true|false}, TransportBooked={true|false}, ResolvedPreDischarge={true|false}`
+  - `target`: `AdmissionRequest:{id}`
+  - `details`: `PatientId={patientId}, EDD={date}, Confidence={HIGH|MEDIUM|LOW}, RunwayStage={stage}`
 - `DISCHARGE_SIGNOFF`:
   - `target`: `AdmissionRequest:{id}`
   - `details`: `DoctorId={doctorId}, SignOffTime={time}, PreDischargeHour={hour}`
 - `DISPENSE_MEDICATION`:
-  - `target`: `MedicationOrder:{orderId}`
+  - `target`: `AdmissionRequest:{id}`
   - `details`: `PatientId={id}, WardBed={bedNumber}, TargetSla="11:00 AM"`
 - `DELIVER_BEDSIDE_MEDICATION`:
-  - `target`: `MedicationOrder:{orderId}`
-  - `details`: `PatientId={id}, BedId={bedId}, RunnerId={runnerId}, DeliveryTime={time}, ScannedBarcode=true`
+  - `target`: `AdmissionRequest:{id}`
+  - `details`: `PatientId={id}, BedId={bedId}, ConfirmedBy={userId}, DeliveryTime={time}`
 - `VACATE_PATIENT`:
   - `target`: `Bed:{bedId}`
   - `details`: `BedNumber={number}, VacateTimestamp={time}, VacateHour={hour}, DischargedBeforeNoon={true|false}`
@@ -165,9 +144,7 @@ All Epic 4 discharge runway, pharmacy bedside delivery, and bed turnover KPIs ar
 
 ### 2. Database Schema Audit Fields
 
-- `admission_requests`: `admitted_at`, `discharged_at`, `edd`, `edd_confidence`, `discharge_signoff_at`
-- `discharge_runways`: `patient_id`, `caregiver_trained`, `home_equipment_ready`, `transport_booked`, `checklist_completed_at`
-- `medication_orders`: `id`, `admission_request_id`, `status`, `queued_at`, `dispensed_at`, `delivered_at`
+- `admission_requests`: `admitted_at`, `discharged_at`, `edd`, `edd_confidence`, `discharge_signoff_at`, `medication_delivery_status`
 - `beds`: `cleaning_started_at`, `last_cleaned_at`, `status`
 
 ### 3. Metric Computation Recipes
@@ -189,24 +166,15 @@ All Epic 4 discharge runway, pharmacy bedside delivery, and bed turnover KPIs ar
   echo "scale=2; ($before_noon / $total) * 100" | bc | awk '{print "Discharge Before 12:00 PM Rate: " $1 "%"}'
   ```
 
-#### KPI 20: Early Caregiver Engagement Completion Rate
+#### KPI 20: Advance Runway Establishment Rate (D-2 / D-3 EDD Recorded)
 - **SQL Extraction**:
   ```sql
   SELECT 
-    COUNT(*) AS total_runway_patients,
-    SUM(CASE WHEN caregiver_trained = true 
-              AND home_equipment_ready = true 
-              AND transport_booked = true 
-              AND checklist_completed_at < DATE_TRUNC('day', discharged_at) 
-             THEN 1 ELSE 0 END) AS early_completed_count,
-    ROUND(100.0 * SUM(CASE WHEN caregiver_trained = true 
-                            AND home_equipment_ready = true 
-                            AND transport_booked = true 
-                            AND checklist_completed_at < DATE_TRUNC('day', discharged_at) 
-                           THEN 1 ELSE 0 END) / COUNT(*), 2) AS early_completion_rate_pct
-  FROM discharge_runways r
-  JOIN admission_requests a ON r.patient_id = a.patient_id
-  WHERE a.discharged_at IS NOT NULL;
+    COUNT(*) AS total_admitted_patients,
+    SUM(CASE WHEN edd IS NOT NULL THEN 1 ELSE 0 END) AS edd_recorded_count,
+    ROUND(100.0 * SUM(CASE WHEN edd IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS edd_advance_rate_pct
+  FROM admission_requests
+  WHERE status IN ('ADMITTED_INPATIENT', 'DISCHARGED');
   ```
 
 #### KPI 21: Bedside Discharge Medication Delivery Adoption

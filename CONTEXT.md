@@ -170,6 +170,39 @@ _Avoid_: Hard rule, unskippable constraint, mandatory lock
 A capacity or equipment constraint (ward class subsidy tier, static telemetry equipping) that permits coordinator override when accompanied by a structured institutional justification code.
 _Avoid_: Soft constraint, bypassable filter, flexible rule
 
+### Patient & Family Public Tracking
 
+**Public Tracking Token**:
+An unguessable opaque identifier generated upon admission request creation that grants unauthenticated, read-only access to a patient's admission journey without exposing clinical charts or PII.
+_Avoid_: Patient URL, tracking password, auth token, patient session
 
+**Patient Milestone Stepper**:
+The 3-stage progression on the public tracker indicating current boarding phase (Admission Confirmed -> Bed Assigned & Preparing Room -> Admitted to Inpatient Ward Bed), held in a quiescent state during ED assessment.
+_Avoid_: Journey steps, admission progress bar, tracker timeline, 4-stage stepper
+
+**Matching Ward Category**:
+The classification bucket (specifically the patient's requested ward class: Class A, B1, B2, or C) within which pending bed requests are ranked by effective acuity tier and timestamp to determine queue position.
+_Avoid_: Bed category, queue bucket, ward type
+
+**Financial & Care Advisory (FYI Insights)**:
+Informational non-binding guidance displayed on the public tracker detailing estimated daily co-pay ranges, government subsidy percentages, and step-down care options without collecting deposits or signatures.
+_Avoid_: Cost calculator, bill estimate, payment portal
+
+### Inpatient Discharge Runway & Bed Turnover
+
+**Discharge Runway**:
+The multi-day operational timeline leading up to a patient's expected departure, established during morning ward rounds via an Estimated Date of Discharge (EDD) to forecast bed turnover.
+_Avoid_: Departure pipeline, discharge queue, checkout timer
+
+**Estimated Date of Discharge (EDD)**:
+The projected calendar date of inpatient discharge assigned by the clinical care team, paired with a confidence rating (High, Medium, Low) to drive forward bed capacity planning.
+_Avoid_: Target discharge, planned checkout, estimated departure
+
+**Morning Discharge Sign-Off**:
+The formal clinical authorization executed during morning ward rounds (targeted before 09:30 AM) that initiates day-of-discharge medication preparation and prepares the bed for daytime turnover.
+_Avoid_: Discharge order, checkout approval, doctor release
+
+**Terminal Cleaning SLA**:
+The enforced 30-minute operational time window during which Environmental Services (EVS) must sanitize an empty, vacated bed (in EMPTY_PENDING_CLEANING status) to return it to EMPTY_CLEANED status for live BMU allocation.
+_Avoid_: Housekeeping timer, clean window, turnover limit
 

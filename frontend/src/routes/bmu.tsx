@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   useReactTable,
@@ -39,6 +40,7 @@ import {
   FileText,
   GitCompare,
   PhoneCall,
+  Sliders,
 } from 'lucide-react';
 
 export function BmuRoute() {
@@ -465,6 +467,13 @@ export function BmuRoute() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            to="/bmu/config"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer"
+          >
+            <Sliders className="h-3.5 w-3.5 text-slate-600" />
+            Solver Config
+          </Link>
           <Badge variant="outline" className="px-3 py-1 text-xs bg-slate-50 text-slate-700">
             BMU Coordinator: Wong (bmu_coord_wong)
           </Badge>

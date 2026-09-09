@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { bmuQueries, useUpdateBmuConfig } from '../services/queries';
 import type { BmuAlgorithmConfig, BmuConfigUpdateRequest } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Sliders, CheckCircle2, RotateCcw, Sparkles, Layers, ShieldAlert, Users, Zap } from 'lucide-react';
+import { Sliders, CheckCircle2, RotateCcw, Sparkles, Layers, ShieldAlert, Users, Zap, ArrowLeft } from 'lucide-react';
 
 export function BmuConfigRoute() {
   const [success, setSuccess] = useState<string | null>(null);
@@ -32,9 +33,18 @@ export function BmuConfigRoute() {
             Real-time constraint tuning for the pure Java heuristic engine and future Timefold solver profiles.
           </p>
         </div>
-        <Badge variant="outline" className="text-xs bg-slate-50">
-          Syncs Real-Time
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/bmu"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 text-slate-600" />
+            Back to BMU Hub
+          </Link>
+          <Badge variant="outline" className="text-xs bg-slate-50">
+            Syncs Real-Time
+          </Badge>
+        </div>
       </div>
 
       {success && (

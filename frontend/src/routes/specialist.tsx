@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { specialistQueries, useClaimBroadcast, useSubmitConsult } from '../services/queries';
-import type { AcuityTier, AssessmentBroadcast, SpecialtyCluster } from '../types/admissions';
+import { specialistQueries, useClaimBroadcast, useSubmitConsult, useChainConsult } from '../services/queries';
+import type { AcuityTier, AssessmentBroadcast, SpecialtyCluster, DiversionPathway } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -13,17 +13,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
-import { Users, CheckCircle2, AlertTriangle, MessageSquare, Lock, Sparkles } from 'lucide-react';
+import { Users, CheckCircle2, AlertTriangle, MessageSquare, Lock, Sparkles, GitBranch } from 'lucide-react';
 
 const CLUSTERS: SpecialtyCluster[] = ['CARDIOLOGY', 'GENERAL_MEDICINE', 'SURGERY', 'ORTHOPAEDICS'];
 
 export function SpecialistRoute() {
   const [selectedCluster, setSelectedCluster] = useState<SpecialtyCluster | undefined>(undefined);
   const [consultModalBroadcast, setConsultModalBroadcast] = useState<AssessmentBroadcast | null>(null);
+  const [chainModalBroadcast, setChainModalBroadcast] = useState<AssessmentBroadcast | null>(null);
+  const [chainCluster, setChainCluster] = useState<SpecialtyCluster>('GENERAL_MEDICINE');
+  const [chainRationale, setChainRationale] = useState<string>('');
 
   // Consult Form
   const [consultImpression, setConsultImpression] = useState<string>('');
   const [recommendedTier, setRecommendedTier] = useState<AcuityTier>('TIER_2_ACUTE_URGENT');
+  const [secondaryTelemetry, setSecondaryTelemetry] = useState<boolean>(true);
+  const [diversionPathway, setDiversionPathway] = useState<DiversionPathway>('NONE');
   const [diversionEndorsed, setDiversionEndorsed] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -54,16 +59,59 @@ export function SpecialistRoute() {
     setTimeout(() => setStatusMessage(null), 4000);
   });
 
+  // Centralized Chain Consult Mutation Hook
+  const chainMutation = useChainConsult(
+    () => {
+      setStatusMessage('Secondary specialist consult chained and broadcast successfully.');
+      setChainModalBroadcast(null);
+      setChainRationale('');
+      setTimeout(() => setStatusMessage(null), 4000);
+    },
+    (err: Error) => {
+      setErrorMessage(`Chain consult failed: ${err.message}`);
+      setTimeout(() => setErrorMessage(null), 6000);
+    }
+  );
+
   const handleOpenConsult = (broadcast: AssessmentBroadcast) => {
     setConsultModalBroadcast(broadcast);
     setRecommendedTier(
-      broadcast.admissionRequest.secondaryAcuityTier || broadcast.admissionRequest.primaryAcuityTier
+      broadcast.secondaryAcuityTier || broadcast.admissionRequest.secondaryAcuityTier || broadcast.admissionRequest.primaryAcuityTier
+    );
+    setSecondaryTelemetry(
+      broadcast.secondaryTelemetry ?? broadcast.admissionRequest.patient.telemetryRequired ?? true
+    );
+    setDiversionPathway(
+      broadcast.diversionPathway || broadcast.admissionRequest.diversionPathway || 'NONE'
     );
     setConsultImpression(
       broadcast.consultNotes ||
         'Agree with ED assessment. Patient requires continuous telemetry bed in cardiology ward.'
     );
-    setDiversionEndorsed(broadcast.admissionRequest.diversionRecommended || false);
+    setDiversionEndorsed(
+      (broadcast.diversionPathway && broadcast.diversionPathway !== 'NONE') ||
+      broadcast.admissionRequest.diversionRecommended ||
+      false
+    );
+  };
+
+  const handleOpenChain = (broadcast: AssessmentBroadcast) => {
+    setChainModalBroadcast(broadcast);
+    const availableClusters = CLUSTERS.filter((c) => c !== broadcast.targetCluster);
+    setChainCluster(availableClusters[0] || 'GENERAL_MEDICINE');
+    setChainRationale('');
+  };
+
+  const handleChainSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chainModalBroadcast) return;
+    chainMutation.mutate({
+      id: chainModalBroadcast.id,
+      data: {
+        targetCluster: chainCluster,
+        rationale: chainRationale,
+      },
+    });
   };
 
   const handleSubmitConsult = (e: React.FormEvent) => {
@@ -73,8 +121,10 @@ export function SpecialistRoute() {
       id: consultModalBroadcast.id,
       data: {
         secondaryAcuityTier: recommendedTier,
+        secondaryTelemetry,
         consultNotes: consultImpression,
-        diversionRecommended: diversionEndorsed,
+        diversionRecommended: diversionEndorsed || diversionPathway !== 'NONE',
+        diversionPathway,
       },
     });
   };
@@ -192,23 +242,41 @@ export function SpecialistRoute() {
                         {patient.queueToken}
                       </Badge>
                     </div>
-                    <Badge
-                      variant={
-                        isConsulted
-                          ? 'success'
-                          : isClaimed
-                          ? 'purple'
-                          : 'secondary'
-                      }
-                      className="text-xs"
-                    >
-                      {broadcast.status}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      {broadcast.parentBroadcastId && (
+                        <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1 font-semibold">
+                          <GitBranch className="h-3 w-3" /> Chained
+                        </Badge>
+                      )}
+                      <Badge
+                        variant={
+                          broadcast.status === 'OPEN'
+                            ? 'destructive'
+                            : broadcast.status === 'CLAIMED'
+                            ? 'purple'
+                            : 'secondary'
+                        }
+                        className="text-xs"
+                      >
+                        {broadcast.status}
+                      </Badge>
+                    </div>
                   </div>
                   <CardDescription className="text-xs flex items-center justify-between pt-1">
                     <span>Cluster: <strong>{broadcast.targetCluster}</strong></span>
                     <span>{patient.gender}, {patient.age}y • Class {patient.wardClassPreference}</span>
                   </CardDescription>
+                  {broadcasts.some((b) => b.parentBroadcastId === broadcast.id) && (
+                    <div className="flex items-center flex-wrap gap-1 text-[11px] text-purple-700 pt-1">
+                      <GitBranch className="h-3 w-3" />
+                      <span>Chained to:</span>
+                      {broadcasts.filter((b) => b.parentBroadcastId === broadcast.id).map((b) => (
+                        <Badge key={b.id} variant="outline" className="text-[9px] py-0 px-1.5 bg-purple-50 text-purple-800 border-purple-200">
+                          {b.targetCluster} ({b.status})
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </CardHeader>
 
                 <CardContent className="pt-4 space-y-3">
@@ -254,10 +322,17 @@ export function SpecialistRoute() {
                         Consult Impression ({broadcast.claimedBySpecialistId || 'Specialist'}):
                       </div>
                       <p className="italic text-purple-900 text-[11px] leading-relaxed">{broadcast.consultNotes}</p>
-                      <div className="flex items-center gap-2 pt-1 font-medium">
+                      <div className="flex items-center gap-2 pt-1 font-medium flex-wrap">
                         <span>Recommended: <strong>{req.secondaryAcuityTier}</strong></span>
-                        {req.diversionRecommended && (
-                          <Badge variant="success" className="text-[10px]">Diversion Endorsed</Badge>
+                        {broadcast.secondaryTelemetry && (
+                          <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-900 border-amber-200">
+                            Telemetry Endorsed
+                          </Badge>
+                        )}
+                        {(broadcast.diversionPathway && broadcast.diversionPathway !== 'NONE') && (
+                          <Badge variant="success" className="text-[10px]">
+                            {broadcast.diversionPathway === 'COMMUNITY_HOSPITAL' ? 'Community Hospital' : 'MIC@Home'}
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -275,6 +350,19 @@ export function SpecialistRoute() {
                       >
                         <Lock className="h-3.5 w-3.5 mr-1" />
                         Claim Case
+                      </Button>
+                    )}
+
+                    {(isClaimed || isConsulted) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenChain(broadcast)}
+                        disabled={chainMutation.isPending}
+                        className="text-xs border-purple-200 text-purple-700 hover:bg-purple-50 cursor-pointer"
+                      >
+                        <GitBranch className="h-3.5 w-3.5 mr-1" />
+                        Chain Consult
                       </Button>
                     )}
 
@@ -354,14 +442,39 @@ export function SpecialistRoute() {
                 <label className="flex items-center gap-2 text-xs font-medium text-slate-800 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={diversionEndorsed}
-                    onChange={(e) => setDiversionEndorsed(e.target.checked)}
+                    checked={secondaryTelemetry}
+                    onChange={(e) => setSecondaryTelemetry(e.target.checked)}
                     className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
                   />
-                  <span>Endorse Alternative Diversion Pathway (Sister Hospital / MIC@Home)</span>
+                  <span className="font-semibold">Require Continuous Telemetry Monitoring</span>
                 </label>
                 <p className="text-[11px] text-slate-500 ml-5 mt-0.5">
-                  Allows BMU to evaluate direct diversion to Outram Community Hospital (OCH) or Hospital-at-Home.
+                  Cardiac rhythm monitoring directive specified by reviewing specialist.
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+                <label className="block text-xs font-semibold text-slate-800">
+                  Diversion Pathway Endorsement
+                </label>
+                <select
+                  value={diversionPathway}
+                  onChange={(e) => {
+                    const val = e.target.value as DiversionPathway;
+                    setDiversionPathway(val);
+                    setDiversionEndorsed(val !== 'NONE');
+                    if (val !== 'NONE') {
+                      setRecommendedTier('TIER_4_SUBACUTE_DIVERSION');
+                    }
+                  }}
+                  className="w-full text-xs bg-white border border-slate-300 rounded-md px-3 py-2 font-medium"
+                >
+                  <option value="NONE">None (Acute Inpatient Admission Required)</option>
+                  <option value="COMMUNITY_HOSPITAL">Community Hospital (Step-Down Rehabilitation - OCH/SKCH)</option>
+                  <option value="HOSPITAL_AT_HOME_MIC">Hospital-at-Home (Mobile Inpatient Care - MIC@Home)</option>
+                </select>
+                <p className="text-[11px] text-slate-500">
+                  Selecting Community Hospital or MIC@Home automatically sets recommended tier to Tier 4 Diversion for BMU transfer processing.
                 </p>
               </div>
 
@@ -371,6 +484,69 @@ export function SpecialistRoute() {
                 </Button>
                 <Button type="submit" disabled={consultMutation.isPending} className="bg-purple-600 hover:bg-purple-700 text-white">
                   {consultMutation.isPending ? 'Saving...' : 'Submit Consult (1-Click)'}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Chain Consult Modal Dialog */}
+      <Dialog open={!!chainModalBroadcast} onOpenChange={(open) => !open && setChainModalBroadcast(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <GitBranch className="h-5 w-5 text-purple-600" />
+              Chain Secondary Specialist Consult
+            </DialogTitle>
+            <DialogDescription>
+              {chainModalBroadcast && (
+                <span>
+                  Spawn concurrent specialist review for <strong>{chainModalBroadcast.admissionRequest.patient.name}</strong> ({chainModalBroadcast.admissionRequest.patient.nric}).
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {chainModalBroadcast && (
+            <form onSubmit={handleChainSubmit} className="space-y-4 py-2">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Target Specialty Cluster
+                </label>
+                <select
+                  value={chainCluster}
+                  onChange={(e) => setChainCluster(e.target.value as SpecialtyCluster)}
+                  className="w-full text-xs bg-white border border-slate-300 rounded-md px-3 py-2 font-medium"
+                >
+                  {CLUSTERS.filter((c) => c !== chainModalBroadcast.targetCluster).map((c) => (
+                    <option key={c} value={c}>
+                      {c.replace('_', ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Clinical Rationale for Secondary Consult
+                </label>
+                <textarea
+                  value={chainRationale}
+                  onChange={(e) => setChainRationale(e.target.value)}
+                  rows={3}
+                  className="w-full text-xs bg-white border border-slate-300 rounded-md p-2.5 focus:ring-1 focus:ring-purple-500"
+                  placeholder="e.g. Concomitant fracture requiring orthopaedic fixation prior to telemetry transfer..."
+                  required
+                />
+              </div>
+
+              <DialogFooter className="pt-2">
+                <Button type="button" variant="outline" onClick={() => setChainModalBroadcast(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={chainMutation.isPending} className="bg-purple-600 hover:bg-purple-700 text-white">
+                  {chainMutation.isPending ? 'Chaining...' : 'Spawn Chained Consult'}
                 </Button>
               </DialogFooter>
             </form>

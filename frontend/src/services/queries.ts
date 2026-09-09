@@ -136,6 +136,22 @@ export function useSubmitConsult(onSuccess?: () => void) {
   });
 }
 
+export function useChainConsult(onSuccess?: () => void, onError?: (error: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { id: string; data: import('../types/admissions').ChainConsultRequest }) =>
+      api.chainConsult(variables.id, variables.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
+      onSuccess?.();
+    },
+    onError: (error: Error) => {
+      queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
+      onError?.(error);
+    },
+  });
+}
+
 export function useAllocateBed(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({

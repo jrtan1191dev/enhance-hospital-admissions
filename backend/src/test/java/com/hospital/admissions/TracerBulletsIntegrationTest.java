@@ -268,4 +268,98 @@ class TracerBulletsIntegrationTest {
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.title").value("Conflict"));
     }
+
+    @Test
+    @DisplayName("Tracer Bullet 5: Specialist Consult Evaluation, Structured Diversion & Consult Chaining")
+    void testTracerBullet5_SpecialistConsultEvaluationAndChaining() throws Exception {
+        // Step 1: Create patient and consult-gated admission
+        Patient patient = patientRepository.save(Patient.builder()
+                .name("Chain Evaluation Patient")
+                .nricMasked("S****888X")
+                .age(72)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(30)
+                .queueToken("TOKEN-CHAIN-" + java.util.UUID.randomUUID())
+                .build());
+
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(patient.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .targetClusters(java.util.Set.of(SpecialtyCluster.CARDIOLOGY))
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B2)
+                .needsTelemetry(true)
+                .requiresSpecialistConsult(true)
+                .build();
+
+        MvcResult submitResult = mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        AdmissionRequest admission = objectMapper.readValue(
+                submitResult.getResponse().getContentAsString(),
+                AdmissionRequest.class);
+
+        AssessmentBroadcast broadcast = broadcastRepository.findAll().stream()
+                .filter(b -> b.getAdmissionRequest().getId().equals(admission.getId()))
+                .findFirst().orElseThrow();
+
+        // Step 2: Specialist claims broadcast
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/claim")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CLAIMED"));
+
+        // Step 3: Specialist chains secondary consult to SURGERY
+        com.hospital.admissions.dto.ChainConsultRequest chainReq = com.hospital.admissions.dto.ChainConsultRequest.builder()
+                .targetCluster(SpecialtyCluster.SURGERY)
+                .rationale("Suspected mesenteric ischemia, surgical opinion requested")
+                .build();
+
+        MvcResult chainResult = mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/chain")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(chainReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.targetCluster").value("SURGERY"))
+                .andExpect(jsonPath("$.parentBroadcastId").value(broadcast.getId().toString()))
+                .andReturn();
+
+        AssessmentBroadcast chainedBroadcast = objectMapper.readValue(
+                chainResult.getResponse().getContentAsString(),
+                AssessmentBroadcast.class);
+
+        assertThat(chainedBroadcast.getParentBroadcastId()).isEqualTo(broadcast.getId());
+
+        // Step 4: Specialist submits clinical evaluation with structured diversion
+        SpecialistConsultRequest consultReq = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_4_SUBACUTE_DIVERSION)
+                .secondaryTelemetry(false)
+                .consultNotes("Hemodynamically stable; recommend step-down to Community Hospital")
+                .diversionPathway(DiversionPathway.COMMUNITY_HOSPITAL)
+                .diversionRecommended(true)
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/consult")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(consultReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        // Step 5: Verify updated AdmissionRequest dossier
+        AdmissionRequest updatedAdmission = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(updatedAdmission.isDiversionRecommended()).isTrue();
+        assertThat(updatedAdmission.getDiversionPathway()).isEqualTo(DiversionPathway.COMMUNITY_HOSPITAL);
+        assertThat(updatedAdmission.getSecondaryAcuityTier()).isEqualTo(AcuityTier.TIER_4_SUBACUTE_DIVERSION);
+    }
 }

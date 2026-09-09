@@ -66,6 +66,8 @@ export const api = {
     http.post<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/claim`).then((r) => r.data),
   submitConsult: (id: string, data: SpecialistConsultRequest) =>
     http.post<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/consult`, data).then((r) => r.data),
+  chainConsult: (id: string, data: import('../types/admissions').ChainConsultRequest) =>
+    http.post<AssessmentBroadcast>(`/api/v1/clinicians/specialist/broadcasts/${id}/chain`, data).then((r) => r.data),
 
   // BMU Controller
   getPrioritizedQueue: () => http.get<AdmissionRequest[]>('/api/v1/bmu/queue').then((r) => r.data),

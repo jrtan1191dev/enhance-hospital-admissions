@@ -39,4 +39,14 @@ public class AssessmentBroadcast extends AuditableEntity {
 
     @Column(length = 2000)
     private String consultNotes;
+
+    @Enumerated(EnumType.STRING)
+    private AcuityTier secondaryAcuityTier;
+
+    private Boolean secondaryTelemetry;
+
+    @Enumerated(EnumType.STRING)
+    private DiversionPathway diversionPathway;
+
+    private UUID parentBroadcastId;
 }

@@ -15,6 +15,14 @@ public class SpecialistConsultRequest {
     @NotNull
     private AcuityTier secondaryAcuityTier;
 
+    private Boolean secondaryTelemetry;
     private String consultNotes;
     private boolean diversionRecommended;
+    private com.hospital.admissions.domain.DiversionPathway diversionPathway;
+
+    public SpecialistConsultRequest(AcuityTier secondaryAcuityTier, String consultNotes, boolean diversionRecommended) {
+        this.secondaryAcuityTier = secondaryAcuityTier;
+        this.consultNotes = consultNotes;
+        this.diversionRecommended = diversionRecommended;
+    }
 }

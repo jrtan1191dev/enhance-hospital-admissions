@@ -54,4 +54,11 @@ public class ClinicianController {
             @Valid @RequestBody SpecialistConsultRequest request) {
         return ResponseEntity.ok(clinicianService.submitConsult(id, request));
     }
+
+    @PostMapping("/specialist/broadcasts/{id}/chain")
+    public ResponseEntity<AssessmentBroadcast> chainConsult(
+            @PathVariable UUID id,
+            @Valid @RequestBody com.hospital.admissions.dto.ChainConsultRequest request) {
+        return ResponseEntity.ok(clinicianService.chainConsult(id, request));
+    }
 }

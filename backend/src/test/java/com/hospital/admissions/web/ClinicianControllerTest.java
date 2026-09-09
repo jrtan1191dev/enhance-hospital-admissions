@@ -185,4 +185,32 @@ class ClinicianControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("COMPLETED"));
     }
+
+    @Test
+    @DisplayName("POST /api/v1/clinicians/specialist/broadcasts/{id}/chain returns 200 and chained broadcast")
+    void testChainConsult() throws Exception {
+        UUID broadcastId = UUID.randomUUID();
+        com.hospital.admissions.dto.ChainConsultRequest req = com.hospital.admissions.dto.ChainConsultRequest.builder()
+                .targetCluster(SpecialtyCluster.ORTHOPAEDICS)
+                .rationale("Suspected pelvic fracture")
+                .build();
+
+        AssessmentBroadcast chained = AssessmentBroadcast.builder()
+                .id(UUID.randomUUID())
+                .targetCluster(SpecialtyCluster.ORTHOPAEDICS)
+                .status(BroadcastStatus.OPEN)
+                .parentBroadcastId(broadcastId)
+                .build();
+
+        when(clinicianService.chainConsult(eq(broadcastId), any(com.hospital.admissions.dto.ChainConsultRequest.class)))
+                .thenReturn(chained);
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcastId + "/chain")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.targetCluster").value("ORTHOPAEDICS"))
+                .andExpect(jsonPath("$.parentBroadcastId").value(broadcastId.toString()));
+    }
 }

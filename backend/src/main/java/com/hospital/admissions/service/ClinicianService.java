@@ -164,10 +164,21 @@ public class ClinicianService {
 
         broadcast.setStatus(BroadcastStatus.COMPLETED);
         broadcast.setConsultNotes(req.getConsultNotes());
+        broadcast.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
+        broadcast.setSecondaryTelemetry(req.getSecondaryTelemetry());
+        broadcast.setDiversionPathway(req.getDiversionPathway());
 
         AdmissionRequest request = broadcast.getAdmissionRequest();
         request.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
-        request.setDiversionRecommended(req.isDiversionRecommended());
+        if (req.getSecondaryTelemetry() != null) {
+            request.setSecondaryTelemetry(req.getSecondaryTelemetry());
+        }
+        boolean isDiversion = req.isDiversionRecommended() ||
+                (req.getDiversionPathway() != null && req.getDiversionPathway() != DiversionPathway.NONE);
+        request.setDiversionRecommended(isDiversion);
+        if (req.getDiversionPathway() != null) {
+            request.setDiversionPathway(req.getDiversionPathway());
+        }
         boolean isConcordant = request.getPrimaryAcuityTier() == req.getSecondaryAcuityTier();
         request.setIsDiscordant(!isConcordant);
         admissionRequestRepository.save(request);
@@ -178,12 +189,51 @@ public class ClinicianService {
         details.put("PrimaryAcuity", request.getPrimaryAcuityTier());
         details.put("SecondaryAcuity", req.getSecondaryAcuityTier());
         details.put("Concordant", isConcordant);
-        details.put("DiversionEndorsed", req.isDiversionRecommended());
+        details.put("DiversionEndorsed", isDiversion);
+        if (req.getDiversionPathway() != null) {
+            details.put("DiversionPathway", req.getDiversionPathway());
+        }
 
         auditLogger.logAction(currentUser, "SUBMIT_SPECIALIST_CONSULT",
                 "AssessmentBroadcast:" + broadcastId,
                 AuditLogger.formatDetails(details));
 
         return broadcast;
+    }
+
+    @Transactional
+    public AssessmentBroadcast chainConsult(UUID broadcastId, com.hospital.admissions.dto.ChainConsultRequest req) {
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        AssessmentBroadcast parentBroadcast = broadcastRepository.findById(broadcastId)
+                .orElseThrow(() -> new IllegalArgumentException("Broadcast not found: " + broadcastId));
+
+        if (parentBroadcast.getStatus() != BroadcastStatus.CLAIMED && parentBroadcast.getStatus() != BroadcastStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot chain consult: Parent broadcast must be claimed or completed first (current status: " + parentBroadcast.getStatus() + ")");
+        }
+
+        AssessmentBroadcast chainedBroadcast = AssessmentBroadcast.builder()
+                .admissionRequest(parentBroadcast.getAdmissionRequest())
+                .targetCluster(req.getTargetCluster())
+                .status(BroadcastStatus.OPEN)
+                .parentBroadcastId(broadcastId)
+                .consultNotes(req.getRationale())
+                .build();
+
+        chainedBroadcast = broadcastRepository.save(chainedBroadcast);
+
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("ParentBroadcastId", broadcastId);
+        details.put("TargetCluster", req.getTargetCluster());
+        details.put("Specialist", currentUser);
+        if (req.getRationale() != null) {
+            details.put("Rationale", req.getRationale());
+        }
+
+        auditLogger.logAction(currentUser, "CHAIN_CONSULT",
+                "AssessmentBroadcast:" + chainedBroadcast.getId(),
+                AuditLogger.formatDetails(details));
+
+        return chainedBroadcast;
     }
 }

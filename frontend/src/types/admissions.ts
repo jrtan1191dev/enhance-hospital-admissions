@@ -36,6 +36,8 @@ export type AdmissionStatus =
 
 export type BroadcastStatus = 'OPEN' | 'CLAIMED' | 'AUTO_ESCALATED' | 'COMPLETED';
 
+export type DiversionPathway = 'NONE' | 'COMMUNITY_HOSPITAL' | 'HOSPITAL_AT_HOME_MIC';
+
 export interface Patient {
   id: string;
   name: string;
@@ -120,6 +122,7 @@ export interface AdmissionRequest {
   createdAt: string;
   operationalDelayReason?: string;
   diversionRecommended?: boolean;
+  diversionPathway?: DiversionPathway;
   sisterHospitalReferralId?: string;
   isRecommendationAccepted?: boolean;
   overrideReasonCode?: string;
@@ -134,6 +137,10 @@ export interface AssessmentBroadcast {
   claimedBySpecialistId?: string;
   claimedAt?: string;
   consultNotes?: string;
+  secondaryAcuityTier?: AcuityTier;
+  secondaryTelemetry?: boolean;
+  diversionPathway?: DiversionPathway;
+  parentBroadcastId?: string;
 }
 
 export interface BmuAlgorithmConfig {
@@ -184,10 +191,17 @@ export interface SisterHospitalReferralResponse {
 }
 
 
+export interface ChainConsultRequest {
+  targetCluster: SpecialtyCluster;
+  rationale?: string;
+}
+
 export interface SpecialistConsultRequest {
   secondaryAcuityTier: AcuityTier;
+  secondaryTelemetry?: boolean;
   consultNotes?: string;
   diversionRecommended: boolean;
+  diversionPathway?: DiversionPathway;
 }
 
 export interface BedAllocationRequest {

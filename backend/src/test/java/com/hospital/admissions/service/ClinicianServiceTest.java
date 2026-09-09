@@ -386,4 +386,102 @@ class ClinicianServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Broadcast not found");
     }
+
+    @Test
+    @DisplayName("submitConsult with structured diversion populates admission dossier and audit log")
+    void testSubmitConsult_WithStructuredDiversion_PopulatesAdmissionDossierAndAudit() {
+        UUID broadcastId = UUID.randomUUID();
+        AdmissionRequest admissionRequest = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .build();
+
+        AssessmentBroadcast b = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .admissionRequest(admissionRequest)
+                .status(BroadcastStatus.CLAIMED)
+                .claimedBySpecialistId("dr_test")
+                .build();
+
+        SpecialistConsultRequest req = SpecialistConsultRequest.builder()
+                .consultNotes("Patient stable for community step-down")
+                .secondaryAcuityTier(AcuityTier.TIER_4_SUBACUTE_DIVERSION)
+                .secondaryTelemetry(false)
+                .diversionPathway(DiversionPathway.COMMUNITY_HOSPITAL)
+                .diversionRecommended(true)
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(b));
+        when(broadcastRepository.save(b)).thenReturn(b);
+
+        AssessmentBroadcast result = clinicianService.submitConsult(broadcastId, req);
+
+        assertThat(result.getStatus()).isEqualTo(BroadcastStatus.COMPLETED);
+        assertThat(result.getSecondaryAcuityTier()).isEqualTo(AcuityTier.TIER_4_SUBACUTE_DIVERSION);
+        assertThat(result.getSecondaryTelemetry()).isFalse();
+        assertThat(result.getDiversionPathway()).isEqualTo(DiversionPathway.COMMUNITY_HOSPITAL);
+        assertThat(admissionRequest.isDiversionRecommended()).isTrue();
+        assertThat(admissionRequest.getDiversionPathway()).isEqualTo(DiversionPathway.COMMUNITY_HOSPITAL);
+        assertThat(admissionRequest.getSecondaryAcuityTier()).isEqualTo(AcuityTier.TIER_4_SUBACUTE_DIVERSION);
+        verify(admissionRequestRepository).save(admissionRequest);
+        verify(broadcastRepository).save(b);
+        verify(auditLogger).logAction(eq("dr_test"), eq("SUBMIT_SPECIALIST_CONSULT"), anyString(), contains("DiversionPathway=COMMUNITY_HOSPITAL"));
+    }
+
+    @Test
+    @DisplayName("chainConsult creates linked OPEN broadcast and emits CHAIN_CONSULT audit log")
+    void testChainConsult_Success() {
+        UUID broadcastId = UUID.randomUUID();
+        AdmissionRequest admissionRequest = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .status(AdmissionStatus.ASSESSMENT_PENDING)
+                .build();
+
+        AssessmentBroadcast parentBroadcast = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.CLAIMED)
+                .claimedBySpecialistId("dr_test")
+                .build();
+
+        com.hospital.admissions.dto.ChainConsultRequest req = com.hospital.admissions.dto.ChainConsultRequest.builder()
+                .targetCluster(SpecialtyCluster.ORTHOPAEDICS)
+                .rationale("Rule out hip fracture")
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(parentBroadcast));
+        when(broadcastRepository.save(any(AssessmentBroadcast.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        AssessmentBroadcast chained = clinicianService.chainConsult(broadcastId, req);
+
+        assertThat(chained).isNotNull();
+        assertThat(chained.getStatus()).isEqualTo(BroadcastStatus.OPEN);
+        assertThat(chained.getTargetCluster()).isEqualTo(SpecialtyCluster.ORTHOPAEDICS);
+        assertThat(chained.getParentBroadcastId()).isEqualTo(broadcastId);
+        assertThat(chained.getAdmissionRequest()).isEqualTo(admissionRequest);
+        verify(broadcastRepository).save(any(AssessmentBroadcast.class));
+        verify(auditLogger).logAction(eq("dr_test"), eq("CHAIN_CONSULT"), anyString(), contains("TargetCluster=ORTHOPAEDICS"));
+    }
+
+    @Test
+    @DisplayName("chainConsult throws IllegalStateException when broadcast is not CLAIMED")
+    void testChainConsult_UnclaimedBroadcast_ThrowsException() {
+        UUID broadcastId = UUID.randomUUID();
+        AssessmentBroadcast parentBroadcast = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .status(BroadcastStatus.OPEN)
+                .build();
+
+        com.hospital.admissions.dto.ChainConsultRequest req = com.hospital.admissions.dto.ChainConsultRequest.builder()
+                .targetCluster(SpecialtyCluster.SURGERY)
+                .rationale("Surgical consult needed")
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(parentBroadcast));
+
+        assertThatThrownBy(() -> clinicianService.chainConsult(broadcastId, req))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("must be claimed");
+    }
 }

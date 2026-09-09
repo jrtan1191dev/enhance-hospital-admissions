@@ -5,11 +5,11 @@ Enable claimed specialists to conduct clinical evaluations—submitting secondar
 
 **Blocked by:** 02: Consult-Gated Admission & Multi-Cluster Broadcast Pool with Atomic Claiming
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `SpecialistConsultRequest` accepts `secondaryAcuityTier`, `secondaryTelemetry`, `consultNotes`, and `diversionPathway`.
-- [ ] Submitting a consult via `POST /api/v1/clinicians/specialist/broadcasts/{id}/consult` transitions the broadcast status to `COMPLETED` and emits `SUBMIT_SPECIALIST_CONSULT` audit log.
-- [ ] Selecting `COMMUNITY_HOSPITAL` or `HOSPITAL_AT_HOME_MIC` recommends `TIER_4_SUBACUTE_DIVERSION` and populates diversion fields on the admission dossier.
-- [ ] Reviewing specialist can chain a secondary consult via `POST /api/v1/clinicians/specialist/broadcasts/{id}/chain`, creating a new `OPEN` broadcast for the requested cluster linked by `parentBroadcastId`.
-- [ ] Broadcast detail view displays linked chained consults and their real-time statuses.
-- [ ] Service tests verify consult submission payloads, chained broadcast creation, and structured audit logs.
+- [x] `SpecialistConsultRequest` accepts `secondaryAcuityTier`, `secondaryTelemetry`, `consultNotes`, and `diversionPathway`.
+- [x] Submitting a consult via `POST /api/v1/clinicians/specialist/broadcasts/{id}/consult` transitions the broadcast status to `COMPLETED` and emits `SUBMIT_SPECIALIST_CONSULT` audit log.
+- [x] Selecting `COMMUNITY_HOSPITAL` or `HOSPITAL_AT_HOME_MIC` recommends `TIER_4_SUBACUTE_DIVERSION` and populates diversion fields on the admission dossier.
+- [x] Reviewing specialist can chain a secondary consult via `POST /api/v1/clinicians/specialist/broadcasts/{id}/chain`, creating a new `OPEN` broadcast for the requested cluster linked by `parentBroadcastId`.
+- [x] Broadcast detail view displays linked chained consults and their real-time statuses.
+- [x] Service tests verify consult submission payloads, chained broadcast creation, and structured audit logs.

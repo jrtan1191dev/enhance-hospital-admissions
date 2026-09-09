@@ -67,6 +67,8 @@ public class AdmissionRequest extends AuditableEntity {
     private LocalDateTime dischargedAt;
 
     private boolean diversionRecommended;
+    @Enumerated(EnumType.STRING)
+    private DiversionPathway diversionPathway;
     private String sisterHospitalReferralId;
 
     private Boolean isRecommendationAccepted;

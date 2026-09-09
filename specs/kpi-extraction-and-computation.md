@@ -51,15 +51,15 @@ The system provides a standardized, high-performance **Operational KPI Logging, 
 ### 3. Patient Journey & Family Communication Metrics (Epic 3)
 
  1. As a Chief Patient Experience Officer, I want to track the Public Patient Milestone Tracker Access Rate (percentage of admitted patients who access their tracking link), so that digital patient engagement can be measured.
- 2. As a Patient Experience Lead, I want the system to audit the 2-Hour Periodic Update Delivery Compliance Rate for patients boarding over 120 minutes, so that communication consistency is guaranteed.
+ 2. As a Patient Experience Lead, I want the system to audit the Periodic Update Delivery Compliance Rate for patients boarding in the queue (every 5 minutes in prototype evaluation), so that communication consistency is guaranteed.
  3. As an ED Nurse Manager, I want the system to correlate public milestone tracker adoption with reductions in patient and family inquiries at the triage desk, so that nursing workload alleviation can be evaluated.
  4. As a Medical Social Work Lead, I want to track the 1-click contact rates for Medical Social Work (MSW) and Financial Counseling initiated from the patient tracker explainer card, so that caregiver counseling demand can be forecasted.
 
 ### 4. Inpatient Discharge Runway & Turnover Metrics (Epic 4)
 
  1. As an Inpatient Clinical Director, I want the system to track the percentage of patients Vacating Inpatient Beds Before 12:00 PM, so that acute bed availability for afternoon ED admissions is maximized.
- 2. As a Ward Nurse Manager, I want to measure the Early Caregiver Engagement Completion Rate (percentage of checklists resolved prior to the discharge day), so that last-minute discharge delays are prevented.
- 3. As an Inpatient Pharmacy Director, I want to track the Adoption Rate of Bedside Discharge Medication Delivery, so that elimination of outpatient pharmacy collection queues can be measured.
+ 2. As an Inpatient Care Coordinator, I want to measure the Advance Runway Establishment Rate (percentage of admitted patients with an Estimated Date of Discharge recorded at least 48 hours prior to departure), so that capacity planning can anticipate bed vacancies.
+ 3. As an Inpatient Pharmacy Director, I want to track the Adoption Rate of Bedside Discharge Medication Delivery via ward console sign-offs, so that elimination of outpatient pharmacy collection queues can be measured.
  4. As an Environmental Services (EVS) Director, I want to track the Bed Turnover Cleaning Latency and 30-Minute Housekeeping SLA Compliance Rate, so that cleaning performance and room turnover speed can be benchmarked.
 
 ### 5. Data Governance & Operational Reporting
@@ -75,7 +75,7 @@ The system provides a standardized, high-performance **Operational KPI Logging, 
 ### 1. Modules & Domain Boundaries
 
 - **`KpiMetricsService`**: Central analytics service in the backend that calculates hospital-wide operational metrics using optimized JPA queries and SQL projections. Provides cached, real-time KPI aggregates.
-- **`KpiAnalyticsController`**: REST endpoint layer exposing executive summaries, SLA compliance summaries, and dimensional breakdowns for internal administration dashboards and BI tools.
+- **`KpiAnalyticsController`**: REST endpoint layer exposing the consolidated hospital executive summary for internal administration dashboards and BI tools.
 - **`AuditLogger` & MDC Context Filter**: Central logging component emitting standardized, structured `[AUDIT]` log statements with user principal, action name, target identifier, and machine-parseable key-value details.
 - **Relational Schema Audit Infrastructure**: Base entity `AuditableEntity` providing automatic JPA auditing (`@CreatedDate`, `@CreatedBy`, `@LastModifiedDate`, `@LastModifiedBy`) across all domain models, supplemented by explicit domain lifecycle timestamps.
 
@@ -104,15 +104,17 @@ All transactional operations emit structured log entries formatted as:
 | Patient Tracker Accessed | `TRACK_PATIENT_ACCESS` | `PatientId`, `MilestoneStep`, `EstWaitMins` |
 | Periodic Update Sent | `DISPATCH_PERIODIC_UPDATE` | `Channel=SMS_PUSH`, `Milestone`, `DeliveryStatus=SUCCESS` |
 | MSW / Counseling Contacted | `CONNECT_MSW_HOTLINE` | `Service=MSW`, `AdmissionId`, `Action=CLICK_TO_CALL` |
+| Morning Discharge Signed Off | `DISCHARGE_SIGNOFF` | `DoctorId`, `SignOffTime`, `PreDischargeHour` |
+| Discharge Meds Dispensed | `DISPENSE_MEDICATION` | `PatientId`, `WardBed`, `TargetSla="11:00 AM"` |
+| Bedside Meds Delivered | `DELIVER_BEDSIDE_MEDICATION` | `PatientId`, `BedId`, `ConfirmedBy`, `DeliveryTime` |
 | Patient Vacated (Discharge) | `VACATE_PATIENT` | `BedNumber`, `VacateTimestamp`, `VacateHour`, `DischargedBeforeNoon={true\|false}` |
 | Terminal Clean Signed Off | `CLEAN_BED` | `BedNumber`, `HousekeeperId`, `ElapsedCleaningMins`, `Within30mSla={true\|false}` |
 
 ### 3. API Surface & REST Contracts
 
-- `GET /api/v1/analytics/kpis/summary`: Returns overarching executive KPI metrics (turnaround times, suggestion acceptance, concordance, pre-noon discharge, 30-min clean compliance).
-- `GET /api/v1/analytics/kpis/sla-compliance`: Returns granular SLA compliance breakdowns (Specialist consult pick-up SLA, Sister hospital referral 30-min SLA, Housekeeping 30-min turnover SLA).
-- `GET /api/v1/analytics/kpis/diversions`: Returns volume, diversion rate, and facility breakdown for OCH, AH, SACH, and MIC@Home.
-- `GET /api/v1/analytics/kpis/capacity-gains`: Returns batch holding ward adoption rates, ghost bed hours recovered, and cohort-swap yield.
+- `GET /api/v1/analytics/kpis/summary`: Returns the consolidated executive summary of all 21 operational KPIs.
+  - **Query Parameters**: Optional `startDate` and `endDate` (ISO-8601). If omitted, defaults to `ALL_TIME` to include all seeded prototype records and live session events.
+  - **Division-by-Zero Safety**: All rate and percentage calculations are guarded; unobserved cohorts return `0.0` alongside their respective count fields to guarantee valid numerical JSON payloads.
 
 ```typescript
 // Core Analytics Data Contracts (Prototype-Verified Shape)
@@ -120,14 +122,14 @@ interface HospitalKpiSummaryDto {
   periodStart: string;
   periodEnd: string;
   
-  // Clinical Intake & Collaboration
+  // Clinical Intake & Collaboration (Epic 1)
   avgEdTurnaroundMinutes: number;
   edTurnaroundP95Minutes: number;
   specialistClaimLatencyAvgMinutes: number;
   primarySpecialistConcordanceRatePct: number;
   digitalBedRequestCount: number;
   
-  // BMU Capacity & Diversions
+  // BMU Capacity & Diversions (Epic 2)
   bmuSuggestionAcceptanceRatePct: number;
   bmuManualOverrideCount: number;
   totalDiversionCount: number;
@@ -135,23 +137,49 @@ interface HospitalKpiSummaryDto {
   sisterHospitalSlaCompliancePct: number;
   batchHoldingWardAdoptionRatePct: number;
   
-  // Patient Experience
+  // Patient Experience (Epic 3)
   patientTrackerAccessRatePct: number;
   twoHourPeriodicUpdateDeliveryPct: number;
   prolongedWaitCommunicationRatePct: number;
   
-  // Inpatient Discharge & Turnover
+  // Inpatient Discharge & Turnover (Epic 4)
   dischargeBeforeNoonRatePct: number;
-  earlyCaregiverReadinessRatePct: number;
+  advanceRunwayEstablishmentRatePct: number;
   bedsideMedicationDeliveryAdoptionPct: number;
   housekeepingTurnoverAvgMinutes: number;
   housekeeping30mSlaCompliancePct: number;
 }
 ```
 
-### 4. Architectural Decisions (ADR Alignment)
+### 4. Frontend Analytics Dashboard Requirements (`/analytics`)
+
+The web frontend provides an executive **Hospital Operational KPI Dashboard** accessible at route `/analytics`:
+
+1. **Top-Level Navigation & Layout**:
+   - Integrated as a top-level route in `router.tsx` and linked via an "Analytics" tab in `Header.tsx`.
+   - Responsive layout with maximum width container and clean visual hierarchy matching the rest of the application.
+2. **Organized 4-Domain Presentation**:
+   - Displays all 21 metrics organized into 4 distinct domain sections corresponding to Epics 1 through 4:
+     - *1. ED Clinical Intake & Specialist Collaboration*
+     - *2. BMU Capacity Orchestration & Diversions*
+     - *3. Patient & Family Milestone Tracking*
+     - *4. Inpatient Discharge Runway & Rapid Turnover*
+   - Each metric rendered in an executive stat card featuring:
+     - Metric title and short descriptive subtitle
+     - Formatted numerical value and unit (`mins`, `%`, `pax`)
+     - Target benchmark indicator (e.g. `Target: ≥ 80%`, `SLA: ≤ 30 mins`)
+     - Visual health badge: Green (Target Met), Amber (Approaching Threshold), or Red (Action Required)
+3. **Real-Time Data Polling & Manual Synchronization**:
+   - Powered by TanStack Query with an active 5-second background refetch interval (`refetchInterval: 5000`) so actions taken in BMU, Ward, or ED views reflect dynamically on the dashboard.
+   - Includes a manual "Refresh Metrics" button with loading spinner state and a live "Last updated at HH:mm:ss" indicator.
+4. **Hybrid Temporal Filtering Controls**:
+   - **Preset Filter Buttons**: 1-click pill buttons (`All Time (Demo Mode)`, `Today (Last 24h)`, `Past 7 Days`), defaulting to `All Time (Demo Mode)`.
+   - **Custom Date Inputs**: Optional `From` and `To` date pickers allowing users to define custom reporting windows.
+
+### 5. Architectural Decisions (ADR Alignment)
 
 - **ADR-001 (Relational Data Model & Auditing)**: Entities inherit `AuditableEntity`. Explicit lifecycle timestamps and flags are persisted on relational tables with database indexes for rapid filtering.
+- **ADR-003 (Polling & Real-Time Synchronization)**: Consumes summary metrics via TanStack Query with 5-second background refetch.
 - **ADR-009 (Enterprise Security, RBAC & IM8 Audit Logging)**: Structured SLF4J audit events provide the immutable, streamable foundation for real-time log ingestion and compliance.
 - **ADR-011 (Dual-Pathway KPI Logging & Extraction Architecture)**: Establishes Path A (Relational SQL Analytics) and Path B (Structured Log Extraction) as the complementary operational metric pipelines.
 

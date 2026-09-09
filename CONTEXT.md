@@ -206,3 +206,12 @@ _Avoid_: Discharge order, checkout approval, doctor release
 The enforced 30-minute operational time window during which Environmental Services (EVS) must sanitize an empty, vacated bed (in EMPTY_PENDING_CLEANING status) to return it to EMPTY_CLEANED status for live BMU allocation.
 _Avoid_: Housekeeping timer, clean window, turnover limit
 
+### Operational KPI & Audit Logging Architecture
+
+**Dual-Pathway Extraction Architecture**:
+The operational analytics paradigm that simultaneously persists indexed relational state transitions on auditable entities (Path A) and emits machine-parseable structured SLF4J audit events (Path B) to support both BI reporting and real-time observability.
+_Avoid_: Double logging, dual tracking, secondary telemetry
+
+**Audit Action Tag**:
+A standardized uppercase identifier emitted within structured audit logs representing a discrete clinical or administrative milestone transition.
+_Avoid_: Event type, log label, audit code

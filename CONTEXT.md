@@ -127,3 +127,49 @@ _Avoid_: Consult edit, assessment rollback, second opinion
 **Clinical Condition Updated Alert**:
 A high-priority notification in the BMU queue signaling that a consulting specialist has amended clinical parameters on an active bed request.
 _Avoid_: Change ping, edit badge, doctor update
+
+### BMU Bed Capacity & Orchestration
+
+**Flex Ward**:
+A multi-bed ward maintained in an empty, cleaned state without active cohort locks, preserved to batch-admit waiting surge clusters.
+_Avoid_: Flex-cubicle, holding room, swing cubicle, reserve room
+
+**Ward Cohort Lock**:
+The administrative constraint applied to an entire ward restricting it to a single biological gender and infection status upon placing an initial patient.
+_Avoid_: Cubicle lock, room lock, cohort lockout, single-gender cubicle lockout
+
+**Deallocation**:
+The programmatic reversion of a bed from EMPTY_ASSIGNED back to EMPTY_CLEANED when an allocation is cancelled prior to physical patient arrival.
+_Avoid_: Unassign, bed drop, soft unreserve
+
+**Dynamic Cohort Swap**:
+The atomic reassignment of an isolated assigned patient from a flex ward to an equivalent bed in a partially occupied ward to liberate the flex ward for a surge cluster.
+_Avoid_: Patient shuffle, bed trade, cohort reshuffle
+
+**Batch Holding Ward**:
+A flex ward converted to admit an identified surge cluster of three or more matching patients in a single coordinated allocation.
+_Avoid_: Surge cubicle, batch room, holding unit
+
+**All-Clean Ward Reset**:
+The automatic removal of a ward's cohort locks occurring strictly when every bed in the ward reaches EMPTY_CLEANED status following patient discharges.
+_Avoid_: Empty reset, zero occupancy release, dirty unlock
+
+**Operational Delay Tag**:
+A structured bottleneck classification attached exclusively by BMU coordinators to prolonged-wait admission requests, automatically archived upon bed allocation.
+_Avoid_: Delay reason, nurse delay note, queue blocker tag
+
+**Static Telemetry Bed**:
+An inpatient bed permanently equipped with continuous cardiac telemetry monitoring hardware, pruned by the allocation solver unless overridden by clinical operations.
+_Avoid_: Telemetry bay, monitored bed, portable telemetry unit
+
+**Absolute Safety Invariant**:
+A clinical infection or cohorting constraint (biological gender cohorting in multi-bed wards, airborne infection negative pressure isolation) that software strictly forbids overriding under any circumstance.
+_Avoid_: Hard rule, unskippable constraint, mandatory lock
+
+**Overridable Operational Constraint**:
+A capacity or equipment constraint (ward class subsidy tier, static telemetry equipping) that permits coordinator override when accompanied by a structured institutional justification code.
+_Avoid_: Soft constraint, bypassable filter, flexible rule
+
+
+
+

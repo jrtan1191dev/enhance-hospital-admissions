@@ -141,6 +141,7 @@ export interface AssessmentBroadcast {
   secondaryTelemetry?: boolean;
   diversionPathway?: DiversionPathway;
   parentBroadcastId?: string;
+  createdAt?: string;
 }
 
 export interface BmuAlgorithmConfig {

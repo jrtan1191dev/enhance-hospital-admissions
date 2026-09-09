@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hospital.admissions.domain.*;
 import com.hospital.admissions.dto.*;
 import com.hospital.admissions.repository.*;
+import com.hospital.admissions.service.ClinicianService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +47,9 @@ class TracerBulletsIntegrationTest {
 
     @Autowired
     private AssessmentBroadcastRepository broadcastRepository;
+
+    @Autowired
+    private ClinicianService clinicianService;
 
     @Test
     @DisplayName("Tracer Bullet 1: ED Assessment -> Specialist Claim -> BMU Allocation")
@@ -361,5 +366,81 @@ class TracerBulletsIntegrationTest {
         assertThat(updatedAdmission.isDiversionRecommended()).isTrue();
         assertThat(updatedAdmission.getDiversionPathway()).isEqualTo(DiversionPathway.COMMUNITY_HOSPITAL);
         assertThat(updatedAdmission.getSecondaryAcuityTier()).isEqualTo(AcuityTier.TIER_4_SUBACUTE_DIVERSION);
+    }
+
+    @Test
+    @DisplayName("Tracer Bullet 6: Acuity-Driven SLA Expiry and Cluster Auto-Escalation")
+    void testTracerBullet6_AcuityDrivenSlaAndAutoEscalation() throws Exception {
+        // Step 1: Submit ED assessment for P104 (Orthopaedics, TIER_3_ACUTE_STABLE) requiring consult
+        Patient p104 = patientRepository.findByQueueToken("TOKEN-P104").orElseThrow();
+
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(p104.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.ORTHOPAEDICS)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B2)
+                .needsTelemetry(false)
+                .requiresSpecialistConsult(true)
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk());
+
+        AdmissionRequest admission = admissionRequestRepository.findAll().stream()
+                .filter(a -> a.getPatient().getId().equals(p104.getId()))
+                .findFirst().orElseThrow();
+
+        AssessmentBroadcast broadcast = broadcastRepository.findByAdmissionRequest_Id(admission.getId()).stream()
+                .filter(b -> b.getTargetCluster() == SpecialtyCluster.ORTHOPAEDICS)
+                .findFirst().orElseThrow();
+
+        assertThat(broadcast.getStatus()).isEqualTo(BroadcastStatus.OPEN);
+
+        // Step 2: Trigger auto-escalation check at +20 mins -> Tier 3 has 30m SLA, so Ortho broadcast should NOT escalate yet
+        LocalDateTime tPlus20 = LocalDateTime.now().plusMinutes(20);
+        clinicianService.autoEscalateOverdueBroadcasts(tPlus20);
+
+        AssessmentBroadcast stillOpen = broadcastRepository.findById(broadcast.getId()).orElseThrow();
+        assertThat(stillOpen.getStatus()).isEqualTo(BroadcastStatus.OPEN);
+        assertThat(stillOpen.getClaimedBySpecialistId()).isNull();
+
+        // Step 3: Trigger auto-escalation check at +31 mins -> Exceeds 30m SLA -> should escalate to dr_lee_ortho
+        LocalDateTime tPlus31 = LocalDateTime.now().plusMinutes(31);
+        int escalatedCountLate = clinicianService.autoEscalateOverdueBroadcasts(tPlus31);
+        assertThat(escalatedCountLate).isGreaterThanOrEqualTo(1);
+
+        AssessmentBroadcast escalated = broadcastRepository.findById(broadcast.getId()).orElseThrow();
+        assertThat(escalated.getStatus()).isEqualTo(BroadcastStatus.AUTO_ESCALATED);
+        assertThat(escalated.getClaimedBySpecialistId()).isEqualTo("dr_lee_ortho");
+        assertThat(escalated.getClaimedAt()).isNotNull();
+
+        // Step 4: Verify specialist feed displays escalated broadcast
+        mockMvc.perform(get("/api/v1/clinicians/specialist/broadcasts")
+                        .param("cluster", "ORTHOPAEDICS")
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == '" + broadcast.getId() + "')].status").value("AUTO_ESCALATED"))
+                .andExpect(jsonPath("$[?(@.id == '" + broadcast.getId() + "')].claimedBySpecialistId").value("dr_lee_ortho"));
+
+        // Step 5: Escalated specialist conducts consult evaluation and submits consult
+        SpecialistConsultRequest consultReq = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .secondaryTelemetry(false)
+                .consultNotes("Escalated review completed: Conservative fracture management indicated.")
+                .diversionPathway(DiversionPathway.NONE)
+                .diversionRecommended(false)
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcast.getId() + "/consult")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(consultReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
     }
 }

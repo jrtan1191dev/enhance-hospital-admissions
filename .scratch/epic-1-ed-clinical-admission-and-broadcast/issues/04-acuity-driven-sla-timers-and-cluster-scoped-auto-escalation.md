@@ -5,12 +5,13 @@ Display live SLA countdown timers on active broadcast feeds based on patient acu
 
 **Blocked by:** 02: Consult-Gated Admission & Multi-Cluster Broadcast Pool with Atomic Claiming
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Frontend displays dynamic countdown timers and overdue badges on active broadcast cards based on `primaryAcuityTier` SLA thresholds.
-- [ ] Backend defines cluster-to-default-specialist mappings (Cardiology $\rightarrow$ `dr_lim_cardio`, General Medicine $\rightarrow$ `dr_tan_genmed`, Surgery $\rightarrow$ `dr_kumar_surg`, Orthopaedics $\rightarrow$ `dr_lee_ortho`).
-- [ ] Background job (`@Scheduled(fixedRate = 30000)`) scans for `OPEN` broadcasts exceeding their acuity-based SLA duration (`Tier 1-2: 15m`, `Tier 3-5: 30m`).
-- [ ] Overdue broadcasts atomically transition to `status = AUTO_ESCALATED` and assign `claimedBySpecialistId` to the cluster's designated default lead.
-- [ ] Auto-escalation emits an `AUTO_ESCALATE_BROADCAST` audit log with MDC metadata.
-- [ ] Escalated cases surface high-priority alert banners on the default specialist's dashboard and ED tracking board.
-- [ ] Unit and scheduled integration tests verify SLA computation, auto-assignment accuracy, and cluster isolation.
+- [x] Frontend displays dynamic countdown timers and overdue badges on active broadcast cards based on `primaryAcuityTier` SLA thresholds.
+- [x] Backend defines cluster-to-default-specialist mappings (Cardiology $\rightarrow$ `dr_lim_cardio`, General Medicine $\rightarrow$ `dr_tan_genmed`, Surgery $\rightarrow$ `dr_kumar_surg`, Orthopaedics $\rightarrow$ `dr_lee_ortho`).
+- [x] Background job (`@Scheduled(fixedRate = 30000)`) scans for `OPEN` broadcasts exceeding their acuity-based SLA duration (`Tier 1-2: 15m`, `Tier 3-5: 30m`).
+- [x] Overdue broadcasts atomically transition to `status = AUTO_ESCALATED` and assign `claimedBySpecialistId` to the cluster's designated default lead.
+- [x] Auto-escalation emits an `AUTO_ESCALATE_BROADCAST` audit log with MDC metadata.
+- [x] Escalated cases surface high-priority alert banners on the default specialist's dashboard and ED tracking board.
+- [x] Unit and scheduled integration tests verify SLA computation, auto-assignment accuracy, and cluster isolation.
+

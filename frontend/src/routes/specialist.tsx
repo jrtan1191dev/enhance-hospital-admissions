@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { specialistQueries, useClaimBroadcast, useSubmitConsult, useChainConsult } from '../services/queries';
 import type { AcuityTier, AssessmentBroadcast, SpecialtyCluster, DiversionPathway } from '../types/admissions';
@@ -13,9 +13,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
-import { Users, CheckCircle2, AlertTriangle, MessageSquare, Lock, Sparkles, GitBranch } from 'lucide-react';
+import { Users, CheckCircle2, AlertTriangle, MessageSquare, Lock, Sparkles, GitBranch, Clock } from 'lucide-react';
 
 const CLUSTERS: SpecialtyCluster[] = ['CARDIOLOGY', 'GENERAL_MEDICINE', 'SURGERY', 'ORTHOPAEDICS'];
+
+// Acuity-Driven SLA Thresholds: Tier 1-2 = 15m; Tier 3-5 = 30m
+function getSlaMinutes(tier?: AcuityTier): number {
+  if (tier === 'TIER_1_CRITICAL' || tier === 'TIER_2_ACUTE_URGENT') return 15;
+  return 30;
+}
+
+function getSlaRemainingSeconds(broadcast: AssessmentBroadcast, nowMs: number): number {
+  const reqTime = broadcast.createdAt || broadcast.admissionRequest?.requestedAt || broadcast.admissionRequest?.createdAt;
+  if (!reqTime) return 0;
+  const createdMs = new Date(reqTime).getTime();
+  const slaMins = getSlaMinutes(broadcast.admissionRequest?.primaryAcuityTier);
+  const deadlineMs = createdMs + slaMins * 60 * 1000;
+  return Math.floor((deadlineMs - nowMs) / 1000);
+}
+
+function formatCountdown(totalSecs: number): string {
+  if (totalSecs <= 0) return '00:00';
+  const mins = Math.floor(totalSecs / 60);
+  const secs = totalSecs % 60;
+  return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+}
 
 export function SpecialistRoute() {
   const [selectedCluster, setSelectedCluster] = useState<SpecialtyCluster | undefined>(undefined);
@@ -33,10 +55,18 @@ export function SpecialistRoute() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const [now, setNow] = useState<number>(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // TanStack Query: Fetch Broadcasts via queries.ts queryOptions
   const { data: broadcasts = [], isLoading } = useQuery(
     specialistQueries.broadcasts(selectedCluster)
   );
+
+  const escalatedBroadcasts = broadcasts.filter((b) => b.status === 'AUTO_ESCALATED');
 
   // Centralized Claim Mutation Hook with Conflict Handling
   const claimMutation = useClaimBroadcast(
@@ -161,6 +191,26 @@ export function SpecialistRoute() {
         </div>
       )}
 
+      {/* Critical SLA Auto-Escalation Banner */}
+      {escalatedBroadcasts.length > 0 && (
+        <div className="p-4 bg-red-50 border-l-4 border-l-red-600 border border-red-200 rounded-xl text-red-950 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 animate-bounce" />
+            <div>
+              <div className="font-bold text-sm">
+                CRITICAL SLA ESCALATION ({escalatedBroadcasts.length} Active {escalatedBroadcasts.length === 1 ? 'Case' : 'Cases'})
+              </div>
+              <div className="text-xs text-red-800 mt-0.5">
+                One or more consult requests exceeded acuity-based SLA thresholds and have been auto-escalated to designated cluster leads for immediate review.
+              </div>
+            </div>
+          </div>
+          <Badge variant="destructive" className="font-mono text-xs uppercase animate-pulse">
+            Immediate Review Required
+          </Badge>
+        </div>
+      )}
+
       {/* Specialty Cluster Filter Tabs */}
       <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-xl border border-slate-200 shadow-2xs">
         <button
@@ -223,13 +273,22 @@ export function SpecialistRoute() {
           {broadcasts.map((broadcast) => {
             const req = broadcast.admissionRequest;
             const patient = req.patient;
-            const isClaimed = broadcast.status === 'CLAIMED' || broadcast.status === 'COMPLETED';
+            const isClaimed = broadcast.status === 'CLAIMED' || broadcast.status === 'AUTO_ESCALATED' || broadcast.status === 'COMPLETED';
             const isConsulted = broadcast.status === 'COMPLETED';
+            const isEscalated = broadcast.status === 'AUTO_ESCALATED';
+            const isOpen = broadcast.status === 'OPEN';
+
+            const remainingSecs = getSlaRemainingSeconds(broadcast, now);
+            const isOverdue = isOpen && remainingSecs <= 0;
 
             const borderAccent = isConsulted
               ? 'border-l-4 border-l-emerald-500'
+              : isEscalated
+              ? 'border-l-4 border-l-red-500 bg-red-50/20'
               : isClaimed
               ? 'border-l-4 border-l-purple-500'
+              : isOverdue
+              ? 'border-l-4 border-l-red-500'
               : 'border-l-4 border-l-blue-500';
 
             return (
@@ -248,15 +307,28 @@ export function SpecialistRoute() {
                           <GitBranch className="h-3 w-3" /> Chained
                         </Badge>
                       )}
+                      {isOpen && (
+                        <Badge
+                          variant={isOverdue ? 'destructive' : 'outline'}
+                          className={`text-[10px] font-mono flex items-center gap-1 ${
+                            isOverdue ? 'animate-pulse' : 'bg-amber-50 text-amber-800 border-amber-300'
+                          }`}
+                        >
+                          <Clock className="h-3 w-3" />
+                          {isOverdue ? 'SLA OVERDUE' : `SLA: ${formatCountdown(remainingSecs)}`}
+                        </Badge>
+                      )}
                       <Badge
                         variant={
-                          broadcast.status === 'OPEN'
+                          isOpen
+                            ? isOverdue ? 'destructive' : 'secondary'
+                            : isEscalated
                             ? 'destructive'
                             : broadcast.status === 'CLAIMED'
                             ? 'purple'
                             : 'secondary'
                         }
-                        className="text-xs"
+                        className={`text-xs font-semibold ${isEscalated ? 'animate-pulse' : ''}`}
                       >
                         {broadcast.status}
                       </Badge>
@@ -313,6 +385,24 @@ export function SpecialistRoute() {
                       )}
                     </div>
                   </div>
+
+                  {/* Auto-Escalated Notice */}
+                  {isEscalated && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-950 space-y-1">
+                      <div className="font-semibold flex items-center gap-1 text-red-700">
+                        <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+                        Auto-Escalated Consult (SLA Breached):
+                      </div>
+                      <p className="text-[11px] text-red-800">
+                        Unclaimed beyond {getSlaMinutes(req.primaryAcuityTier)}m SLA. Automatically assigned to default on-call specialist lead:
+                      </p>
+                      <div className="pt-0.5">
+                        <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded border border-red-200 text-red-700">
+                          {broadcast.claimedBySpecialistId}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Specialist Impression (if already consulted) */}
                   {isConsulted && (

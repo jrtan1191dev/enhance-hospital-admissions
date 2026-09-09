@@ -9,18 +9,27 @@ import com.hospital.admissions.repository.PatientRepository;
 import com.hospital.admissions.security.AuditLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClinicianService {
+
+    public static final Map<SpecialtyCluster, String> DEFAULT_SPECIALISTS = Map.of(
+            SpecialtyCluster.CARDIOLOGY, "dr_lim_cardio",
+            SpecialtyCluster.GENERAL_MEDICINE, "dr_tan_genmed",
+            SpecialtyCluster.SURGERY, "dr_kumar_surg",
+            SpecialtyCluster.ORTHOPAEDICS, "dr_lee_ortho"
+    );
 
     private final PatientRepository patientRepository;
     private final AdmissionRequestRepository admissionRequestRepository;
@@ -208,7 +217,9 @@ public class ClinicianService {
         AssessmentBroadcast parentBroadcast = broadcastRepository.findById(broadcastId)
                 .orElseThrow(() -> new IllegalArgumentException("Broadcast not found: " + broadcastId));
 
-        if (parentBroadcast.getStatus() != BroadcastStatus.CLAIMED && parentBroadcast.getStatus() != BroadcastStatus.COMPLETED) {
+        if (parentBroadcast.getStatus() != BroadcastStatus.CLAIMED &&
+                parentBroadcast.getStatus() != BroadcastStatus.AUTO_ESCALATED &&
+                parentBroadcast.getStatus() != BroadcastStatus.COMPLETED) {
             throw new IllegalStateException("Cannot chain consult: Parent broadcast must be claimed or completed first (current status: " + parentBroadcast.getStatus() + ")");
         }
 
@@ -235,5 +246,49 @@ public class ClinicianService {
                 AuditLogger.formatDetails(details));
 
         return chainedBroadcast;
+    }
+
+    @Scheduled(fixedRate = 30000)
+    @Transactional
+    public int autoEscalateOverdueBroadcasts() {
+        return autoEscalateOverdueBroadcasts(LocalDateTime.now());
+    }
+
+    @Transactional
+    public int autoEscalateOverdueBroadcasts(LocalDateTime now) {
+        List<AssessmentBroadcast> openBroadcasts = broadcastRepository.findByStatus(BroadcastStatus.OPEN);
+        int count = 0;
+        for (AssessmentBroadcast b : openBroadcasts) {
+            LocalDateTime creationTime = b.getCreatedAt();
+            if (creationTime == null && b.getAdmissionRequest() != null) {
+                creationTime = b.getAdmissionRequest().getRequestedAt();
+            }
+            if (creationTime == null) {
+                creationTime = now;
+            }
+
+            AcuityTier tier = b.getAdmissionRequest() != null ? b.getAdmissionRequest().getPrimaryAcuityTier() : null;
+            long slaMins = (tier == AcuityTier.TIER_1_CRITICAL || tier == AcuityTier.TIER_2_ACUTE_URGENT) ? 15 : 30;
+
+            if (java.time.Duration.between(creationTime, now).toMinutes() >= slaMins) {
+                String defaultLead = DEFAULT_SPECIALISTS.getOrDefault(b.getTargetCluster(), "oncall_specialist");
+                b.setStatus(BroadcastStatus.AUTO_ESCALATED);
+                b.setClaimedBySpecialistId(defaultLead);
+                b.setClaimedAt(now);
+                broadcastRepository.save(b);
+                count++;
+
+                java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+                details.put("TargetCluster", b.getTargetCluster());
+                details.put("EscalatedTo", defaultLead);
+                details.put("AcuityTier", tier);
+                details.put("ElapsedMins", java.time.Duration.between(creationTime, now).toMinutes());
+
+                auditLogger.logAction("SYSTEM", "AUTO_ESCALATE_BROADCAST",
+                        "AssessmentBroadcast:" + b.getId(),
+                        AuditLogger.formatDetails(details));
+            }
+        }
+        return count;
     }
 }

@@ -6,7 +6,7 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { edQueries, useSubmitEdAssessment } from '../services/queries';
+import { edQueries, specialistQueries, useSubmitEdAssessment } from '../services/queries';
 import type { AcuityTier, InfectionStatus, Patient, SpecialtyCluster, WardClass } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -42,6 +42,9 @@ export function EdRoute() {
   // Fetch Waiting Patients and Assessed Admissions via TanStack Query
   const { data: patients = [], isLoading, error } = useQuery(edQueries.patients());
   const { data: assessedAdmissions = [], isLoading: isLoadingAssessed } = useQuery(edQueries.admissions());
+  const { data: allBroadcasts = [] } = useQuery(specialistQueries.broadcasts());
+
+  const escalatedBroadcasts = allBroadcasts.filter((b) => b.status === 'AUTO_ESCALATED');
 
   // Submit Assessment Mutation via centralized TanStack Query service hook
   const submitMutation = useSubmitEdAssessment(() => {
@@ -210,6 +213,26 @@ export function EdRoute() {
         </div>
       )}
 
+      {/* High Priority SLA Auto-Escalation Alert Banner */}
+      {escalatedBroadcasts.length > 0 && (
+        <div className="p-3.5 bg-red-50 border-l-4 border-l-red-600 border border-red-200 rounded-xl flex items-center justify-between text-red-950 text-xs shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 animate-bounce" />
+            <div>
+              <span className="font-bold text-red-900">
+                CRITICAL SLA ALERT: {escalatedBroadcasts.length} Consult {escalatedBroadcasts.length === 1 ? 'Broadcast' : 'Broadcasts'} Auto-Escalated!
+              </span>
+              <p className="text-[11px] text-red-700 mt-0.5">
+                Consult request breached acuity SLA without claim ({escalatedBroadcasts.map(b => b.targetCluster).join(', ')}). Assigned to on-call cluster lead.
+              </p>
+            </div>
+          </div>
+          <Badge variant="destructive" className="text-[10px] uppercase font-mono tracking-wider animate-pulse">
+            SLA Breached
+          </Badge>
+        </div>
+      )}
+
       {/* Board Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200">
         <button
@@ -325,18 +348,25 @@ export function EdRoute() {
                         </div>
                       </TableCell>
                       <TableCell className="py-3 text-xs">
-                        <Badge
-                          variant={
-                            admission.status === 'BED_ALLOCATED'
-                              ? 'default'
-                              : admission.status === 'BED_REQUESTED'
-                              ? 'secondary'
-                              : 'outline'
-                          }
-                          className="text-[10px] font-semibold"
-                        >
-                          {admission.status}
-                        </Badge>
+                        <div className="flex flex-col gap-1 items-start">
+                          <Badge
+                            variant={
+                              admission.status === 'BED_ALLOCATED'
+                                ? 'default'
+                                : admission.status === 'BED_REQUESTED'
+                                ? 'secondary'
+                                : 'outline'
+                            }
+                            className="text-[10px] font-semibold"
+                          >
+                            {admission.status}
+                          </Badge>
+                          {allBroadcasts.some(b => b.admissionRequest?.id === admission.id && b.status === 'AUTO_ESCALATED') && (
+                            <Badge variant="destructive" className="text-[9px] py-0 px-1 font-mono uppercase animate-pulse">
+                              Auto-Escalated
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="py-3 text-xs font-mono font-medium text-slate-700">
                         {admission.assignedBed ? (

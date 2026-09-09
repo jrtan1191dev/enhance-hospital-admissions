@@ -484,4 +484,131 @@ class ClinicianServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("must be claimed");
     }
+
+    @Test
+    @DisplayName("autoEscalateOverdueBroadcasts escalates Tier 1-2 broadcasts exceeding 15 mins to designated default specialist")
+    void testAutoEscalateOverdueBroadcasts_Tier1And2_EscalatesAfter15Minutes() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 9, 12, 30);
+        LocalDateTime created16mAgo = now.minusMinutes(16);
+
+        AdmissionRequest reqCardio = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .build();
+
+        AssessmentBroadcast cardioBroadcast = AssessmentBroadcast.builder()
+                .id(UUID.randomUUID())
+                .admissionRequest(reqCardio)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.OPEN)
+                .build();
+        cardioBroadcast.setCreatedAt(created16mAgo);
+
+        when(broadcastRepository.findByStatus(BroadcastStatus.OPEN)).thenReturn(List.of(cardioBroadcast));
+        when(broadcastRepository.save(any(AssessmentBroadcast.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        int escalatedCount = clinicianService.autoEscalateOverdueBroadcasts(now);
+
+        assertThat(escalatedCount).isEqualTo(1);
+        assertThat(cardioBroadcast.getStatus()).isEqualTo(BroadcastStatus.AUTO_ESCALATED);
+        assertThat(cardioBroadcast.getClaimedBySpecialistId()).isEqualTo("dr_lim_cardio");
+        assertThat(cardioBroadcast.getClaimedAt()).isEqualTo(now);
+        verify(broadcastRepository).save(cardioBroadcast);
+        verify(auditLogger).logAction(eq("SYSTEM"), eq("AUTO_ESCALATE_BROADCAST"), eq("AssessmentBroadcast:" + cardioBroadcast.getId()), contains("EscalatedTo=dr_lim_cardio"));
+    }
+
+    @Test
+    @DisplayName("autoEscalateOverdueBroadcasts respects 30 min SLA for Tiers 3-5 and verifies cluster mappings")
+    void testAutoEscalateOverdueBroadcasts_Tiers3To5_SlaThresholdsAndClusterMappings() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 9, 12, 30);
+
+        // Broadcast 1: General Medicine, Tier 3, created 25 mins ago (within 30m SLA) -> should NOT escalate
+        AdmissionRequest reqGenMed = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .build();
+        AssessmentBroadcast genMedBroadcast = AssessmentBroadcast.builder()
+                .id(UUID.randomUUID())
+                .admissionRequest(reqGenMed)
+                .targetCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .status(BroadcastStatus.OPEN)
+                .build();
+        genMedBroadcast.setCreatedAt(now.minusMinutes(25));
+
+        // Broadcast 2: Orthopaedics, Tier 4, created 35 mins ago (exceeds 30m SLA) -> should escalate to dr_lee_ortho
+        AdmissionRequest reqOrtho = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_4_SUBACUTE_DIVERSION)
+                .build();
+        AssessmentBroadcast orthoBroadcast = AssessmentBroadcast.builder()
+                .id(UUID.randomUUID())
+                .admissionRequest(reqOrtho)
+                .targetCluster(SpecialtyCluster.ORTHOPAEDICS)
+                .status(BroadcastStatus.OPEN)
+                .build();
+        orthoBroadcast.setCreatedAt(now.minusMinutes(35));
+
+        // Broadcast 3: Surgery, Tier 1, created 20 mins ago (exceeds 15m SLA) -> should escalate to dr_kumar_surg
+        AdmissionRequest reqSurg = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .build();
+        AssessmentBroadcast surgBroadcast = AssessmentBroadcast.builder()
+                .id(UUID.randomUUID())
+                .admissionRequest(reqSurg)
+                .targetCluster(SpecialtyCluster.SURGERY)
+                .status(BroadcastStatus.OPEN)
+                .build();
+        surgBroadcast.setCreatedAt(now.minusMinutes(20));
+
+        when(broadcastRepository.findByStatus(BroadcastStatus.OPEN))
+                .thenReturn(List.of(genMedBroadcast, orthoBroadcast, surgBroadcast));
+        when(broadcastRepository.save(any(AssessmentBroadcast.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        int escalatedCount = clinicianService.autoEscalateOverdueBroadcasts(now);
+
+        assertThat(escalatedCount).isEqualTo(2);
+        // GenMed should remain OPEN
+        assertThat(genMedBroadcast.getStatus()).isEqualTo(BroadcastStatus.OPEN);
+        assertThat(genMedBroadcast.getClaimedBySpecialistId()).isNull();
+
+        // Ortho escalated to dr_lee_ortho
+        assertThat(orthoBroadcast.getStatus()).isEqualTo(BroadcastStatus.AUTO_ESCALATED);
+        assertThat(orthoBroadcast.getClaimedBySpecialistId()).isEqualTo("dr_lee_ortho");
+
+        // Surg escalated to dr_kumar_surg
+        assertThat(surgBroadcast.getStatus()).isEqualTo(BroadcastStatus.AUTO_ESCALATED);
+        assertThat(surgBroadcast.getClaimedBySpecialistId()).isEqualTo("dr_kumar_surg");
+    }
+
+    @Test
+    @DisplayName("chainConsult allows chaining from AUTO_ESCALATED broadcast")
+    void testChainConsult_AutoEscalatedBroadcast_Success() {
+        UUID broadcastId = UUID.randomUUID();
+        AdmissionRequest admissionRequest = AdmissionRequest.builder().id(UUID.randomUUID()).build();
+        AssessmentBroadcast autoEscalatedBroadcast = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.AUTO_ESCALATED)
+                .claimedBySpecialistId("dr_lim_cardio")
+                .build();
+
+        com.hospital.admissions.dto.ChainConsultRequest req = com.hospital.admissions.dto.ChainConsultRequest.builder()
+                .targetCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .rationale("Auto-escalated multidisciplinary review required")
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(autoEscalatedBroadcast));
+        when(broadcastRepository.save(any(AssessmentBroadcast.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        AssessmentBroadcast chained = clinicianService.chainConsult(broadcastId, req);
+
+        assertThat(chained).isNotNull();
+        assertThat(chained.getStatus()).isEqualTo(BroadcastStatus.OPEN);
+        assertThat(chained.getTargetCluster()).isEqualTo(SpecialtyCluster.GENERAL_MEDICINE);
+        assertThat(chained.getParentBroadcastId()).isEqualTo(broadcastId);
+        verify(broadcastRepository).save(any(AssessmentBroadcast.class));
+    }
 }
+

@@ -164,7 +164,7 @@ export function WardRoute() {
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                     }`}
                   >
-                    <span>Ward {w.wardCode} ({w.specialty?.replace('_', ' ') || ''})</span>
+                    <span>Ward {w.wardCode} ({w.specialty.replace('_', ' ')})</span>
                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-semibold ${
                       isSelected ? 'bg-blue-100 text-blue-800' : 'bg-slate-200/70 text-slate-600'
                     }`}>

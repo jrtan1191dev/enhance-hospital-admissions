@@ -3,11 +3,13 @@ package com.hospital.admissions.service;
 import com.hospital.admissions.domain.*;
 import com.hospital.admissions.dto.BatchApprovalRequest;
 import com.hospital.admissions.dto.BatchSuggestion;
+import com.hospital.admissions.dto.BedDto;
 import com.hospital.admissions.dto.CohortSwapApprovalRequest;
 import com.hospital.admissions.dto.CohortSwapSuggestion;
 import com.hospital.admissions.dto.BedRecommendation;
 import com.hospital.admissions.dto.BmuConfigUpdateRequest;
 import com.hospital.admissions.dto.SisterHospitalReferralResponse;
+import com.hospital.admissions.dto.WardDto;
 import com.hospital.admissions.gateway.SisterHospitalGateway;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.BedRepository;
@@ -189,8 +191,28 @@ public class BmuService {
         return savedRequest;
     }
 
-    public List<Ward> getInventory() {
-        return wardRepository.findAllByOrderByLevelAscNameAsc();
+    public List<WardDto> getInventory() {
+        return wardRepository.findAllByOrderByLevelAscNameAsc().stream()
+                .map(w -> new WardDto(
+                        w.getId(),
+                        w.getName().replace("Ward ", ""),
+                        w.getLevel(),
+                        w.getWardClass(),
+                        w.getServiceCluster(),
+                        w.getLockedGender(),
+                        w.getLockedInfectionStatus(),
+                        w.getBeds().stream()
+                                .map(b -> new BedDto(
+                                        b.getId(),
+                                        b.getBedNumber(),
+                                        b.getStatus(),
+                                        b.isHasTelemetry(),
+                                        b.isNearNursingStation(),
+                                        b.getCurrentPatient()
+                                ))
+                                .toList()
+                ))
+                .toList();
     }
 
     public BmuAlgorithmConfig getOrCreateConfig() {

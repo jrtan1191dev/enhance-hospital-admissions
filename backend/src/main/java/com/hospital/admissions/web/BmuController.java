@@ -2,7 +2,7 @@ package com.hospital.admissions.web;
 
 import com.hospital.admissions.domain.AdmissionRequest;
 import com.hospital.admissions.domain.BmuAlgorithmConfig;
-import com.hospital.admissions.domain.Ward;
+import com.hospital.admissions.dto.WardDto;
 import com.hospital.admissions.dto.BedAllocationRequest;
 import com.hospital.admissions.dto.BedRecommendation;
 import com.hospital.admissions.dto.BmuConfigUpdateRequest;
@@ -74,7 +74,7 @@ public class BmuController {
     }
 
     @GetMapping("/inventory")
-    public ResponseEntity<List<Ward>> getInventory() {
+    public ResponseEntity<List<WardDto>> getInventory() {
         return ResponseEntity.ok(bmuService.getInventory());
     }
 

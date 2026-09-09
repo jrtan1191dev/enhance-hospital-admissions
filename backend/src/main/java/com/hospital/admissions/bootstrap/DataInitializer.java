@@ -85,7 +85,7 @@ public class DataInitializer implements CommandLineRunner {
                     .capacity(4)
                     .build());
 
-            bedRepository.save(Bed.builder()
+            Bed bed8A01 = bedRepository.save(Bed.builder()
                     .ward(ward8A)
                     .bedNumber("8A-01")
                     .status(BedStatus.OCCUPIED_TAKEN)
@@ -94,7 +94,7 @@ public class DataInitializer implements CommandLineRunner {
                     .currentPatient(inp1)
                     .build());
 
-            bedRepository.save(Bed.builder()
+            Bed bed8A02 = bedRepository.save(Bed.builder()
                     .ward(ward8A)
                     .bedNumber("8A-02")
                     .status(BedStatus.OCCUPIED_TAKEN)
@@ -109,16 +109,17 @@ public class DataInitializer implements CommandLineRunner {
                     .status(BedStatus.EMPTY_CLEANED)
                     .isNearNursingStation(true)
                     .hasTelemetry(true)
+                    .cleaningStartedAt(LocalDateTime.now().minusHours(2).minusMinutes(22))
                     .lastCleanedAt(LocalDateTime.now().minusHours(2))
                     .build());
 
             bedRepository.save(Bed.builder()
                     .ward(ward8A)
                     .bedNumber("8A-04")
-                    .status(BedStatus.EMPTY_CLEANED)
+                    .status(BedStatus.EMPTY_PENDING_CLEANING)
                     .isNearNursingStation(false)
                     .hasTelemetry(true)
-                    .lastCleanedAt(LocalDateTime.now().minusHours(1))
+                    .cleaningStartedAt(LocalDateTime.now().minusMinutes(12))
                     .build());
 
             // Ward 8B: Level 8 / Cardiology / Class B2 / Flex Unlocked
@@ -138,6 +139,7 @@ public class DataInitializer implements CommandLineRunner {
                         .status(BedStatus.EMPTY_CLEANED)
                         .isNearNursingStation(i <= 2)
                         .hasTelemetry(false)
+                        .cleaningStartedAt(i == 1 ? LocalDateTime.now().minusHours(3).minusMinutes(25) : null)
                         .lastCleanedAt(LocalDateTime.now().minusHours(3))
                         .build());
             }
@@ -152,7 +154,7 @@ public class DataInitializer implements CommandLineRunner {
                     .capacity(2)
                     .build());
 
-            bedRepository.save(Bed.builder()
+            Bed bed9A01 = bedRepository.save(Bed.builder()
                     .ward(ward9A)
                     .bedNumber("9A-01")
                     .status(BedStatus.OCCUPIED_TAKEN)
@@ -167,10 +169,79 @@ public class DataInitializer implements CommandLineRunner {
                     .status(BedStatus.EMPTY_CLEANED)
                     .isNearNursingStation(true)
                     .hasTelemetry(false)
+                    .cleaningStartedAt(LocalDateTime.now().minusHours(4).minusMinutes(20))
                     .lastCleanedAt(LocalDateTime.now().minusHours(4))
                     .build());
 
-            log.info("[PROTOTYPE SEEDER] Seeded Wards 8A, 8B, 9A and 10 beds successfully.");
+            // Seed active Inpatient Admission Requests for occupied beds & 1 past discharge
+            admissionRequestRepository.save(AdmissionRequest.builder()
+                    .patient(inp1)
+                    .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                    .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                    .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                    .requestedWardClass(WardClass.B2)
+                    .status(AdmissionStatus.ADMITTED_INPATIENT)
+                    .assignedBed(bed8A01)
+                    .requestedAt(LocalDateTime.now().minusDays(3))
+                    .allocatedAt(LocalDateTime.now().minusDays(3).plusMinutes(20))
+                    .admittedAt(LocalDateTime.now().minusDays(3).plusMinutes(45))
+                    .waitingInEd(false)
+                    .build());
+
+            admissionRequestRepository.save(AdmissionRequest.builder()
+                    .patient(inp2)
+                    .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                    .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                    .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                    .requestedWardClass(WardClass.B2)
+                    .status(AdmissionStatus.ADMITTED_INPATIENT)
+                    .assignedBed(bed8A02)
+                    .requestedAt(LocalDateTime.now().minusDays(2))
+                    .allocatedAt(LocalDateTime.now().minusDays(2).plusMinutes(30))
+                    .admittedAt(LocalDateTime.now().minusDays(2).plusMinutes(55))
+                    .waitingInEd(false)
+                    .build());
+
+            admissionRequestRepository.save(AdmissionRequest.builder()
+                    .patient(inp3)
+                    .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                    .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                    .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                    .requestedWardClass(WardClass.C)
+                    .status(AdmissionStatus.ADMITTED_INPATIENT)
+                    .assignedBed(bed9A01)
+                    .requestedAt(LocalDateTime.now().minusDays(1))
+                    .allocatedAt(LocalDateTime.now().minusDays(1).plusMinutes(15))
+                    .admittedAt(LocalDateTime.now().minusDays(1).plusMinutes(35))
+                    .waitingInEd(false)
+                    .build());
+
+            Patient pastInp = patientRepository.save(Patient.builder()
+                    .name("Madam Choo (Discharged)")
+                    .nricMasked("S****334H")
+                    .age(65)
+                    .gender(Gender.FEMALE)
+                    .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                    .fallRiskScore(20)
+                    .needsTelemetry(false)
+                    .queueToken("TOKEN-DIS-334")
+                    .build());
+
+            admissionRequestRepository.save(AdmissionRequest.builder()
+                    .patient(pastInp)
+                    .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                    .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                    .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                    .requestedWardClass(WardClass.C)
+                    .status(AdmissionStatus.DISCHARGED)
+                    .requestedAt(LocalDateTime.now().minusDays(2))
+                    .allocatedAt(LocalDateTime.now().minusDays(2).plusMinutes(10))
+                    .admittedAt(LocalDateTime.now().minusDays(2).plusMinutes(30))
+                    .dischargedAt(LocalDateTime.now().minusDays(1).withHour(10).withMinute(30))
+                    .waitingInEd(false)
+                    .build());
+
+            log.info("[PROTOTYPE SEEDER] Seeded Wards 8A, 8B, 9A, 10 beds, and inpatient admission requests successfully.");
         }
 
         // 3. Seed ED Patients P101 - P104

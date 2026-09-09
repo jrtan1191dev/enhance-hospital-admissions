@@ -86,6 +86,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    @ExceptionHandler({
+        jakarta.persistence.OptimisticLockException.class,
+        org.springframework.orm.ObjectOptimisticLockingFailureException.class
+    })
+    public ProblemDetail handleOptimisticLock(Exception ex, HttpServletRequest request) {
+        logDiagnostic(HttpStatus.CONFLICT, ex, request);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                "The resource was updated concurrently by another user. Please refresh and try again.");
+        problem.setTitle("Conflict");
+        problem.setProperty("timestamp", Instant.now());
+        return problem;
+    }
+
     @ExceptionHandler(UnsupportedOperationException.class)
     public ProblemDetail handleUnsupportedOperation(UnsupportedOperationException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.NOT_IMPLEMENTED, ex, request);

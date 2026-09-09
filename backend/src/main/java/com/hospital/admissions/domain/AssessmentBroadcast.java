@@ -19,6 +19,9 @@ public class AssessmentBroadcast extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Version
+    private Long version;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "admission_request_id", nullable = false)
     private AdmissionRequest admissionRequest;

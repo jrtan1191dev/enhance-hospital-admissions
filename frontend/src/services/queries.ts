@@ -108,13 +108,17 @@ export function useSubmitEdAssessment(onSuccess?: () => void) {
   });
 }
 
-export function useClaimBroadcast(onSuccess?: () => void) {
+export function useClaimBroadcast(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.claimBroadcast(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
       onSuccess?.();
+    },
+    onError: (error: Error) => {
+      queryClient.invalidateQueries({ queryKey: specialistQueries.all() });
+      onError?.(error);
     },
   });
 }

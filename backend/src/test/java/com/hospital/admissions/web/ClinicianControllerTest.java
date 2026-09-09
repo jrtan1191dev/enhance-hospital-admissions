@@ -147,6 +147,20 @@ class ClinicianControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/v1/clinicians/specialist/broadcasts/{id}/claim conflict returns 409 Conflict ProblemDetail")
+    void testClaimBroadcast_ConflictReturns409() throws Exception {
+        UUID broadcastId = UUID.randomUUID();
+        when(clinicianService.claimBroadcast(broadcastId))
+                .thenThrow(new IllegalStateException("Broadcast has already been claimed or is no longer open: " + broadcastId));
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + broadcastId + "/claim"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.title").value("Conflict"))
+                .andExpect(jsonPath("$.detail").value("Broadcast has already been claimed or is no longer open: " + broadcastId));
+    }
+
+    @Test
     @DisplayName("POST /api/v1/clinicians/specialist/broadcasts/{id}/consult returns 200")
     void testSubmitConsult() throws Exception {
         UUID broadcastId = UUID.randomUUID();

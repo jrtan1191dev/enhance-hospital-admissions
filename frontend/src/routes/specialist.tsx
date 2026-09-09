@@ -26,17 +26,26 @@ export function SpecialistRoute() {
   const [recommendedTier, setRecommendedTier] = useState<AcuityTier>('TIER_2_ACUTE_URGENT');
   const [diversionEndorsed, setDiversionEndorsed] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // TanStack Query: Fetch Broadcasts via queries.ts queryOptions
   const { data: broadcasts = [], isLoading } = useQuery(
     specialistQueries.broadcasts(selectedCluster)
   );
 
-  // Centralized Claim Mutation Hook
-  const claimMutation = useClaimBroadcast(() => {
-    setStatusMessage('Case successfully claimed and locked to specialist.');
-    setTimeout(() => setStatusMessage(null), 4000);
-  });
+  // Centralized Claim Mutation Hook with Conflict Handling
+  const claimMutation = useClaimBroadcast(
+    () => {
+      setErrorMessage(null);
+      setStatusMessage('Case successfully claimed and locked to specialist.');
+      setTimeout(() => setStatusMessage(null), 4000);
+    },
+    (err: Error) => {
+      setStatusMessage(null);
+      setErrorMessage(`Claim Conflict: ${err.message || 'This broadcast was claimed concurrently by another specialist.'}`);
+      setTimeout(() => setErrorMessage(null), 6000);
+    }
+  );
 
   // Centralized Consult Mutation Hook
   const consultMutation = useSubmitConsult(() => {
@@ -92,6 +101,13 @@ export function SpecialistRoute() {
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0" />
           {statusMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-sm flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-rose-600 flex-shrink-0" />
+          {errorMessage}
         </div>
       )}
 

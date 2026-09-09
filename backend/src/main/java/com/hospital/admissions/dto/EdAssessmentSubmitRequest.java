@@ -31,6 +31,7 @@ public class EdAssessmentSubmitRequest {
     private boolean needsTelemetry;
     private boolean primaryTelemetry;
     private boolean requiresSpecialistConsult;
+    private java.util.Set<SpecialtyCluster> targetClusters;
     private java.util.List<ClinicalBaselineOverride> overrides;
     private String clinicalNotes;
     private Boolean recommendedAccepted;

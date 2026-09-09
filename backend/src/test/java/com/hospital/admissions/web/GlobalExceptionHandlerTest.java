@@ -80,6 +80,12 @@ class GlobalExceptionHandlerTest {
         public void throwConstraintViolation() {
             throw new ConstraintViolationException("Parameter invalid", java.util.Set.of());
         }
+
+        @GetMapping("/test/optimistic-lock")
+        public void throwOptimisticLock() {
+            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(
+                    com.hospital.admissions.domain.AssessmentBroadcast.class, java.util.UUID.randomUUID());
+        }
     }
 
     @BeforeEach
@@ -132,6 +138,16 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.title").value("Conflict"))
                 .andExpect(jsonPath("$.detail").value("Bed 8A-01 is not EMPTY_CLEANED"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    @DisplayName("ObjectOptimisticLockingFailureException returns 409 Conflict ProblemDetail")
+    void testOptimisticLockConflict() throws Exception {
+        mockMvc.perform(get("/test/optimistic-lock").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.title").value("Conflict"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 

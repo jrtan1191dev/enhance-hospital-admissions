@@ -187,4 +187,85 @@ class TracerBulletsIntegrationTest {
         assertThat(broadcasts).anyMatch(b -> b.getTargetCluster() == SpecialtyCluster.GENERAL_MEDICINE
                 && b.getAdmissionRequest().getPatient().getId().equals(p102.getId()));
     }
+
+    @Test
+    @DisplayName("Tracer Bullet 4: Consult-Gated Multi-Cluster Broadcast & Atomic Claiming with 409 Conflict")
+    void testTracerBullet4_ConsultGatedMultiClusterBroadcastAndAtomicClaimConflict() throws Exception {
+        // Step 1: Create test patient
+        Patient patient = patientRepository.save(Patient.builder()
+                .name("Consult Multi-Cluster Patient")
+                .nricMasked("S****999Z")
+                .age(64)
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(25)
+                .queueToken("TOKEN-CONSULT-" + java.util.UUID.randomUUID())
+                .build());
+
+        // Step 2: Submit consult-gated admission with 2 clusters (CARDIOLOGY and SURGERY)
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(patient.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .targetClusters(java.util.Set.of(SpecialtyCluster.CARDIOLOGY, SpecialtyCluster.SURGERY))
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B1)
+                .needsTelemetry(true)
+                .requiresSpecialistConsult(true)
+                .build();
+
+        MvcResult submitResult = mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ASSESSMENT_PENDING"))
+                .andReturn();
+
+        AdmissionRequest admission = objectMapper.readValue(
+                submitResult.getResponse().getContentAsString(),
+                AdmissionRequest.class);
+
+        // Step 3: Verify hidden from BMU queue
+        MvcResult queueResult = mockMvc.perform(get("/api/v1/bmu/queue")
+                        .header("X-User-Role", "BMU_COORDINATOR"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<AdmissionRequest> bmuQueue = objectMapper.readValue(
+                queueResult.getResponse().getContentAsString(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, AdmissionRequest.class));
+
+        assertThat(bmuQueue).noneMatch(r -> r.getId().equals(admission.getId()));
+
+        // Step 4: Verify broadcasts persisted for both clusters
+        List<AssessmentBroadcast> broadcasts = broadcastRepository.findAll().stream()
+                .filter(b -> b.getAdmissionRequest().getId().equals(admission.getId()))
+                .toList();
+
+        assertThat(broadcasts).hasSize(2);
+        assertThat(broadcasts).extracting(AssessmentBroadcast::getTargetCluster)
+                .containsExactlyInAnyOrder(SpecialtyCluster.CARDIOLOGY, SpecialtyCluster.SURGERY);
+        assertThat(broadcasts).allMatch(b -> b.getStatus() == BroadcastStatus.OPEN);
+
+        AssessmentBroadcast cardioBroadcast = broadcasts.stream()
+                .filter(b -> b.getTargetCluster() == SpecialtyCluster.CARDIOLOGY)
+                .findFirst().orElseThrow();
+
+        // Step 5: Specialist 1 claims the broadcast atomically -> 200 OK
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + cardioBroadcast.getId() + "/claim")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CLAIMED"))
+                .andExpect(jsonPath("$.claimedBySpecialistId").isNotEmpty());
+
+        // Step 6: Specialist 2 attempts to claim the already-claimed broadcast -> 409 Conflict
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + cardioBroadcast.getId() + "/claim")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.title").value("Conflict"));
+    }
 }

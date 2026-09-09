@@ -199,6 +199,40 @@ class ClinicianServiceTest {
     }
 
     @Test
+    @DisplayName("submitEdAssessment with consult-gated multi-cluster publishes OPEN broadcast to each cluster")
+    void testSubmitEdAssessment_ConsultGated_MultiCluster_PublishesToEachCluster() {
+        UUID patientId = UUID.randomUUID();
+        Patient patient = Patient.builder()
+                .id(patientId)
+                .name("Multi-Cluster Patient")
+                .build();
+
+        EdAssessmentSubmitRequest req = EdAssessmentSubmitRequest.builder()
+                .patientId(patientId)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B1)
+                .requiresSpecialistConsult(true)
+                .targetClusters(java.util.Set.of(SpecialtyCluster.CARDIOLOGY, SpecialtyCluster.SURGERY))
+                .build();
+
+        when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
+        when(patientRepository.save(patient)).thenReturn(patient);
+        when(admissionRequestRepository.save(any(AdmissionRequest.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        AdmissionRequest result = clinicianService.submitEdAssessment(req);
+
+        assertThat(result.getStatus()).isEqualTo(AdmissionStatus.ASSESSMENT_PENDING);
+        org.mockito.ArgumentCaptor<AssessmentBroadcast> broadcastCaptor = org.mockito.ArgumentCaptor.forClass(AssessmentBroadcast.class);
+        verify(broadcastRepository, times(2)).save(broadcastCaptor.capture());
+
+        List<AssessmentBroadcast> savedBroadcasts = broadcastCaptor.getAllValues();
+        assertThat(savedBroadcasts).extracting(AssessmentBroadcast::getTargetCluster)
+                .containsExactlyInAnyOrder(SpecialtyCluster.CARDIOLOGY, SpecialtyCluster.SURGERY);
+        assertThat(savedBroadcasts).allMatch(b -> b.getStatus() == BroadcastStatus.OPEN);
+    }
+
+    @Test
     @DisplayName("submitEdAssessment throws when patient is not found")
     void testSubmitEdAssessment_PatientNotFound() {
         UUID patientId = UUID.randomUUID();
@@ -270,6 +304,40 @@ class ClinicianServiceTest {
         assertThatThrownBy(() -> clinicianService.claimBroadcast(broadcastId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Broadcast not found");
+    }
+
+    @Test
+    @DisplayName("claimBroadcast throws IllegalStateException when broadcast is already claimed")
+    void testClaimBroadcast_AlreadyClaimed_ThrowsConflict() {
+        UUID broadcastId = UUID.randomUUID();
+        AssessmentBroadcast b = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .status(BroadcastStatus.CLAIMED)
+                .claimedBySpecialistId("dr_lim")
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(b));
+
+        assertThatThrownBy(() -> clinicianService.claimBroadcast(broadcastId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("already been claimed");
+        verify(broadcastRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("claimBroadcast throws ObjectOptimisticLockingFailureException on concurrent write conflict")
+    void testClaimBroadcast_OptimisticLockingFailure_PropagatesException() {
+        UUID broadcastId = UUID.randomUUID();
+        AssessmentBroadcast b = AssessmentBroadcast.builder()
+                .id(broadcastId)
+                .status(BroadcastStatus.OPEN)
+                .build();
+
+        when(broadcastRepository.findById(broadcastId)).thenReturn(Optional.of(b));
+        when(broadcastRepository.save(b)).thenThrow(new org.springframework.orm.ObjectOptimisticLockingFailureException(AssessmentBroadcast.class, broadcastId));
+
+        assertThatThrownBy(() -> clinicianService.claimBroadcast(broadcastId))
+                .isInstanceOf(org.springframework.orm.ObjectOptimisticLockingFailureException.class);
     }
 
     @Test

@@ -71,12 +71,18 @@ public class ClinicianService {
         admissionRequest = admissionRequestRepository.save(admissionRequest);
 
         if (requiresConsult) {
-            AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
-                    .admissionRequest(admissionRequest)
-                    .targetCluster(req.getSuspectedDiagnosisService())
-                    .status(BroadcastStatus.OPEN)
-                    .build();
-            broadcastRepository.save(broadcast);
+            java.util.Set<SpecialtyCluster> clusters = req.getTargetClusters();
+            if (clusters == null || clusters.isEmpty()) {
+                clusters = java.util.Collections.singleton(req.getSuspectedDiagnosisService());
+            }
+            for (SpecialtyCluster cluster : clusters) {
+                AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
+                        .admissionRequest(admissionRequest)
+                        .targetCluster(cluster)
+                        .status(BroadcastStatus.OPEN)
+                        .build();
+                broadcastRepository.save(broadcast);
+            }
         }
 
         java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
@@ -123,6 +129,10 @@ public class ClinicianService {
 
         AssessmentBroadcast broadcast = broadcastRepository.findById(broadcastId)
                 .orElseThrow(() -> new IllegalArgumentException("Broadcast not found: " + broadcastId));
+
+        if (broadcast.getStatus() != BroadcastStatus.OPEN) {
+            throw new IllegalStateException("Broadcast has already been claimed or is no longer open: " + broadcastId);
+        }
 
         broadcast.setStatus(BroadcastStatus.CLAIMED);
         broadcast.setClaimedBySpecialistId(currentUser);

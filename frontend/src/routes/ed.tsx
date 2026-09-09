@@ -36,6 +36,7 @@ export function EdRoute() {
   const [isolation, setIsolation] = useState<InfectionStatus>('NONE');
   const [clinicalNotes, setClinicalNotes] = useState<string>('Pre-populated diagnostic synthesis: Elevated Troponin with chest pain.');
   const [requiresSpecialistConsult, setRequiresSpecialistConsult] = useState<boolean>(false);
+  const [targetClusters, setTargetClusters] = useState<SpecialtyCluster[]>(['CARDIOLOGY']);
   const [selectionTime, setSelectionTime] = useState<number>(Date.now());
 
   // Fetch Waiting Patients and Assessed Admissions via TanStack Query
@@ -58,10 +59,12 @@ export function EdRoute() {
     if (patient.labTroponin && patient.labTroponin !== 'Normal') {
       setAcuityTier('TIER_2_ACUTE_URGENT');
       setSpecialty('CARDIOLOGY');
+      setTargetClusters(['CARDIOLOGY']);
       setTelemetry(true);
     } else {
       setAcuityTier('TIER_3_ACUTE_STABLE');
       setSpecialty('GENERAL_MEDICINE');
+      setTargetClusters(['GENERAL_MEDICINE']);
       setTelemetry(false);
     }
     setWardClass(patient.wardClassPreference || 'B2');
@@ -103,7 +106,7 @@ export function EdRoute() {
       requestedWardClass: wardClass,
       primaryTelemetry: telemetry,
       requiresSpecialistConsult,
-      targetClusters: requiresSpecialistConsult ? [specialty] : undefined,
+      targetClusters: requiresSpecialistConsult ? (targetClusters.length > 0 ? targetClusters : [specialty]) : undefined,
       overrides: overrides.length > 0 ? overrides : undefined,
       clinicalNotes,
       recommendedAccepted: overrides.length === 0,
@@ -616,6 +619,46 @@ export function EdRoute() {
                         </div>
                       </div>
                     </label>
+
+                    {requiresSpecialistConsult && (
+                      <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-200 space-y-2 mt-2">
+                        <label className="block text-xs font-semibold text-purple-950">
+                          Target Specialty Clusters (Multi-Cluster Broadcast Pool)
+                        </label>
+                        <p className="text-[11px] text-purple-700 leading-snug">
+                          Concurrent consult requests will be published to the selected clusters. Admission is held in <span className="font-semibold">ASSESSMENT_PENDING</span>.
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 pt-1">
+                          {(['CARDIOLOGY', 'GENERAL_MEDICINE', 'SURGERY', 'ORTHOPAEDICS'] as SpecialtyCluster[]).map((c) => {
+                            const isSelected = targetClusters.includes(c);
+                            return (
+                              <label
+                                key={c}
+                                className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-all ${
+                                  isSelected
+                                    ? 'bg-purple-100 border-purple-400 font-semibold text-purple-900 shadow-2xs'
+                                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setTargetClusters((prev) => [...prev, c]);
+                                    } else {
+                                      setTargetClusters((prev) => (prev.length > 1 ? prev.filter((item) => item !== c) : prev));
+                                    }
+                                  }}
+                                  className="h-3.5 w-3.5 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                                />
+                                <span>{c.replace('_', ' ')}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Submit Action */}

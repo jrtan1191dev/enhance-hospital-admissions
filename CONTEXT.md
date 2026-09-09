@@ -68,6 +68,10 @@ _Avoid_: Patient list, intake queue, raw patients
 The dedicated view displaying patients whose admission has been initiated by ED clinicians, showing real-time consult status, discordance alerts, and bed allocation progression.
 _Avoid_: History tab, past admissions, archived patients
 
+**Clinical Baseline Override**:
+The deliberate modification by an ED clinician of an automated pre-populated recommendation, captured as structured field-level deltas in the audit log.
+_Avoid_: AI change, chip edit, suggestion rejection
+
 ### Clinical Constraints & Monitoring
 
 **Primary Telemetry Requirement**:

@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<frontend.skip>false</frontend.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -116,6 +117,41 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.15.0</version>
+				<configuration>
+					<!-- Path to your React project directory relative to the pom.xml -->
+					<workingDirectory>../frontend</workingDirectory>
+					<nodeVersion>v22.12.0</nodeVersion>
+					<skip>${frontend.skip}</skip>
+				</configuration>
+				<executions>
+					<!-- 1. Run npm install -->
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<!-- 2. Run npm run build (which invokes Vite and outputs to /static) -->
+					<execution>
+						<id>npm run build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

@@ -177,6 +177,8 @@ public class ClinicianService {
         broadcast.setSecondaryTelemetry(req.getSecondaryTelemetry());
         broadcast.setDiversionPathway(req.getDiversionPathway());
 
+        broadcast = broadcastRepository.save(broadcast);
+
         AdmissionRequest request = broadcast.getAdmissionRequest();
         request.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
         if (req.getSecondaryTelemetry() != null) {
@@ -188,16 +190,57 @@ public class ClinicianService {
         if (req.getDiversionPathway() != null) {
             request.setDiversionPathway(req.getDiversionPathway());
         }
-        boolean isConcordant = request.getPrimaryAcuityTier() == req.getSecondaryAcuityTier();
-        request.setIsDiscordant(!isConcordant);
+
+        // Evaluate Consensus Completion Gate & Safety-First Discordance across all broadcasts
+        List<AssessmentBroadcast> allBroadcasts = broadcastRepository.findByAdmissionRequest_Id(request.getId());
+        if (allBroadcasts == null || allBroadcasts.isEmpty()) {
+            allBroadcasts = List.of(broadcast);
+        }
+
+        AcuityTier highestAcuity = request.getPrimaryAcuityTier();
+        boolean primaryTel = Boolean.TRUE.equals(request.getPrimaryTelemetry());
+        boolean anyTelemetry = primaryTel;
+        boolean anyDiscordant = false;
+        boolean allCompleted = true;
+
+        for (AssessmentBroadcast b : allBroadcasts) {
+            if (b.getStatus() != BroadcastStatus.COMPLETED) {
+                allCompleted = false;
+            }
+            if (b.getSecondaryAcuityTier() != null) {
+                if (highestAcuity == null || b.getSecondaryAcuityTier().ordinal() < highestAcuity.ordinal()) {
+                    highestAcuity = b.getSecondaryAcuityTier();
+                }
+                if (request.getPrimaryAcuityTier() != null && b.getSecondaryAcuityTier() != request.getPrimaryAcuityTier()) {
+                    anyDiscordant = true;
+                }
+            }
+            if (Boolean.TRUE.equals(b.getSecondaryTelemetry())) {
+                anyTelemetry = true;
+            }
+            if (b.getSecondaryTelemetry() != null && b.getSecondaryTelemetry() != primaryTel) {
+                anyDiscordant = true;
+            }
+        }
+
+        request.setEffectiveAcuityTier(highestAcuity);
+        request.setEffectiveTelemetry(anyTelemetry);
+        request.setIsDiscordant(anyDiscordant);
+
+        // Consensus Completion Gate: Advance to BED_REQUESTED only if all broadcasts are COMPLETED
+        if (allCompleted) {
+            request.setStatus(AdmissionStatus.BED_REQUESTED);
+        }
+
         admissionRequestRepository.save(request);
 
-        broadcast = broadcastRepository.save(broadcast);
-
+        boolean isConcordant = !anyDiscordant;
         java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
         details.put("PrimaryAcuity", request.getPrimaryAcuityTier());
         details.put("SecondaryAcuity", req.getSecondaryAcuityTier());
+        details.put("EffectiveAcuity", request.getEffectiveAcuityTier());
         details.put("Concordant", isConcordant);
+        details.put("ConsensusCompleted", allCompleted);
         details.put("DiversionEndorsed", isDiversion);
         if (req.getDiversionPathway() != null) {
             details.put("DiversionPathway", req.getDiversionPathway());

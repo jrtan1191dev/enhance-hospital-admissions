@@ -39,9 +39,12 @@ public class BmuService {
     public List<AdmissionRequest> getPrioritizedQueue() {
         List<AdmissionRequest> pendingRequests = admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED);
 
-        // Sort by Primary: Acuity Tier (ordinal 0=Tier1 is highest priority), Secondary: requestedAt FIFO
+        // Sort by Primary: Effective Acuity Tier (ordinal 0=Tier1 is highest priority), Secondary: requestedAt FIFO
         return pendingRequests.stream()
-                .sorted(Comparator.comparing((AdmissionRequest r) -> r.getPrimaryAcuityTier().ordinal())
+                .sorted(Comparator.comparing((AdmissionRequest r) -> {
+                            AcuityTier tier = r.getEffectiveAcuityTier() != null ? r.getEffectiveAcuityTier() : r.getPrimaryAcuityTier();
+                            return tier != null ? tier.ordinal() : Integer.MAX_VALUE;
+                        })
                         .thenComparing(AdmissionRequest::getRequestedAt))
                 .collect(Collectors.toList());
     }

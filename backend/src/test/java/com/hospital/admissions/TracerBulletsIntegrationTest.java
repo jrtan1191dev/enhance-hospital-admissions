@@ -443,4 +443,108 @@ class TracerBulletsIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("COMPLETED"));
     }
+
+    @Test
+    @DisplayName("Tracer Bullet 7: Multi-Broadcast Consensus Gate, Acuity Escalation & BMU Dispatch")
+    void testTracerBullet7_ConsensusCompletionGateAndSafetyFirstBmuDispatch() throws Exception {
+        // Step 1: Submit ED assessment for P103 with multiple target clusters (CARDIOLOGY + SURGERY)
+        Patient p103 = patientRepository.findByQueueToken("TOKEN-P103").orElseThrow();
+
+        EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
+                .patientId(p103.getId())
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B2)
+                .needsTelemetry(false)
+                .requiresSpecialistConsult(true)
+                .targetClusters(java.util.Set.of(SpecialtyCluster.CARDIOLOGY, SpecialtyCluster.SURGERY))
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
+                        .with(csrf())
+                        .header("X-User-Role", "ED_ATTENDING")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitReq)))
+                .andExpect(status().isOk());
+
+        AdmissionRequest admission = admissionRequestRepository.findAll().stream()
+                .filter(a -> a.getPatient().getId().equals(p103.getId()))
+                .findFirst().orElseThrow();
+
+        List<AssessmentBroadcast> broadcasts = broadcastRepository.findByAdmissionRequest_Id(admission.getId());
+        assertThat(broadcasts).hasSize(2);
+
+        AssessmentBroadcast cardioBroadcast = broadcasts.stream()
+                .filter(b -> b.getTargetCluster() == SpecialtyCluster.CARDIOLOGY)
+                .findFirst().orElseThrow();
+        AssessmentBroadcast surgBroadcast = broadcasts.stream()
+                .filter(b -> b.getTargetCluster() == SpecialtyCluster.SURGERY)
+                .findFirst().orElseThrow();
+
+        // Step 2: Cardiology specialist claims and submits consult (concordant, stable)
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + cardioBroadcast.getId() + "/claim")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isOk());
+
+        SpecialistConsultRequest cardioConsult = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .secondaryTelemetry(false)
+                .consultNotes("ECG and biomarkers normal.")
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + cardioBroadcast.getId() + "/consult")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cardioConsult)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        // Consensus Completion Gate verification: surgBroadcast is still OPEN, so admission MUST remain ASSESSMENT_PENDING
+        AdmissionRequest midAdmission = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(midAdmission.getStatus()).isEqualTo(AdmissionStatus.ASSESSMENT_PENDING);
+
+        // Verify patient does NOT appear in BMU queue yet
+        mockMvc.perform(get("/api/v1/bmu/queue")
+                        .header("X-User-Role", "BMU_COORDINATOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.patient.queueToken == 'TOKEN-P103')]").doesNotExist());
+
+        // Step 3: Surgery specialist claims and submits consult (elevates acuity to TIER_1_CRITICAL + telemetry)
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + surgBroadcast.getId() + "/claim")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST"))
+                .andExpect(status().isOk());
+
+        SpecialistConsultRequest surgConsult = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .secondaryTelemetry(true)
+                .consultNotes("Surgical emergency: Immediate resuscitation and ICU bed required.")
+                .build();
+
+        mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + surgBroadcast.getId() + "/consult")
+                        .with(csrf())
+                        .header("X-User-Role", "SPECIALIST")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(surgConsult)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        // Consensus Completion Gate verification: All broadcasts are now COMPLETED -> status advances to BED_REQUESTED
+        AdmissionRequest finalAdmission = admissionRequestRepository.findById(admission.getId()).orElseThrow();
+        assertThat(finalAdmission.getStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
+        assertThat(finalAdmission.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_1_CRITICAL);
+        assertThat(finalAdmission.getEffectiveTelemetry()).isTrue();
+        assertThat(finalAdmission.getIsDiscordant()).isTrue();
+
+        // Step 4: Verify patient appears in BMU queue with elevated priority
+        mockMvc.perform(get("/api/v1/bmu/queue")
+                        .header("X-User-Role", "BMU_COORDINATOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].patient.queueToken").value("TOKEN-P103"))
+                .andExpect(jsonPath("$[0].effectiveAcuityTier").value("TIER_1_CRITICAL"))
+                .andExpect(jsonPath("$[0].effectiveTelemetry").value(true))
+                .andExpect(jsonPath("$[0].discordant").value(true));
+    }
 }

@@ -610,5 +610,111 @@ class ClinicianServiceTest {
         assertThat(chained.getParentBroadcastId()).isEqualTo(broadcastId);
         verify(broadcastRepository).save(any(AssessmentBroadcast.class));
     }
+
+    @Test
+    @DisplayName("Consensus Completion Gate: Partial broadcast completion leaves AdmissionRequest in ASSESSMENT_PENDING")
+    void testSubmitConsult_ConsensusGate_PartialCompletion_RemainsAssessmentPending() {
+        UUID admissionId = UUID.randomUUID();
+        AdmissionRequest admissionRequest = AdmissionRequest.builder()
+                .id(admissionId)
+                .status(AdmissionStatus.ASSESSMENT_PENDING)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .primaryTelemetry(false)
+                .build();
+
+        UUID b1Id = UUID.randomUUID();
+        AssessmentBroadcast b1 = AssessmentBroadcast.builder()
+                .id(b1Id)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.CLAIMED)
+                .claimedBySpecialistId("dr_test")
+                .build();
+
+        UUID b2Id = UUID.randomUUID();
+        AssessmentBroadcast b2 = AssessmentBroadcast.builder()
+                .id(b2Id)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.ORTHOPAEDICS)
+                .status(BroadcastStatus.OPEN)
+                .build();
+
+        SpecialistConsultRequest req = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .secondaryTelemetry(true)
+                .consultNotes("Cardiac stable, awaiting orthopaedic consult")
+                .build();
+
+        when(broadcastRepository.findById(b1Id)).thenReturn(Optional.of(b1));
+        when(broadcastRepository.save(b1)).thenReturn(b1);
+        when(broadcastRepository.findByAdmissionRequest_Id(admissionId)).thenReturn(List.of(b1, b2));
+
+        AssessmentBroadcast result = clinicianService.submitConsult(b1Id, req);
+
+        assertThat(result.getStatus()).isEqualTo(BroadcastStatus.COMPLETED);
+        // Gate remains closed because b2 is still OPEN
+        assertThat(admissionRequest.getStatus()).isEqualTo(AdmissionStatus.ASSESSMENT_PENDING);
+        // Effective acuity and telemetry are updated
+        assertThat(admissionRequest.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_2_ACUTE_URGENT);
+        assertThat(admissionRequest.getEffectiveTelemetry()).isTrue();
+        assertThat(admissionRequest.getIsDiscordant()).isTrue();
+        verify(admissionRequestRepository).save(admissionRequest);
+    }
+
+    @Test
+    @DisplayName("Consensus Completion Gate: All broadcasts completed advances AdmissionRequest to BED_REQUESTED with highest acuity and telemetry union")
+    void testSubmitConsult_ConsensusGate_AllCompleted_AdvancesToBedRequested_AndElevatesAcuityAndTelemetry() {
+        UUID admissionId = UUID.randomUUID();
+        AdmissionRequest admissionRequest = AdmissionRequest.builder()
+                .id(admissionId)
+                .status(AdmissionStatus.ASSESSMENT_PENDING)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .primaryTelemetry(false)
+                .build();
+
+        UUID b1Id = UUID.randomUUID();
+        AssessmentBroadcast b1 = AssessmentBroadcast.builder()
+                .id(b1Id)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.CARDIOLOGY)
+                .status(BroadcastStatus.COMPLETED)
+                .secondaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .secondaryTelemetry(false)
+                .claimedBySpecialistId("dr_lim_cardio")
+                .build();
+
+        UUID b2Id = UUID.randomUUID();
+        AssessmentBroadcast b2 = AssessmentBroadcast.builder()
+                .id(b2Id)
+                .admissionRequest(admissionRequest)
+                .targetCluster(SpecialtyCluster.SURGERY)
+                .status(BroadcastStatus.CLAIMED)
+                .claimedBySpecialistId("dr_kumar_surg")
+                .build();
+
+        // Surgery specialist elevates acuity to TIER_1_CRITICAL with telemetry required
+        SpecialistConsultRequest req = SpecialistConsultRequest.builder()
+                .secondaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .secondaryTelemetry(true)
+                .consultNotes("Acute abdomen with signs of peritonitis: Resuscitation required!")
+                .build();
+
+        when(broadcastRepository.findById(b2Id)).thenReturn(Optional.of(b2));
+        when(broadcastRepository.save(b2)).thenReturn(b2);
+        when(broadcastRepository.findByAdmissionRequest_Id(admissionId)).thenReturn(List.of(b1, b2));
+
+        AssessmentBroadcast result = clinicianService.submitConsult(b2Id, req);
+
+        assertThat(result.getStatus()).isEqualTo(BroadcastStatus.COMPLETED);
+        // Gate opens: All broadcasts are now COMPLETED!
+        assertThat(admissionRequest.getStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
+        // Safety-First: Effective acuity elevated to highest acuity (TIER_1_CRITICAL)
+        assertThat(admissionRequest.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_1_CRITICAL);
+        // Safety-First: Telemetry unioned to true
+        assertThat(admissionRequest.getEffectiveTelemetry()).isTrue();
+        // Discordance flagged due to divergence from primary ED tier
+        assertThat(admissionRequest.getIsDiscordant()).isTrue();
+        verify(admissionRequestRepository).save(admissionRequest);
+    }
 }
 

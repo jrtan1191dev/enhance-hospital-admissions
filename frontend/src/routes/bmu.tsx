@@ -6,7 +6,7 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { bmuQueries, useAllocateBed, useReferSisterHospital } from '../services/queries';
+import { bmuQueries, specialistQueries, useAllocateBed, useReferSisterHospital } from '../services/queries';
 import type { AdmissionRequest, Bed } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -35,10 +35,13 @@ import {
   Sparkles,
   ExternalLink,
   Clock,
+  FileText,
+  GitCompare,
 } from 'lucide-react';
 
 export function BmuRoute() {
   const [selectedRequest, setSelectedRequest] = useState<AdmissionRequest | null>(null);
+  const [comparisonRequest, setComparisonRequest] = useState<AdmissionRequest | null>(null);
   const [diversionModalOpen, setDiversionModalOpen] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState('Outram Community Hospital (OCH)');
   const [notification, setNotification] = useState<string | null>(null);
@@ -46,6 +49,7 @@ export function BmuRoute() {
   // Queries via queries.ts queryOptions
   const { data: queue = [], isLoading: queueLoading } = useQuery(bmuQueries.queue());
   const { data: inventory = [], isLoading: inventoryLoading } = useQuery(bmuQueries.inventory());
+  const { data: broadcasts = [] } = useQuery(specialistQueries.broadcasts());
   const { data: recommendations = [], isLoading: recsLoading } = useQuery(
     bmuQueries.recommendations(selectedRequest?.id)
   );
@@ -68,10 +72,11 @@ export function BmuRoute() {
   // Table Columns for Admission Queue (TanStack Table)
   const columns: ColumnDef<AdmissionRequest>[] = [
     {
-      accessorKey: 'primaryAcuityTier',
+      id: 'priorityTier',
       header: 'Priority Tier',
       cell: ({ row }) => {
-        const tier = row.original.primaryAcuityTier;
+        const effTier = row.original.effectiveAcuityTier || row.original.primaryAcuityTier;
+        const isElevated = row.original.effectiveAcuityTier && row.original.effectiveAcuityTier !== row.original.primaryAcuityTier;
         const variantMap: Record<string, 'destructive' | 'warning' | 'secondary' | 'success' | 'outline'> = {
           TIER_1_CRITICAL: 'destructive',
           TIER_2_ACUTE_URGENT: 'warning',
@@ -79,9 +84,16 @@ export function BmuRoute() {
           TIER_4_SUBACUTE_DIVERSION: 'success',
         };
         return (
-          <Badge variant={variantMap[tier] || 'outline'} className="text-[10px]">
-            {tier}
-          </Badge>
+          <div className="flex flex-col gap-0.5 items-start">
+            <Badge variant={variantMap[effTier] || 'outline'} className="text-[10px] font-semibold">
+              {effTier}
+            </Badge>
+            {isElevated && (
+              <span className="text-[9px] text-red-600 font-mono font-medium">
+                ↑ From {row.original.primaryAcuityTier.replace('TIER_', 'T')}
+              </span>
+            )}
+          </div>
         );
       },
     },
@@ -103,8 +115,16 @@ export function BmuRoute() {
       cell: ({ row }) => (
         <div>
           {row.original.discordant ? (
-            <Badge variant="destructive" className="text-[10px] flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" /> Acuity Divergence
+            <Badge
+              variant="destructive"
+              className="text-[10px] flex items-center gap-1 cursor-pointer font-semibold animate-pulse"
+              onClick={(e) => {
+                e.stopPropagation();
+                setComparisonRequest(row.original);
+              }}
+              title="Click to view comparative notes"
+            >
+              <AlertTriangle className="h-3 w-3" /> Discordance Flagged
             </Badge>
           ) : (
             <Badge variant="secondary" className="text-[10px] text-slate-600 bg-slate-100">
@@ -120,7 +140,7 @@ export function BmuRoute() {
       cell: ({ row }) => (
         <div className="text-xs space-y-0.5">
           <Badge variant="outline" className="text-[10px]">{row.original.patient.wardClassPreference}</Badge>
-          {row.original.patient.telemetryRequired && (
+          {(row.original.effectiveTelemetry || row.original.primaryTelemetry || row.original.patient.telemetryRequired) && (
             <span className="block text-[10px] text-amber-700 font-medium">Telemetry Req</span>
           )}
         </div>
@@ -148,14 +168,25 @@ export function BmuRoute() {
       id: 'action',
       header: 'Action',
       cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant={selectedRequest?.id === row.original.id ? 'default' : 'outline'}
-          onClick={() => setSelectedRequest(row.original)}
-          className="text-xs"
-        >
-          {selectedRequest?.id === row.original.id ? 'Managing' : 'Select'}
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant={selectedRequest?.id === row.original.id ? 'default' : 'outline'}
+            onClick={() => setSelectedRequest(row.original)}
+            className="text-xs"
+          >
+            {selectedRequest?.id === row.original.id ? 'Managing' : 'Select'}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            title="View Comparative Notes"
+            onClick={() => setComparisonRequest(row.original)}
+            className="text-xs text-slate-600 hover:text-slate-900 px-2 cursor-pointer"
+          >
+            <GitCompare className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       ),
     },
   ];
@@ -383,14 +414,24 @@ export function BmuRoute() {
                 <div className="space-y-4">
                   {/* Discordance Alert Banner */}
                   {selectedRequest.discordant && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 space-y-1">
-                      <div className="font-semibold flex items-center gap-1.5">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                        Clinical Discordance Flagged
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 space-y-1.5">
+                      <div className="font-semibold flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-red-700">
+                          <AlertTriangle className="h-4 w-4 text-red-600" />
+                          Clinical Discordance Flagged
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setComparisonRequest(selectedRequest)}
+                          className="text-[11px] h-6 px-2 py-0 border-red-300 text-red-800 bg-white hover:bg-red-50 cursor-pointer"
+                        >
+                          <GitCompare className="h-3 w-3 mr-1" /> View Alignment
+                        </Button>
                       </div>
                       <p className="text-[11px] text-red-800">
-                        Primary ED Attending: <strong>{selectedRequest.primaryAcuityTier}</strong> vs Specialist: <strong>{selectedRequest.secondaryAcuityTier}</strong>.
-                        Defaulting to higher acuity reservation under Safety-First policy.
+                        Primary ED Attending: <strong>{selectedRequest.primaryAcuityTier}</strong> vs Specialist Consults.
+                        Defaulting to <strong>{selectedRequest.effectiveAcuityTier || selectedRequest.primaryAcuityTier}</strong> under Safety-First policy.
                       </p>
                     </div>
                   )}
@@ -661,6 +702,151 @@ export function BmuRoute() {
               </DialogFooter>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Side-by-Side Clinical Consensus & Comparative Notes Dialog */}
+      <Dialog open={!!comparisonRequest} onOpenChange={(open) => !open && setComparisonRequest(null)}>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <GitCompare className="h-5 w-5 text-blue-600" />
+              Clinical Consensus & Comparative Notes
+            </DialogTitle>
+            <DialogDescription>
+              {comparisonRequest && (
+                <span>
+                  Patient: <strong>{comparisonRequest.patient.name}</strong> ({comparisonRequest.patient.nric}) • Token: {comparisonRequest.patient.queueToken} • Class: {comparisonRequest.requestedWardClass || 'B2'}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {comparisonRequest && (() => {
+            const reqBroadcasts = broadcasts.filter(b => b.admissionRequest?.id === comparisonRequest.id);
+            return (
+              <div className="space-y-4 py-2">
+                {/* Safety-First Policy Summary Banner */}
+                <div className={`p-3 rounded-xl border text-xs space-y-1 ${
+                  comparisonRequest.discordant
+                    ? 'bg-amber-50 border-amber-200 text-amber-950'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                }`}>
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      {comparisonRequest.discordant ? (
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      )}
+                      {comparisonRequest.discordant ? 'Safety-First Acuity Discordance Override Active' : 'Consensus Alignment Achieved'}
+                    </span>
+                    <Badge variant={comparisonRequest.discordant ? 'destructive' : 'success'} className="text-[10px]">
+                      Effective: {comparisonRequest.effectiveAcuityTier || comparisonRequest.primaryAcuityTier}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-slate-700">
+                    Under hospital safety policy, the highest acuity tier and continuous telemetry constraints are automatically elevated for bed placement reservation.
+                  </p>
+                </div>
+
+                {/* Side-by-Side Comparison Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left Column: ED Attending Assessment */}
+                  <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/30 space-y-3">
+                    <div className="flex items-center justify-between border-b border-blue-100 pb-2">
+                      <div className="font-bold text-sm text-blue-900 flex items-center gap-1.5">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        ED Attending Assessment
+                      </div>
+                      <Badge variant="outline" className="text-[10px] bg-white text-blue-800 border-blue-200">
+                        Primary Lead
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Primary Acuity Tier:</span>
+                        <Badge variant="outline" className="font-semibold text-blue-700 bg-white">
+                          {comparisonRequest.primaryAcuityTier}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Telemetry Required:</span>
+                        <Badge variant={comparisonRequest.primaryTelemetry ? 'warning' : 'outline'} className="text-[10px]">
+                          {comparisonRequest.primaryTelemetry ? 'Telemetry Required' : 'Standard'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500">Suspected Service:</span>
+                        <span className="font-semibold text-slate-800">{comparisonRequest.suspectedDiagnosisService || 'GENERAL_MEDICINE'}</span>
+                      </div>
+                      <div className="pt-2 border-t border-blue-100/70">
+                        <span className="text-slate-500 block mb-1 font-medium">Diagnostic Notes & Synthesis:</span>
+                        <div className="p-2.5 bg-white rounded-lg border border-blue-100 text-[11px] text-slate-700 italic">
+                          {comparisonRequest.patient.suspectedDiagnosis || 'EHR Synthesis: Acute presentation evaluated at triage.'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Consulting Specialists */}
+                  <div className="p-4 rounded-xl border border-purple-200 bg-purple-50/30 space-y-3">
+                    <div className="flex items-center justify-between border-b border-purple-100 pb-2">
+                      <div className="font-bold text-sm text-purple-900 flex items-center gap-1.5">
+                        <GitCompare className="h-4 w-4 text-purple-600" />
+                        Specialist Consultations ({reqBroadcasts.length})
+                      </div>
+                      <Badge variant="outline" className="text-[10px] bg-white text-purple-800 border-purple-200">
+                        Second Opinions
+                      </Badge>
+                    </div>
+
+                    {reqBroadcasts.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-slate-400 italic">
+                        Direct admission without specialist consult broadcast.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {reqBroadcasts.map((b) => (
+                          <div key={b.id} className="p-3 bg-white rounded-lg border border-purple-100 text-xs space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-slate-900">{b.targetCluster}</span>
+                              <Badge variant={b.status === 'COMPLETED' ? 'success' : 'secondary'} className="text-[10px]">
+                                {b.status}
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1 text-[11px] text-slate-600">
+                              <div>Specialist: <strong>{b.claimedBySpecialistId || '--'}</strong></div>
+                              <div>Secondary Tier: <strong className="text-purple-700">{b.secondaryAcuityTier || '--'}</strong></div>
+                              <div>Telemetry: <strong>{b.secondaryTelemetry ? 'Endorsed' : 'Standard'}</strong></div>
+                              {b.diversionPathway && b.diversionPathway !== 'NONE' && (
+                                <div className="text-emerald-700 font-semibold">Diversion: {b.diversionPathway}</div>
+                              )}
+                            </div>
+                            {b.consultNotes && (
+                              <div className="pt-1 border-t border-slate-100">
+                                <span className="text-[10px] font-medium text-slate-500 block mb-0.5">Impression:</span>
+                                <p className="text-[11px] text-slate-800 italic bg-slate-50 p-2 rounded">
+                                  "{b.consultNotes}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <DialogFooter className="pt-2">
+                  <Button variant="outline" onClick={() => setComparisonRequest(null)}>
+                    Close Comparison
+                  </Button>
+                </DialogFooter>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>

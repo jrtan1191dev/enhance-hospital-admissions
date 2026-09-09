@@ -101,6 +101,36 @@ class BmuServiceTest {
     }
 
     @Test
+    @DisplayName("getPrioritizedQueue sorts by effectiveAcuityTier over primaryAcuityTier under Safety-First policy")
+    void testGetPrioritizedQueue_SortsByEffectiveAcuityTierOverPrimaryAcuityTier() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Request A: primary Tier 3, but escalated to Tier 1 via specialist consult
+        AdmissionRequest reqA = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .effectiveAcuityTier(AcuityTier.TIER_1_CRITICAL)
+                .requestedAt(now.minusMinutes(5))
+                .build();
+
+        // Request B: primary Tier 2, effective Tier 2
+        AdmissionRequest reqB = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedAt(now.minusMinutes(20))
+                .build();
+
+        when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED))
+                .thenReturn(List.of(reqB, reqA));
+
+        List<AdmissionRequest> queue = bmuService.getPrioritizedQueue();
+
+        // reqA (effective Tier 1) must jump ahead of reqB (effective Tier 2)
+        assertThat(queue).containsExactly(reqA, reqB);
+    }
+
+    @Test
     @DisplayName("getRecommendations returns solver recommendations")
     void testGetRecommendations() {
         UUID reqId = UUID.randomUUID();

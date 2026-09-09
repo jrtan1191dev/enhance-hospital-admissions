@@ -9,6 +9,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    outDir: '../backend/target/classes/static',
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

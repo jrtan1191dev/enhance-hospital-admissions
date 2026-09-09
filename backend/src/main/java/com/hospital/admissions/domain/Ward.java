@@ -52,8 +52,7 @@ public class Ward extends AuditableEntity {
     @Builder.Default
     private boolean isHoldingWard = false;
 
-    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
-    @JsonIgnore
     private List<Bed> beds = new ArrayList<>();
 }

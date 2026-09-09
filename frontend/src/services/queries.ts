@@ -30,6 +30,12 @@ export const edQueries = {
       queryFn: api.getEdWaitingPatients,
       refetchInterval: 3000,
     }),
+  admissions: () =>
+    queryOptions({
+      queryKey: [...edQueries.all(), 'admissions'] as const,
+      queryFn: api.getEdSubmittedAdmissions,
+      refetchInterval: 3000,
+    }),
 };
 
 export const specialistQueries = {

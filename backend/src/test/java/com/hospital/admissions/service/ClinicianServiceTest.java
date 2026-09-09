@@ -59,15 +59,98 @@ class ClinicianServiceTest {
     }
 
     @Test
-    @DisplayName("getEdWaitingPatients returns all patients")
+    @DisplayName("getEdWaitingPatients returns unassessed patients")
     void testGetEdWaitingPatients() {
         Patient patient = Patient.builder().id(UUID.randomUUID()).name("Test Patient").build();
-        when(patientRepository.findAll()).thenReturn(List.of(patient));
+        when(patientRepository.findPatientsWithoutActiveAdmission()).thenReturn(List.of(patient));
 
         List<Patient> result = clinicianService.getEdWaitingPatients();
 
         assertThat(result).containsExactly(patient);
-        verify(patientRepository).findAll();
+        verify(patientRepository).findPatientsWithoutActiveAdmission();
+    }
+
+    @Test
+    @DisplayName("getEdSubmittedAdmissions returns submitted admissions ordered by requestedAt desc")
+    void testGetEdSubmittedAdmissions() {
+        AdmissionRequest req = AdmissionRequest.builder().id(UUID.randomUUID()).build();
+        when(admissionRequestRepository.findAllByOrderByRequestedAtDesc()).thenReturn(List.of(req));
+
+        List<AdmissionRequest> result = clinicianService.getEdSubmittedAdmissions();
+
+        assertThat(result).containsExactly(req);
+        verify(admissionRequestRepository).findAllByOrderByRequestedAtDesc();
+    }
+
+    @Test
+    @DisplayName("submitEdAssessment with Direct Admission (requiresSpecialistConsult=false) does not create broadcast")
+    void testSubmitEdAssessment_DirectAdmission_NoBroadcastCreated() {
+        UUID patientId = UUID.randomUUID();
+        Patient patient = Patient.builder()
+                .id(patientId)
+                .name("Direct Patient")
+                .build();
+
+        EdAssessmentSubmitRequest req = EdAssessmentSubmitRequest.builder()
+                .patientId(patientId)
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B1)
+                .primaryTelemetry(false)
+                .requiresSpecialistConsult(false)
+                .build();
+
+        when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
+        when(patientRepository.save(any(Patient.class))).thenReturn(patient);
+        when(admissionRequestRepository.save(any(AdmissionRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AdmissionRequest result = clinicianService.submitEdAssessment(req);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
+        assertThat(result.getEffectiveAcuityTier()).isEqualTo(AcuityTier.TIER_3_ACUTE_STABLE);
+        assertThat(result.getEffectiveTelemetry()).isFalse();
+        assertThat(result.getRequiresSpecialistConsult()).isFalse();
+        verify(broadcastRepository, never()).save(any());
+        verify(auditLogger).logAction(eq("dr_test"), eq("SUBMIT_ED_ASSESSMENT"), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("submitEdAssessment with structured overrides emits OVERRIDE_CLINICAL_BASELINE audit")
+    void testSubmitEdAssessment_WithOverrides_EmitsOverrideAudit() {
+        UUID patientId = UUID.randomUUID();
+        Patient patient = Patient.builder()
+                .id(patientId)
+                .name("Override Patient")
+                .build();
+
+        com.hospital.admissions.dto.ClinicalBaselineOverride override = com.hospital.admissions.dto.ClinicalBaselineOverride.builder()
+                .field("acuityTier")
+                .originalValue("TIER_2_ACUTE_URGENT")
+                .submittedValue("TIER_3_ACUTE_STABLE")
+                .overrideReason("Clinical stability confirmed")
+                .build();
+
+        EdAssessmentSubmitRequest req = EdAssessmentSubmitRequest.builder()
+                .patientId(patientId)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedWardClass(WardClass.B2)
+                .primaryTelemetry(true)
+                .requiresSpecialistConsult(false)
+                .overrides(List.of(override))
+                .build();
+
+        when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
+        when(patientRepository.save(any(Patient.class))).thenReturn(patient);
+        when(admissionRequestRepository.save(any(AdmissionRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AdmissionRequest result = clinicianService.submitEdAssessment(req);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getIsRecommendationAccepted()).isFalse();
+        verify(auditLogger).logAction(eq("dr_test"), eq("SUBMIT_ED_ASSESSMENT"), anyString(), anyString());
+        verify(auditLogger).logAction(eq("dr_test"), eq("OVERRIDE_CLINICAL_BASELINE"), anyString(), contains("Field=acuityTier"));
     }
 
     @Test
@@ -86,6 +169,7 @@ class ClinicianServiceTest {
                 .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
                 .requestedWardClass(WardClass.B2)
                 .needsTelemetry(true)
+                .requiresSpecialistConsult(true)
                 .build();
 
         UUID reqId = UUID.randomUUID();

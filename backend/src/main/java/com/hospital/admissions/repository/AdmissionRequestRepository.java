@@ -14,4 +14,5 @@ public interface AdmissionRequestRepository extends JpaRepository<AdmissionReque
     List<AdmissionRequest> findByStatus(AdmissionStatus status);
     Optional<AdmissionRequest> findByPatient_QueueToken(String queueToken);
     Optional<AdmissionRequest> findByPatient_Id(UUID patientId);
+    List<AdmissionRequest> findAllByOrderByRequestedAtDesc();
 }

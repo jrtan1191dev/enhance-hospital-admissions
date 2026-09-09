@@ -77,14 +77,46 @@ export interface Ward {
   beds?: Bed[];
 }
 
+export interface ClinicalBaselineOverride {
+  field: string;
+  originalValue: string;
+  submittedValue: string;
+  overrideReason?: string;
+}
+
+export interface EdAssessmentSubmitRequest {
+  patientId: string;
+  suspectedDiagnosisService: SpecialtyCluster;
+  primaryAcuityTier: AcuityTier;
+  requestedWardClass: WardClass;
+  needsTelemetry?: boolean;
+  primaryTelemetry?: boolean;
+  requiresSpecialistConsult?: boolean;
+  targetClusters?: SpecialtyCluster[];
+  overrides?: ClinicalBaselineOverride[];
+  clinicalNotes?: string;
+  recommendedAccepted?: boolean;
+  elapsedMins?: number;
+}
+
 export interface AdmissionRequest {
   id: string;
   patient: Patient;
+  suspectedDiagnosisService?: SpecialtyCluster;
   primaryAcuityTier: AcuityTier;
   secondaryAcuityTier?: AcuityTier;
+  effectiveAcuityTier?: AcuityTier;
+  primaryTelemetry?: boolean;
+  secondaryTelemetry?: boolean;
+  effectiveTelemetry?: boolean;
+  requestedWardClass?: WardClass;
+  requiresSpecialistConsult?: boolean;
+  reconciliationRequested?: boolean;
+  admittingSpecialtyCluster?: SpecialtyCluster;
   discordant: boolean;
   status: AdmissionStatus;
   assignedBed?: Bed;
+  requestedAt?: string;
   createdAt: string;
   operationalDelayReason?: string;
   diversionRecommended?: boolean;
@@ -151,15 +183,6 @@ export interface SisterHospitalReferralResponse {
   notes?: string;
 }
 
-export interface EdAssessmentSubmitRequest {
-  patientId: string;
-  suspectedDiagnosisService: SpecialtyCluster;
-  primaryAcuityTier: AcuityTier;
-  requestedWardClass: WardClass;
-  needsTelemetry: boolean;
-  recommendedAccepted?: boolean;
-  elapsedMins?: number;
-}
 
 export interface SpecialistConsultRequest {
   secondaryAcuityTier: AcuityTier;

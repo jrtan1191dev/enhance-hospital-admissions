@@ -20,11 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
-import { Stethoscope, CheckCircle2, AlertCircle, HeartPulse, ShieldAlert, Sparkles } from 'lucide-react';
+import { Stethoscope, CheckCircle2, AlertCircle, HeartPulse, ShieldAlert, Sparkles, Users, Clock } from 'lucide-react';
 
 export function EdRoute() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'WAITING' | 'ASSESSED'>('WAITING');
 
   // Form State
   const [acuityTier, setAcuityTier] = useState<AcuityTier>('TIER_2_ACUTE_URGENT');
@@ -34,10 +35,12 @@ export function EdRoute() {
   const [fallRisk, setFallRisk] = useState<boolean>(true);
   const [isolation, setIsolation] = useState<InfectionStatus>('NONE');
   const [clinicalNotes, setClinicalNotes] = useState<string>('Pre-populated diagnostic synthesis: Elevated Troponin with chest pain.');
+  const [requiresSpecialistConsult, setRequiresSpecialistConsult] = useState<boolean>(false);
   const [selectionTime, setSelectionTime] = useState<number>(Date.now());
 
-  // Fetch Waiting Patients via TanStack Query queryOptions
+  // Fetch Waiting Patients and Assessed Admissions via TanStack Query
   const { data: patients = [], isLoading, error } = useQuery(edQueries.patients());
+  const { data: assessedAdmissions = [], isLoading: isLoadingAssessed } = useQuery(edQueries.admissions());
 
   // Submit Assessment Mutation via centralized TanStack Query service hook
   const submitMutation = useSubmitEdAssessment(() => {
@@ -51,6 +54,7 @@ export function EdRoute() {
     setSelectedPatient(patient);
     setSuccessMessage(null);
     setSelectionTime(Date.now());
+    setRequiresSpecialistConsult(false);
     if (patient.labTroponin && patient.labTroponin !== 'Normal') {
       setAcuityTier('TIER_2_ACUTE_URGENT');
       setSpecialty('CARDIOLOGY');
@@ -76,11 +80,19 @@ export function EdRoute() {
     const recTelemetry = isTroponin;
     const recWardClass = selectedPatient.wardClassPreference || 'B2';
 
-    const recommendedAccepted =
-      acuityTier === recTier &&
-      specialty === recSpecialty &&
-      telemetry === recTelemetry &&
-      wardClass === recWardClass;
+    const overrides: import('../types/admissions').ClinicalBaselineOverride[] = [];
+    if (acuityTier !== recTier) {
+      overrides.push({ field: 'acuityTier', originalValue: recTier, submittedValue: acuityTier });
+    }
+    if (specialty !== recSpecialty) {
+      overrides.push({ field: 'specialty', originalValue: recSpecialty, submittedValue: specialty });
+    }
+    if (wardClass !== recWardClass) {
+      overrides.push({ field: 'wardClass', originalValue: recWardClass, submittedValue: wardClass });
+    }
+    if (telemetry !== recTelemetry) {
+      overrides.push({ field: 'telemetry', originalValue: String(recTelemetry), submittedValue: String(telemetry) });
+    }
 
     const elapsedMins = Math.max(0.1, Math.round(((Date.now() - selectionTime) / 60000) * 10) / 10);
 
@@ -89,8 +101,12 @@ export function EdRoute() {
       suspectedDiagnosisService: specialty,
       primaryAcuityTier: acuityTier,
       requestedWardClass: wardClass,
-      needsTelemetry: telemetry,
-      recommendedAccepted,
+      primaryTelemetry: telemetry,
+      requiresSpecialistConsult,
+      targetClusters: requiresSpecialistConsult ? [specialty] : undefined,
+      overrides: overrides.length > 0 ? overrides : undefined,
+      clinicalNotes,
+      recommendedAccepted: overrides.length === 0,
       elapsedMins,
     });
   };
@@ -191,6 +207,153 @@ export function EdRoute() {
         </div>
       )}
 
+      {/* Board Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200">
+        <button
+          type="button"
+          onClick={() => setActiveTab('WAITING')}
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 cursor-pointer transition-all ${
+            activeTab === 'WAITING'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <HeartPulse className="h-4 w-4" />
+          Awaiting Assessment
+          <Badge variant={activeTab === 'WAITING' ? 'default' : 'secondary'} className="text-xs">
+            {patients.length}
+          </Badge>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('ASSESSED')}
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 cursor-pointer transition-all ${
+            activeTab === 'ASSESSED'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          Assessed Admissions
+          <Badge variant={activeTab === 'ASSESSED' ? 'default' : 'secondary'} className="text-xs">
+            {assessedAdmissions.length}
+          </Badge>
+        </button>
+      </div>
+
+      {activeTab === 'ASSESSED' ? (
+        <Card>
+          <CardHeader className="pb-3 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  Assessed Admissions Tracker
+                  <Badge variant="secondary" className="font-mono text-xs">{assessedAdmissions.length}</Badge>
+                </CardTitle>
+                <CardDescription>Track all submitted ED admissions, real-time consult status, and bed allocation progress.</CardDescription>
+              </div>
+              <Badge variant="secondary" className="self-start sm:self-center text-xs flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                Live Polling
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {isLoadingAssessed ? (
+              <div className="p-8 text-center text-slate-500 text-sm">Loading assessed admissions...</div>
+            ) : assessedAdmissions.length === 0 ? (
+              <div className="p-8 text-center text-slate-500 text-sm">No admissions have been assessed yet.</div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs font-semibold">Patient & Token</TableHead>
+                    <TableHead className="text-xs font-semibold">Acuity (Primary / Effective)</TableHead>
+                    <TableHead className="text-xs font-semibold">Discipline & Class</TableHead>
+                    <TableHead className="text-xs font-semibold">Care Directives</TableHead>
+                    <TableHead className="text-xs font-semibold">Admission Status</TableHead>
+                    <TableHead className="text-xs font-semibold">Assigned Bed</TableHead>
+                    <TableHead className="text-xs font-semibold">Submitted At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assessedAdmissions.map((admission) => (
+                    <TableRow key={admission.id} className="hover:bg-slate-50">
+                      <TableCell className="py-3 text-xs">
+                        <div className="font-semibold text-slate-900">{admission.patient?.name || 'Unknown Patient'}</div>
+                        <div className="text-[11px] text-slate-500 font-mono">
+                          {admission.patient?.queueToken || admission.id.slice(0, 8)} • {admission.patient?.nric || 'N/A'}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 text-xs">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="text-[10px]">
+                            {admission.primaryAcuityTier.replace('TIER_', 'T').replace('_', ' ')}
+                          </Badge>
+                          {admission.effectiveAcuityTier && (
+                            <Badge variant="secondary" className="text-[10px] bg-blue-50 text-blue-700 font-semibold">
+                              Eff: {admission.effectiveAcuityTier.replace('TIER_', 'T').replace('_', ' ')}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 text-xs">
+                        <div className="font-medium text-slate-800">
+                          {admission.suspectedDiagnosisService || admission.admittingSpecialtyCluster || 'GENERAL_MEDICINE'}
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Class {admission.requestedWardClass || 'B2'}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 text-xs">
+                        <div className="flex items-center gap-1">
+                          {admission.effectiveTelemetry || admission.primaryTelemetry ? (
+                            <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
+                              <HeartPulse className="h-3 w-3" /> Telemetry
+                            </Badge>
+                          ) : (
+                            <span className="text-[11px] text-slate-400">Standard</span>
+                          )}
+                          {admission.discordant && (
+                            <Badge variant="destructive" className="text-[10px]">
+                              Discordant
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 text-xs">
+                        <Badge
+                          variant={
+                            admission.status === 'BED_ALLOCATED'
+                              ? 'default'
+                              : admission.status === 'BED_REQUESTED'
+                              ? 'secondary'
+                              : 'outline'
+                          }
+                          className="text-[10px] font-semibold"
+                        >
+                          {admission.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-3 text-xs font-mono font-medium text-slate-700">
+                        {admission.assignedBed ? (
+                          <span className="text-emerald-700 font-semibold">{admission.assignedBed.bedNumber}</span>
+                        ) : (
+                          <span className="text-slate-400 italic">Pending Allocation</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="py-3 text-xs text-slate-500 flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-slate-400" />
+                        {admission.requestedAt ? new Date(admission.requestedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Waiting ED Patient Queue Table (TanStack Table) */}
         <div className="lg:col-span-7 space-y-4">
@@ -434,6 +597,26 @@ export function EdRoute() {
                       className="text-xs rounded-lg"
                     />
                   </div>
+                  {/* Admission Pathway: Direct vs Consult-Gated */}
+                  <div className="pt-2 border-t border-slate-200">
+                    <label className="flex items-center gap-3 p-2.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50/40 has-[:checked]:ring-1 has-[:checked]:ring-purple-500/30">
+                      <input
+                        type="checkbox"
+                        checked={requiresSpecialistConsult}
+                        onChange={(e) => setRequiresSpecialistConsult(e.target.checked)}
+                        className="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                      />
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5 text-purple-600" />
+                          Request Specialist Consult Pool (Consult-Gated)
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Unchecked = Direct Admission (dispatches immediately to BMU queue in BED_REQUESTED)
+                        </div>
+                      </div>
+                    </label>
+                  </div>
 
                   {/* Submit Action */}
                   <Button
@@ -441,7 +624,11 @@ export function EdRoute() {
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 mt-2 shadow-xs cursor-pointer"
                     disabled={submitMutation.isPending}
                   >
-                    {submitMutation.isPending ? 'Submitting Assessment...' : 'Confirm & Lead Assessment (1-Click)'}
+                    {submitMutation.isPending
+                      ? 'Submitting Assessment...'
+                      : requiresSpecialistConsult
+                      ? 'Broadcast for Specialist Consult Pool'
+                      : 'Confirm Direct Admission (1-Click to BMU)'}
                   </Button>
                 </form>
               )}
@@ -449,6 +636,7 @@ export function EdRoute() {
           </Card>
         </div>
       </div>
+      )}
     </div>
   );
 }

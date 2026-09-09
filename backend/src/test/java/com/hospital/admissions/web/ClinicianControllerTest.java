@@ -60,6 +60,22 @@ class ClinicianControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/clinicians/ed/admissions returns 200 and list of submitted admissions")
+    void testGetEdSubmittedAdmissions() throws Exception {
+        AdmissionRequest req = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .status(AdmissionStatus.BED_REQUESTED)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .build();
+        when(clinicianService.getEdSubmittedAdmissions()).thenReturn(List.of(req));
+
+        mockMvc.perform(get("/api/v1/clinicians/ed/admissions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].status").value("BED_REQUESTED"))
+                .andExpect(jsonPath("$[0].effectiveAcuityTier").value("TIER_2_ACUTE_URGENT"));
+    }
+
+    @Test
     @DisplayName("POST /api/v1/clinicians/ed/assessments/submit returns 200 and admission request")
     void testSubmitEdAssessment() throws Exception {
         UUID patientId = UUID.randomUUID();

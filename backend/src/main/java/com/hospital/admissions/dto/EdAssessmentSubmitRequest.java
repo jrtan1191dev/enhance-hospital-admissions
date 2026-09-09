@@ -29,8 +29,16 @@ public class EdAssessmentSubmitRequest {
     private WardClass requestedWardClass;
 
     private boolean needsTelemetry;
+    private boolean primaryTelemetry;
+    private boolean requiresSpecialistConsult;
+    private java.util.List<ClinicalBaselineOverride> overrides;
+    private String clinicalNotes;
     private Boolean recommendedAccepted;
     private Double elapsedMins;
+
+    public boolean isPrimaryTelemetry() {
+        return primaryTelemetry || needsTelemetry;
+    }
 
     public EdAssessmentSubmitRequest(UUID patientId, SpecialtyCluster suspectedDiagnosisService, AcuityTier primaryAcuityTier, WardClass requestedWardClass, boolean needsTelemetry) {
         this.patientId = patientId;
@@ -38,6 +46,7 @@ public class EdAssessmentSubmitRequest {
         this.primaryAcuityTier = primaryAcuityTier;
         this.requestedWardClass = requestedWardClass;
         this.needsTelemetry = needsTelemetry;
+        this.primaryTelemetry = needsTelemetry;
         this.recommendedAccepted = true;
     }
 }

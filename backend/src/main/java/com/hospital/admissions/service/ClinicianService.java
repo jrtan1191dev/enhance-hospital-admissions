@@ -28,7 +28,11 @@ public class ClinicianService {
     private final AuditLogger auditLogger;
 
     public List<Patient> getEdWaitingPatients() {
-        return patientRepository.findAll();
+        return patientRepository.findPatientsWithoutActiveAdmission();
+    }
+
+    public List<AdmissionRequest> getEdSubmittedAdmissions() {
+        return admissionRequestRepository.findAllByOrderByRequestedAtDesc();
     }
 
     @Transactional
@@ -38,43 +42,70 @@ public class ClinicianService {
         Patient patient = patientRepository.findById(req.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + req.getPatientId()));
 
-        patient.setNeedsTelemetry(req.isNeedsTelemetry());
+        boolean primaryTelemetry = req.isPrimaryTelemetry();
+        patient.setNeedsTelemetry(primaryTelemetry);
         patientRepository.save(patient);
+
+        boolean requiresConsult = req.isRequiresSpecialistConsult();
+        AdmissionStatus initialStatus = requiresConsult ? AdmissionStatus.ASSESSMENT_PENDING : AdmissionStatus.BED_REQUESTED;
 
         AdmissionRequest admissionRequest = AdmissionRequest.builder()
                 .patient(patient)
                 .suspectedDiagnosisService(req.getSuspectedDiagnosisService())
                 .primaryAcuityTier(req.getPrimaryAcuityTier())
+                .effectiveAcuityTier(req.getPrimaryAcuityTier())
+                .primaryTelemetry(primaryTelemetry)
+                .effectiveTelemetry(primaryTelemetry)
                 .requestedWardClass(req.getRequestedWardClass())
-                .status(AdmissionStatus.BED_REQUESTED)
+                .status(initialStatus)
+                .requiresSpecialistConsult(requiresConsult)
                 .requestedAt(LocalDateTime.now())
                 .build();
 
-        boolean recommendedAccepted = req.getRecommendedAccepted() != null ? req.getRecommendedAccepted() : true;
+        boolean hasOverrides = req.getOverrides() != null && !req.getOverrides().isEmpty();
+        boolean recommendedAccepted = !hasOverrides && (req.getRecommendedAccepted() != null ? req.getRecommendedAccepted() : true);
         double elapsedMins = req.getElapsedMins() != null ? req.getElapsedMins() :
                 (patient.getCreatedAt() != null ? Math.max(1.0, java.time.Duration.between(patient.getCreatedAt(), LocalDateTime.now()).toMinutes()) : 12.5);
 
         admissionRequest.setIsRecommendationAccepted(recommendedAccepted);
         admissionRequest = admissionRequestRepository.save(admissionRequest);
 
-        AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
-                .admissionRequest(admissionRequest)
-                .targetCluster(req.getSuspectedDiagnosisService())
-                .status(BroadcastStatus.OPEN)
-                .build();
-
-        broadcastRepository.save(broadcast);
+        if (requiresConsult) {
+            AssessmentBroadcast broadcast = AssessmentBroadcast.builder()
+                    .admissionRequest(admissionRequest)
+                    .targetCluster(req.getSuspectedDiagnosisService())
+                    .status(BroadcastStatus.OPEN)
+                    .build();
+            broadcastRepository.save(broadcast);
+        }
 
         java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
         details.put("PrimaryAcuity", req.getPrimaryAcuityTier());
+        details.put("EffectiveAcuity", req.getPrimaryAcuityTier());
         details.put("WardClass", req.getRequestedWardClass());
         details.put("Cluster", req.getSuspectedDiagnosisService());
+        details.put("RequiresConsult", requiresConsult);
         details.put("RecommendedAccepted", recommendedAccepted);
         details.put("ElapsedMins", String.format(java.util.Locale.US, "%.1f", elapsedMins));
 
         auditLogger.logAction(currentUser, "SUBMIT_ED_ASSESSMENT",
                 "AdmissionRequest:" + admissionRequest.getId(),
                 AuditLogger.formatDetails(details));
+
+        if (hasOverrides) {
+            for (com.hospital.admissions.dto.ClinicalBaselineOverride ov : req.getOverrides()) {
+                java.util.Map<String, Object> ovDetails = new java.util.LinkedHashMap<>();
+                ovDetails.put("Field", ov.getField());
+                ovDetails.put("Original", ov.getOriginalValue());
+                ovDetails.put("Submitted", ov.getSubmittedValue());
+                if (ov.getOverrideReason() != null) {
+                    ovDetails.put("Reason", ov.getOverrideReason());
+                }
+                auditLogger.logAction(currentUser, "OVERRIDE_CLINICAL_BASELINE",
+                        "AdmissionRequest:" + admissionRequest.getId(),
+                        AuditLogger.formatDetails(ovDetails));
+            }
+        }
 
         return admissionRequest;
     }

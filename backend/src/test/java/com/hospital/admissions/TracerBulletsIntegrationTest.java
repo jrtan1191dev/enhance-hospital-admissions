@@ -169,6 +169,7 @@ class TracerBulletsIntegrationTest {
                 .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
                 .requestedWardClass(WardClass.B2)
                 .needsTelemetry(false)
+                .requiresSpecialistConsult(true)
                 .build();
 
         mockMvc.perform(post("/api/v1/clinicians/ed/assessments/submit")
@@ -177,7 +178,7 @@ class TracerBulletsIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(submitReq)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("BED_REQUESTED"))
+                .andExpect(jsonPath("$.status").value("ASSESSMENT_PENDING"))
                 .andExpect(jsonPath("$.suspectedDiagnosisService").value("GENERAL_MEDICINE"))
                 .andExpect(jsonPath("$.primaryAcuityTier").value("TIER_3_ACUTE_STABLE"))
                 .andExpect(jsonPath("$.requestedWardClass").value("B2"));

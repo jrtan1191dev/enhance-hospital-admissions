@@ -27,6 +27,11 @@ public class ClinicianController {
         return ResponseEntity.ok(clinicianService.getEdWaitingPatients());
     }
 
+    @GetMapping("/ed/admissions")
+    public ResponseEntity<List<AdmissionRequest>> getEdSubmittedAdmissions() {
+        return ResponseEntity.ok(clinicianService.getEdSubmittedAdmissions());
+    }
+
     @PostMapping("/ed/assessments/submit")
     public ResponseEntity<AdmissionRequest> submitEdAssessment(@Valid @RequestBody EdAssessmentSubmitRequest request) {
         return ResponseEntity.ok(clinicianService.submitEdAssessment(request));

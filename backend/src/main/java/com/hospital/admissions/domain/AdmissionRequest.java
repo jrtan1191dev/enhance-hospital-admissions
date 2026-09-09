@@ -35,6 +35,19 @@ public class AdmissionRequest extends AuditableEntity {
     private AcuityTier secondaryAcuityTier;
 
     @Enumerated(EnumType.STRING)
+    private AcuityTier effectiveAcuityTier;
+
+    private Boolean primaryTelemetry;
+    private Boolean secondaryTelemetry;
+    private Boolean effectiveTelemetry;
+
+    private Boolean requiresSpecialistConsult;
+    private Boolean reconciliationRequested;
+
+    @Enumerated(EnumType.STRING)
+    private SpecialtyCluster admittingSpecialtyCluster;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WardClass requestedWardClass;
 

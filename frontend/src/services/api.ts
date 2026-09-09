@@ -57,6 +57,7 @@ export const api = {
 
   // Clinician Controller
   getEdWaitingPatients: () => http.get<Patient[]>('/api/v1/clinicians/ed/patients').then((r) => r.data),
+  getEdSubmittedAdmissions: () => http.get<AdmissionRequest[]>('/api/v1/clinicians/ed/admissions').then((r) => r.data),
   submitEdAssessment: (data: EdAssessmentSubmitRequest) =>
     http.post<AdmissionRequest>('/api/v1/clinicians/ed/assessments/submit', data).then((r) => r.data),
   getSpecialistBroadcasts: (cluster?: SpecialtyCluster) =>

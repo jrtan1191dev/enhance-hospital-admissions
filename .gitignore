@@ -19,6 +19,7 @@ skills-lock.json
 # React / Node.js / Frontend Essentials
 # ==============================================================================
 # Dependencies
+node/
 node_modules/
 frontend/node/
 .pnpm-store/

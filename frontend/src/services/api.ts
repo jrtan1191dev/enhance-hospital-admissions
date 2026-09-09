@@ -87,7 +87,18 @@ export const api = {
     http.post<AdmissionRequest>('/api/v1/bmu/allocate', data).then((r) => r.data),
   deallocateBed: (admissionRequestId: string) =>
     http.post<AdmissionRequest>('/api/v1/bmu/deallocate', { admissionRequestId }).then((r) => r.data),
-  getInventory: () => http.get<Ward[]>('/api/v1/bmu/inventory').then((r) => r.data),
+  getInventory: () =>
+    http.get<any[]>('/api/v1/bmu/inventory').then(
+      (r) =>
+        r.data.map((w) => ({
+          ...w,
+          wardCode: w.wardCode || w.name?.replace('Ward ', '') || w.name,
+          levelNumber: w.levelNumber ?? w.level,
+          specialty: w.specialty || w.serviceCluster,
+          genderCohortLocked: w.genderCohortLocked || w.lockedGender,
+          infectionLocked: w.infectionLocked || w.lockedInfectionStatus,
+        })) as Ward[]
+    ),
   getConfig: () => http.get<BmuAlgorithmConfig>('/api/v1/bmu/config').then((r) => r.data),
   updateConfig: (data: BmuConfigUpdateRequest) =>
     http.put<BmuAlgorithmConfig>('/api/v1/bmu/config', data).then((r) => r.data),

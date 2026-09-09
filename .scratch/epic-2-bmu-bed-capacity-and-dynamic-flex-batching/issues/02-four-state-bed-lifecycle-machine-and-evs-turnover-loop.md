@@ -5,14 +5,14 @@ Implement the deterministic four-state bed machine (`Mustard Yellow` / `White` /
 
 **Blocked by:** 01: Two-Tier Constraint Validation & Override Workflow
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Bed entities strictly enforce state transitions: `EMPTY_CLEANED` -> `EMPTY_ASSIGNED` -> `OCCUPIED_TAKEN` -> `EMPTY_PENDING_CLEANING` -> `EMPTY_CLEANED`.
-- [ ] Deallocation API reverts an `EMPTY_ASSIGNED` bed directly to `EMPTY_CLEANED` if patient has not physically arrived, resetting the admission request to `BED_REQUESTED`.
-- [ ] Ward console provides an arrival confirmation action that transitions the bed to `OCCUPIED_TAKEN` (`Grey`) and admission status to `ADMITTED_INPATIENT`.
-- [ ] Ward console provides a patient discharge/vacate action that transitions the bed from `OCCUPIED_TAKEN` to `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) and sets `cleaningStartedAt`.
-- [ ] Beds in `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) are excluded from recommendation candidate pools.
-- [ ] Housekeeping terminal clean sign-off transitions the bed from `EMPTY_PENDING_CLEANING` to `EMPTY_CLEANED` (`White`), records `lastCleanedAt`, and logs elapsed turnover time against the 30-minute SLA.
-- [ ] An All-Clean Ward Reset is executed automatically upon clean sign-off if all beds in the ward are `EMPTY_CLEANED`, clearing `lockedGender`, `lockedInfectionStatus`, and `isHoldingWard`.
-- [ ] Ward and BMU UI boards reflect bed states with distinct color coding (`Mustard Yellow`, `White`, `Green`, `Grey`) and live turnover countdown timers.
-- [ ] Comprehensive integration tests verify lifecycle transitions, invalid transition rejections, deallocation, and All-Clean Ward Reset triggers.
+- [x] Bed entities strictly enforce state transitions: `EMPTY_CLEANED` -> `EMPTY_ASSIGNED` -> `OCCUPIED_TAKEN` -> `EMPTY_PENDING_CLEANING` -> `EMPTY_CLEANED`.
+- [x] Deallocation API reverts an `EMPTY_ASSIGNED` bed directly to `EMPTY_CLEANED` if patient has not physically arrived, resetting the admission request to `BED_REQUESTED`.
+- [x] Ward console provides an arrival confirmation action that transitions the bed to `OCCUPIED_TAKEN` (`Grey`) and admission status to `ADMITTED_INPATIENT`.
+- [x] Ward console provides a patient discharge/vacate action that transitions the bed from `OCCUPIED_TAKEN` to `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) and sets `cleaningStartedAt`.
+- [x] Beds in `EMPTY_PENDING_CLEANING` (`Mustard Yellow`) are excluded from recommendation candidate pools.
+- [x] Housekeeping terminal clean sign-off transitions the bed from `EMPTY_PENDING_CLEANING` to `EMPTY_CLEANED` (`White`), records `lastCleanedAt`, and logs elapsed turnover time against the 30-minute SLA.
+- [x] An All-Clean Ward Reset is executed automatically upon clean sign-off if all beds in the ward are `EMPTY_CLEANED`, clearing `lockedGender`, `lockedInfectionStatus`, and `isHoldingWard`.
+- [x] Ward and BMU UI boards reflect bed states with distinct color coding (`Mustard Yellow`, `White`, `Green`, `Grey`) and live turnover countdown timers.
+- [x] Comprehensive integration tests verify lifecycle transitions, invalid transition rejections, deallocation, and All-Clean Ward Reset triggers.

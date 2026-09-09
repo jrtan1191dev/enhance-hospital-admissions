@@ -5,14 +5,14 @@ Enable automated surge cluster detection and bulk flex ward allocation to rapidl
 
 **Blocked by:** 02: Four-State Bed Lifecycle Machine & EVS Turnover Loop
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Batch detection engine scans pending admission requests to identify surge clusters of $\ge 3$ patients matching ward class, gender, and infection status.
-- [ ] Endpoint `GET /api/v1/bmu/batch-suggestions` surfaces active cluster suggestions paired with available all-`White` flex wards.
-- [ ] Endpoint `POST /api/v1/bmu/batch-holding-wards/approve` atomically assigns cluster patients to the target flex ward in a single transaction.
-- [ ] When cluster size exceeds flex ward capacity, the batch engine prioritizes patients using greedy FIFO dwell-time slicing (earliest `requestedAt` first), leaving remaining cluster patients at the top of the queue.
-- [ ] Flex ward cohort locks (`lockedGender`, `lockedInfectionStatus`, `isHoldingWard = true`) are set upon approval.
-- [ ] Residual clean beds within the batch-allocated ward remain `EMPTY_CLEANED` under the established cohort lock, receiving the +30 consolidation bonus for matching individual arrivals.
-- [ ] BMU console displays prominent Batch Suggestion cards with 1-click approval and patient list inspection.
-- [ ] Structured audit log event `APPROVE_BATCH_HOLDING_WARD` is emitted recording coordinator ID, ward ID, batch size, and patient IDs.
-- [ ] Unit and integration tests verify cluster grouping logic, FIFO dwell slicing, atomic multi-bed assignment, and residual bed cohort locking.
+- [x] Batch detection engine scans pending admission requests to identify surge clusters of $\ge 3$ patients matching ward class, gender, and infection status.
+- [x] Endpoint `GET /api/v1/bmu/batch-suggestions` surfaces active cluster suggestions paired with available all-`White` flex wards.
+- [x] Endpoint `POST /api/v1/bmu/batch-holding-wards/approve` atomically assigns cluster patients to the target flex ward in a single transaction.
+- [x] When cluster size exceeds flex ward capacity, the batch engine prioritizes patients using greedy FIFO dwell-time slicing (earliest `requestedAt` first), leaving remaining cluster patients at the top of the queue.
+- [x] Flex ward cohort locks (`lockedGender`, `lockedInfectionStatus`, `isHoldingWard = true`) are set upon approval.
+- [x] Residual clean beds within the batch-allocated ward remain `EMPTY_CLEANED` under the established cohort lock, receiving the +30 consolidation bonus for matching individual arrivals.
+- [x] BMU console displays prominent Batch Suggestion cards with 1-click approval and patient list inspection.
+- [x] Structured audit log event `APPROVE_BATCH_HOLDING_WARD` is emitted recording coordinator ID, ward ID, batch size, and patient IDs.
+- [x] Unit and integration tests verify cluster grouping logic, FIFO dwell slicing, atomic multi-bed assignment, and residual bed cohort locking.

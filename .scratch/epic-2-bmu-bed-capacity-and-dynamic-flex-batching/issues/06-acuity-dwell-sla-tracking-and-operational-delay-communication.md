@@ -5,14 +5,14 @@ Deliver continuous dwell-time monitoring against acuity-tier SLAs and establish 
 
 **Blocked by:** 01: Two-Tier Constraint Validation & Override Workflow
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] BMU queue calculates elapsed dwell minutes from `requestedAt` and renders color-coded dwell timers for each waiting patient.
-- [ ] Visual escalation badges highlight patients exceeding acuity-tier dwell SLA thresholds (Tier 1: immediate, Tier 2: >60 mins, Tier 3: >120 mins).
-- [ ] Endpoint `POST /api/v1/bmu/requests/{requestId}/delay-tag` allows BMU coordinators to attach a structured `DelayReasonCode` and explanatory operational note.
-- [ ] Non-BMU personas attempting to submit delay reason tags are rejected with HTTP 403 Forbidden.
-- [ ] ED triage board displays attached delay reason tags on patient rows along with contextual family talking points.
-- [ ] When an admission request transitions to `BED_ALLOCATED`, active delay tags are automatically archived from the active alert view and preserved in audit records.
-- [ ] Specialist consult amendments that increase acuity or require telemetry automatically re-sort queue rank and display a prominent `CLINICAL_CONDITION_UPDATED` badge.
-- [ ] Structured audit event `TAG_DELAY_REASON` is emitted recording coordinator identity, delay code, dwell minutes, and patient acuity tier.
-- [ ] Unit and integration tests verify dwell timer calculations, SLA breach alerts, coordinator-exclusive delay tagging, auto-archival on allocation, and consult amendment queue elevation.
+- [x] BMU queue calculates elapsed dwell minutes from `requestedAt` and renders color-coded dwell timers for each waiting patient.
+- [x] Visual escalation badges highlight patients exceeding acuity-tier dwell SLA thresholds (Tier 1: immediate, Tier 2: >60 mins, Tier 3: >120 mins).
+- [x] Endpoint `POST /api/v1/bmu/requests/{requestId}/delay-tag` allows BMU coordinators to attach a structured `DelayReasonCode` and explanatory operational note.
+- [x] Non-BMU personas attempting to submit delay reason tags are rejected with HTTP 403 Forbidden.
+- [x] ED triage board displays attached delay reason tags on patient rows along with contextual family talking points.
+- [x] When an admission request transitions to `BED_ALLOCATED`, active delay tags are automatically archived from the active alert view and preserved in audit records.
+- [x] Specialist consult amendments that increase acuity or require telemetry automatically re-sort queue rank and display a prominent `CLINICAL_CONDITION_UPDATED` badge.
+- [x] Structured audit event `TAG_DELAY_REASON` is emitted recording coordinator identity, delay code, dwell minutes, and patient acuity tier.
+- [x] Unit and integration tests verify dwell timer calculations, SLA breach alerts, coordinator-exclusive delay tagging, auto-archival on allocation, and consult amendment queue elevation.

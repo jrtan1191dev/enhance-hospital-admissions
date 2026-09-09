@@ -5,15 +5,15 @@ Provide BMU coordinators with digital referral dispatch and SLA lifecycle manage
 
 **Blocked by:** 01: Two-Tier Constraint Validation & Override Workflow
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] BMU queue displays high-visibility diversion indicator badges for patients endorsed for Tier 4 Subacute or MIC@Home care pathways.
-- [ ] BMU UI provides a digital referral drawer pre-populating patient demographics, vital signs, consult impressions, and destination facility.
-- [ ] Endpoint `POST /api/v1/bmu/diversion/refer` dispatches the referral, persists external referral metadata, and initiates a 30-minute bilateral SLA countdown.
-- [ ] Active referrals track remaining SLA time; upon reaching 0 minutes without partner acceptance, the UI displays visual escalation badges with actionable response triggers:
+- [x] BMU queue displays high-visibility diversion indicator badges for patients endorsed for Tier 4 Subacute or MIC@Home care pathways.
+- [x] BMU UI provides a digital referral drawer pre-populating patient demographics, vital signs, consult impressions, and destination facility.
+- [x] Endpoint `POST /api/v1/bmu/diversion/refer` dispatches the referral, persists external referral metadata, and initiates a 30-minute bilateral SLA countdown.
+- [x] Active referrals track remaining SLA time; upon reaching 0 minutes without partner acceptance, the UI displays visual escalation badges with actionable response triggers:
   - "Recall to Acute Queue" (cancels referral and returns request to standard acute queue)
   - "Extend SLA +15 Mins" (extends deadline and logs operational delay note)
   - "Log Telephone Follow-up" (records coordinator communication notes in audit history)
-- [ ] Dispatching or confirming a MIC@Home diversion allocates a synthetic virtual bed identifier (`MIC-V{sequence}`) and updates admission status to `DIVERTED_HAH`.
-- [ ] Structured audit log event `DIVERSION_REFERRAL` is emitted with coordinator identity, destination facility, referral ID, and SLA window.
-- [ ] End-to-end integration tests verify referral creation, SLA tracking, timeout escalation handling, and MIC@Home virtual bed assignment.
+- [x] Dispatching or confirming a MIC@Home diversion allocates a synthetic virtual bed identifier (`MIC-V{sequence}`) and updates admission status to `DIVERTED_HAH`.
+- [x] Structured audit log event `DIVERSION_REFERRAL` is emitted with coordinator identity, destination facility, referral ID, and SLA window.
+- [x] End-to-end integration tests verify referral creation, SLA tracking, timeout escalation handling, and MIC@Home virtual bed assignment.

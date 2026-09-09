@@ -5,13 +5,13 @@ Enforce the Two-Tier Constraint Hierarchy during bed allocation recommendation a
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Bed allocation recommendation engine evaluates candidate beds against hard constraints and computes multi-criteria scores (+40 specialty cluster match, +30 consolidation packing bonus, +15 proximity for fall risk >= 45).
-- [ ] Absolute Safety Invariants (biological gender cohorting in multi-bed wards and negative pressure isolation for airborne infections) are strictly non-overridable; allocation attempts violating these invariants return RFC 7807 `422 Unprocessable Entity` with clinical safety violation details.
-- [ ] Overridable Operational Constraints (financial ward class subsidy upgrade and deploying portable telemetry to non-equipped beds) permit allocation only when a valid structured reason code is provided.
-- [ ] Attempting an operational constraint override without a valid reason code returns RFC 7807 `400 Bad Request`.
-- [ ] Normal bed allocations emit `ALLOCATE_BED` audit log events; overrides emit `OVERRIDE_ALLOCATION` audit events capturing coordinator username, assigned bed, rank, and structured reason code.
-- [ ] BMU recommendation UI displays the Top 3 ranked candidate beds with detailed score breakdown chips.
-- [ ] BMU UI allows 1-click approval for recommended beds, and provides an override modal requiring structured reason selection when choosing non-recommended or operational-override beds.
-- [ ] Automated integration tests verify invariant rejection (422), reason-code validation, scoring weights, and audit log emissions.
+- [x] Bed allocation recommendation engine evaluates candidate beds against hard constraints and computes multi-criteria scores (+40 specialty cluster match, +30 consolidation packing bonus, +15 proximity for fall risk >= 45).
+- [x] Absolute Safety Invariants (biological gender cohorting in multi-bed wards and negative pressure isolation for airborne infections) are strictly non-overridable; allocation attempts violating these invariants return RFC 7807 `422 Unprocessable Entity` with clinical safety violation details.
+- [x] Overridable Operational Constraints (financial ward class subsidy upgrade and deploying portable telemetry to non-equipped beds) permit allocation only when a valid structured reason code is provided.
+- [x] Attempting an operational constraint override without a valid reason code returns RFC 7807 `400 Bad Request`.
+- [x] Normal bed allocations emit `ALLOCATE_BED` audit log events; overrides emit `OVERRIDE_ALLOCATION` audit events capturing coordinator username, assigned bed, rank, and structured reason code.
+- [x] BMU recommendation UI displays the Top 3 ranked candidate beds with detailed score breakdown chips.
+- [x] BMU UI allows 1-click approval for recommended beds, and provides an override modal requiring structured reason selection when choosing non-recommended or operational-override beds.
+- [x] Automated integration tests verify invariant rejection (422), reason-code validation, scoring weights, and audit log emissions.

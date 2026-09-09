@@ -5,13 +5,13 @@ Empower BMU coordinators to liberate flex wards obstructed by 1–2 isolated pat
 
 **Blocked by:** 03: Dynamic Holding Ward Batching for Surge Clusters
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Cohort-swap detection engine scans flex wards to identify those blocked by 1 or 2 isolated `EMPTY_ASSIGNED` beds where the assigned patient has not departed the ED (`waitingInEd = true`).
-- [ ] Engine searches for candidate replacement beds in partially occupied wards satisfying all hard constraints (ward class, gender, telemetry, infection status) without introducing new cohort conflicts.
-- [ ] Endpoint `GET /api/v1/bmu/cohort-swap-suggestions` returns calculated swap proposals including blocked patient, current bed, target bed, target ward, and unlocked capacity count.
-- [ ] Endpoint `POST /api/v1/bmu/cohort-swap/approve` atomically swaps the patient's reservation from the flex bed to the target bed, returning the flex bed to `EMPTY_CLEANED`.
-- [ ] Atomic swap execution validates optimistic locking / transit status; if the patient is no longer waiting in the ED or the target bed is not `EMPTY_CLEANED`, it immediately rejects with RFC 7807 `409 Conflict`.
-- [ ] BMU UI presents a side-by-side Cohort Swap proposal card with 1-click coordinator approval and rejection handling.
-- [ ] Structured audit log event `APPROVE_COHORT_SWAP` is emitted with coordinator identity, reallocated patient ID, origin and destination bed numbers, and liberated ward ID.
-- [ ] Integration tests verify detection of blocked flex wards, candidate bed matching, atomic swap execution, and conflict rejection on ED departure.
+- [x] Cohort-swap detection engine scans flex wards to identify those blocked by 1 or 2 isolated `EMPTY_ASSIGNED` beds where the assigned patient has not departed the ED (`waitingInEd = true`).
+- [x] Engine searches for candidate replacement beds in partially occupied wards satisfying all hard constraints (ward class, gender, telemetry, infection status) without introducing new cohort conflicts.
+- [x] Endpoint `GET /api/v1/bmu/cohort-swap-suggestions` returns calculated swap proposals including blocked patient, current bed, target bed, target ward, and unlocked capacity count.
+- [x] Endpoint `POST /api/v1/bmu/cohort-swap/approve` atomically swaps the patient's reservation from the flex bed to the target bed, returning the flex bed to `EMPTY_CLEANED`.
+- [x] Atomic swap execution validates optimistic locking / transit status; if the patient is no longer waiting in the ED or the target bed is not `EMPTY_CLEANED`, it immediately rejects with RFC 7807 `409 Conflict`.
+- [x] BMU UI presents a side-by-side Cohort Swap proposal card with 1-click coordinator approval and rejection handling.
+- [x] Structured audit log event `APPROVE_COHORT_SWAP` is emitted with coordinator identity, reallocated patient ID, origin and destination bed numbers, and liberated ward ID.
+- [x] Integration tests verify detection of blocked flex wards, candidate bed matching, atomic swap execution, and conflict rejection on ED departure.

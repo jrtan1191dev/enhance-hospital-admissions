@@ -503,11 +503,10 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         // ------------------------------------------------------------------
-        // P103 — Female, MRSA, BED_ALLOCATED (bed EMPTY_ASSIGNED, patient in transit)
-        //        Concordant consult completed; effectiveAcuityTier = Tier 2
-        //        Scenario: bed-in-transit green state, check-in pending
+        // P103 — Female, MRSA, high fall-risk — clean ED patient (no admission request)
+        //        Reserved for Tracer Bullet 7 (consensus gate test)
         // ------------------------------------------------------------------
-        Patient p103 = patientRepository.save(Patient.builder()
+        patientRepository.save(Patient.builder()
                 .name("Kowsalya")
                 .nricMasked("S****789C")
                 .age(72)
@@ -518,13 +517,43 @@ public class DataInitializer implements CommandLineRunner {
                 .queueToken("TOKEN-P103")
                 .build());
 
-        // Assign 11A-01 (negative-pressure, Class A, telemetry) to p103
+        // ------------------------------------------------------------------
+        // P104 — Female, non-infectious — clean ED patient (no admission request)
+        //        Reserved for Tracer Bullet 6 (SLA auto-escalation test)
+        // ------------------------------------------------------------------
+        patientRepository.save(Patient.builder()
+                .name("Mdm Lee")
+                .nricMasked("S****234D")
+                .age(81)
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(50)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-P104")
+                .build());
+
+        // ------------------------------------------------------------------
+        // P110 — Female, MRSA, BED_ALLOCATED (bed EMPTY_ASSIGNED, patient in transit)
+        //        Concordant consult completed; effectiveAcuityTier = Tier 2
+        //        Scenario: bed-in-transit green state, check-in pending, negative-pressure ward
+        // ------------------------------------------------------------------
+        Patient p110 = patientRepository.save(Patient.builder()
+                .name("Kavitha (In Transit)")
+                .nricMasked("S****811S")
+                .age(68)
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.MRSA)
+                .fallRiskScore(70)
+                .needsTelemetry(true)
+                .queueToken("TOKEN-P110")
+                .build());
+
         Bed bed11A01 = bedRepository.findAll().stream()
                 .filter(b -> b.getBedNumber().equals("11A-01"))
                 .findFirst()
                 .orElseThrow();
         bed11A01.setStatus(BedStatus.EMPTY_ASSIGNED);
-        bed11A01.setCurrentPatient(p103);
+        bed11A01.setCurrentPatient(p110);
         bedRepository.save(bed11A01);
 
         Ward ward11A = bed11A01.getWard();
@@ -532,8 +561,8 @@ public class DataInitializer implements CommandLineRunner {
         ward11A.setLockedInfectionStatus(InfectionStatus.MRSA);
         wardRepository.save(ward11A);
 
-        AdmissionRequest req103 = admissionRequestRepository.save(AdmissionRequest.builder()
-                .patient(p103)
+        AdmissionRequest req110 = admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(p110)
                 .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
                 .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
                 .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
@@ -554,7 +583,7 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         broadcastRepository.save(AssessmentBroadcast.builder()
-                .admissionRequest(req103)
+                .admissionRequest(req110)
                 .targetCluster(SpecialtyCluster.GENERAL_MEDICINE)
                 .status(BroadcastStatus.COMPLETED)
                 .claimedBySpecialistId("dr_chen_genmedicine")
@@ -566,22 +595,22 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         // ------------------------------------------------------------------
-        // P104 — Female, Tier 1 Critical, BED_REQUESTED with HOUSEKEEPING delay tag
+        // P111 — Female, Tier 1 Critical, BED_REQUESTED with HOUSEKEEPING delay tag
         //        Scenario: delay reason tag visible in patient tracker & BMU queue
         // ------------------------------------------------------------------
-        Patient p104 = patientRepository.save(Patient.builder()
-                .name("Mdm Lee")
-                .nricMasked("S****234D")
-                .age(81)
+        Patient p111 = patientRepository.save(Patient.builder()
+                .name("Mdm Rajamani (Delayed)")
+                .nricMasked("S****522T")
+                .age(79)
                 .gender(Gender.FEMALE)
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
-                .fallRiskScore(50)
+                .fallRiskScore(55)
                 .needsTelemetry(false)
-                .queueToken("TOKEN-P104")
+                .queueToken("TOKEN-P111")
                 .build());
 
         admissionRequestRepository.save(AdmissionRequest.builder()
-                .patient(p104)
+                .patient(p111)
                 .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
                 .primaryAcuityTier(AcuityTier.TIER_1_CRITICAL)
                 .effectiveAcuityTier(AcuityTier.TIER_1_CRITICAL)
@@ -752,6 +781,6 @@ public class DataInitializer implements CommandLineRunner {
                 .queueToken("TOKEN-P109")
                 .build());
 
-        log.info("[PROTOTYPE SEEDER] Seeded ED patients P101-P109 covering: BED_REQUESTED, ASSESSMENT_PENDING (open broadcasts), BED_ALLOCATED (in-transit), DIVERTED_HAH, discordant consult, delay tag, and pure awaiting-assessment patients.");
+        log.info("[PROTOTYPE SEEDER] Seeded ED patients P101-P111: BED_REQUESTED (P101/P107/P111), ASSESSMENT_PENDING+broadcasts (P102/P105), BED_ALLOCATED in-transit (P110), DIVERTED_HAH (P106), discordant consult (P105), delay tag (P111), clean test-reserved (P103/P104), awaiting-assessment (P108/P109).");
     }
 }

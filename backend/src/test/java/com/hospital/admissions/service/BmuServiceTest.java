@@ -4,6 +4,7 @@ import com.hospital.admissions.domain.*;
 import com.hospital.admissions.dto.BedRecommendation;
 import com.hospital.admissions.dto.BmuConfigUpdateRequest;
 import com.hospital.admissions.dto.SisterHospitalReferralResponse;
+import com.hospital.admissions.dto.WardDto;
 import com.hospital.admissions.gateway.SisterHospitalGateway;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.BedRepository;
@@ -242,9 +243,11 @@ class BmuServiceTest {
         Ward ward = Ward.builder().id(UUID.randomUUID()).name("Ward 8A").level(8).build();
         when(wardRepository.findAllByOrderByLevelAscNameAsc()).thenReturn(List.of(ward));
 
-        List<Ward> inventory = bmuService.getInventory();
+        List<WardDto> inventory = bmuService.getInventory();
 
-        assertThat(inventory).containsExactly(ward);
+        assertThat(inventory).hasSize(1);
+        assertThat(inventory.get(0).wardCode()).isEqualTo("8A");
+        assertThat(inventory.get(0).levelNumber()).isEqualTo(8);
     }
 
     @Test

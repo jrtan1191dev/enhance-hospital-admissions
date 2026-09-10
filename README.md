@@ -7,7 +7,7 @@
 
 > 🌐 **[Live Prototype Demo →][LIVE_PROTOTYPE_DEMO_URL]**
 >
-> *The application may take a moment to wake on first load (cold start, ~50seconds) as this prototype is a personal project and is deployed at https://www.render.com.*
+> *The application may take a moment to wake on first load (cold start, ~50seconds) as this prototype is a personal project and is deployed using free tier of https://www.render.com.*
 
 ---
 

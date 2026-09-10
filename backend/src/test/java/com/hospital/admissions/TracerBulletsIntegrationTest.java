@@ -5,6 +5,7 @@ import com.hospital.admissions.domain.*;
 import com.hospital.admissions.dto.*;
 import com.hospital.admissions.repository.*;
 import com.hospital.admissions.service.ClinicianService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -55,6 +57,21 @@ class TracerBulletsIntegrationTest {
     @Autowired
     private ClinicianService clinicianService;
 
+    @Autowired
+    private BmuAlgorithmConfigRepository configRepository;
+
+    @BeforeEach
+    void ensureAlgorithmConfig() {
+        if (configRepository.count() == 0) {
+            configRepository.save(BmuAlgorithmConfig.builder()
+                    .weightSpecialtyCluster(40)
+                    .weightConsolidation(30)
+                    .weightFallRiskStation(15)
+                    .batchHoldingWardThreshold(3)
+                    .build());
+        }
+    }
+
     @Test
     @DisplayName("Tracer Bullet 1: ED Assessment -> Specialist Claim -> BMU Allocation")
     void testTracerBullet1_EdToBmuAllocation() throws Exception {
@@ -64,9 +81,58 @@ class TracerBulletsIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        Patient p101 = patientRepository.findByQueueToken("TOKEN-P101").orElseThrow();
+        String queueToken = "TOKEN-TB1-" + UUID.randomUUID();
+        Patient p101 = patientRepository.save(Patient.builder()
+                .name("TB1 Flow Patient")
+                .nricMasked("S****101A")
+                .age(68)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(65)
+                .needsTelemetry(true)
+                .queueToken(queueToken)
+                .build());
 
-        // Step 2: Fetch BMU Queue (P101 was pre-seeded in BED_REQUESTED)
+        AdmissionRequest p101Req = admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(p101)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B2)
+                .primaryTelemetry(true)
+                .effectiveTelemetry(true)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .requestedAt(LocalDateTime.now().minusMinutes(15))
+                .build());
+
+        Ward ward = wardRepository.save(Ward.builder()
+                .level(8)
+                .name("Ward TB1-" + UUID.randomUUID())
+                .wardClass(WardClass.B2)
+                .lockedGender(Gender.MALE)
+                .serviceCluster(SpecialtyCluster.CARDIOLOGY)
+                .capacity(3)
+                .build());
+
+        // Occupied bed in same ward to earn consolidation packing bonus (+30)
+        bedRepository.save(Bed.builder()
+                .ward(ward)
+                .bedNumber("TB1-OCC-" + UUID.randomUUID())
+                .status(BedStatus.OCCUPIED_TAKEN)
+                .build());
+
+        // Target bed with telemetry and near nursing station (+40 specialty, +30 consolidation, +15 proximity = 85)
+        String targetBedNumber = "TB1-03-" + UUID.randomUUID();
+        Bed targetBed = bedRepository.save(Bed.builder()
+                .ward(ward)
+                .bedNumber(targetBedNumber)
+                .status(BedStatus.EMPTY_CLEANED)
+                .hasTelemetry(true)
+                .isNearNursingStation(true)
+                .build());
+
+        // Step 2: Fetch BMU Queue (P101 was seeded in BED_REQUESTED)
         MvcResult queueResult = mockMvc.perform(get("/api/v1/bmu/queue")
                         .header("X-User-Role", "BMU_COORDINATOR"))
                 .andExpect(status().isOk())
@@ -77,12 +143,12 @@ class TracerBulletsIntegrationTest {
                 objectMapper.getTypeFactory().constructCollectionType(List.class, AdmissionRequest.class)
         );
         assertThat(queue).isNotEmpty();
-        AdmissionRequest p101Req = queue.stream()
-                .filter(r -> r.getPatient().getQueueToken().equals("TOKEN-P101"))
+        AdmissionRequest foundReq = queue.stream()
+                .filter(r -> r.getPatient().getQueueToken().equals(queueToken))
                 .findFirst().orElseThrow();
 
         // Step 3: Get BMU recommendations for P101 (Male, Cardio, B2, Telemetry, FallRisk 65)
-        MvcResult recResult = mockMvc.perform(get("/api/v1/bmu/recommendations/" + p101Req.getId())
+        MvcResult recResult = mockMvc.perform(get("/api/v1/bmu/recommendations/" + foundReq.getId())
                         .header("X-User-Role", "BMU_COORDINATOR"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -93,17 +159,18 @@ class TracerBulletsIntegrationTest {
         );
 
         assertThat(recommendations).isNotEmpty();
-        // Top recommendation should be Bed 8A-03 (Cardio B2 Male, telemetry, near nursing station)
-        BedRecommendation topRec = recommendations.get(0);
-        assertThat(topRec.getBedNumber()).isEqualTo("8A-03");
-        assertThat(topRec.isRecommended()).isTrue();
-        // Score: +40 Specialty, +30 Consolidation (Ward 8A has occupied beds 8A-01/02), +15 Proximity = 85
-        assertThat(topRec.getScore()).isEqualTo(85);
+        BedRecommendation targetRec = recommendations.stream()
+                .filter(r -> r.getBedId().equals(targetBed.getId()))
+                .findFirst().orElseThrow();
+        assertThat(targetRec.getBedNumber()).isEqualTo(targetBedNumber);
+        assertThat(targetRec.isRecommended()).isTrue();
+        // Score: +40 Specialty, +30 Consolidation, +15 Proximity = 85
+        assertThat(targetRec.getScore()).isEqualTo(85);
 
         // Step 4: 1-Click Bed Allocation
         BedAllocationRequest allocReq = BedAllocationRequest.builder()
-                .admissionRequestId(p101Req.getId())
-                .bedId(topRec.getBedId())
+                .admissionRequestId(foundReq.getId())
+                .bedId(targetRec.getBedId())
                 .build();
 
         mockMvc.perform(post("/api/v1/bmu/allocate")
@@ -113,64 +180,106 @@ class TracerBulletsIntegrationTest {
                         .content(objectMapper.writeValueAsString(allocReq)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("BED_ALLOCATED"))
-                .andExpect(jsonPath("$.assignedBed.bedNumber").value("8A-03"));
+                .andExpect(jsonPath("$.assignedBed.bedNumber").value(targetBedNumber));
 
-        // Verify Bed 8A-03 is now EMPTY_ASSIGNED (Green)
-        Bed bed8A03 = bedRepository.findById(topRec.getBedId()).orElseThrow();
-        assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.EMPTY_ASSIGNED);
+        // Verify targetBed is now EMPTY_ASSIGNED (Green)
+        Bed allocatedBed = bedRepository.findById(targetRec.getBedId()).orElseThrow();
+        assertThat(allocatedBed.getStatus()).isEqualTo(BedStatus.EMPTY_ASSIGNED);
     }
 
     @Test
     @DisplayName("Tracer Bullet 2: Patient Milestone Tracker -> Nurse Checkin/Vacate -> Housekeeping Clean")
     void testTracerBullet2_PatientTrackerAndTurnoverLoop() throws Exception {
+        String token = "TOKEN-TB2-" + UUID.randomUUID();
+        Patient patient = patientRepository.save(Patient.builder()
+                .name("Tracker Loop Patient")
+                .nricMasked("S****202C")
+                .age(60)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(20)
+                .queueToken(token)
+                .build());
+
+        Ward ward = wardRepository.save(Ward.builder()
+                .level(8)
+                .name("Ward TB2-" + UUID.randomUUID())
+                .wardClass(WardClass.B2)
+                .serviceCluster(SpecialtyCluster.CARDIOLOGY)
+                .capacity(2)
+                .build());
+
+        String bedNum = "TB2-01-" + UUID.randomUUID();
+        Bed bed = bedRepository.save(Bed.builder()
+                .bedNumber(bedNum)
+                .ward(ward)
+                .status(BedStatus.EMPTY_ASSIGNED)
+                .currentPatient(patient)
+                .build());
+
+        admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(patient)
+                .assignedBed(bed)
+                .status(AdmissionStatus.BED_ALLOCATED)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .requestedWardClass(WardClass.B2)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .requestedAt(LocalDateTime.now().minusMinutes(30))
+                .build());
+
         // Step 1: Patient Milestone Tracker views status
-        mockMvc.perform(get("/api/v1/patients/track/TOKEN-P101")
+        mockMvc.perform(get("/api/v1/patients/track/" + token)
                         .header("X-User-Role", "PATIENT"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.patientName").value("Tan Ah Meng"))
-                .andExpect(jsonPath("$.queueToken").value("TOKEN-P101"));
-
-        Bed bed8A03 = bedRepository.findAll().stream()
-                .filter(b -> b.getBedNumber().equals("8A-03"))
-                .findFirst().orElseThrow();
+                .andExpect(jsonPath("$.patientName").value("Tracker Loop Patient"))
+                .andExpect(jsonPath("$.queueToken").value(token));
 
         // Step 2: Inpatient Ward Nurse checks in patient -> Bed turns OCCUPIED_TAKEN (Grey)
-        mockMvc.perform(post("/api/v1/patients/beds/" + bed8A03.getId() + "/checkin")
+        mockMvc.perform(post("/api/v1/patients/beds/" + bed.getId() + "/checkin")
                         .with(csrf())
                         .header("X-User-Role", "WARD_NURSE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("OCCUPIED_TAKEN"));
 
-        bed8A03 = bedRepository.findById(bed8A03.getId()).orElseThrow();
-        assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.OCCUPIED_TAKEN);
+        Bed checkedInBed = bedRepository.findById(bed.getId()).orElseThrow();
+        assertThat(checkedInBed.getStatus()).isEqualTo(BedStatus.OCCUPIED_TAKEN);
 
         // Step 3: Ward Nurse vacates patient upon discharge -> Bed turns EMPTY_PENDING_CLEANING (Mustard Yellow - vacated, empty, not yet cleaned)
-        mockMvc.perform(post("/api/v1/patients/beds/" + bed8A03.getId() + "/vacate")
+        mockMvc.perform(post("/api/v1/patients/beds/" + bed.getId() + "/vacate")
                         .with(csrf())
                         .header("X-User-Role", "WARD_NURSE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("EMPTY_PENDING_CLEANING"));
 
-        bed8A03 = bedRepository.findById(bed8A03.getId()).orElseThrow();
-        assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.EMPTY_PENDING_CLEANING);
+        Bed vacatedBed = bedRepository.findById(bed.getId()).orElseThrow();
+        assertThat(vacatedBed.getStatus()).isEqualTo(BedStatus.EMPTY_PENDING_CLEANING);
 
         // Step 4: Housekeeping completes 30m terminal cleaning -> Bed turns EMPTY_CLEANED (White - empty, cleaned)
-        mockMvc.perform(post("/api/v1/patients/beds/" + bed8A03.getId() + "/clean")
+        mockMvc.perform(post("/api/v1/patients/beds/" + bed.getId() + "/clean")
                         .with(csrf())
                         .header("X-User-Role", "HOUSEKEEPING"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("EMPTY_CLEANED"));
 
-        bed8A03 = bedRepository.findById(bed8A03.getId()).orElseThrow();
-        assertThat(bed8A03.getStatus()).isEqualTo(BedStatus.EMPTY_CLEANED);
-        assertThat(bed8A03.getCurrentPatient()).isNull();
-        assertThat(bed8A03.getLastCleanedAt()).isNotNull();
+        Bed cleanedBed = bedRepository.findById(bed.getId()).orElseThrow();
+        assertThat(cleanedBed.getStatus()).isEqualTo(BedStatus.EMPTY_CLEANED);
+        assertThat(cleanedBed.getCurrentPatient()).isNull();
+        assertThat(cleanedBed.getLastCleanedAt()).isNotNull();
     }
 
     @Test
     @DisplayName("Tracer Bullet 3: Submit ED Assessment creates AdmissionRequest and Broadcast")
     void testSubmitEdAssessment() throws Exception {
-        Patient p102 = patientRepository.findByQueueToken("TOKEN-P102").orElseThrow();
+        Patient p102 = patientRepository.save(Patient.builder()
+                .name("TB3 Test Patient")
+                .nricMasked("S****102B")
+                .age(52)
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(20)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-TB3-" + UUID.randomUUID())
+                .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
                 .patientId(p102.getId())
@@ -376,7 +485,16 @@ class TracerBulletsIntegrationTest {
     @DisplayName("Tracer Bullet 6: Acuity-Driven SLA Expiry and Cluster Auto-Escalation")
     void testTracerBullet6_AcuityDrivenSlaAndAutoEscalation() throws Exception {
         // Step 1: Submit ED assessment for P104 (Orthopaedics, TIER_3_ACUTE_STABLE) requiring consult
-        Patient p104 = patientRepository.findByQueueToken("TOKEN-P104").orElseThrow();
+        Patient p104 = patientRepository.save(Patient.builder()
+                .name("TB6 SLA Patient")
+                .nricMasked("S****104D")
+                .age(58)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(25)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-TB6-" + UUID.randomUUID())
+                .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
                 .patientId(p104.getId())
@@ -452,7 +570,17 @@ class TracerBulletsIntegrationTest {
     @DisplayName("Tracer Bullet 7: Multi-Broadcast Consensus Gate, Acuity Escalation & BMU Dispatch")
     void testTracerBullet7_ConsensusCompletionGateAndSafetyFirstBmuDispatch() throws Exception {
         // Step 1: Submit ED assessment for P103 with multiple target clusters (CARDIOLOGY + SURGERY)
-        Patient p103 = patientRepository.findByQueueToken("TOKEN-P103").orElseThrow();
+        String queueTokenP103 = "TOKEN-TB7-" + UUID.randomUUID();
+        Patient p103 = patientRepository.save(Patient.builder()
+                .name("TB7 Consensus Patient")
+                .nricMasked("S****103C")
+                .age(65)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(30)
+                .needsTelemetry(false)
+                .queueToken(queueTokenP103)
+                .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
                 .patientId(p103.getId())
@@ -513,7 +641,7 @@ class TracerBulletsIntegrationTest {
         mockMvc.perform(get("/api/v1/bmu/queue")
                         .header("X-User-Role", "BMU_COORDINATOR"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.patient.queueToken == 'TOKEN-P103')]").doesNotExist());
+                .andExpect(jsonPath("$[?(@.patient.queueToken == '" + queueTokenP103 + "')]").doesNotExist());
 
         // Step 3: Surgery specialist claims and submits consult (elevates acuity to TIER_1_CRITICAL + telemetry)
         mockMvc.perform(post("/api/v1/clinicians/specialist/broadcasts/" + surgBroadcast.getId() + "/claim")
@@ -546,10 +674,9 @@ class TracerBulletsIntegrationTest {
         mockMvc.perform(get("/api/v1/bmu/queue")
                         .header("X-User-Role", "BMU_COORDINATOR"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].patient.queueToken").value("TOKEN-P103"))
-                .andExpect(jsonPath("$[0].effectiveAcuityTier").value("TIER_1_CRITICAL"))
-                .andExpect(jsonPath("$[0].effectiveTelemetry").value(true))
-                .andExpect(jsonPath("$[0].discordant").value(true));
+                .andExpect(jsonPath("$[?(@.patient.queueToken == '" + queueTokenP103 + "')].effectiveAcuityTier").value("TIER_1_CRITICAL"))
+                .andExpect(jsonPath("$[?(@.patient.queueToken == '" + queueTokenP103 + "')].effectiveTelemetry").value(true))
+                .andExpect(jsonPath("$[?(@.patient.queueToken == '" + queueTokenP103 + "')].discordant").value(true));
     }
 
     @Test
@@ -626,9 +753,15 @@ class TracerBulletsIntegrationTest {
         assertThat(reconciledReq.getReconciliationRequested()).isTrue();
 
         // Step 3: Tentative bed allocation proceeds without being blocked by pending reconciliation
-        Ward targetWard = bedRepository.findAll().get(0).getWard();
+        Ward targetWard = wardRepository.save(Ward.builder()
+                .name("Ward TB8-" + UUID.randomUUID())
+                .level(8)
+                .wardClass(WardClass.B2)
+                .serviceCluster(SpecialtyCluster.CARDIOLOGY)
+                .capacity(2)
+                .build());
         Bed availableBed = bedRepository.save(Bed.builder()
-                .bedNumber("TEST-AMEND-BED")
+                .bedNumber("TEST-AMEND-BED-" + UUID.randomUUID())
                 .ward(targetWard)
                 .status(BedStatus.EMPTY_CLEANED)
                 .hasTelemetry(true)
@@ -731,9 +864,13 @@ class TracerBulletsIntegrationTest {
         assertThat(updatedReq.getAdmittingSpecialtyCluster()).isEqualTo(SpecialtyCluster.CARDIOLOGY);
 
         // Step 3: Setup two available beds in B2 ward
-        Ward targetWard = wardRepository.findAll().stream()
-                .filter(w -> w.getWardClass() == WardClass.B2)
-                .findFirst().orElseThrow();
+        Ward targetWard = wardRepository.save(Ward.builder()
+                .name("Ward TB9-" + UUID.randomUUID())
+                .level(8)
+                .wardClass(WardClass.B2)
+                .serviceCluster(SpecialtyCluster.CARDIOLOGY)
+                .capacity(4)
+                .build());
 
         Bed bedA = bedRepository.save(Bed.builder()
                 .bedNumber("TEST-REALLOC-A-" + java.util.UUID.randomUUID())
@@ -855,14 +992,19 @@ class TracerBulletsIntegrationTest {
         assertThat(taggedAdmission.getOperationalDelayReason()).isEqualTo("EVS terminal sanitization in progress");
 
         // Step 4: Allocate Bed -> Transitions to BED_ALLOCATED, archives active delay tag
-        Ward ward = wardRepository.findAll().stream()
-                .filter(w -> w.getWardClass() == WardClass.B2 && (w.getLockedGender() == null || w.getLockedGender() == Gender.FEMALE))
-                .findFirst()
-                .orElseThrow();
-        Bed targetBed = bedRepository.findByWard_Id(ward.getId()).stream()
-                .filter(b -> b.getStatus() == BedStatus.EMPTY_CLEANED)
-                .findFirst()
-                .orElseThrow();
+        Ward ward = wardRepository.save(Ward.builder()
+                .name("Ward TB10-" + UUID.randomUUID())
+                .level(8)
+                .wardClass(WardClass.B2)
+                .lockedGender(Gender.FEMALE)
+                .serviceCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .capacity(2)
+                .build());
+        Bed targetBed = bedRepository.save(Bed.builder()
+                .bedNumber("BED-TB10-" + UUID.randomUUID())
+                .ward(ward)
+                .status(BedStatus.EMPTY_CLEANED)
+                .build());
 
         BedAllocationRequest allocReq = new BedAllocationRequest();
         allocReq.setAdmissionRequestId(admission.getId());

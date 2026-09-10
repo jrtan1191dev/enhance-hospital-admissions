@@ -39,6 +39,15 @@ function MetricCard({ title, value, unit, subtitle, benchmark, status, icon }: M
   const badgeText =
     status === 'GREEN' ? 'Target Met' : status === 'AMBER' ? 'Warning' : status === 'RED' ? 'Action Required' : 'Info';
 
+  const statusIcon =
+    status === 'GREEN' ? (
+      <CheckCircle2 className="w-3 h-3 text-emerald-700 shrink-0" aria-hidden="true" />
+    ) : status === 'AMBER' ? (
+      <AlertTriangle className="w-3 h-3 text-amber-700 shrink-0" aria-hidden="true" />
+    ) : status === 'RED' ? (
+      <XCircle className="w-3 h-3 text-red-600 shrink-0" aria-hidden="true" />
+    ) : null;
+
   return (
     <Card className="shadow-xs hover:shadow-sm transition-shadow">
       <CardHeader className="pb-2">
@@ -47,8 +56,9 @@ function MetricCard({ title, value, unit, subtitle, benchmark, status, icon }: M
             {icon && <div className="text-slate-500">{icon}</div>}
             <CardTitle className="text-sm font-semibold text-slate-800">{title}</CardTitle>
           </div>
-          <Badge variant={badgeVariant} className="text-[10px] px-1.5 py-0.5">
-            {badgeText}
+          <Badge variant={badgeVariant} className="text-[10px] px-1.5 py-0.5 gap-1">
+            {statusIcon}
+            <span>{badgeText}</span>
           </Badge>
         </div>
         {subtitle && <CardDescription className="text-xs text-slate-500">{subtitle}</CardDescription>}
@@ -63,6 +73,24 @@ function MetricCard({ title, value, unit, subtitle, benchmark, status, icon }: M
             <span className="text-slate-400">Benchmark:</span> {benchmark}
           </p>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function MetricCardSkeleton() {
+  return (
+    <Card className="shadow-xs animate-pulse" aria-hidden="true">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between">
+          <div className="h-4 w-28 bg-slate-200 rounded" />
+          <div className="h-4 w-16 bg-slate-200 rounded-full" />
+        </div>
+        <div className="h-3 w-36 bg-slate-100 rounded mt-1" />
+      </CardHeader>
+      <CardContent>
+        <div className="h-8 w-20 bg-slate-200 rounded" />
+        <div className="h-3 w-28 bg-slate-100 rounded mt-2" />
       </CardContent>
     </Card>
   );
@@ -92,6 +120,8 @@ export function AnalyticsRoute() {
     data: kpi,
     isLoading,
     isFetching,
+    isError,
+    error,
     dataUpdatedAt,
     refetch,
   } = useQuery(analyticsQueries.kpiSummary(startDateParam, endDateParam));
@@ -156,6 +186,13 @@ export function AnalyticsRoute() {
       ? 'GREEN'
       : 'AMBER';
 
+  const holdingWardStatus =
+    (kpi?.batchHoldingWardAdoptionRatePct ?? 0) === 0
+      ? 'NEUTRAL'
+      : (kpi?.batchHoldingWardAdoptionRatePct ?? 0) >= 20.0
+      ? 'GREEN'
+      : 'AMBER';
+
   // Epic 3 Evaluations
   const trackerAccessStatus =
     (kpi?.patientTrackerAccessRatePct ?? 0) === 0
@@ -214,12 +251,36 @@ export function AnalyticsRoute() {
             onClick={() => refetch()}
             disabled={isFetching}
             className="cursor-pointer gap-1.5"
+            aria-label="Refresh metrics"
           >
-            <RotateCcw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} />
+            <RotateCcw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin motion-reduce:animate-none' : ''}`} />
             <span>Refresh Metrics</span>
           </Button>
         </div>
       </div>
+
+      {/* Error Alert Banner */}
+      {isError && (
+        <div
+          role="alert"
+          className="p-4 rounded-xl bg-red-50 border border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-red-800 text-xs"
+        >
+          <div className="flex items-center gap-2">
+            <XCircle className="w-4 h-4 text-red-600 shrink-0" aria-hidden="true" />
+            <span>
+              Failed to load operational metrics: {error instanceof Error ? error.message : 'Unable to connect to hospital analytics API'}.
+            </span>
+          </div>
+          <Button
+            size="xs"
+            variant="outline"
+            onClick={() => refetch()}
+            className="border-red-300 hover:bg-red-100 text-red-800 self-start sm:self-auto cursor-pointer"
+          >
+            Retry Connection
+          </Button>
+        </div>
+      )}
 
       {/* Temporal Filter Controls */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
@@ -258,133 +319,164 @@ export function AnalyticsRoute() {
         </div>
 
         {preset === 'CUSTOM' && (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500">From:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <label htmlFor="custom-start-date" className="text-slate-500 font-medium">From:</label>
             <Input
+              id="custom-start-date"
               type="date"
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
               className="h-7 text-xs w-36"
+              aria-label="Start date"
             />
-            <span className="text-slate-500">To:</span>
+            <label htmlFor="custom-end-date" className="text-slate-500 font-medium">To:</label>
             <Input
+              id="custom-end-date"
               type="date"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
               className="h-7 text-xs w-36"
+              aria-label="End date"
             />
           </div>
         )}
       </div>
 
       {/* 1. ED Clinical Intake & Specialist Collaboration (Epic 1) */}
-      <div className="space-y-3">
+      <section
+        aria-labelledby="section-epic-1-title"
+        className="space-y-3 [content-visibility:auto] [contain-intrinsic-size:auto_300px_auto_350px]"
+      >
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+          <div className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs" aria-hidden="true">
             1
           </div>
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          <h2 id="section-epic-1-title" className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             ED Clinical Intake & Specialist Collaboration
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <MetricCard
-            title="Avg ED Turnaround"
-            value={kpi?.avgEdTurnaroundMinutes ?? 0}
-            unit="mins"
-            subtitle="Triage to admission order"
-            benchmark="Target: < 15 mins"
-            status={edTurnaroundStatus}
-            icon={<Clock className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="P95 ED Turnaround"
-            value={kpi?.edTurnaroundP95Minutes ?? 0}
-            unit="mins"
-            subtitle="95th percentile intake latency"
-            benchmark="Target: < 30 mins"
-            status={edP95Status}
-            icon={<Activity className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Specialist Claim Latency"
-            value={kpi?.specialistClaimLatencyAvgMinutes ?? 0}
-            unit="mins"
-            subtitle="Broadcast to consult claim"
-            benchmark="Target: < 10 mins"
-            status={claimLatencyStatus}
-            icon={<Users className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Triage Concordance"
-            value={kpi?.primarySpecialistConcordanceRatePct ?? 0}
-            unit="%"
-            subtitle="Primary vs specialist acuity"
-            benchmark="Target: ≥ 85%"
-            status={concordanceStatus}
-            icon={<CheckCircle2 className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Digital Bed Requests"
-            value={kpi?.digitalBedRequestCount ?? 0}
-            unit="requests"
-            subtitle="100% digital transmission"
-            benchmark="Target: 100% phone-free"
-            status={(kpi?.digitalBedRequestCount ?? 0) > 0 ? 'GREEN' : 'NEUTRAL'}
-            icon={<Sparkles className="w-4 h-4" />}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" role="region" aria-busy={isLoading && !kpi}>
+          {isLoading && !kpi ? (
+            Array.from({ length: 5 }).map((_, i) => <MetricCardSkeleton key={i} />)
+          ) : (
+            <>
+              <MetricCard
+                title="Avg ED Turnaround"
+                value={kpi?.avgEdTurnaroundMinutes ?? 0}
+                unit="mins"
+                subtitle="Triage to admission order"
+                benchmark="Target: < 15 mins"
+                status={edTurnaroundStatus}
+                icon={<Clock className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="P95 ED Turnaround"
+                value={kpi?.edTurnaroundP95Minutes ?? 0}
+                unit="mins"
+                subtitle="95th percentile intake latency"
+                benchmark="Target: < 30 mins"
+                status={edP95Status}
+                icon={<Activity className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Specialist Claim Latency"
+                value={kpi?.specialistClaimLatencyAvgMinutes ?? 0}
+                unit="mins"
+                subtitle="Broadcast to consult claim"
+                benchmark="Target: < 10 mins"
+                status={claimLatencyStatus}
+                icon={<Users className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Triage Concordance"
+                value={kpi?.primarySpecialistConcordanceRatePct ?? 0}
+                unit="%"
+                subtitle="Primary vs specialist acuity"
+                benchmark="Target: ≥ 85%"
+                status={concordanceStatus}
+                icon={<CheckCircle2 className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Digital Bed Requests"
+                value={kpi?.digitalBedRequestCount ?? 0}
+                unit="requests"
+                subtitle="100% digital transmission"
+                benchmark="Target: 100% phone-free"
+                status={(kpi?.digitalBedRequestCount ?? 0) > 0 ? 'GREEN' : 'NEUTRAL'}
+                icon={<Sparkles className="w-4 h-4" />}
+              />
+            </>
+          )}
         </div>
-      </div>
+      </section>
 
       {/* 2. BMU Capacity Orchestration & Diversions (Epic 2) */}
-      <div className="space-y-3">
+      <section
+        aria-labelledby="section-epic-2-title"
+        className="space-y-3 [content-visibility:auto] [contain-intrinsic-size:auto_300px_auto_350px]"
+      >
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+          <div className="w-6 h-6 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs" aria-hidden="true">
             2
           </div>
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          <h2 id="section-epic-2-title" className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             BMU Capacity Orchestration & Diversions
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Suggestion Acceptance"
-            value={kpi?.bmuSuggestionAcceptanceRatePct ?? 0}
-            unit="%"
-            subtitle="1-click algorithmic approvals"
-            benchmark="Target: ≥ 75%"
-            status={bmuAcceptanceStatus}
-            icon={<CheckCircle2 className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Manual Overrides"
-            value={kpi?.bmuManualOverrideCount ?? 0}
-            unit="events"
-            subtitle="Coordinator plan adjustments"
-            benchmark="Target: Minimize"
-            status={(kpi?.bmuManualOverrideCount ?? 0) > 0 ? 'AMBER' : 'GREEN'}
-            icon={<AlertTriangle className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Total Diversions"
-            value={kpi?.totalDiversionCount ?? 0}
-            unit={`pax (${kpi?.diversionRatePct ?? 0}%)`}
-            subtitle="Community Hosp & MIC@Home"
-            benchmark="Diversion target active"
-            status={(kpi?.totalDiversionCount ?? 0) > 0 ? 'GREEN' : 'NEUTRAL'}
-            icon={<ArrowRightLeft className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Transfer SLA (30m)"
-            value={kpi?.sisterHospitalSlaCompliancePct ?? 0}
-            unit="%"
-            subtitle="Sister hospital bilateral SLA"
-            benchmark="SLA: ≤ 30 mins (≥ 80%)"
-            status={transferSlaStatus}
-            icon={<Clock className="w-4 h-4" />}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" role="region" aria-busy={isLoading && !kpi}>
+          {isLoading && !kpi ? (
+            Array.from({ length: 5 }).map((_, i) => <MetricCardSkeleton key={i} />)
+          ) : (
+            <>
+              <MetricCard
+                title="Suggestion Acceptance"
+                value={kpi?.bmuSuggestionAcceptanceRatePct ?? 0}
+                unit="%"
+                subtitle="1-click algorithmic approvals"
+                benchmark="Target: ≥ 75%"
+                status={bmuAcceptanceStatus}
+                icon={<CheckCircle2 className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Manual Overrides"
+                value={kpi?.bmuManualOverrideCount ?? 0}
+                unit="events"
+                subtitle="Coordinator plan adjustments"
+                benchmark="Target: Minimize"
+                status={(kpi?.bmuManualOverrideCount ?? 0) > 0 ? 'AMBER' : 'GREEN'}
+                icon={<AlertTriangle className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Total Diversions"
+                value={kpi?.totalDiversionCount ?? 0}
+                unit={`pax (${kpi?.diversionRatePct ?? 0}%)`}
+                subtitle="Community Hosp & MIC@Home"
+                benchmark="Diversion target active"
+                status={(kpi?.totalDiversionCount ?? 0) > 0 ? 'GREEN' : 'NEUTRAL'}
+                icon={<ArrowRightLeft className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Transfer SLA (30m)"
+                value={kpi?.sisterHospitalSlaCompliancePct ?? 0}
+                unit="%"
+                subtitle="Sister hospital bilateral SLA"
+                benchmark="SLA: ≤ 30 mins (≥ 80%)"
+                status={transferSlaStatus}
+                icon={<Clock className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Holding Ward Adoption"
+                value={kpi?.batchHoldingWardAdoptionRatePct ?? 0}
+                unit="%"
+                subtitle="Batch holding buffer utilization"
+                benchmark="Surge mitigation active"
+                status={holdingWardStatus}
+                icon={<Layers className="w-4 h-4" />}
+              />
+            </>
+          )}
         </div>
 
         {/* Override and Diversion Breakdown Cards if present */}
@@ -423,118 +515,136 @@ export function AnalyticsRoute() {
             </Card>
           </div>
         )}
-      </div>
+      </section>
 
       {/* 3. Patient & Family Milestone Tracking (Epic 3) */}
-      <div className="space-y-3">
+      <section
+        aria-labelledby="section-epic-3-title"
+        className="space-y-3 [content-visibility:auto] [contain-intrinsic-size:auto_300px_auto_350px]"
+      >
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+          <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs" aria-hidden="true">
             3
           </div>
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          <h2 id="section-epic-3-title" className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             Patient & Family Milestone Tracking
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Public Tracker Access"
-            value={kpi?.patientTrackerAccessRatePct ?? 0}
-            unit="%"
-            subtitle="Admitted patients accessing token"
-            benchmark="Target: ≥ 60%"
-            status={trackerAccessStatus}
-            icon={<Users className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Periodic Push Updates"
-            value={kpi?.twoHourPeriodicUpdateDeliveryPct ?? 0}
-            unit="%"
-            subtitle="Patients waiting ≥ 2h receiving updates"
-            benchmark="Target: ≥ 90%"
-            status={periodicPushStatus}
-            icon={<Activity className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Prolonged Wait Delay Tagging"
-            value={kpi?.prolongedWaitCommunicationRatePct ?? 0}
-            unit="%"
-            subtitle="Delayed patients with reason tags"
-            benchmark="Target: 100%"
-            status={(kpi?.prolongedWaitCommunicationRatePct ?? 0) >= 80 ? 'GREEN' : 'NEUTRAL'}
-            icon={<Clock className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Caregiver Counseling Rate"
-            value={kpi?.caregiverCounselingConnectRatePct ?? 0}
-            unit="%"
-            subtitle="1-click MSW & finance calls"
-            benchmark="Proactive support demand"
-            status="NEUTRAL"
-            icon={<Users className="w-4 h-4" />}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" role="region" aria-busy={isLoading && !kpi}>
+          {isLoading && !kpi ? (
+            Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
+          ) : (
+            <>
+              <MetricCard
+                title="Public Tracker Access"
+                value={kpi?.patientTrackerAccessRatePct ?? 0}
+                unit="%"
+                subtitle="Admitted patients accessing token"
+                benchmark="Target: ≥ 60%"
+                status={trackerAccessStatus}
+                icon={<Users className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Periodic Push Updates"
+                value={kpi?.twoHourPeriodicUpdateDeliveryPct ?? 0}
+                unit="%"
+                subtitle="Patients waiting ≥ 2h receiving updates"
+                benchmark="Target: ≥ 90%"
+                status={periodicPushStatus}
+                icon={<Activity className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Prolonged Wait Delay Tagging"
+                value={kpi?.prolongedWaitCommunicationRatePct ?? 0}
+                unit="%"
+                subtitle="Delayed patients with reason tags"
+                benchmark="Target: 100%"
+                status={(kpi?.prolongedWaitCommunicationRatePct ?? 0) >= 80 ? 'GREEN' : 'NEUTRAL'}
+                icon={<Clock className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Caregiver Counseling Rate"
+                value={kpi?.caregiverCounselingConnectRatePct ?? 0}
+                unit="%"
+                subtitle="1-click MSW & finance calls"
+                benchmark="Proactive support demand"
+                status="NEUTRAL"
+                icon={<Users className="w-4 h-4" />}
+              />
+            </>
+          )}
         </div>
-      </div>
+      </section>
 
       {/* 4. Inpatient Discharge Runway & Rapid Turnover (Epic 4) */}
-      <div className="space-y-3">
+      <section
+        aria-labelledby="section-epic-4-title"
+        className="space-y-3 [content-visibility:auto] [contain-intrinsic-size:auto_300px_auto_350px]"
+      >
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">
+          <div className="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs" aria-hidden="true">
             4
           </div>
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+          <h2 id="section-epic-4-title" className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             Inpatient Discharge Runway & Rapid Turnover
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <MetricCard
-            title="Discharge Before Noon"
-            value={kpi?.dischargeBeforeNoonRatePct ?? 0}
-            unit="%"
-            subtitle="Beds vacated before 12:00 PM"
-            benchmark="Target: ≥ 40%"
-            status={noonDischargeStatus}
-            icon={<Bed className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Advance Runway (48h EDD)"
-            value={kpi?.advanceRunwayEstablishmentRatePct ?? 0}
-            unit="%"
-            subtitle="EDD recorded ≥ 48h prior"
-            benchmark="Target: ≥ 70%"
-            status={(kpi?.advanceRunwayEstablishmentRatePct ?? 0) >= 70 ? 'GREEN' : 'NEUTRAL'}
-            icon={<Layers className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Bedside Meds Delivery"
-            value={kpi?.bedsideMedicationDeliveryAdoptionPct ?? 0}
-            unit="%"
-            subtitle="Direct bedside dispensing"
-            benchmark="Target: ≥ 50%"
-            status={(kpi?.bedsideMedicationDeliveryAdoptionPct ?? 0) >= 50 ? 'GREEN' : 'NEUTRAL'}
-            icon={<Sparkles className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Turnover Cleaning Avg"
-            value={kpi?.housekeepingTurnoverAvgMinutes ?? 0}
-            unit="mins"
-            subtitle="Bed vacate to clean sign-off"
-            benchmark="Target: ≤ 30 mins"
-            status={(kpi?.housekeepingTurnoverAvgMinutes ?? 0) > 0 && (kpi?.housekeepingTurnoverAvgMinutes ?? 0) <= 30 ? 'GREEN' : 'NEUTRAL'}
-            icon={<Clock className="w-4 h-4" />}
-          />
-          <MetricCard
-            title="Housekeeping 30m SLA"
-            value={kpi?.housekeeping30mSlaCompliancePct ?? 0}
-            unit="%"
-            subtitle="Turnovers completed within 30m"
-            benchmark="Target: ≥ 85%"
-            status={cleaningSlaStatus}
-            icon={<CheckCircle2 className="w-4 h-4" />}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" role="region" aria-busy={isLoading && !kpi}>
+          {isLoading && !kpi ? (
+            Array.from({ length: 5 }).map((_, i) => <MetricCardSkeleton key={i} />)
+          ) : (
+            <>
+              <MetricCard
+                title="Discharge Before Noon"
+                value={kpi?.dischargeBeforeNoonRatePct ?? 0}
+                unit="%"
+                subtitle="Beds vacated before 12:00 PM"
+                benchmark="Target: ≥ 40%"
+                status={noonDischargeStatus}
+                icon={<Bed className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Advance Runway (48h EDD)"
+                value={kpi?.advanceRunwayEstablishmentRatePct ?? 0}
+                unit="%"
+                subtitle="EDD recorded ≥ 48h prior"
+                benchmark="Target: ≥ 70%"
+                status={(kpi?.advanceRunwayEstablishmentRatePct ?? 0) >= 70 ? 'GREEN' : 'NEUTRAL'}
+                icon={<Layers className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Bedside Meds Delivery"
+                value={kpi?.bedsideMedicationDeliveryAdoptionPct ?? 0}
+                unit="%"
+                subtitle="Direct bedside dispensing"
+                benchmark="Target: ≥ 50%"
+                status={(kpi?.bedsideMedicationDeliveryAdoptionPct ?? 0) >= 50 ? 'GREEN' : 'NEUTRAL'}
+                icon={<Sparkles className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Turnover Cleaning Avg"
+                value={kpi?.housekeepingTurnoverAvgMinutes ?? 0}
+                unit="mins"
+                subtitle="Bed vacate to clean sign-off"
+                benchmark="Target: ≤ 30 mins"
+                status={(kpi?.housekeepingTurnoverAvgMinutes ?? 0) > 0 && (kpi?.housekeepingTurnoverAvgMinutes ?? 0) <= 30 ? 'GREEN' : 'NEUTRAL'}
+                icon={<Clock className="w-4 h-4" />}
+              />
+              <MetricCard
+                title="Housekeeping 30m SLA"
+                value={kpi?.housekeeping30mSlaCompliancePct ?? 0}
+                unit="%"
+                subtitle="Turnovers completed within 30m"
+                benchmark="Target: ≥ 85%"
+                status={cleaningSlaStatus}
+                icon={<CheckCircle2 className="w-4 h-4" />}
+              />
+            </>
+          )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

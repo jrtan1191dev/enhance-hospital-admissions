@@ -126,6 +126,8 @@ describe('AnalyticsRoute component', () => {
     expect(screen.getByText('Total Diversions')).toBeInTheDocument();
     expect(screen.getByText('Transfer SLA (30m)')).toBeInTheDocument();
     expect(screen.getByText('92')).toBeInTheDocument();
+    expect(screen.getByText('Holding Ward Adoption')).toBeInTheDocument();
+    expect(screen.getByText('25')).toBeInTheDocument();
 
     // Breakdown cards
     expect(screen.getByText('Override Reasons Breakdown')).toBeInTheDocument();
@@ -154,8 +156,8 @@ describe('AnalyticsRoute component', () => {
     renderAnalyticsRoute();
 
     expect(await screen.findByText('Inpatient Discharge Runway & Rapid Turnover')).toBeInTheDocument();
-    expect(screen.getByText('Discharge Before Noon')).toBeInTheDocument();
-    expect(await screen.findByText('45')).toBeInTheDocument();
+    expect(await screen.findByText('Discharge Before Noon')).toBeInTheDocument();
+    expect(screen.getByText('45')).toBeInTheDocument();
     expect(screen.getByText('Advance Runway (48h EDD)')).toBeInTheDocument();
     expect(screen.getByText('72')).toBeInTheDocument();
     expect(screen.getByText('Bedside Meds Delivery')).toBeInTheDocument();
@@ -164,5 +166,14 @@ describe('AnalyticsRoute component', () => {
     expect(screen.getByText('22')).toBeInTheDocument();
     expect(screen.getByText('Housekeeping 30m SLA')).toBeInTheDocument();
     expect(screen.getByText('91')).toBeInTheDocument();
+  });
+
+  it('renders error alert banner when query fails', async () => {
+    vi.mocked(api.getKpiSummary).mockRejectedValueOnce(new Error('Network connection timeout'));
+    renderAnalyticsRoute();
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.getByText(/Failed to load operational metrics/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retry connection/i })).toBeInTheDocument();
   });
 });

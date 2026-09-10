@@ -7,7 +7,7 @@
 
 > 🌐 **[Live Demo →][LIVE_DEMO_URL]**
 >
-> *The application may take a moment to wake on first load (cold start). A GraalVM native image build is planned to eliminate this.*
+> *The application may take a moment to wake on first load (cold start, ~50seconds) as this prototype is a personal project and is deployed at https://www.render.com.*
 
 ---
 

@@ -124,6 +124,14 @@ public class PatientTrackerService {
             }
         }
 
+        java.time.LocalDate edd = optRequest.map(AdmissionRequest::getEdd).orElse(null);
+        com.hospital.admissions.domain.EddConfidence eddConfidence = optRequest.map(AdmissionRequest::getEddConfidence).orElse(null);
+        com.hospital.admissions.domain.MedicationDeliveryStatus medicationStatus = optRequest.map(AdmissionRequest::getMedicationDeliveryStatus).orElse(null);
+        java.time.LocalDateTime dischargeSignoffAt = optRequest.map(AdmissionRequest::getDischargeSignoffAt).orElse(null);
+        com.hospital.admissions.domain.DischargeRunwayStage runwayStage = (edd != null)
+                ? WardService.calculateRunwayStage(edd, dischargeSignoffAt, medicationStatus)
+                : null;
+
         return PatientMilestoneResponse.builder()
                 .patientId(patient.getId())
                 .patientName(patient.getName())
@@ -142,6 +150,10 @@ public class PatientTrackerService {
                 .careGuidance(guidance)
                 .diversionRecommended(diversionRecommended)
                 .diversionPathway(diversionPathway)
+                .estimatedDateOfDischarge(edd)
+                .eddConfidence(eddConfidence)
+                .medicationDeliveryStatus(medicationStatus)
+                .runwayStage(runwayStage)
                 .build();
     }
 
@@ -299,6 +311,11 @@ public class PatientTrackerService {
 
         Bed bed = bedRepository.findById(bedId)
                 .orElseThrow(() -> new IllegalArgumentException("Bed not found: " + bedId));
+
+        if (bed.getStatus() != BedStatus.EMPTY_PENDING_CLEANING) {
+            throw new IllegalArgumentException("Cannot clean bed " + bed.getBedNumber() +
+                    ": bed is currently in status " + bed.getStatus() + ", but terminal sanitization requires EMPTY_PENDING_CLEANING.");
+        }
 
         LocalDateTime now = LocalDateTime.now();
         long elapsedCleaningMins = (bed.getCleaningStartedAt() != null) ?

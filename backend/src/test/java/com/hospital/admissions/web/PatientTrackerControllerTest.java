@@ -125,6 +125,18 @@ class PatientTrackerControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/v1/patients/beds/{bedId}/clean on invalid status returns RFC 7807 400 Bad Request")
+    void testCleanBed_InvalidStatusReturns400() throws Exception {
+        UUID bedId = UUID.randomUUID();
+        when(patientTrackerService.cleanBed(bedId)).thenThrow(new IllegalArgumentException("Cannot clean bed: terminal sanitization requires EMPTY_PENDING_CLEANING."));
+
+        mockMvc.perform(post("/api/v1/patients/beds/" + bedId + "/clean"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"))
+                .andExpect(jsonPath("$.detail").value("Cannot clean bed: terminal sanitization requires EMPTY_PENDING_CLEANING."));
+    }
+
+    @Test
     @DisplayName("POST /api/v1/patients/simulate-periodic-update returns dispatched count")
     void testSimulatePeriodicUpdate() throws Exception {
         when(patientTrackerService.dispatchPeriodicUpdates()).thenReturn(3);

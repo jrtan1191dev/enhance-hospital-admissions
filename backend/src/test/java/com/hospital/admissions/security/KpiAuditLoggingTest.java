@@ -53,6 +53,7 @@ class KpiAuditLoggingTest {
     private ClinicianService clinicianService;
     private BmuService bmuService;
     private PatientTrackerService trackerService;
+    private WardService wardService;
 
     @BeforeEach
     void setUp() {
@@ -63,6 +64,7 @@ class KpiAuditLoggingTest {
         clinicianService = new ClinicianService(patientRepository, admissionRequestRepository, broadcastRepository, auditLogger);
         bmuService = new BmuService(admissionRequestRepository, bedRepository, wardRepository, configRepository, solver, sisterHospitalGateway, auditLogger);
         trackerService = new PatientTrackerService(patientRepository, admissionRequestRepository, bedRepository, patientAuditInteractionRepository, auditLogger);
+        wardService = new WardService(admissionRequestRepository, bedRepository, wardRepository, auditLogger);
     }
 
     @AfterEach
@@ -268,5 +270,36 @@ class KpiAuditLoggingTest {
                 .contains("HousekeeperId=dr_auditor")
                 .contains("ElapsedCleaningMins=20")
                 .contains("Within30mSla=true");
+    }
+
+    @Test
+    @DisplayName("RECORD_EDD logs PatientId, EDD, Confidence, and RunwayStage (KPI 20)")
+    void testRecordEdd_Logging() {
+        UUID pId = UUID.randomUUID();
+        Patient patient = Patient.builder().id(pId).name("Uncle Seng").build();
+        AdmissionRequest req = AdmissionRequest.builder()
+                .id(UUID.randomUUID())
+                .patient(patient)
+                .status(AdmissionStatus.ADMITTED_INPATIENT)
+                .build();
+
+        when(admissionRequestRepository.findByPatient_Id(pId)).thenReturn(Optional.of(req));
+        when(admissionRequestRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        java.time.LocalDate targetEdd = java.time.LocalDate.now().plusDays(2);
+        EddUpdateRequest updateReq = EddUpdateRequest.builder()
+                .edd(targetEdd)
+                .eddConfidence(EddConfidence.HIGH)
+                .rationale("Clinical condition stabilized")
+                .build();
+
+        wardService.updateEdd(pId, updateReq);
+
+        ArgumentCaptor<String> eddCaptor = ArgumentCaptor.forClass(String.class);
+        verify(auditLogger).logAction(eq("dr_auditor"), eq("RECORD_EDD"), eq("AdmissionRequest:" + req.getId()), eddCaptor.capture());
+        assertThat(eddCaptor.getValue()).contains("PatientId=" + pId)
+                .contains("EDD=" + targetEdd)
+                .contains("Confidence=HIGH")
+                .contains("RunwayStage=RUNWAY_D2");
     }
 }

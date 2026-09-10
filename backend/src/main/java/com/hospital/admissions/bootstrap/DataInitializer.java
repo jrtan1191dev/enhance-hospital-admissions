@@ -321,6 +321,8 @@ public class DataInitializer implements CommandLineRunner {
                 .build());
 
         // Seed active Inpatient Admission Requests for occupied beds & 1 past discharge
+        java.time.LocalDate today = java.time.LocalDate.now();
+
         admissionRequestRepository.save(AdmissionRequest.builder()
                 .patient(inp1)
                 .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
@@ -334,6 +336,9 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(3).plusMinutes(20))
                 .admittedAt(LocalDateTime.now().minusDays(3).plusMinutes(45))
                 .waitingInEd(false)
+                .edd(today.plusDays(2))
+                .eddConfidence(EddConfidence.HIGH)
+                .eddRationale("Post-PCI cardiac stabilization complete; ambulating well")
                 .build());
 
         admissionRequestRepository.save(AdmissionRequest.builder()
@@ -349,6 +354,9 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(2).plusMinutes(30))
                 .admittedAt(LocalDateTime.now().minusDays(2).plusMinutes(55))
                 .waitingInEd(false)
+                .edd(today.plusDays(3))
+                .eddConfidence(EddConfidence.MEDIUM)
+                .eddRationale("Monitoring oral diuresis response and kidney panel")
                 .build());
 
         admissionRequestRepository.save(AdmissionRequest.builder()
@@ -364,6 +372,9 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(1).plusMinutes(15))
                 .admittedAt(LocalDateTime.now().minusDays(1).plusMinutes(35))
                 .waitingInEd(false)
+                .edd(today)
+                .eddConfidence(EddConfidence.HIGH)
+                .eddRationale("Afebrile x48h, oral antibiotics tolerated, ready for morning sign-off")
                 .build());
 
         admissionRequestRepository.save(AdmissionRequest.builder()
@@ -379,6 +390,9 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(2).minusHours(5).plusMinutes(25))
                 .admittedAt(LocalDateTime.now().minusDays(2).minusHours(5).plusMinutes(50))
                 .waitingInEd(false)
+                .edd(today.plusDays(1))
+                .eddConfidence(EddConfidence.HIGH)
+                .eddRationale("Wound dressing dry, drain removed, discharge planned tomorrow")
                 .build());
 
         admissionRequestRepository.save(AdmissionRequest.builder()
@@ -394,6 +408,9 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(1).minusHours(6).plusMinutes(18))
                 .admittedAt(LocalDateTime.now().minusDays(1).minusHours(6).plusMinutes(40))
                 .waitingInEd(false)
+                .edd(today.plusDays(2))
+                .eddConfidence(EddConfidence.HIGH)
+                .eddRationale("Physiotherapy transfer cleared, step-down walk approved")
                 .build());
 
         // Past discharge

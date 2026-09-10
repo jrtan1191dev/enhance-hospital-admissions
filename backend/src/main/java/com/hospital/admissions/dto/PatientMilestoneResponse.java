@@ -32,4 +32,8 @@ public class PatientMilestoneResponse {
     private String careGuidance;
     private Boolean diversionRecommended;
     private DiversionPathway diversionPathway;
+    private java.time.LocalDate estimatedDateOfDischarge;
+    private com.hospital.admissions.domain.EddConfidence eddConfidence;
+    private com.hospital.admissions.domain.MedicationDeliveryStatus medicationDeliveryStatus;
+    private com.hospital.admissions.domain.DischargeRunwayStage runwayStage;
 }

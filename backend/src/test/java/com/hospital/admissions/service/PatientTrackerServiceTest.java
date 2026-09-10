@@ -524,6 +524,22 @@ class PatientTrackerServiceTest {
     }
 
     @Test
+    @DisplayName("cleanBed throws IllegalArgumentException when bed is not in EMPTY_PENDING_CLEANING status")
+    void testCleanBed_InvalidStatusThrows() {
+        UUID bedId = UUID.randomUUID();
+        Bed bed = Bed.builder()
+                .id(bedId)
+                .bedNumber("8A-01")
+                .status(BedStatus.OCCUPIED_TAKEN)
+                .build();
+        when(bedRepository.findById(bedId)).thenReturn(Optional.of(bed));
+
+        assertThatThrownBy(() -> trackerService.cleanBed(bedId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("terminal sanitization requires EMPTY_PENDING_CLEANING");
+    }
+
+    @Test
     @DisplayName("recordPatientAction persists interaction and emits CONNECT_MSW_HOTLINE audit log")
     void testRecordPatientAction_MswCall() {
         UUID patientId = UUID.randomUUID();

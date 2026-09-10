@@ -24,6 +24,12 @@ import java.util.UUID;
 public class BmuController {
 
     private final BmuService bmuService;
+    private final com.hospital.admissions.service.WardService wardService;
+
+    @GetMapping("/capacity-forecast")
+    public ResponseEntity<com.hospital.admissions.dto.BmuCapacityForecastDto> getCapacityForecast() {
+        return ResponseEntity.ok(wardService.getCapacityForecast());
+    }
 
     @GetMapping("/queue")
     public ResponseEntity<List<AdmissionRequest>> getPrioritizedQueue() {

@@ -43,6 +43,9 @@ class BmuControllerTest {
         @Mock
         private BmuService bmuService;
 
+        @Mock
+        private com.hospital.admissions.service.WardService wardService;
+
         @InjectMocks
         private BmuController bmuController;
 

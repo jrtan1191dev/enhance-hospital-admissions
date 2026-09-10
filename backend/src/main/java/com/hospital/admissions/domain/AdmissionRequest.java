@@ -67,6 +67,15 @@ public class AdmissionRequest extends AuditableEntity {
     private LocalDateTime admittedAt;
     private LocalDateTime dischargedAt;
 
+    private java.time.LocalDate edd;
+    @Enumerated(EnumType.STRING)
+    private EddConfidence eddConfidence;
+    private String eddRationale;
+    private LocalDateTime dischargeSignoffAt;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MedicationDeliveryStatus medicationDeliveryStatus = MedicationDeliveryStatus.NOT_DISPATCHED;
+
     private boolean diversionRecommended;
     @Enumerated(EnumType.STRING)
     private DiversionPathway diversionPathway;

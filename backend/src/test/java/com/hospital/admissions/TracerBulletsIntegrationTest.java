@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -1024,6 +1025,174 @@ class TracerBulletsIntegrationTest {
         assertThat(allocatedAdmission.getStatus()).isEqualTo(AdmissionStatus.BED_ALLOCATED);
         assertThat(allocatedAdmission.getDelayReasonTag()).isNull();
         assertThat(allocatedAdmission.getArchivedDelayReasonTag()).isEqualTo("HOUSEKEEPING_DELAY");
+    }
+
+    @Test
+    @DisplayName("Tracer Bullet 11: Epic 4 Closed-Loop Discharge Runway, Medication Delivery, Terminal Sanitization, and BMU Bed Release")
+    void testTracerBullet11_Epic4ClosedLoopDischargeRunwayToBmuBedRelease() throws Exception {
+        // Step 1: Create Ward and Bed X, plus an Inpatient admitted into Bed X
+        Ward ward = wardRepository.save(Ward.builder()
+                .name("Ward TB11-" + UUID.randomUUID())
+                .level(6)
+                .wardClass(WardClass.B2)
+                .lockedGender(Gender.MALE)
+                .serviceCluster(SpecialtyCluster.CARDIOLOGY)
+                .capacity(2)
+                .build());
+
+        Bed bedX = bedRepository.save(Bed.builder()
+                .bedNumber("BED-TB11-X-" + UUID.randomUUID())
+                .ward(ward)
+                .status(BedStatus.OCCUPIED_TAKEN)
+                .build());
+
+        String token = "TOKEN-TB11-" + UUID.randomUUID();
+        Patient inpatient = patientRepository.save(Patient.builder()
+                .name("TB11 Inpatient")
+                .nricMasked("S****111A")
+                .age(62)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(25)
+                .needsTelemetry(false)
+                .queueToken(token)
+                .build());
+
+        bedX.setCurrentPatient(inpatient);
+        bedX = bedRepository.save(bedX);
+
+        AdmissionRequest inpatientAdmission = admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(inpatient)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B2)
+                .status(AdmissionStatus.ADMITTED_INPATIENT)
+                .assignedBed(bedX)
+                .requestedAt(LocalDateTime.now().minusDays(3))
+                .admittedAt(LocalDateTime.now().minusDays(3))
+                .build());
+
+        // Step 2: Also create a waiting ED patient who needs a Cardiology B2 bed
+        Patient edPatient = patientRepository.save(Patient.builder()
+                .name("TB11 ED Waiting Patient")
+                .nricMasked("S****222B")
+                .age(55)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(30)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-TB11-ED-" + UUID.randomUUID())
+                .build());
+
+        AdmissionRequest edAdmission = admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(edPatient)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .requestedWardClass(WardClass.B2)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .requestedAt(LocalDateTime.now().minusMinutes(30))
+                .build());
+
+        // Step 3: Clinician records/updates EDD -> Runway Stage D-2
+        LocalDate eddDate = LocalDate.now().plusDays(2);
+        EddUpdateRequest eddRequest = new EddUpdateRequest(eddDate, EddConfidence.HIGH, "Clinical recovery progressing ahead of target");
+
+        mockMvc.perform(post("/api/v1/ward/patients/" + inpatient.getId() + "/edd")
+                        .with(csrf())
+                        .header("X-User-Role", "WARD_DOCTOR")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eddRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.edd").value(eddDate.toString()))
+                .andExpect(jsonPath("$.eddConfidence").value("HIGH"));
+
+        // Verify runway endpoint reflects stage RUNWAY_D2
+        mockMvc.perform(get("/api/v1/ward/runway")
+                        .header("X-User-Role", "WARD_NURSE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.patientId == '" + inpatient.getId() + "')].runwayStage").value("RUNWAY_D2"));
+
+        // Step 4: Morning discharge sign-off -> Transitions to MEDICATIONS_PENDING and PACKING_IN_PROGRESS
+        mockMvc.perform(post("/api/v1/ward/patients/" + inpatient.getId() + "/discharge-signoff")
+                        .with(csrf())
+                        .header("X-User-Role", "WARD_DOCTOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.medicationDeliveryStatus").value("PACKING_IN_PROGRESS"));
+
+        mockMvc.perform(get("/api/v1/ward/runway")
+                        .header("X-User-Role", "WARD_NURSE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.patientId == '" + inpatient.getId() + "')].runwayStage").value("MEDICATIONS_PENDING"));
+
+        // Step 5: Bedside medication delivered -> Transitions to DELIVERED_BEDSIDE and READY_TO_VACATE
+        mockMvc.perform(post("/api/v1/ward/patients/" + inpatient.getId() + "/deliver-medication")
+                        .with(csrf())
+                        .header("X-User-Role", "WARD_NURSE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.medicationDeliveryStatus").value("DELIVERED_BEDSIDE"));
+
+        mockMvc.perform(get("/api/v1/ward/runway")
+                        .header("X-User-Role", "WARD_NURSE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.patientId == '" + inpatient.getId() + "')].runwayStage").value("READY_TO_VACATE"));
+
+        // Verify patient tracker receives bedside meds status
+        mockMvc.perform(get("/api/v1/patients/track/" + token)
+                        .header("X-User-Role", "PATIENT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.medicationDeliveryStatus").value("DELIVERED_BEDSIDE"))
+                .andExpect(jsonPath("$.runwayStage").value("READY_TO_VACATE"));
+
+        // Step 6: Nurse vacates bed -> Bed turns EMPTY_PENDING_CLEANING, Admission turns DISCHARGED
+        mockMvc.perform(post("/api/v1/patients/beds/" + bedX.getId() + "/vacate")
+                        .with(csrf())
+                        .header("X-User-Role", "WARD_NURSE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EMPTY_PENDING_CLEANING"));
+
+        AdmissionRequest dischargedReq = admissionRequestRepository.findById(inpatientAdmission.getId()).orElseThrow();
+        assertThat(dischargedReq.getStatus()).isEqualTo(AdmissionStatus.DISCHARGED);
+
+        // Step 7: EVS Turnover queue verification -> Bed X present under 30-minute SLA countdown (ON_TRACK)
+        mockMvc.perform(get("/api/v1/ward/turnover-tasks")
+                        .header("X-User-Role", "HOUSEKEEPING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.bedId == '" + bedX.getId() + "')].slaStatus").value("ON_TRACK"));
+
+        // Step 8: Terminal sanitization state-machine enforcement:
+        // Attempting to clean another bed that is not EMPTY_PENDING_CLEANING returns 400 Bad Request
+        Bed occupiedBed = bedRepository.save(Bed.builder()
+                .bedNumber("BED-TB11-OCC-" + UUID.randomUUID())
+                .ward(ward)
+                .status(BedStatus.OCCUPIED_TAKEN)
+                .build());
+
+        mockMvc.perform(post("/api/v1/patients/beds/" + occupiedBed.getId() + "/clean")
+                        .with(csrf())
+                        .header("X-User-Role", "HOUSEKEEPING"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Bad Request"));
+
+        // Step 9: Housekeeper completes terminal sanitization -> Bed X transitions to EMPTY_CLEANED
+        mockMvc.perform(post("/api/v1/patients/beds/" + bedX.getId() + "/clean")
+                        .with(csrf())
+                        .header("X-User-Role", "HOUSEKEEPING"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("EMPTY_CLEANED"));
+
+        Bed cleanedBedX = bedRepository.findById(bedX.getId()).orElseThrow();
+        assertThat(cleanedBedX.getStatus()).isEqualTo(BedStatus.EMPTY_CLEANED);
+        assertThat(cleanedBedX.getCurrentPatient()).isNull();
+
+        // Step 10: Closed-Loop BMU Bed Release:
+        // BMU recommendation query for ED patient immediately returns Bed X as a viable candidate
+        mockMvc.perform(get("/api/v1/bmu/recommendations/" + edAdmission.getId())
+                        .header("X-User-Role", "BMU_COORDINATOR"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.bedId == '" + bedX.getId() + "')]").exists())
+                .andExpect(jsonPath("$[?(@.bedId == '" + bedX.getId() + "')].score").isNotEmpty());
     }
 }
 

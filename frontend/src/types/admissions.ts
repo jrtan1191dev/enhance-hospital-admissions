@@ -379,3 +379,38 @@ export const DELAY_REASON_TALKING_POINTS: Record<DelayReasonCode, string> = {
   SPECIALIZED_ISOLATION_CLEANING: 'Your room requires specialized isolation infection-control protocols and bio-cleaning before safe transfer. Housekeeping is expediting this.',
   SURGE_TRAUMA_EVENT: 'The emergency department is managing a temporary acute surge in critical emergency admissions. Additional clinical staff and bed allocations are being mobilized.',
 };
+
+export interface HospitalKpiSummaryDto {
+  periodStart: string;
+  periodEnd: string;
+
+  // Epic 1: Clinical Intake & Collaboration
+  avgEdTurnaroundMinutes: number;
+  edTurnaroundP95Minutes: number;
+  specialistClaimLatencyAvgMinutes: number;
+  primarySpecialistConcordanceRatePct: number;
+  digitalBedRequestCount: number;
+
+  // Epic 2: BMU Capacity & Diversions
+  bmuSuggestionAcceptanceRatePct: number;
+  bmuManualOverrideCount: number;
+  totalDiversionCount: number;
+  diversionRatePct: number;
+  sisterHospitalSlaCompliancePct: number;
+  batchHoldingWardAdoptionRatePct: number;
+  overrideReasonsBreakdown?: Record<string, number>;
+  diversionChannelsBreakdown?: Record<string, number>;
+
+  // Epic 3: Patient Experience
+  patientTrackerAccessRatePct: number;
+  twoHourPeriodicUpdateDeliveryPct: number;
+  prolongedWaitCommunicationRatePct: number;
+  caregiverCounselingConnectRatePct: number;
+
+  // Epic 4: Inpatient Discharge & Turnover
+  dischargeBeforeNoonRatePct: number;
+  advanceRunwayEstablishmentRatePct: number;
+  bedsideMedicationDeliveryAdoptionPct: number;
+  housekeepingTurnoverAvgMinutes: number;
+  housekeeping30mSlaCompliancePct: number;
+}

@@ -4,7 +4,7 @@ import { getActiveRole, setActiveRole } from '../../services/api';
 import { authQueries } from '../../services/queries';
 import type { RolePersona } from '../../types/admissions';
 import { Badge } from '../ui/badge';
-import { Activity, UserCheck, ShieldCheck } from 'lucide-react';
+import { Activity, UserCheck, ShieldCheck, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 
 const ROLES: { id: RolePersona; label: string; icon: string; path: string; user: string }[] = [
@@ -72,6 +72,21 @@ export function Header() {
               <p className="text-xs text-slate-500 hidden sm:block">Emergency & Bed Capacity Orchestration System</p>
             </div>
           </Link>
+
+          {/* Middle/Nav: Analytics Navigation Item */}
+          <nav className="flex items-center gap-1 mx-4">
+            <Link
+              to="/analytics"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                location.pathname === '/analytics'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Analytics</span>
+            </Link>
+          </nav>
 
           {/* Right: Role Persona Switcher & Indicators */}
           <div className="flex items-center gap-2">

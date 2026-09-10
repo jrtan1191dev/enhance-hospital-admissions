@@ -480,3 +480,13 @@ export function useRecordPatientAction() {
   });
 }
 
+export const analyticsQueries = {
+  all: () => ['analytics'] as const,
+  kpiSummary: (startDate?: string, endDate?: string) =>
+    queryOptions({
+      queryKey: [...analyticsQueries.all(), 'kpiSummary', { startDate, endDate }] as const,
+      queryFn: () => api.getKpiSummary(startDate, endDate),
+      refetchInterval: 5000,
+    }),
+};
+

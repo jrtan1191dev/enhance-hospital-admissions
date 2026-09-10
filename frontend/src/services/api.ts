@@ -25,6 +25,7 @@ import type {
   BmuCapacityForecastDto,
   EddUpdateRequest,
   TurnoverTaskDto,
+  HospitalKpiSummaryDto,
 } from '../types/admissions';
 
 const ROLE_STORAGE_KEY = 'admissions_role_persona';
@@ -142,4 +143,15 @@ export const api = {
     http.post<AdmissionRequest>(`/api/v1/ward/patients/${patientId}/deliver-medication`).then((r) => r.data),
   getTurnoverTasks: () =>
     http.get<TurnoverTaskDto[]>('/api/v1/ward/turnover-tasks').then((r) => r.data),
+
+  // Analytics & Operational KPIs
+  getKpiSummary: (startDate?: string, endDate?: string) =>
+    http
+      .get<HospitalKpiSummaryDto>('/api/v1/analytics/kpis/summary', {
+        params: {
+          ...(startDate ? { startDate } : {}),
+          ...(endDate ? { endDate } : {}),
+        },
+      })
+      .then((r) => r.data),
 };

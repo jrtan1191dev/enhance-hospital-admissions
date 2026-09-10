@@ -47,11 +47,12 @@ describe('Header component', () => {
     mockLocation = { pathname: '/ed' };
   });
 
-  it('renders application title, live sync indicator, and user info', () => {
+  it('renders application title, live sync indicator, user info, and analytics navigation link', () => {
     renderHeader();
     expect(screen.getByText('Patient Admission & Discharge Management Application')).toBeInTheDocument();
     expect(screen.getByText('Live Sync')).toBeInTheDocument();
     expect(screen.getByText('dr_tan_ed')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /analytics/i })).toHaveAttribute('href', '/analytics');
   });
 
   it('handles role switching from dropdown and navigates', () => {

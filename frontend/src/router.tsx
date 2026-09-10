@@ -14,6 +14,7 @@ import { BmuRoute } from './routes/bmu';
 import { BmuConfigRoute } from './routes/bmu-config';
 import { PatientRoute } from './routes/patient';
 import { WardRoute } from './routes/ward';
+import { AnalyticsRoute } from './routes/analytics';
 
 // Root Layout Route
 const rootRoute = createRootRoute({
@@ -74,6 +75,12 @@ const wardRoute = createRoute({
   component: WardRoute,
 });
 
+const analyticsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/analytics',
+  component: AnalyticsRoute,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   edRoute,
@@ -82,6 +89,7 @@ const routeTree = rootRoute.addChildren([
   bmuConfigRoute,
   patientRoute,
   wardRoute,
+  analyticsRoute,
 ]);
 
 export const router = createRouter({

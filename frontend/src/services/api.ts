@@ -28,6 +28,8 @@ import type {
   HospitalKpiSummaryDto,
 } from '../types/admissions';
 
+import { useState, useEffect } from 'react';
+
 const ROLE_STORAGE_KEY = 'admissions_role_persona';
 
 export function getActiveRole(): RolePersona {
@@ -35,7 +37,36 @@ export function getActiveRole(): RolePersona {
 }
 
 export function setActiveRole(role: RolePersona) {
-  if (typeof window !== 'undefined') localStorage.setItem(ROLE_STORAGE_KEY, role);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(ROLE_STORAGE_KEY, role);
+    window.dispatchEvent(new CustomEvent('admissions-role-change', { detail: role }));
+  }
+}
+
+/**
+ * Reactive hook to track the active role persona across components.
+ * Subscribes to window admissions-role-change and storage events.
+ */
+export function useActiveRole(): RolePersona {
+  const [role, setRole] = useState<RolePersona>(getActiveRole());
+
+  useEffect(() => {
+    const handler = (e?: Event) => {
+      if (e instanceof CustomEvent && e.detail) {
+        setRole(e.detail as RolePersona);
+      } else {
+        setRole(getActiveRole());
+      }
+    };
+    window.addEventListener('admissions-role-change', handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener('admissions-role-change', handler);
+      window.removeEventListener('storage', handler);
+    };
+  }, []);
+
+  return role;
 }
 
 // Axios natively uses xsrfCookieName: 'XSRF-TOKEN' and xsrfHeaderName: 'X-XSRF-TOKEN' by default

@@ -45,6 +45,21 @@ export function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  // Synchronize role state if updated externally
+  useEffect(() => {
+    const handleRoleUpdate = (e: Event) => {
+      if (e instanceof CustomEvent && e.detail) {
+        setRole(e.detail as RolePersona);
+      } else {
+        setRole(getActiveRole());
+      }
+    };
+    window.addEventListener('admissions-role-change', handleRoleUpdate);
+    return () => {
+      window.removeEventListener('admissions-role-change', handleRoleUpdate);
+    };
+  }, []);
+
   // Sync active role with URL route changes during render without cascading effects
   if (prevPath !== location.pathname) {
     setPrevPath(location.pathname);
@@ -57,6 +72,9 @@ export function Header() {
       if (matchingRole) {
         setActiveRole(matchingRole.id);
         setRole(matchingRole.id);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('admissions-role-change', { detail: matchingRole.id }));
+        }
         queryClient.invalidateQueries();
       }
     }
@@ -65,6 +83,9 @@ export function Header() {
   const handleRoleChange = (newRole: RolePersona) => {
     setActiveRole(newRole);
     setRole(newRole);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('admissions-role-change', { detail: newRole }));
+    }
     queryClient.invalidateQueries();
 
     const target = ROLES.find((r) => r.id === newRole);

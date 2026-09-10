@@ -10,7 +10,8 @@ import {
   useDischargeSignoff,
   useDeliverMedication,
 } from '../services/queries';
-import type { Bed, EddConfidence, DischargeRunwayDto } from '../types/admissions';
+import { useActiveRole } from '../services/api';
+import type { Bed, EddConfidence, DischargeRunwayDto, RolePersona } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -39,7 +40,15 @@ import {
   Edit,
 } from 'lucide-react';
 
-export function WardRoute() {
+interface WardRouteProps {
+  role?: RolePersona;
+}
+
+export function WardRoute({ role: roleProp }: WardRouteProps = {}) {
+  const activeRole = useActiveRole();
+  const role = roleProp ?? activeRole;
+  const isHousekeeping = role === 'HOUSEKEEPING';
+
   const [activeWardCode, setActiveWardCode] = useState<string>('8A');
   const [notification, setNotification] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -164,17 +173,34 @@ export function WardRoute() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <BedDouble className="h-6 w-6 text-blue-600" />
-            Inpatient Ward Reception & Rapid Bed Turnover
+            {isHousekeeping ? (
+              <>
+                <Brush className="h-6 w-6 text-amber-600 shrink-0" />
+                Housekeeping (EVS) Rapid Bed Turnover
+              </>
+            ) : (
+              <>
+                <BedDouble className="h-6 w-6 text-blue-600 shrink-0" />
+                Inpatient Ward Reception & Bed Control
+              </>
+            )}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Ward nursing discharge runways, morning authorizations, bedside meds handoffs, and 30-minute terminal sanitization sign-offs.
+            {isHousekeeping
+              ? '30-minute terminal sanitization queue, vacated bed disinfection tracking, and clean bed sign-offs for BMU allocation.'
+              : 'Ward nursing discharge runways, morning authorizations, bedside meds handoffs, and bed status management.'}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="px-3 py-1 text-xs bg-slate-50 text-slate-700">
-            Discharge Runway & Rapid Turnover Loop
-          </Badge>
+          {isHousekeeping ? (
+            <Badge variant="outline" className="px-3 py-1 text-xs bg-amber-50 text-amber-900 border-amber-300 font-medium">
+              🧹 EVS Housekeeping View
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="px-3 py-1 text-xs bg-blue-50 text-blue-800 border-blue-200 font-medium">
+              👩‍⚕️ Ward Nursing View
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -192,8 +218,9 @@ export function WardRoute() {
         </div>
       )}
 
-      {/* Housekeeping / EVS Active 30-Minute Turnover Queue Banner */}
-      <Card className="border-amber-300 bg-amber-50/40 shadow-xs">
+      {/* Housekeeping / EVS Active 30-Minute Turnover Queue Banner - Viewable ONLY by EVS Housekeeping */}
+      {isHousekeeping && (
+        <Card className="border-amber-300 bg-amber-50/40 shadow-xs">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -277,10 +304,13 @@ export function WardRoute() {
           )}
         </CardContent>
       </Card>
+      )}
 
-      {/* Ward Nursing View */}
-      <Card>
-        <CardHeader>
+      {/* Ward Nursing View - Viewable ONLY by Ward Nurse */}
+      {!isHousekeeping && (
+        <>
+          <Card>
+            <CardHeader>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -729,6 +759,8 @@ export function WardRoute() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
+      )}
     </div>
   );
 }

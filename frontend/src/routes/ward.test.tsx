@@ -137,7 +137,9 @@ vi.mock('../services/queries', () => ({
   }),
 }));
 
-function renderWardRoute() {
+import type { RolePersona } from '../types/admissions';
+
+function renderWardRoute(role?: RolePersona) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -147,7 +149,7 @@ function renderWardRoute() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <WardRoute />
+      <WardRoute role={role} />
     </QueryClientProvider>
   );
 }
@@ -157,51 +159,73 @@ describe('WardRoute component', () => {
     vi.clearAllMocks();
   });
 
-  it('renders ward roster with D-2 Potential Discharge badge and turnover queue', () => {
-    renderWardRoute();
+  describe('Nurse View (WARD_NURSE)', () => {
+    it('renders ward roster with bed control and does not render housekeeping turnover queue', () => {
+      renderWardRoute('WARD_NURSE');
 
-    expect(screen.getByText('Inpatient Ward Reception & Rapid Bed Turnover')).toBeInTheDocument();
-    expect(screen.getByText(/D-2 Potential Discharge/i)).toBeInTheDocument();
-    expect(screen.getByText('Uncle Seng')).toBeInTheDocument();
-    expect(screen.getAllByText(/Post-PCI cardiac stabilization/i).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Housekeeping (EVS) 30-Minute Turnover Queue (1 Beds Pending)')).toBeInTheDocument();
-    expect(screen.getByText(/18m left \(On Track\)/i)).toBeInTheDocument();
+      // Nurse sees Ward Nursing Station Bed Control
+      expect(screen.getByText('Inpatient Ward Reception & Bed Control')).toBeInTheDocument();
+      expect(screen.getByText('Ward Nursing Station Bed Control')).toBeInTheDocument();
+      expect(screen.getByText('👩‍⚕️ Ward Nursing View')).toBeInTheDocument();
+      expect(screen.getByText(/D-2 Potential Discharge/i)).toBeInTheDocument();
+      expect(screen.getByText('Uncle Seng')).toBeInTheDocument();
+      expect(screen.getAllByText(/Post-PCI cardiac stabilization/i).length).toBeGreaterThanOrEqual(1);
+
+      // Nurse should NOT see the EVS Housekeeping queue
+      expect(screen.queryByText(/Housekeeping \(EVS\) 30-Minute Turnover Queue/i)).not.toBeInTheDocument();
+    });
+
+    it('handles Set/Update EDD modal opening and saving', () => {
+      renderWardRoute('WARD_NURSE');
+
+      const updateEddBtn = screen.getByRole('button', { name: /Update EDD \/ Rationale/i });
+      fireEvent.click(updateEddBtn);
+
+      expect(screen.getByText('Establish Advance Discharge Runway (EDD)')).toBeInTheDocument();
+      const saveBtn = screen.getByRole('button', { name: /Save EDD & Runway Stage/i });
+      fireEvent.click(saveBtn);
+
+      expect(mockUpdateEddMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientId: 'p101',
+        })
+      );
+    });
+
+    it('handles bedside medication delivery confirmation and bed vacate actions', () => {
+      renderWardRoute('WARD_NURSE');
+
+      const deliverBtn = screen.getByRole('button', { name: /Confirm Bedside Delivery/i });
+      fireEvent.click(deliverBtn);
+      expect(mockDeliverMedMutate).toHaveBeenCalledWith('p101');
+
+      const vacateBtn = screen.getByRole('button', { name: /Patient Vacated Bed/i });
+      fireEvent.click(vacateBtn);
+      expect(mockVacateMutate).toHaveBeenCalledWith('bed-8A01');
+    });
   });
 
-  it('handles Set/Update EDD modal opening and saving', () => {
-    renderWardRoute();
+  describe('Housekeeping View (HOUSEKEEPING)', () => {
+    it('renders housekeeping turnover queue and does not render ward nursing station bed control', () => {
+      renderWardRoute('HOUSEKEEPING');
 
-    const updateEddBtn = screen.getByRole('button', { name: /Update EDD \/ Rationale/i });
-    fireEvent.click(updateEddBtn);
+      // Housekeeping sees EVS Turnover Queue
+      expect(screen.getByText('Housekeeping (EVS) Rapid Bed Turnover')).toBeInTheDocument();
+      expect(screen.getByText('🧹 EVS Housekeeping View')).toBeInTheDocument();
+      expect(screen.getByText('Housekeeping (EVS) 30-Minute Turnover Queue (1 Beds Pending)')).toBeInTheDocument();
+      expect(screen.getByText(/18m left \(On Track\)/i)).toBeInTheDocument();
 
-    expect(screen.getByText('Establish Advance Discharge Runway (EDD)')).toBeInTheDocument();
-    const saveBtn = screen.getByRole('button', { name: /Save EDD & Runway Stage/i });
-    fireEvent.click(saveBtn);
+      // Housekeeping should NOT see Ward Nursing Station Bed Control
+      expect(screen.queryByText('Ward Nursing Station Bed Control')).not.toBeInTheDocument();
+      expect(screen.queryByText('Uncle Seng')).not.toBeInTheDocument();
+    });
 
-    expect(mockUpdateEddMutate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        patientId: 'p101',
-      })
-    );
-  });
+    it('handles housekeeping sign-off clean action', () => {
+      renderWardRoute('HOUSEKEEPING');
 
-  it('handles bedside medication delivery confirmation and bed vacate actions', () => {
-    renderWardRoute();
-
-    const deliverBtn = screen.getByRole('button', { name: /Confirm Bedside Delivery/i });
-    fireEvent.click(deliverBtn);
-    expect(mockDeliverMedMutate).toHaveBeenCalledWith('p101');
-
-    const vacateBtn = screen.getByRole('button', { name: /Patient Vacated Bed/i });
-    fireEvent.click(vacateBtn);
-    expect(mockVacateMutate).toHaveBeenCalledWith('bed-8A01');
-  });
-
-  it('handles housekeeping sign-off clean action', () => {
-    renderWardRoute();
-
-    const cleanBtn = screen.getByRole('button', { name: /Sign-Off Clean/i });
-    fireEvent.click(cleanBtn);
-    expect(mockCleanMutate).toHaveBeenCalledWith('bed-8A02');
+      const cleanBtn = screen.getByRole('button', { name: /Sign-Off Clean/i });
+      fireEvent.click(cleanBtn);
+      expect(mockCleanMutate).toHaveBeenCalledWith('bed-8A02');
+    });
   });
 });

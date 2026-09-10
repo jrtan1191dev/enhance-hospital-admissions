@@ -120,4 +120,8 @@ export const api = {
     http.post<Bed>(`/api/v1/patients/beds/${bedId}/vacate`).then((r) => r.data),
   cleanBed: (bedId: string) =>
     http.post<Bed>(`/api/v1/patients/beds/${bedId}/clean`).then((r) => r.data),
+  simulatePeriodicUpdate: () =>
+    http.post<{ status: string; dispatchedCount: number; message: string }>('/api/v1/patients/simulate-periodic-update').then((r) => r.data),
+  recordPatientAction: (token: string, actionType: 'MSW_CALL' | 'FINANCE_CALL') =>
+    http.post<{ id: string; token: string; actionType: string; createdAt: string }>(`/api/v1/patients/track/${token}/actions`, { actionType }).then((r) => r.data),
 };

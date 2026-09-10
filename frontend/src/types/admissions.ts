@@ -186,13 +186,19 @@ export interface PatientMilestoneResponse {
   patientName: string;
   queueToken: string;
   admissionStatus: AdmissionStatus;
+  requestedWardClass?: WardClass;
   queuePosition: number;
+  patientsAhead?: number;
   estimatedWaitMinutes: number;
   assignedBedNumber?: string;
   assignedWardName?: string;
   assignedLevel?: number;
+  delayReason?: string;
+  delayContactHotline?: string;
   coPayEstimate?: string;
   careGuidance?: string;
+  diversionRecommended?: boolean;
+  diversionPathway?: DiversionPathway;
 }
 
 export interface SisterHospitalReferralResponse {

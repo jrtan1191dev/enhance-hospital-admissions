@@ -96,7 +96,7 @@ export const patientQueries = {
     queryOptions({
       queryKey: [...patientQueries.all(), 'track', token] as const,
       queryFn: () => api.trackPatient(token),
-      refetchInterval: 2500,
+      refetchInterval: 3000,
       enabled: !!token,
     }),
   availablePatients: () =>
@@ -385,3 +385,22 @@ export function useCleanBed(onSuccess?: () => void) {
     },
   });
 }
+
+export function useSimulatePeriodicUpdate(onSuccess?: (data: { dispatchedCount: number; message: string }) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.simulatePeriodicUpdate(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.(data);
+    },
+  });
+}
+
+export function useRecordPatientAction() {
+  return useMutation({
+    mutationFn: (variables: { token: string; actionType: 'MSW_CALL' | 'FINANCE_CALL' }) =>
+      api.recordPatientAction(variables.token, variables.actionType),
+  });
+}
+

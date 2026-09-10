@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { patientQueries } from '../services/queries';
+import {
+  patientQueries,
+  useSimulatePeriodicUpdate,
+  useRecordPatientAction,
+} from '../services/queries';
 import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { toast } from '../lib/toast';
 import {
   Smartphone,
   CheckCircle2,
@@ -9,52 +15,80 @@ import {
   Users,
   BedDouble,
   ShieldCheck,
+  AlertCircle,
+  Info,
+  Phone,
+  PhoneCall,
+  BellRing,
 } from 'lucide-react';
 
 const MILESTONES = [
-  { step: 1, title: 'Admission Decision Confirmed', desc: 'Bed request dispatched to Bed Management Unit (BMU)' },
-  { step: 2, title: 'Bed Assigned & Sanitization', desc: 'Matching ward identified; housekeeping sanitization in progress' },
-  { step: 3, title: 'Porter Transfer in Progress', desc: 'Porter dispatched for transfer to inpatient bed' },
-  { step: 4, title: 'Admitted to Ward Bed', desc: 'Patient received and safely checked in by ward nursing staff' },
+  {
+    step: 1,
+    title: 'Admission Decision Confirmed & Bed Queued',
+    desc: 'Bed request dispatched to Bed Management Unit (BMU)',
+  },
+  {
+    step: 2,
+    title: 'Bed Assigned & Preparing Room',
+    desc: 'Matching ward identified; housekeeping sanitization underway',
+  },
+  {
+    step: 3,
+    title: 'Admitted to Inpatient Ward Bed',
+    desc: 'Patient received and checked in by ward nursing staff',
+  },
 ];
 
 export function PatientRoute() {
   const [selectedToken, setSelectedToken] = useState<string>('TOKEN-P101');
 
-  // Fetch available patient tokens via patientQueries.availablePatients()
+  // Fetch available patient tokens for quick-picker
   const { data: availablePatients = [] } = useQuery(patientQueries.availablePatients());
 
-  // Fetch Milestone status with live polling via patientQueries.track()
+  // Fetch Milestone status with 3-second live polling
   const { data: tracker, isLoading, error } = useQuery(
     patientQueries.track(selectedToken)
   );
 
-  // Derive milestone step and label from backend admissionStatus
+  // Periodic update simulation mutation
+  const simulateMutation = useSimulatePeriodicUpdate((data) => {
+    toast.success(
+      'Periodic Update Broadcast Simulated',
+      data.message || `Refreshed ${data.dispatchedCount} waiting patient(s)`
+    );
+  });
+
+  // Action recording mutation for hotlines (KPI 18)
+  const recordActionMutation = useRecordPatientAction();
+
+  // Milestone derivation
   const getMilestoneStep = (status?: string): number => {
     switch (status) {
       case 'ASSESSMENT_PENDING':
+        return 0; // Quiescent pre-milestone state
       case 'BED_REQUESTED':
         return 1;
       case 'BED_ALLOCATED':
         return 2;
       case 'ADMITTED_INPATIENT':
       case 'DISCHARGED':
-        return 4;
+        return 3;
       default:
-        return 1;
+        return 0;
     }
   };
 
   const getMilestoneLabel = (status?: string): string => {
     switch (status) {
       case 'ASSESSMENT_PENDING':
-        return 'ED Assessment & Triage in Progress';
+        return 'ED Clinical Assessment in Progress';
       case 'BED_REQUESTED':
         return 'Admission Confirmed — Awaiting Bed Allocation';
       case 'BED_ALLOCATED':
-        return 'Bed Allocated — Housekeeping & Sanitization';
+        return 'Bed Allocated — Preparing Inpatient Room';
       case 'ADMITTED_INPATIENT':
-        return 'Admitted to Inpatient Ward';
+        return 'Admitted to Inpatient Ward Bed';
       case 'DISCHARGED':
         return 'Patient Discharged';
       default:
@@ -64,6 +98,20 @@ export function PatientRoute() {
 
   const currentMilestone = getMilestoneStep(tracker?.admissionStatus);
   const milestoneLabel = getMilestoneLabel(tracker?.admissionStatus);
+
+  const handleSimulatePeriodicUpdate = () => {
+    simulateMutation.mutate();
+  };
+
+  const handleCallHotline = (
+    actionType: 'MSW_CALL' | 'FINANCE_CALL',
+    phoneNumber: string,
+    serviceName: string
+  ) => {
+    recordActionMutation.mutate({ token: selectedToken, actionType });
+    toast.info(`Calling ${serviceName}`, `Connecting to ${phoneNumber}...`);
+    window.location.href = `tel:${phoneNumber.replace(/\s+/g, '')}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -79,26 +127,39 @@ export function PatientRoute() {
           </p>
         </div>
 
-        {/* Quick-Picker Dropdown */}
-        <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-          <span className="text-xs font-semibold text-slate-600">Simulate Patient:</span>
-          <select
-            value={selectedToken}
-            onChange={(e) => setSelectedToken(e.target.value)}
-            className="text-xs font-medium bg-white border border-slate-300 rounded px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 shadow-xs cursor-pointer"
+        {/* Quick-Picker & Simulation Actions */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+            <span className="text-xs font-semibold text-slate-600">Simulate Patient:</span>
+            <select
+              value={selectedToken}
+              onChange={(e) => setSelectedToken(e.target.value)}
+              className="text-xs font-medium bg-white border border-slate-300 rounded px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 shadow-xs cursor-pointer"
+            >
+              {availablePatients.map((p) => (
+                <option key={p.id} value={p.queueToken}>
+                  {p.name} ({p.queueToken})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSimulatePeriodicUpdate}
+            disabled={simulateMutation.isPending}
+            className="text-xs font-semibold gap-1.5 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
           >
-            {availablePatients.map((p) => (
-              <option key={p.id} value={p.queueToken}>
-                {p.name} ({p.queueToken})
-              </option>
-            ))}
-          </select>
+            <BellRing className="h-3.5 w-3.5 text-blue-600" />
+            {simulateMutation.isPending ? 'Broadcasting...' : 'Simulate Periodic Update'}
+          </Button>
         </div>
       </div>
 
       {/* Mobile Simulator Mockup Frame */}
       <div className="flex justify-center py-4">
-        <div className="w-full max-w-[380px] rounded-[3rem] border-[10px] border-slate-900 bg-slate-900 p-2.5 shadow-2xl ring-1 ring-slate-800">
+        <div className="w-full max-w-[390px] rounded-[3rem] border-[10px] border-slate-900 bg-slate-900 p-2.5 shadow-2xl ring-1 ring-slate-800">
           {/* Top Notch / Dynamic Island */}
           <div className="relative mx-auto mb-2 h-5 w-28 rounded-full bg-slate-950 flex items-center justify-between px-2.5 shadow-inner">
             <div className="h-2 w-2 rounded-full bg-blue-950/80 ring-1 ring-blue-500/20"></div>
@@ -106,7 +167,7 @@ export function PatientRoute() {
           </div>
 
           {/* Screen Container */}
-          <div className="rounded-[2.4rem] bg-slate-50 overflow-hidden min-h-[620px] flex flex-col justify-between p-4 text-slate-900 shadow-inner">
+          <div className="rounded-[2.4rem] bg-slate-50 overflow-hidden min-h-[660px] flex flex-col justify-between p-4 text-slate-900 shadow-inner">
             {/* iOS Style Top Status Bar */}
             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700 px-1 pt-0.5 pb-2">
               <span>9:41</span>
@@ -118,7 +179,7 @@ export function PatientRoute() {
               </div>
             </div>
 
-            {/* Header in App */}
+            {/* In-App Header & Content */}
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
                 <div className="flex items-center gap-2">
@@ -140,35 +201,87 @@ export function PatientRoute() {
                 <div className="py-20 text-center text-xs text-red-600">Failed to track token.</div>
               ) : tracker ? (
                 <>
-                  {/* Greeting & Summary */}
+                  {/* Greeting & Summary Banner */}
                   <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-sm space-y-1">
-                    <p className="text-[11px] text-emerald-100 font-medium">Admission Status Update</p>
+                    <p className="text-[11px] text-emerald-100 font-medium">Admission Journey Tracker</p>
                     <h3 className="font-bold text-base leading-tight">{tracker.patientName}</h3>
                     <p className="text-xs text-emerald-100/90">{milestoneLabel}</p>
                   </div>
 
-                  {/* Operational Metrics Cards */}
-                  <div className="grid grid-cols-2 gap-2 text-center">
-                    <div className="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs">
-                      <div className="flex items-center justify-center gap-1 text-[10px] text-slate-500 font-medium">
-                        <Clock className="h-3 w-3 text-blue-600" /> Est. Wait Time
+                  {/* Quiescent State Notice for ASSESSMENT_PENDING */}
+                  {currentMilestone === 0 ? (
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1.5 shadow-2xs">
+                      <div className="flex items-center gap-1.5 font-bold text-amber-950">
+                        <Info className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                        ED Clinical Assessment in Progress
                       </div>
-                      <div className="text-base font-bold text-slate-900 mt-1">
-                        {tracker.estimatedWaitMinutes} <span className="text-[10px] font-normal text-slate-500">mins</span>
-                      </div>
+                      <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                        Your emergency care team is currently reviewing clinical evaluations, lab results, and diagnostic scans before an inpatient admission decision is confirmed.
+                      </p>
                     </div>
+                  ) : (
+                    <>
+                      {/* Non-FIFO Clinical Urgency Banner (Ticket 02) */}
+                      <div className="bg-blue-50/80 border border-blue-200/70 rounded-xl p-2.5 text-[11px] text-blue-900 flex items-start gap-2 shadow-2xs">
+                        <AlertCircle className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div className="leading-tight">
+                          <span className="font-semibold text-blue-950">Clinical Urgency Priority: </span>
+                          Hospital admissions are prioritized by acute clinical urgency and infection prevention rather than first-come-first-served sequence.
+                        </div>
+                      </div>
 
-                    <div className="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs">
-                      <div className="flex items-center justify-center gap-1 text-[10px] text-slate-500 font-medium">
-                        <Users className="h-3 w-3 text-purple-600" /> Ahead in Queue
+                      {/* Operational Metrics Cards (Ticket 01 & 02) */}
+                      <div className="grid grid-cols-2 gap-2 text-center">
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs">
+                          <div className="flex items-center justify-center gap-1 text-[10px] text-slate-500 font-medium">
+                            <Clock className="h-3 w-3 text-blue-600" /> Est. Wait Time
+                          </div>
+                          <div className="text-base font-bold text-slate-900 mt-1">
+                            {tracker.estimatedWaitMinutes} <span className="text-[10px] font-normal text-slate-500">mins</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-3 rounded-xl border border-slate-200/90 shadow-2xs">
+                          <div className="flex items-center justify-center gap-1 text-[10px] text-slate-500 font-medium">
+                            <Users className="h-3 w-3 text-purple-600" /> Patients Ahead
+                          </div>
+                          <div className="text-base font-bold text-slate-900 mt-1">
+                            {tracker.patientsAhead ?? (tracker.queuePosition > 0 ? tracker.queuePosition - 1 : 0)}{' '}
+                            <span className="text-[10px] font-normal text-slate-500">pax</span>
+                          </div>
+                          <p className="text-[9px] text-slate-400 mt-0.5">
+                            Class {tracker.requestedWardClass ?? 'B2'} Queue
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-base font-bold text-slate-900 mt-1">
-                        {tracker.queuePosition} <span className="text-[10px] font-normal text-slate-500">pax</span>
+                    </>
+                  )}
+
+                  {/* Empathetic Operational Delay Card (Ticket 03) */}
+                  {tracker.delayReason && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 text-xs text-orange-950 space-y-2 shadow-2xs">
+                      <div className="flex items-center gap-1.5 font-bold text-orange-900 text-[11px]">
+                        <Clock className="h-3.5 w-3.5 text-orange-600" />
+                        Operational Care Update
                       </div>
+                      <p className="text-[11px] text-orange-800 leading-normal">
+                        {tracker.delayReason}
+                      </p>
+                      {tracker.delayContactHotline && (
+                        <div className="flex items-center justify-between pt-1 border-t border-orange-200/60 text-[10px]">
+                          <span className="text-orange-700">Hotline: {tracker.delayContactHotline}</span>
+                          <a
+                            href={`tel:${tracker.delayContactHotline.replace(/\s+/g, '')}`}
+                            className="font-semibold text-orange-900 underline hover:text-orange-700 flex items-center gap-1"
+                          >
+                            <Phone className="h-3 w-3" /> Call Liaison
+                          </a>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
 
-                  {/* Assigned Bed Badge if known */}
+                  {/* Assigned Bed Badge if known (Level -> Ward -> Bed Spatial Hierarchy) */}
                   {tracker.assignedBedNumber && (
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-3 rounded-xl text-xs flex items-center justify-between text-blue-950 shadow-2xs">
                       <div className="flex items-center gap-2.5">
@@ -178,8 +291,8 @@ export function PatientRoute() {
                         <div>
                           <div className="font-bold text-sm">Bed {tracker.assignedBedNumber}</div>
                           <div className="text-[11px] text-blue-700">
+                            {tracker.assignedLevel ? `Level ${tracker.assignedLevel} • ` : ''}
                             {tracker.assignedWardName}
-                            {tracker.assignedLevel ? ` (Level ${tracker.assignedLevel})` : ''}
                           </div>
                         </div>
                       </div>
@@ -189,7 +302,7 @@ export function PatientRoute() {
                     </div>
                   )}
 
-                  {/* Milestones Stepper with connecting line */}
+                  {/* 3-Stage Visual Milestone Stepper (Ticket 01) */}
                   <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
                     <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">
                       Journey Milestones
@@ -227,28 +340,62 @@ export function PatientRoute() {
                     </div>
                   </div>
 
-                  {/* Financial & Care Explainer Module */}
-                  {(tracker.coPayEstimate || tracker.careGuidance) && (
-                    <div className="bg-slate-100/90 p-3 rounded-xl text-xs space-y-1.5 border border-slate-200/60">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-800">
-                        <span className="flex items-center gap-1.5">
-                          <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-                          Care & Subsidy Insights
-                        </span>
-                        <span className="text-[9px] text-slate-500 font-normal bg-white px-1.5 py-0.5 rounded border border-slate-200">FYI</span>
-                      </div>
-                      {tracker.coPayEstimate && (
-                        <p className="text-[10px] text-slate-600 leading-normal">
-                          {tracker.coPayEstimate}
-                        </p>
-                      )}
-                      {tracker.careGuidance && (
-                        <p className="text-[10px] text-slate-500 italic leading-normal pt-0.5">
-                          {tracker.careGuidance}
-                        </p>
-                      )}
+                  {/* Financial & Care Explainer (Ticket 05 & 06) */}
+                  <div className="bg-slate-100/90 p-3.5 rounded-2xl text-xs space-y-2 border border-slate-200/70 shadow-2xs">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-800">
+                      <span className="flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-blue-600" />
+                        Financial & Care Explainer
+                      </span>
+                      <span className="text-[9px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                        FYI Insights
+                      </span>
                     </div>
-                  )}
+
+                    <p className="text-[10px] text-slate-500 italic leading-snug">
+                      FYI Insights: Figures are informational peace-of-mind estimates and require no upfront deposits or digital signatures.
+                    </p>
+
+                    {tracker.coPayEstimate && (
+                      <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 text-[11px] text-slate-700 leading-normal font-medium">
+                        {tracker.coPayEstimate}
+                      </div>
+                    )}
+
+                    {tracker.careGuidance && (
+                      <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 text-[11px] text-slate-600 leading-normal">
+                        {tracker.careGuidance}
+                      </div>
+                    )}
+
+                    {tracker.diversionRecommended && tracker.diversionPathway && (
+                      <div className="bg-amber-50 p-2.5 rounded-lg border border-amber-200/80 text-[11px] text-amber-900 leading-normal">
+                        <div className="font-semibold flex items-center gap-1 mb-1">
+                          <Info className="h-3.5 w-3.5 text-amber-600" />
+                          <span>Alternative Step-Down Care Recommended</span>
+                        </div>
+                        <p>{tracker.diversionPathway}</p>
+                      </div>
+                    )}
+
+                    {/* 1-Click Support Hotlines with Interaction Audit Logging (Ticket 06) */}
+                    <div className="pt-1 grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleCallHotline('MSW_CALL', '+65 6321 4311', 'Medical Social Work')}
+                        className="flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold py-1.5 px-2 rounded-lg text-[10px] shadow-2xs transition-colors cursor-pointer"
+                      >
+                        <PhoneCall className="h-3 w-3 text-emerald-600" />
+                        <span>Call MSW</span>
+                      </button>
+                      <button
+                        onClick={() => handleCallHotline('FINANCE_CALL', '+65 6321 4312', 'Financial Counseling')}
+                        className="flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold py-1.5 px-2 rounded-lg text-[10px] shadow-2xs transition-colors cursor-pointer"
+                      >
+                        <PhoneCall className="h-3 w-3 text-blue-600" />
+                        <span>Call Finance</span>
+                      </button>
+                    </div>
+                  </div>
                 </>
               ) : null}
             </div>

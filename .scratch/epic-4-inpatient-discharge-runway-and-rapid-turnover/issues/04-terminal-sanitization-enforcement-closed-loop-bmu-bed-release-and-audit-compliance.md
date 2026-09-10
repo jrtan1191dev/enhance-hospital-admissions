@@ -5,11 +5,11 @@ Complete the closed-loop circular bed capacity lifecycle by enforcing strict bed
 
 **Blocked by:** 03: Patient Bed Vacate and Dynamic 30-Minute EVS Turnover SLA Countdown
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `POST /api/v1/patients/beds/{bedId}/clean` validates that the target bed is strictly in `EMPTY_PENDING_CLEANING` status, rejecting invalid attempts with RFC 7807 `400 Bad Request`.
-- [ ] Valid clean sign-off transitions bed status to `EMPTY_CLEANED` (`White`), sets `lastCleanedAt`, and dissociates the discharged patient (`currentPatient = null`).
-- [ ] Clean sign-off emits structured audit log `CLEAN_BED` capturing `BedNumber`, `HousekeeperId`, `ElapsedCleaningMins`, and `Within30mSla` boolean compliance (KPI 22).
-- [ ] BMU live candidate recommendation queries immediately score and include newly cleaned `White` beds for waiting ED admissions without latency or restart.
-- [ ] Ward console updates in real time, removing cleaned beds from the EVS turnover queue and rendering them as available (White) beds.
-- [ ] End-to-end closed-loop integration tests verify the complete journey: morning discharge sign-off -> bedside meds -> nurse vacate -> 30-minute turnover tracking -> housekeeping sign-off -> instant BMU candidate re-allocation.
+- [x] `POST /api/v1/patients/beds/{bedId}/clean` validates that the target bed is strictly in `EMPTY_PENDING_CLEANING` status, rejecting invalid attempts with RFC 7807 `400 Bad Request`.
+- [x] Valid clean sign-off transitions bed status to `EMPTY_CLEANED` (`White`), sets `lastCleanedAt`, and dissociates the discharged patient (`currentPatient = null`).
+- [x] Clean sign-off emits structured audit log `CLEAN_BED` capturing `BedNumber`, `HousekeeperId`, `ElapsedCleaningMins`, and `Within30mSla` boolean compliance (KPI 22).
+- [x] BMU live candidate recommendation queries immediately score and include newly cleaned `White` beds for waiting ED admissions without latency or restart.
+- [x] Ward console updates in real time, removing cleaned beds from the EVS turnover queue and rendering them as available (White) beds.
+- [x] End-to-end closed-loop integration tests verify the complete journey: morning discharge sign-off -> bedside meds -> nurse vacate -> 30-minute turnover tracking -> housekeeping sign-off -> instant BMU candidate re-allocation.

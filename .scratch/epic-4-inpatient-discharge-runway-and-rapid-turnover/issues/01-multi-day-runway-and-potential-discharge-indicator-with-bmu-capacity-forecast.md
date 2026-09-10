@@ -5,12 +5,12 @@ Enable inpatient clinicians to establish and maintain an advance discharge runwa
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `POST /api/v1/ward/patients/{patientId}/edd` sets or updates `edd`, `eddConfidence`, and optional rationale on `AdmissionRequest`, validating confidence values (`HIGH`, `MEDIUM`, `LOW`).
-- [ ] Setting or updating an EDD emits a structured `RECORD_EDD` audit log event capturing patient ID, target EDD, confidence rating, and runway stage (KPI 20).
-- [ ] `GET /api/v1/ward/runway` computes active discharge runway entries across wards, dynamically calculating stages (`RUNWAY_D3`, `RUNWAY_D2`, `RUNWAY_D1`, `READY_FOR_MORNING_SIGNOFF`).
-- [ ] Ward console bed roster highlights patients approaching discharge with prominent D-2 and D-3 Potential Discharge Indicator badges.
-- [ ] BMU interface provides upcoming discharge capacity forecasts 24 to 72 hours out categorized by ward and specialty cluster.
-- [ ] Public patient mobile milestone tracker displays the planned Estimated Date of Discharge to patients and families.
-- [ ] Automated tests verify EDD updates, dynamic runway stage calculation, BMU capacity projection aggregations, and structured audit log emissions.
+- [x] `POST /api/v1/ward/patients/{patientId}/edd` sets or updates `edd`, `eddConfidence`, and optional rationale on `AdmissionRequest`, validating confidence values (`HIGH`, `MEDIUM`, `LOW`).
+- [x] Setting or updating an EDD emits a structured `RECORD_EDD` audit log event capturing patient ID, target EDD, confidence rating, and runway stage (KPI 20).
+- [x] `GET /api/v1/ward/runway` computes active discharge runway entries across wards, dynamically calculating stages (`RUNWAY_D3`, `RUNWAY_D2`, `RUNWAY_D1`, `READY_FOR_MORNING_SIGNOFF`).
+- [x] Ward console bed roster highlights patients approaching discharge with prominent D-2 and D-3 Potential Discharge Indicator badges.
+- [x] BMU interface provides upcoming discharge capacity forecasts 24 to 72 hours out categorized by ward and specialty cluster.
+- [x] Public patient mobile milestone tracker displays the planned Estimated Date of Discharge to patients and families.
+- [x] Automated tests verify EDD updates, dynamic runway stage calculation, BMU capacity projection aggregations, and structured audit log emissions.

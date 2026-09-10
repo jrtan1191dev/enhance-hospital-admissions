@@ -97,30 +97,69 @@ This workflow demonstrates how I'd set up a new product team: establish domain u
 
 ## Architecture Summary
 
-The system uses a **Spring Boot 4.1 + React 19** monorepo deployed as a single JAR. The architecture is **production-ready by default** — when no Spring profile is active, default beans connect to real PostgreSQL databases, FHIR EHR endpoints, and external hospital APIs. All prototype simplifications are strictly isolated under `@Profile("prototype")`.
+The system uses a **Spring Boot 4.1 + React 19** monorepo deployed as a single JAR. The architecture is **production-architected by design** — interfaces, domain logic, and profile boundaries are structured so that swapping in real adapters is additive integration work, not an architectural rewrite. All prototype simplifications are strictly isolated under `@Profile("prototype")`.
+
+> [!IMPORTANT]
+> **Prototype Boundaries:** This is a working prototype. Domain logic (constraint engine, state machines, safety invariants) is production-grade and tested. External integrations (EHR, authentication, database, real-time push) are stubbed behind gateway interfaces — the architectural seams are cut in the right places, but the production adapters behind them are intentional placeholders pending real infrastructure. See [What's Production-Grade Today](#whats-production-grade-today) and [What's Designed but Stubbed](#whats-designed-but-stubbed-for-production) below.
 
 **Core architectural patterns:**
 
-- **Gateway / Adapter Pattern** — EHR integration, sister hospital transfers, and constraint solvers are behind swappable interfaces, enabling mock implementations for prototyping and real adapters for production
-- **Two-Tier Constraint Hierarchy** — Absolute safety invariants (gender cohorting, airborne isolation) are non-overridable; operational constraints (ward class, portable telemetry) permit coordinator override with mandatory institutional reason codes
-- **Safety-First Discordance Engine** — When ED attending and specialist disagree on acuity, the system automatically escalates to the higher tier and unions telemetry requirements
-- **Dual-Pathway Observability** — Every operational KPI is extractable via both SQL queries (for BI dashboards) and structured log parsing (for real-time SIEM alerting)
+- **Gateway / Adapter Pattern** — EHR integration, sister hospital transfers, and constraint solvers are behind swappable interfaces. Prototype mocks are fully functional; production adapters are defined as interface contracts (stubbed) pending real integration endpoints. See [Implementation Status](#implementation-status) for details.
+- **Two-Tier Constraint Hierarchy** `[IMPLEMENTED]` — Absolute safety invariants (gender cohorting, airborne isolation) are non-overridable; operational constraints (ward class, portable telemetry) permit coordinator override with mandatory institutional reason codes
+- **Safety-First Discordance Engine** `[IMPLEMENTED]` — When ED attending and specialist disagree on acuity, the system automatically escalates to the higher tier and unions telemetry requirements
+- **Dual-Pathway Observability** `[IMPLEMENTED]` — Every operational KPI is extractable via both SQL queries (for BI dashboards) and structured log parsing (for real-time SIEM alerting)
 
-**3 API Controllers, 0 phone calls:**
+**3 clinical workflow controllers + 1 analytics dashboard — zero phone calls between ED, BMU, and ward staff:**
 
 - `ClinicianController` — ED assessment, specialist broadcast, consult evaluation
 - `BmuController` — Bed allocation, constraint validation, diversion routing
 - `PatientTrackerController` — Public milestone tracking, financial explainer, support hotlines
+- `KpiAnalyticsController` — 18 operational KPI metrics with dual-pathway extraction
+
+### Implementation Status
+
+The domain patterns (constraint hierarchy, discordance engine, consensus gate, observability) are **fully implemented and tested with >90% coverage**. The integration patterns (EHR, sister hospital, solver, auth) are **architecturally complete** — interfaces and mock adapters exist and run — with production adapters stubbed pending real infrastructure.
 
 > 📐 **[Full Architecture Deep Dive →](docs/architecture.md)** — 10 architectural dimensions with prototype vs production comparisons
 >
-> 🗺️ **[Production Roadmap →](docs/production-roadmap.md)** — Reliability, observability, security, and integration targets (already designed in `.wayfinder/tickets/`)
+> 🗺️ **[Production Roadmap →](docs/production-roadmap.md)** — Reliability, observability, security, and integration targets
+
+---
+
+## What's Production-Grade Today
+
+These components are **fully implemented, tested, and profile-independent** — identical logic runs regardless of whether the prototype or production profile is active:
+
+- ✅ **Bed state machine** — 4-state lifecycle (White → Green → Grey → Mustard Yellow → White) with strict transition gates
+- ✅ **Two-tier constraint hierarchy** — Absolute safety invariants (gender cohorting, airborne isolation) are non-overridable; operational constraints permit coordinator override with mandatory reason codes
+- ✅ **Safety-first discordance engine** — Highest acuity wins, telemetry requirements are unioned
+- ✅ **Consensus completion gate** — All specialist broadcasts must resolve before BMU dispatch
+- ✅ **Optimistic locking** — `@Version` annotations prevent concurrent specialist claim races (HTTP 409 Conflict)
+- ✅ **Structured audit log format** — Identical MDC context and log structure; only the log destination changes between prototype (stdout) and production (SIEM)
+- ✅ **18 operational KPI calculations** — Computed via JPA queries in `KpiMetricsService`, verified for mathematical parity with structured log extraction
+- ✅ **API contracts and error handling** — RFC 7807 `ProblemDetail` responses; identical contract regardless of profile
+- ✅ **Heuristic constraint solver** — 4 hard constraints + 3 soft scoring rules, pure Java, <50ms synchronous evaluation
+
+## What's Designed but Stubbed for Production
+
+These components are **not implemented** — they are architectural placeholders demonstrating where production integration points would connect. The prototype deliberately uses simplified alternatives to keep the focus on domain logic validation. The interfaces and profile boundary are designed so that production work is additive — new adapter implementations behind existing interfaces, not architectural changes. Each adapter can be implemented independently without touching domain logic or other adapters.
+
+| Component | Prototype Simplified Alternative | Production Target (Designed, Not Implemented) | Relevant Ticket |
+| --- | --- | --- | --- |
+| **Hospital EHR** | `MockHospitalEhrGateway` — synthetic data for P101–P104 | `FhirHospitalEhrGateway` — HAPI FHIR R4 client, mTLS, SMART on FHIR `[STUBBED]` | [Ticket 008](.wayfinder/tickets/008-live-hospital-ehr-fhir-ingestion-pipeline.md) |
+| **Sister Hospital Transfers** | `MockSisterHospitalGateway` — simulated 30-min SLA acceptance | `HttpSisterHospitalGateway` — Resilience4j circuit breakers, mTLS REST `[STUBBED]` | [Ticket 007](.wayfinder/tickets/007-sister-hospital-gateway-and-prototype-profile.md) |
+| **Constraint Solver** | `HeuristicBedAllocationSolver` — pure Java, synchronous `[IMPLEMENTED]` | `TimefoldBedAllocationSolver` — continuous daemon, multi-hospital clusters `[STUBBED]` | [Ticket 010](.wayfinder/tickets/010-advanced-constraint-solver-migration.md) |
+| **Authentication** | `PrototypeSecurityFilter` — header-driven `X-User-Role` switching | Spring Security OAuth2/JWT + Singpass OIDC `[STUBBED]` | [Ticket 009](.wayfinder/tickets/009-enterprise-security-rbac-and-im8-audit.md) |
+| **Database** | H2 in-memory with `create-drop` + seed data | Clustered PostgreSQL + Flyway migrations (driver included, not configured) | [Ticket 001](.wayfinder/tickets/001-data-model-and-domain-entities.md) |
+| **Real-Time Push** | REST + TanStack Query polling (3s interval) | WebSocket / STOMP message broker | [Ticket 003](.wayfinder/tickets/003-realtime-event-notification-mechanism.md) |
+| **Audit Log Destination** | Structured SLF4J/MDC to stdout, parsed via CLI scripts | Enterprise SIEM (CloudWatch/Splunk) + WORM storage | [Ticket 009](.wayfinder/tickets/009-enterprise-security-rbac-and-im8-audit.md) |
+| **Patient Notifications** | In-app milestone polling + simulation endpoint | SMS / WhatsApp via hospital notification gateways | [Ticket 006](.wayfinder/tickets/006-tracer-bullet-2-patient-tracker-and-turnover-loop.md) |
 
 ---
 
 ## Testing & Quality
 
-Testing follows a **deliberate pyramid strategy**: >90% line coverage across both frontend (Vitest + V8) and backend (JUnit 5 + JaCoCo), concentrated at the unit and integration test layers where domain invariants provide the highest confidence-per-test.
+Testing follows a **deliberate pyramid strategy**: >90% line coverage across both frontend (Vitest + V8) and backend (JUnit 5 + JaCoCo), concentrated at the unit and integration test layers where domain invariants provide the highest confidence-per-test. Coverage is measured against the prototype profile — the code that actually executes. Production adapter stubs are tested to verify they fail-fast with `UnsupportedOperationException`, confirming the profile boundary contract.
 
 **What's tested at the domain layer:**
 
@@ -180,7 +219,7 @@ This philosophy is codified in a [reusable engineering standard](.agents/skills/
 - **3 controllers** — not 30. Consolidated API surface using native Spring ProblemDetail error handling
 - **0 custom UI primitives** — shadcn/ui + Base UI provide all components
 - **0 hand-rolled HTTP/CSRF/cache handling** — framework defaults and TanStack Query handle everything
-- **No single-implementation interfaces** — concrete service classes directly, not `FooService` / `FooServiceImpl`
+- **No single-implementation interfaces** — concrete service classes directly, not `FooService` / `FooServiceImpl`. Interfaces are used only where genuine runtime polymorphism exists: gateway adapters and solver strategies that swap between prototype mocks and production implementations via Spring profiles.
 
 ---
 
@@ -211,6 +250,6 @@ I used AI coding agents as a development accelerator throughout this project. Th
 | **Backend** | Spring Boot 4.1, Java 25, Spring Security, Spring Data JPA, Bean Validation, Lombok |
 | **Frontend** | React 19, TypeScript 6, TanStack Router + Query + Table, shadcn/ui, Tailwind CSS 4, Vite 8 |
 | **Testing** | JUnit 5, JaCoCo, Vitest 5, Testing Library, happy-dom |
-| **Database** | H2 (prototype), PostgreSQL (production) |
+| **Database** | H2 in-memory (prototype profile) · PostgreSQL (production target — driver included, schema/migration not yet configured) |
 | **Deployment** | Docker (multi-stage), Render |
 | **Linting** | oxlint (frontend) |

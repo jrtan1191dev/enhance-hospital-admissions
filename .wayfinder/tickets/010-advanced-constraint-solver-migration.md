@@ -49,7 +49,7 @@ public interface BedAllocationSolver {
 
 ### 3. Updated Component Matrix
 
-| Capability / Interface | `@Profile("prototype")` Implementation | Default (Production-Ready) Implementation |
+| Capability / Interface | `@Profile("prototype")` Implementation `[IMPLEMENTED]` | Default Implementation `[STUBBED — requires production infrastructure]` |
 | :--- | :--- | :--- |
 | **`BedAllocationSolver`** | `HeuristicBedAllocationSolver` (Pure Java 2-phase heuristic engine, synchronous <50ms) | `TimefoldBedAllocationSolver` (Continuous Timefold / OptaPlanner constraint engine for regional clusters) |
 | **`HospitalEhrGateway`** | `MockHospitalEhrGateway` (synthetic baseline DTOs for P101–P104) | `FhirHospitalEhrGateway` (HAPI FHIR R4 client ingesting live EHR resources) |
@@ -58,3 +58,17 @@ public interface BedAllocationSolver {
 | **Audit Logging** | Real structured log statements with seeded usernames | Real structured log statements shipped to immutable SIEM |
 | **Database** | In-Memory H2 DB (`create-drop`) | Clustered PostgreSQL with managed migrations |
 | **Seed Dataset** | Active (`DataInitializer` for Ward 8A, 8B, 9A & P101–P104) | Disabled (live patient records via EHR feeds) |
+
+---
+
+### 4. Prototype Implementation Divergence Notes
+
+> [!NOTE]
+> The following divergences exist between this specification and the implemented prototype code:
+
+| Specified | Implemented | Rationale |
+| --- | --- | --- |
+| `computeRecommendations(UUID admissionRequestId, BmuAlgorithmConfig config)` | `recommendBeds(AdmissionRequest request, BmuAlgorithmConfig config)` | The prototype passes the full `AdmissionRequest` entity directly instead of a UUID lookup. This avoids an extra repository fetch in the synchronous heuristic solver and simplifies the prototype's single-JVM execution model. Production would use UUID for cross-service communication. |
+| `detectBatchHoldingOpportunities(BmuAlgorithmConfig config)` | Not implemented | Batch holding detection is specified for the Timefold continuous solver. The prototype's synchronous heuristic solver evaluates on-demand per admission request rather than continuously monitoring holding opportunities. |
+| `detectCohortSwaps(BmuAlgorithmConfig config)` | Not implemented | Cohort swap detection requires continuous background optimization. Deferred to the Timefold solver implementation. |
+| `TimefoldBedAllocationSolver` labelled "Production-Ready" | Stub throwing `UnsupportedOperationException` | The interface contract and `@Profile("!prototype")` wiring exist to enforce the architectural boundary. The actual Timefold integration requires solver licensing, continuous daemon configuration, and HL7 ADT event triggers that do not exist in a prototype context. |

@@ -33,7 +33,7 @@ npm run dev
 
 The frontend starts on `http://localhost:5173` with Vite hot-reload.
 
-## Quick Start — Single JAR (Production Build)
+## Quick Start — Single JAR (Full Build)
 
 The Maven build uses `frontend-maven-plugin` to compile the React frontend into static assets bundled inside the Spring Boot JAR:
 
@@ -44,6 +44,9 @@ java -Dspring.profiles.active=prototype -jar target/admissions-0.0.1-SNAPSHOT.ja
 ```
 
 Access the full application at `http://localhost:8080`.
+
+> [!NOTE]
+> The `prototype` profile is required for local execution. A true production deployment would replace this with a production profile providing PostgreSQL, OAuth2, and live gateway configuration.
 
 ## Docker
 

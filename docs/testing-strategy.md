@@ -31,7 +31,7 @@ flowchart TD
 - **Test Slices**: `@WebMvcTest` for controller contract tests, `@DataJpaTest` for entity and repository tests
 - **Security Testing**: `spring-boot-starter-security-test` for filter and RBAC verification
 - **Validation Testing**: `spring-boot-starter-validation-test` for bean validation
-- **Coverage**: JaCoCo (>90% line coverage)
+- **Coverage**: JaCoCo (>90% line coverage). Coverage is measured against the prototype profile — the code that actually executes. Production adapter stubs are tested to verify they fail-fast with `UnsupportedOperationException`, confirming the profile boundary contract.
 - **Report**: `backend/target/site/jacoco/index.html`
 
 ### What's Tested

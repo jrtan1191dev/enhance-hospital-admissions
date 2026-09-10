@@ -50,9 +50,22 @@ public interface HospitalEhrGateway {
 
 ### 4. Extension of Profile Component Matrix
 
-| Component / Interface | `@Profile("prototype")` Implementation | Default (Production-Ready) Implementation |
+| Component / Interface | `@Profile("prototype")` Implementation `[IMPLEMENTED]` | Default Implementation `[STUBBED — requires production infrastructure]` |
 | :--- | :--- | :--- |
 | **`HospitalEhrGateway`** | `MockHospitalEhrGateway` (synthetic baseline DTOs for P101–P104) | `FhirHospitalEhrGateway` (HAPI FHIR R4 client ingesting live EHR resources) |
 | **`SisterHospitalGateway`** | `MockSisterHospitalGateway` (synthetic referral IDs & 30-min SLA timer) | `HttpSisterHospitalGateway` (real mTLS REST / FHIR calls) |
 | **`DataInitializer`** | Active (Ward 8A, 8B, 9A & P101–P104) | Inactive (patient data from live EHR feeds) |
 | **Database** | In-Memory H2 DB (`create-drop`) | Clustered PostgreSQL with managed migrations |
+
+---
+
+### 5. Prototype Implementation Divergence Notes
+
+> [!NOTE]
+> The following divergences exist between this specification and the implemented prototype code:
+
+| Specified | Implemented | Rationale |
+| --- | --- | --- |
+| `getPatientClinicalSummary(UUID patientId)` | `fetchEhrSummary(String nric)` | The prototype uses NRIC (national ID) instead of UUID as the patient lookup key. NRIC is human-readable and demo-friendly for prototype walkthroughs; UUID is a long opaque string unsuitable for live demonstrations. Production modification is needed when finalised for production build. |
+| `fetchPendingAdmissionOrders()` | Not implemented | Deferred — admission orders are seeded directly via `DataInitializer` in the prototype. |
+| `FhirHospitalEhrGateway` labelled "Production-Ready" | Stub throwing `UnsupportedOperationException` | The interface contract and `@Profile("!prototype")` wiring exist to enforce the architectural boundary. The actual FHIR R4 client implementation requires live FHIR server infrastructure, HAPI FHIR dependencies, and mTLS configuration that do not exist in a prototype context. |

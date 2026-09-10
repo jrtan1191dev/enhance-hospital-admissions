@@ -21,7 +21,175 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
-import { Stethoscope, CheckCircle2, AlertCircle, AlertTriangle, HeartPulse, ShieldAlert, Sparkles, Users, Clock } from 'lucide-react';
+import { Stethoscope, CheckCircle2, AlertCircle, AlertTriangle, HeartPulse, ShieldAlert, Sparkles, Users, Clock, ChevronDown, MessageSquareQuote, Copy, Check, ClipboardList } from 'lucide-react';
+
+const DELAY_REASON_LABELS: Record<DelayReasonCode, string> = {
+  HOUSEKEEPING_DELAY: 'Housekeeping Delay',
+  BED_SHORTAGE: 'Bed Shortage',
+  SPECIALIZED_ISOLATION_CLEANING: 'Specialized Cleaning',
+  SURGE_TRAUMA_EVENT: 'Surge Trauma Event',
+};
+
+function formatDelayReason(tag: string): string {
+  if (tag in DELAY_REASON_LABELS) {
+    return DELAY_REASON_LABELS[tag as DelayReasonCode];
+  }
+  return tag.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+interface BmuOperationNoteProps {
+  note: string;
+}
+
+/**
+ * BmuOperationNote component provides an accessible, overflow-contained presentation
+ * of internal Bed Management Unit operational delay notes.
+ * Adheres to Modern Web Guidance: bounded vertical scrolling (max-h-28 with thin scrollbars),
+ * unbreakable token handling (break-words), newline preservation (whitespace-pre-wrap),
+ * keyboard scroll focus (tabIndex={0}), and one-click clipboard copy with visual confirmation.
+ */
+export function BmuOperationNote({ note }: BmuOperationNoteProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(note);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Graceful degradation when clipboard API is unavailable
+    }
+  };
+
+  return (
+    <div className="mt-2 w-full max-w-[290px] min-w-0 rounded-md border border-slate-200/90 bg-white/95 p-2 shadow-2xs text-xs space-y-1.5 border-l-3 border-l-blue-500">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-[10px] font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1">
+          <ClipboardList className="h-3 w-3 text-blue-600 shrink-0" />
+          BMU Operation Note
+        </span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+          title="Copy BMU note to clipboard"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3 w-3 text-emerald-600" />
+              <span className="text-emerald-700">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-3 w-3 text-slate-500" />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+      <div
+        tabIndex={0}
+        aria-label="BMU operational delay note content"
+        className="rounded bg-slate-50 border border-slate-200/80 p-2 text-[11px] text-slate-700 font-mono leading-relaxed break-words whitespace-pre-wrap max-h-28 overflow-y-auto [scrollbar-width:thin] focus:ring-1 focus:ring-blue-400 focus:outline-none"
+      >
+        {note}
+      </div>
+    </div>
+  );
+}
+
+interface FamilyTalkingPointsProps {
+  delayReasonTag: string;
+  operationalDelayReason?: string;
+}
+
+/**
+ * FamilyTalkingPoints component provides an accessible, non-overflowing
+ * inline disclosure (<details>/<summary>) for clinical delay communication scripts.
+ * Adheres to Modern Web Guidance: native semantic disclosure without JS accordion state,
+ * zero interactive elements inside summary, and responsive typography with word wrapping.
+ */
+export function FamilyTalkingPoints({
+  delayReasonTag,
+  operationalDelayReason,
+}: FamilyTalkingPointsProps) {
+  const [copied, setCopied] = useState(false);
+
+  const talkingPoints =
+    DELAY_REASON_TALKING_POINTS[delayReasonTag as DelayReasonCode] ||
+    operationalDelayReason ||
+    'Operational delays are currently being managed by central bed coordination.';
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(talkingPoints);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Graceful degradation when clipboard API is unavailable
+    }
+  };
+
+  const friendlyReason = formatDelayReason(delayReasonTag);
+  const showBmuNote = Boolean(operationalDelayReason && operationalDelayReason !== talkingPoints);
+
+  return (
+    <details className="group mt-1.5 w-full max-w-[290px] min-w-0 rounded-lg border border-amber-200/80 bg-amber-50/70 text-slate-800 transition-all text-xs">
+      <summary
+        className="list-none [&::-webkit-details-marker]:hidden flex items-center justify-between gap-1.5 p-2 cursor-pointer select-none hover:bg-amber-100/60 rounded-lg focus-visible:outline-2 focus-visible:outline-amber-500 transition-colors"
+        aria-label={`Family talking points for ${friendlyReason}`}
+      >
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+          <span className="font-semibold text-amber-950 truncate text-[11px]" title={`Operational Delay: ${friendlyReason}`}>
+            Delay: {friendlyReason}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0 text-[10px] font-medium text-amber-800 bg-amber-200/50 px-1.5 py-0.5 rounded">
+          <span>Script</span>
+          <ChevronDown className="h-3 w-3 transition-transform duration-200 group-open:rotate-180" />
+        </div>
+      </summary>
+
+      <div className="p-2.5 pt-0 space-y-2 border-t border-amber-200/50 mt-1">
+        <div className="flex items-center justify-between gap-1 pt-1.5">
+          <span className="text-[10px] font-semibold text-amber-900 uppercase tracking-wider flex items-center gap-1">
+            <MessageSquareQuote className="h-3.5 w-3.5 text-amber-700" />
+            Family Talking Points
+          </span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-800 hover:text-amber-950 bg-white hover:bg-amber-100/80 border border-amber-300/80 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+            title="Copy script to clipboard"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3 w-3 text-emerald-600" />
+                <span className="text-emerald-700">Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3 text-amber-700" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <blockquote className="bg-white/95 rounded border border-amber-200/80 border-l-3 border-l-amber-500 p-2 text-[11px] text-slate-700 italic leading-relaxed break-words whitespace-normal shadow-2xs">
+          "{talkingPoints}"
+        </blockquote>
+
+        {showBmuNote && (
+          <BmuOperationNote note={operationalDelayReason!} />
+        )}
+      </div>
+    </details>
+  );
+}
 
 export function EdRoute() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -384,23 +552,14 @@ export function EdRoute() {
                               Auto-Escalated
                             </Badge>
                           )}
-                          {admission.delayReasonTag && (
-                            <div className="mt-1 p-2 bg-amber-50 border border-amber-200 rounded text-[11px] space-y-1 max-w-[280px]">
-                              <div className="font-semibold text-amber-900 flex items-center gap-1">
-                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                                <span>Operational Delay: {admission.delayReasonTag}</span>
-                              </div>
-                              <p className="text-[10px] text-slate-700 leading-tight">
-                                <strong className="text-slate-900">Family Talking Points: </strong>
-                                {DELAY_REASON_TALKING_POINTS[admission.delayReasonTag as DelayReasonCode] || admission.operationalDelayReason}
-                              </p>
-                              {admission.operationalDelayReason && (
-                                <p className="text-[9px] text-slate-500 italic">
-                                  BMU Note: {admission.operationalDelayReason}
-                                </p>
-                              )}
-                            </div>
-                          )}
+                          {admission.delayReasonTag ? (
+                            <FamilyTalkingPoints
+                              delayReasonTag={admission.delayReasonTag}
+                              operationalDelayReason={admission.operationalDelayReason}
+                            />
+                          ) : admission.operationalDelayReason ? (
+                            <BmuOperationNote note={admission.operationalDelayReason} />
+                          ) : null}
                         </div>
                       </TableCell>
                       <TableCell className="py-3 text-xs font-mono font-medium text-slate-700">

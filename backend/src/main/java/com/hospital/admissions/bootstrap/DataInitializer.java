@@ -189,7 +189,7 @@ public class DataInitializer implements CommandLineRunner {
                 .wardClass(WardClass.C)
                 .lockedGender(Gender.FEMALE)
                 .serviceCluster(SpecialtyCluster.GENERAL_MEDICINE)
-                .capacity(2)
+                .capacity(3)
                 .build());
 
         Bed bed9A01 = bedRepository.save(Bed.builder()
@@ -209,6 +209,52 @@ public class DataInitializer implements CommandLineRunner {
                 .hasTelemetry(false)
                 .cleaningStartedAt(LocalDateTime.now().minusHours(4).minusMinutes(20))
                 .lastCleanedAt(LocalDateTime.now().minusHours(4))
+                .build());
+
+        // Breached turnover task (>30 mins elapsed, overdue alert)
+        bedRepository.save(Bed.builder()
+                .ward(ward9A)
+                .bedNumber("9A-03")
+                .status(BedStatus.EMPTY_PENDING_CLEANING)
+                .isNearNursingStation(false)
+                .hasTelemetry(false)
+                .cleaningStartedAt(LocalDateTime.now().minusMinutes(38))
+                .build());
+
+        // ---- Ward 9B: Level 9 / General Medicine / Class B2 / Flex Unlocked (Dynamic Cohort-Swap Scenario) ----
+        Ward ward9B = wardRepository.save(Ward.builder()
+                .level(9)
+                .name("Ward 9B")
+                .wardClass(WardClass.B2)
+                .lockedGender(null)
+                .serviceCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .capacity(3)
+                .build());
+
+        bedRepository.save(Bed.builder()
+                .ward(ward9B)
+                .bedNumber("9B-01")
+                .status(BedStatus.EMPTY_ASSIGNED)
+                .isNearNursingStation(true)
+                .hasTelemetry(false)
+                .build());
+
+        bedRepository.save(Bed.builder()
+                .ward(ward9B)
+                .bedNumber("9B-02")
+                .status(BedStatus.EMPTY_CLEANED)
+                .isNearNursingStation(false)
+                .hasTelemetry(false)
+                .lastCleanedAt(LocalDateTime.now().minusHours(2))
+                .build());
+
+        bedRepository.save(Bed.builder()
+                .ward(ward9B)
+                .bedNumber("9B-03")
+                .status(BedStatus.EMPTY_CLEANED)
+                .isNearNursingStation(false)
+                .hasTelemetry(false)
+                .lastCleanedAt(LocalDateTime.now().minusHours(1))
                 .build());
 
         // ---- Ward 10A: Level 10 / Surgery / Class B2 / Locked Male ----
@@ -240,13 +286,14 @@ public class DataInitializer implements CommandLineRunner {
                 .lastCleanedAt(LocalDateTime.now().minusHours(1))
                 .build());
 
+        // Approaching SLA turnover task (24 mins elapsed, 6 mins remaining, urgent warning)
         bedRepository.save(Bed.builder()
                 .ward(ward10A)
                 .bedNumber("10A-03")
                 .status(BedStatus.EMPTY_PENDING_CLEANING)
                 .isNearNursingStation(true)
                 .hasTelemetry(false)
-                .cleaningStartedAt(LocalDateTime.now().minusMinutes(8))
+                .cleaningStartedAt(LocalDateTime.now().minusMinutes(24))
                 .build());
 
         // ---- Ward 10B: Level 10 / Orthopaedics / Class B1 / Locked Female ----
@@ -389,9 +436,11 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(2).minusHours(5).plusMinutes(25))
                 .admittedAt(LocalDateTime.now().minusDays(2).minusHours(5).plusMinutes(50))
                 .waitingInEd(false)
-                .edd(today.plusDays(1))
+                .edd(today)
                 .eddConfidence(EddConfidence.HIGH)
-                .eddRationale("Wound dressing dry, drain removed, discharge planned tomorrow")
+                .eddRationale("Wound dressing dry, drain removed; morning sign-off complete, pharmacy packing discharge meds")
+                .dischargeSignoffAt(LocalDateTime.now().minusMinutes(45))
+                .medicationDeliveryStatus(MedicationDeliveryStatus.PACKING_IN_PROGRESS)
                 .build());
 
         admissionRequestRepository.save(AdmissionRequest.builder()
@@ -407,9 +456,11 @@ public class DataInitializer implements CommandLineRunner {
                 .allocatedAt(LocalDateTime.now().minusDays(1).minusHours(6).plusMinutes(18))
                 .admittedAt(LocalDateTime.now().minusDays(1).minusHours(6).plusMinutes(40))
                 .waitingInEd(false)
-                .edd(today.plusDays(2))
+                .edd(today)
                 .eddConfidence(EddConfidence.HIGH)
-                .eddRationale("Physiotherapy transfer cleared, step-down walk approved")
+                .eddRationale("Physiotherapy transfer cleared; discharge medications received at bedside, ready to vacate")
+                .dischargeSignoffAt(LocalDateTime.now().minusHours(2))
+                .medicationDeliveryStatus(MedicationDeliveryStatus.DELIVERED_BEDSIDE)
                 .build());
 
         // Past discharge
@@ -439,7 +490,7 @@ public class DataInitializer implements CommandLineRunner {
                 .waitingInEd(false)
                 .build());
 
-        log.info("[PROTOTYPE SEEDER] Seeded Wards 8A/8B/9A/10A/10B/11A, {} beds, and inpatient admission requests.", bedRepository.count());
+        log.info("[PROTOTYPE SEEDER] Seeded Wards 8A/8B/9A/9B/10A/10B/11A, {} beds, and inpatient admission requests.", bedRepository.count());
     }
 
     // -------------------------------------------------------------------------
@@ -797,6 +848,149 @@ public class DataInitializer implements CommandLineRunner {
                 .queueToken("TOKEN-P109")
                 .build());
 
-        log.info("[PROTOTYPE SEEDER] Seeded ED patients P101-P111: BED_REQUESTED (P101/P107/P111), ASSESSMENT_PENDING+broadcasts (P102/P105), BED_ALLOCATED in-transit (P110), DIVERTED_HAH (P106), discordant consult (P105), delay tag (P111), clean test-reserved (P103/P104), awaiting-assessment (P108/P109).");
+        // ------------------------------------------------------------------
+        // P112 — Male, CARDIOLOGY, Tier 3, BED_REQUESTED
+        //        Completes 3-patient surge cluster with P101 & P107 (Male, Class B2, Non-infectious)
+        //        Scenario: triggers Batch Holding Ward Suggestion card for Ward 8B
+        // ------------------------------------------------------------------
+        Patient p112 = patientRepository.save(Patient.builder()
+                .name("Mr Teo Hock Seng")
+                .nricMasked("S****843V")
+                .age(58)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(15)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-P112")
+                .build());
+
+        admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(p112)
+                .suspectedDiagnosisService(SpecialtyCluster.CARDIOLOGY)
+                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .primaryTelemetry(false)
+                .effectiveTelemetry(false)
+                .requestedWardClass(WardClass.B2)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .isRecommendationAccepted(true)
+                .waitingInEd(true)
+                .requestedAt(LocalDateTime.now().minusMinutes(20))
+                .build());
+
+        // ------------------------------------------------------------------
+        // P115 — Male, CARDIOLOGY, Tier 3, BED_ALLOCATED to Bed 9B-01 (waitingInEd = true)
+        //        Blocks flex Ward 9B with single isolated Green reservation.
+        //        Candidate transfer bed Ward 8A Bed 8A-03 is partially occupied and clean.
+        //        Scenario: triggers Dynamic Cohort-Swap Proposal card on BMU dashboard
+        // ------------------------------------------------------------------
+        Patient p115 = patientRepository.save(Patient.builder()
+                .name("Mr David Koh")
+                .nricMasked("S****719K")
+                .age(61)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(20)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-P115")
+                .build());
+
+        Bed bed9B01 = bedRepository.findAll().stream()
+                .filter(b -> b.getBedNumber().equals("9B-01"))
+                .findFirst()
+                .orElseThrow();
+        bed9B01.setStatus(BedStatus.EMPTY_ASSIGNED);
+        bed9B01.setCurrentPatient(p115);
+        bedRepository.save(bed9B01);
+
+        admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(p115)
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                .primaryTelemetry(false)
+                .effectiveTelemetry(false)
+                .requestedWardClass(WardClass.B2)
+                .status(AdmissionStatus.BED_ALLOCATED)
+                .assignedBed(bed9B01)
+                .isRecommendationAccepted(true)
+                .waitingInEd(true)
+                .requestedAt(LocalDateTime.now().minusMinutes(55))
+                .allocatedAt(LocalDateTime.now().minusMinutes(10))
+                .build());
+
+        // ------------------------------------------------------------------
+        // P116 — Male, GENERAL_MEDICINE, Tier 4 Subacute Post-Stroke, Sister Hospital Referral
+        //        Scenario: active bilateral 30-minute SLA countdown to Outram Community Hospital (OCH)
+        //                  in BMU; renders Financial & Care Explainer card in Patient Tracker
+        // ------------------------------------------------------------------
+        Patient p116 = patientRepository.save(Patient.builder()
+                .name("Mr Ahmad Ibrahim")
+                .nricMasked("S****418L")
+                .age(71)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(35)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-P116")
+                .build());
+
+        admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(p116)
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_4_SUBACUTE_DIVERSION)
+                .effectiveAcuityTier(AcuityTier.TIER_4_SUBACUTE_DIVERSION)
+                .primaryTelemetry(false)
+                .effectiveTelemetry(false)
+                .requestedWardClass(WardClass.B2)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .diversionRecommended(true)
+                .diversionPathway(DiversionPathway.COMMUNITY_HOSPITAL)
+                .referralFacility("Outram Community Hospital (OCH)")
+                .sisterHospitalReferralId("REF-OCH-8812")
+                .referralDispatchedAt(LocalDateTime.now().minusMinutes(22))
+                .referralSlaMinutes(30)
+                .isRecommendationAccepted(true)
+                .waitingInEd(true)
+                .requestedAt(LocalDateTime.now().minusMinutes(40))
+                .build());
+
+        // ------------------------------------------------------------------
+        // P118 — Female, GENERAL_MEDICINE, Tier 2 Acute Urgent, Prolonged Wait (>60m SLA)
+        //        Scenario: SPECIALIZED_ISOLATION_CLEANING delay tag + prolonged wait visual alert
+        //                  in BMU queue; empathetic UV sanitization explanation in Patient Tracker
+        // ------------------------------------------------------------------
+        Patient p118 = patientRepository.save(Patient.builder()
+                .name("Mdm Wong Siew Kuan")
+                .nricMasked("S****652W")
+                .age(74)
+                .gender(Gender.FEMALE)
+                .infectionStatus(InfectionStatus.RESPIRATORY)
+                .fallRiskScore(40)
+                .needsTelemetry(false)
+                .queueToken("TOKEN-P118")
+                .build());
+
+        admissionRequestRepository.save(AdmissionRequest.builder()
+                .patient(p118)
+                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                .primaryAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .effectiveAcuityTier(AcuityTier.TIER_2_ACUTE_URGENT)
+                .primaryTelemetry(false)
+                .effectiveTelemetry(false)
+                .requestedWardClass(WardClass.B2)
+                .status(AdmissionStatus.BED_REQUESTED)
+                .isRecommendationAccepted(true)
+                .delayReasonTag(DelayReasonCode.SPECIALIZED_ISOLATION_CLEANING.name())
+                .operationalDelayReason("Specialized isolation room completing mandatory 30-minute UV disinfection cycle for patient safety. Preparing room.")
+                .requestedAt(LocalDateTime.now().minusMinutes(85))
+                .waitingInEd(true)
+                .build());
+
+        log.info("[PROTOTYPE SEEDER] Seeded ED patients P101-P118: BED_REQUESTED (P101/P107/P111/P112/P116/P118), ASSESSMENT_PENDING+broadcasts (P102/P105), BED_ALLOCATED (P110 in-transit, P115 cohort-swap block), DIVERTED_HAH (P106), Sister Hospital OCH referral (P116), discordant consult (P105), delay tags (P111/P118), clean test-reserved (P103/P104), awaiting-assessment (P108/P109).");
     }
 }

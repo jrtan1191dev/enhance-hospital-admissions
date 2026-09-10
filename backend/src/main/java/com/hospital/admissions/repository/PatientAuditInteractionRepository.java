@@ -1,6 +1,6 @@
 package com.hospital.admissions.repository;
 
-import com.hospital.admissions.domain.PatientAuditInteraction;
+import com.hospital.admissions.entity.PatientAuditInteraction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

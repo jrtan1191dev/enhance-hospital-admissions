@@ -1,4 +1,4 @@
-package com.hospital.admissions.domain;
+package com.hospital.admissions.entity;
 
 public enum Gender {
     MALE, FEMALE

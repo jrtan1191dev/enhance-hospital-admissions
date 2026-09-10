@@ -1,13 +1,12 @@
 package com.hospital.admissions.service;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.BmuCapacityForecastDto;
 import com.hospital.admissions.dto.DischargeRunwayDto;
 import com.hospital.admissions.dto.EddUpdateRequest;
 import com.hospital.admissions.dto.TurnoverTaskDto;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.BedRepository;
-import com.hospital.admissions.repository.WardRepository;
 import com.hospital.admissions.security.AuditLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ public class WardService {
 
     private final AdmissionRequestRepository admissionRequestRepository;
     private final BedRepository bedRepository;
-    private final WardRepository wardRepository;
     private final AuditLogger auditLogger;
 
     /**

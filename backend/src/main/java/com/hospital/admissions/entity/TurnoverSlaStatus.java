@@ -1,4 +1,4 @@
-package com.hospital.admissions.domain;
+package com.hospital.admissions.entity;
 
 /**
  * Service level agreement status for 30-minute terminal bed sanitization turnover.

@@ -1,4 +1,4 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

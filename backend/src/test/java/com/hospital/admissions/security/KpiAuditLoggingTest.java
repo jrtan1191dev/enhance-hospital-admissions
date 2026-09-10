@@ -1,6 +1,6 @@
 package com.hospital.admissions.security;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.*;
 import com.hospital.admissions.gateway.SisterHospitalGateway;
 import com.hospital.admissions.repository.*;
@@ -64,7 +64,7 @@ class KpiAuditLoggingTest {
         clinicianService = new ClinicianService(patientRepository, admissionRequestRepository, broadcastRepository, auditLogger);
         bmuService = new BmuService(admissionRequestRepository, bedRepository, wardRepository, configRepository, solver, sisterHospitalGateway, auditLogger);
         trackerService = new PatientTrackerService(patientRepository, admissionRequestRepository, bedRepository, patientAuditInteractionRepository, auditLogger);
-        wardService = new WardService(admissionRequestRepository, bedRepository, wardRepository, auditLogger);
+        wardService = new WardService(admissionRequestRepository, bedRepository, auditLogger);
     }
 
     @AfterEach

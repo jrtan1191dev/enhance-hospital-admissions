@@ -1,6 +1,6 @@
 package com.hospital.admissions.service;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.PatientMilestoneResponse;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.BedRepository;
@@ -125,10 +125,10 @@ public class PatientTrackerService {
         }
 
         java.time.LocalDate edd = optRequest.map(AdmissionRequest::getEdd).orElse(null);
-        com.hospital.admissions.domain.EddConfidence eddConfidence = optRequest.map(AdmissionRequest::getEddConfidence).orElse(null);
-        com.hospital.admissions.domain.MedicationDeliveryStatus medicationStatus = optRequest.map(AdmissionRequest::getMedicationDeliveryStatus).orElse(null);
+        com.hospital.admissions.entity.EddConfidence eddConfidence = optRequest.map(AdmissionRequest::getEddConfidence).orElse(null);
+        com.hospital.admissions.entity.MedicationDeliveryStatus medicationStatus = optRequest.map(AdmissionRequest::getMedicationDeliveryStatus).orElse(null);
         java.time.LocalDateTime dischargeSignoffAt = optRequest.map(AdmissionRequest::getDischargeSignoffAt).orElse(null);
-        com.hospital.admissions.domain.DischargeRunwayStage runwayStage = (edd != null)
+        com.hospital.admissions.entity.DischargeRunwayStage runwayStage = (edd != null)
                 ? WardService.calculateRunwayStage(edd, dischargeSignoffAt, medicationStatus)
                 : null;
 

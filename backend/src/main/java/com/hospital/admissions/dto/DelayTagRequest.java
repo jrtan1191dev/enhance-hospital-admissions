@@ -1,6 +1,6 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.DelayReasonCode;
+import com.hospital.admissions.entity.DelayReasonCode;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

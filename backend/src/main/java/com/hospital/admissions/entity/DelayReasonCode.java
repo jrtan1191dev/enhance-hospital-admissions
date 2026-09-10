@@ -1,4 +1,4 @@
-package com.hospital.admissions.domain;
+package com.hospital.admissions.entity;
 
 public enum DelayReasonCode {
     HOUSEKEEPING_DELAY("Terminal sanitization in progress. Ward bed identified and undergoing infection-control turnover."),

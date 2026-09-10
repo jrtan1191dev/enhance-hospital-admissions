@@ -1,6 +1,6 @@
 package com.hospital.admissions.bootstrap;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Component

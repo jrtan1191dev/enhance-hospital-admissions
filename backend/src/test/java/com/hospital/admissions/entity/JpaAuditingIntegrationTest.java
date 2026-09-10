@@ -1,4 +1,4 @@
-package com.hospital.admissions.domain;
+package com.hospital.admissions.entity;
 
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.PatientRepository;

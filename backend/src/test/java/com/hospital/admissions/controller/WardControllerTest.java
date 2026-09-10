@@ -1,14 +1,13 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
 import tools.jackson.databind.json.JsonMapper;
-import com.hospital.admissions.domain.AdmissionRequest;
-import com.hospital.admissions.domain.DischargeRunwayStage;
-import com.hospital.admissions.domain.EddConfidence;
-import com.hospital.admissions.domain.MedicationDeliveryStatus;
+import com.hospital.admissions.entity.AdmissionRequest;
+import com.hospital.admissions.entity.DischargeRunwayStage;
+import com.hospital.admissions.entity.EddConfidence;
+import com.hospital.admissions.entity.MedicationDeliveryStatus;
 import com.hospital.admissions.dto.BmuCapacityForecastDto;
 import com.hospital.admissions.dto.DischargeRunwayDto;
 import com.hospital.admissions.dto.EddUpdateRequest;
-import com.hospital.admissions.dto.TurnoverTaskDto;
 import com.hospital.admissions.service.WardService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 

@@ -1,12 +1,11 @@
 package com.hospital.admissions.service;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.BmuCapacityForecastDto;
 import com.hospital.admissions.dto.DischargeRunwayDto;
 import com.hospital.admissions.dto.EddUpdateRequest;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.BedRepository;
-import com.hospital.admissions.repository.WardRepository;
 import com.hospital.admissions.security.AuditLogger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,9 +40,6 @@ class WardServiceTest {
     private BedRepository bedRepository;
 
     @Mock
-    private WardRepository wardRepository;
-
-    @Mock
     private AuditLogger auditLogger;
 
     private WardService wardService;
@@ -53,7 +49,7 @@ class WardServiceTest {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken("dr_chen", null, List.of())
         );
-        wardService = new WardService(admissionRequestRepository, bedRepository, wardRepository, auditLogger);
+        wardService = new WardService(admissionRequestRepository, bedRepository, auditLogger);
     }
 
     @AfterEach

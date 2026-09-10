@@ -1,13 +1,17 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.AdmissionStatus;
-import com.hospital.admissions.domain.DiversionPathway;
-import com.hospital.admissions.domain.WardClass;
+import com.hospital.admissions.entity.AdmissionStatus;
+import com.hospital.admissions.entity.DischargeRunwayStage;
+import com.hospital.admissions.entity.DiversionPathway;
+import com.hospital.admissions.entity.EddConfidence;
+import com.hospital.admissions.entity.MedicationDeliveryStatus;
+import com.hospital.admissions.entity.WardClass;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -32,8 +36,8 @@ public class PatientMilestoneResponse {
     private String careGuidance;
     private Boolean diversionRecommended;
     private DiversionPathway diversionPathway;
-    private java.time.LocalDate estimatedDateOfDischarge;
-    private com.hospital.admissions.domain.EddConfidence eddConfidence;
-    private com.hospital.admissions.domain.MedicationDeliveryStatus medicationDeliveryStatus;
-    private com.hospital.admissions.domain.DischargeRunwayStage runwayStage;
+    private LocalDate estimatedDateOfDischarge;
+    private EddConfidence eddConfidence;
+    private MedicationDeliveryStatus medicationDeliveryStatus;
+    private DischargeRunwayStage runwayStage;
 }

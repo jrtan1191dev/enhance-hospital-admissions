@@ -1,7 +1,7 @@
 package com.hospital.admissions.repository;
 
-import com.hospital.admissions.domain.AdmissionRequest;
-import com.hospital.admissions.domain.AdmissionStatus;
+import com.hospital.admissions.entity.AdmissionRequest;
+import com.hospital.admissions.entity.AdmissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

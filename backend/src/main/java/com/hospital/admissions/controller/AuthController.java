@@ -1,4 +1,4 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

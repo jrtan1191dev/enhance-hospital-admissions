@@ -1,8 +1,8 @@
 package com.hospital.admissions.repository;
 
-import com.hospital.admissions.domain.AssessmentBroadcast;
-import com.hospital.admissions.domain.BroadcastStatus;
-import com.hospital.admissions.domain.SpecialtyCluster;
+import com.hospital.admissions.entity.AssessmentBroadcast;
+import com.hospital.admissions.entity.BroadcastStatus;
+import com.hospital.admissions.entity.SpecialtyCluster;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

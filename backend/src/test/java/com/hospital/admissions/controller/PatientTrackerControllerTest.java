@@ -1,8 +1,9 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
-import com.hospital.admissions.domain.Bed;
-import com.hospital.admissions.domain.BedStatus;
-import com.hospital.admissions.domain.Patient;
+import com.hospital.admissions.entity.Bed;
+import com.hospital.admissions.entity.BedStatus;
+import com.hospital.admissions.entity.Patient;
+import com.hospital.admissions.entity.PatientAuditInteraction;
 import com.hospital.admissions.dto.PatientMilestoneResponse;
 import com.hospital.admissions.repository.PatientRepository;
 import com.hospital.admissions.service.PatientTrackerService;
@@ -13,9 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -150,17 +153,16 @@ class PatientTrackerControllerTest {
     @Test
     @DisplayName("POST /api/v1/patients/track/{token}/actions records patient interaction")
     void testRecordPatientAction() throws Exception {
-        com.hospital.admissions.domain.PatientAuditInteraction interaction =
-                com.hospital.admissions.domain.PatientAuditInteraction.builder()
-                        .token("TOKEN-123")
-                        .actionType("MSW_CALL")
-                        .createdAt(java.time.LocalDateTime.now())
-                        .build();
+        PatientAuditInteraction interaction = PatientAuditInteraction.builder()
+                .token("TOKEN-123")
+                .actionType("MSW_CALL")
+                .createdAt(LocalDateTime.now())
+                .build();
 
         when(patientTrackerService.recordPatientAction("TOKEN-123", "MSW_CALL")).thenReturn(interaction);
 
         mockMvc.perform(post("/api/v1/patients/track/TOKEN-123/actions")
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"actionType\":\"MSW_CALL\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("TOKEN-123"))

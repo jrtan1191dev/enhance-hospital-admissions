@@ -1,7 +1,7 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.BedStatus;
-import com.hospital.admissions.domain.Patient;
+import com.hospital.admissions.entity.BedStatus;
+import com.hospital.admissions.entity.Patient;
 
 import java.util.UUID;
 

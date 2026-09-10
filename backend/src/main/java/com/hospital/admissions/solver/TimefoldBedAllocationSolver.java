@@ -1,13 +1,12 @@
 package com.hospital.admissions.solver;
 
-import com.hospital.admissions.domain.AdmissionRequest;
-import com.hospital.admissions.domain.BmuAlgorithmConfig;
+import com.hospital.admissions.entity.AdmissionRequest;
+import com.hospital.admissions.entity.BmuAlgorithmConfig;
 import com.hospital.admissions.dto.BedRecommendation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j

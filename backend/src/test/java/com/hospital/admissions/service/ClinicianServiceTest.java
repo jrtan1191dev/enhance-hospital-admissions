@@ -1,6 +1,6 @@
 package com.hospital.admissions.service;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.EdAssessmentSubmitRequest;
 import com.hospital.admissions.dto.SpecialistConsultRequest;
 import com.hospital.admissions.repository.AdmissionRequestRepository;

@@ -1,4 +1,4 @@
-package com.hospital.admissions.domain;
+package com.hospital.admissions.entity;
 
 import com.hospital.admissions.dto.*;
 import org.junit.jupiter.api.DisplayName;

@@ -1,8 +1,8 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.DischargeRunwayStage;
-import com.hospital.admissions.domain.EddConfidence;
-import com.hospital.admissions.domain.MedicationDeliveryStatus;
+import com.hospital.admissions.entity.DischargeRunwayStage;
+import com.hospital.admissions.entity.EddConfidence;
+import com.hospital.admissions.entity.MedicationDeliveryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

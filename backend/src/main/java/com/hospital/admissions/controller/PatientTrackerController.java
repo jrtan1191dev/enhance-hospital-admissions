@@ -1,7 +1,9 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
-import com.hospital.admissions.domain.Bed;
-import com.hospital.admissions.domain.Patient;
+import com.hospital.admissions.entity.Bed;
+import com.hospital.admissions.entity.Patient;
+import com.hospital.admissions.entity.PatientAuditInteraction;
+import com.hospital.admissions.dto.PatientActionRequest;
 import com.hospital.admissions.dto.PatientMilestoneResponse;
 import com.hospital.admissions.repository.PatientRepository;
 import com.hospital.admissions.service.PatientTrackerService;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,9 +29,9 @@ public class PatientTrackerController {
     }
 
     @PostMapping("/track/{token}/actions")
-    public ResponseEntity<com.hospital.admissions.domain.PatientAuditInteraction> recordPatientAction(
+    public ResponseEntity<PatientAuditInteraction> recordPatientAction(
             @PathVariable String token,
-            @RequestBody com.hospital.admissions.dto.PatientActionRequest request) {
+            @RequestBody PatientActionRequest request) {
         return ResponseEntity.ok(patientTrackerService.recordPatientAction(token, request.getActionType()));
     }
 
@@ -48,9 +51,9 @@ public class PatientTrackerController {
     }
 
     @PostMapping("/simulate-periodic-update")
-    public ResponseEntity<java.util.Map<String, Object>> simulatePeriodicUpdate() {
+    public ResponseEntity<Map<String, Object>> simulatePeriodicUpdate() {
         int count = patientTrackerService.dispatchPeriodicUpdates();
-        return ResponseEntity.ok(java.util.Map.of(
+        return ResponseEntity.ok(Map.of(
                 "status", "SUCCESS",
                 "dispatchedCount", count,
                 "message", "Simulated periodic status updates dispatched to " + count + " waiting patient(s)"

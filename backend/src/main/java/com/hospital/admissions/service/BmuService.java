@@ -1,6 +1,6 @@
 package com.hospital.admissions.service;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.BatchApprovalRequest;
 import com.hospital.admissions.dto.BatchSuggestion;
 import com.hospital.admissions.dto.BedDto;
@@ -772,7 +772,7 @@ public class BmuService {
         bedRepository.save(targetBed);
 
         req.setAssignedBed(targetBed);
-        AdmissionRequest savedReq = admissionRequestRepository.save(req);
+        admissionRequestRepository.save(req);
 
         // Clear flex bed
         if (flexBed != null) {

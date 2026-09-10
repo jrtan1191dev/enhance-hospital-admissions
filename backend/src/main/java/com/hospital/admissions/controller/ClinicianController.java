@@ -1,9 +1,9 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
-import com.hospital.admissions.domain.AdmissionRequest;
-import com.hospital.admissions.domain.AssessmentBroadcast;
-import com.hospital.admissions.domain.Patient;
-import com.hospital.admissions.domain.SpecialtyCluster;
+import com.hospital.admissions.entity.AdmissionRequest;
+import com.hospital.admissions.entity.AssessmentBroadcast;
+import com.hospital.admissions.entity.Patient;
+import com.hospital.admissions.entity.SpecialtyCluster;
 import com.hospital.admissions.dto.EdAssessmentSubmitRequest;
 import com.hospital.admissions.dto.SpecialistConsultRequest;
 import com.hospital.admissions.service.ClinicianService;

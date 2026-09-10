@@ -1,7 +1,7 @@
 package com.hospital.admissions.repository;
 
-import com.hospital.admissions.domain.Bed;
-import com.hospital.admissions.domain.BedStatus;
+import com.hospital.admissions.entity.Bed;
+import com.hospital.admissions.entity.BedStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

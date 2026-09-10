@@ -1,17 +1,11 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
 import tools.jackson.databind.json.JsonMapper;
-import com.hospital.admissions.domain.AdmissionRequest;
-import com.hospital.admissions.domain.BmuAlgorithmConfig;
-import com.hospital.admissions.dto.BedAllocationRequest;
-import com.hospital.admissions.dto.BedRecommendation;
-import com.hospital.admissions.dto.BmuConfigUpdateRequest;
-import com.hospital.admissions.domain.DelayReasonCode;
-import com.hospital.admissions.dto.DelayTagRequest;
-import com.hospital.admissions.dto.DiversionReferralRequest;
-import com.hospital.admissions.dto.SisterHospitalReferralResponse;
-import com.hospital.admissions.dto.WardDto;
+import com.hospital.admissions.dto.*;
+import com.hospital.admissions.entity.*;
+import com.hospital.admissions.exception.SafetyInvariantViolationException;
 import com.hospital.admissions.service.BmuService;
+import com.hospital.admissions.service.WardService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +38,7 @@ class BmuControllerTest {
         private BmuService bmuService;
 
         @Mock
-        private com.hospital.admissions.service.WardService wardService;
+        private WardService wardService;
 
         @InjectMocks
         private BmuController bmuController;
@@ -138,7 +132,7 @@ class BmuControllerTest {
                                 .build();
 
                 when(bmuService.allocateBed(reqId, bedId))
-                                .thenThrow(new com.hospital.admissions.exception.SafetyInvariantViolationException(
+                                .thenThrow(new SafetyInvariantViolationException(
                                                 "Biological gender cohorting violation in multi-bed ward"));
 
                 mockMvc.perform(post("/api/v1/bmu/allocate")
@@ -275,18 +269,18 @@ class BmuControllerTest {
         @DisplayName("POST /api/v1/bmu/requests/{id}/admitting-cluster returns 200 and updated cluster")
         void testAssignAdmittingCluster() throws Exception {
                 UUID reqId = UUID.randomUUID();
-                com.hospital.admissions.dto.AdmittingClusterRequest clusterReq = com.hospital.admissions.dto.AdmittingClusterRequest
+                AdmittingClusterRequest clusterReq = AdmittingClusterRequest
                                 .builder()
-                                .admittingSpecialtyCluster(com.hospital.admissions.domain.SpecialtyCluster.CARDIOLOGY)
+                                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
                                 .build();
 
                 AdmissionRequest updated = AdmissionRequest.builder()
                                 .id(reqId)
-                                .admittingSpecialtyCluster(com.hospital.admissions.domain.SpecialtyCluster.CARDIOLOGY)
+                                .admittingSpecialtyCluster(SpecialtyCluster.CARDIOLOGY)
                                 .build();
 
                 when(bmuService.assignAdmittingCluster(eq(reqId),
-                                eq(com.hospital.admissions.domain.SpecialtyCluster.CARDIOLOGY)))
+                                eq(SpecialtyCluster.CARDIOLOGY)))
                                 .thenReturn(updated);
 
                 mockMvc.perform(post("/api/v1/bmu/requests/" + reqId + "/admitting-cluster")
@@ -300,11 +294,11 @@ class BmuControllerTest {
         @DisplayName("POST /api/v1/bmu/deallocate returns 200 and deallocated request")
         void testDeallocateBed() throws Exception {
                 UUID reqId = UUID.randomUUID();
-                com.hospital.admissions.dto.BedDeallocationRequest deallocReq = new com.hospital.admissions.dto.BedDeallocationRequest(
+                BedDeallocationRequest deallocReq = new BedDeallocationRequest(
                                 reqId);
 
                 AdmissionRequest deallocated = AdmissionRequest.builder().id(reqId)
-                                .status(com.hospital.admissions.domain.AdmissionStatus.BED_REQUESTED).build();
+                                .status(AdmissionStatus.BED_REQUESTED).build();
                 when(bmuService.deallocateBed(reqId)).thenReturn(deallocated);
 
                 mockMvc.perform(post("/api/v1/bmu/deallocate")
@@ -318,9 +312,9 @@ class BmuControllerTest {
         @DisplayName("POST /api/v1/bmu/beds/{bedId}/arrive returns 200 and OCCUPIED_TAKEN bed")
         void testConfirmArrival() throws Exception {
                 UUID bedId = UUID.randomUUID();
-                com.hospital.admissions.domain.Bed bed = com.hospital.admissions.domain.Bed.builder()
+                Bed bed = Bed.builder()
                                 .id(bedId)
-                                .status(com.hospital.admissions.domain.BedStatus.OCCUPIED_TAKEN)
+                                .status(BedStatus.OCCUPIED_TAKEN)
                                 .build();
                 when(bmuService.confirmArrival(bedId)).thenReturn(bed);
 
@@ -333,9 +327,9 @@ class BmuControllerTest {
         @DisplayName("POST /api/v1/bmu/beds/{bedId}/vacate returns 200 and EMPTY_PENDING_CLEANING bed")
         void testVacateBed() throws Exception {
                 UUID bedId = UUID.randomUUID();
-                com.hospital.admissions.domain.Bed bed = com.hospital.admissions.domain.Bed.builder()
+                Bed bed = Bed.builder()
                                 .id(bedId)
-                                .status(com.hospital.admissions.domain.BedStatus.EMPTY_PENDING_CLEANING)
+                                .status(BedStatus.EMPTY_PENDING_CLEANING)
                                 .build();
                 when(bmuService.vacateBed(bedId)).thenReturn(bed);
 
@@ -348,9 +342,9 @@ class BmuControllerTest {
         @DisplayName("POST /api/v1/bmu/beds/{bedId}/clean returns 200 and EMPTY_CLEANED bed")
         void testCleanBed() throws Exception {
                 UUID bedId = UUID.randomUUID();
-                com.hospital.admissions.domain.Bed bed = com.hospital.admissions.domain.Bed.builder()
+                Bed bed = Bed.builder()
                                 .id(bedId)
-                                .status(com.hospital.admissions.domain.BedStatus.EMPTY_CLEANED)
+                                .status(BedStatus.EMPTY_CLEANED)
                                 .build();
                 when(bmuService.signOffCleaning(bedId)).thenReturn(bed);
 
@@ -363,13 +357,13 @@ class BmuControllerTest {
         @DisplayName("GET /api/v1/bmu/batch-suggestions returns 200 and list of suggestions")
         void testGetBatchSuggestions() throws Exception {
                 UUID wardId = UUID.randomUUID();
-                com.hospital.admissions.dto.BatchSuggestion suggestion = com.hospital.admissions.dto.BatchSuggestion
+                BatchSuggestion suggestion = BatchSuggestion
                                 .builder()
                                 .suggestionId("SUGG-1")
                                 .targetWardId(wardId)
                                 .targetWardName("Ward 9C")
-                                .commonWardClass(com.hospital.admissions.domain.WardClass.B2)
-                                .commonGender(com.hospital.admissions.domain.Gender.MALE)
+                                .commonWardClass(WardClass.B2)
+                                .commonGender(Gender.MALE)
                                 .build();
 
                 when(bmuService.getBatchSuggestions()).thenReturn(List.of(suggestion));
@@ -388,20 +382,20 @@ class BmuControllerTest {
                 UUID reqId2 = UUID.randomUUID();
                 UUID reqId3 = UUID.randomUUID();
 
-                com.hospital.admissions.dto.BatchApprovalRequest approval = com.hospital.admissions.dto.BatchApprovalRequest
+                BatchApprovalRequest approval = BatchApprovalRequest
                                 .builder()
                                 .targetWardId(wardId)
                                 .admissionRequestIds(List.of(reqId1, reqId2, reqId3))
                                 .build();
 
                 AdmissionRequest r1 = AdmissionRequest.builder().id(reqId1)
-                                .status(com.hospital.admissions.domain.AdmissionStatus.BED_ALLOCATED).build();
+                                .status(AdmissionStatus.BED_ALLOCATED).build();
                 AdmissionRequest r2 = AdmissionRequest.builder().id(reqId2)
-                                .status(com.hospital.admissions.domain.AdmissionStatus.BED_ALLOCATED).build();
+                                .status(AdmissionStatus.BED_ALLOCATED).build();
                 AdmissionRequest r3 = AdmissionRequest.builder().id(reqId3)
-                                .status(com.hospital.admissions.domain.AdmissionStatus.BED_ALLOCATED).build();
+                                .status(AdmissionStatus.BED_ALLOCATED).build();
 
-                when(bmuService.approveBatchHoldingWard(any(com.hospital.admissions.dto.BatchApprovalRequest.class)))
+                when(bmuService.approveBatchHoldingWard(any(BatchApprovalRequest.class)))
                                 .thenReturn(List.of(r1, r2, r3));
 
                 mockMvc.perform(post("/api/v1/bmu/batch-holding-wards/approve")
@@ -416,7 +410,7 @@ class BmuControllerTest {
         @DisplayName("GET /api/v1/bmu/cohort-swap-suggestions returns 200 and list of suggestions")
         void testGetCohortSwapSuggestions() throws Exception {
                 UUID reqId = UUID.randomUUID();
-                com.hospital.admissions.dto.CohortSwapSuggestion suggestion = com.hospital.admissions.dto.CohortSwapSuggestion
+                CohortSwapSuggestion suggestion = CohortSwapSuggestion
                                 .builder()
                                 .suggestionId("SWAP-1")
                                 .admissionRequestId(reqId)
@@ -440,15 +434,15 @@ class BmuControllerTest {
         void testApproveCohortSwap() throws Exception {
                 UUID reqId = UUID.randomUUID();
                 UUID targetBedId = UUID.randomUUID();
-                com.hospital.admissions.dto.CohortSwapApprovalRequest request = com.hospital.admissions.dto.CohortSwapApprovalRequest
+                CohortSwapApprovalRequest request = CohortSwapApprovalRequest
                                 .builder()
                                 .admissionRequestId(reqId)
                                 .targetBedId(targetBedId)
                                 .build();
 
                 AdmissionRequest result = AdmissionRequest.builder().id(reqId)
-                                .status(com.hospital.admissions.domain.AdmissionStatus.BED_ALLOCATED).build();
-                when(bmuService.approveCohortSwap(any(com.hospital.admissions.dto.CohortSwapApprovalRequest.class)))
+                                .status(AdmissionStatus.BED_ALLOCATED).build();
+                when(bmuService.approveCohortSwap(any(CohortSwapApprovalRequest.class)))
                                 .thenReturn(result);
 
                 mockMvc.perform(post("/api/v1/bmu/cohort-swap/approve")
@@ -463,7 +457,7 @@ class BmuControllerTest {
         void testRecallDiversion() throws Exception {
                 UUID reqId = UUID.randomUUID();
                 AdmissionRequest result = AdmissionRequest.builder().id(reqId)
-                                .status(com.hospital.admissions.domain.AdmissionStatus.BED_REQUESTED).build();
+                                .status(AdmissionStatus.BED_REQUESTED).build();
                 when(bmuService.recallDiversionToAcuteQueue(reqId)).thenReturn(result);
 
                 mockMvc.perform(post("/api/v1/bmu/diversion/" + reqId + "/recall"))
@@ -487,7 +481,7 @@ class BmuControllerTest {
         @DisplayName("POST /api/v1/bmu/diversion/{id}/follow-up returns 200 and updated request")
         void testLogTelephoneFollowUp() throws Exception {
                 UUID reqId = UUID.randomUUID();
-                com.hospital.admissions.dto.FollowUpNoteRequest noteReq = new com.hospital.admissions.dto.FollowUpNoteRequest(
+                FollowUpNoteRequest noteReq = new FollowUpNoteRequest(
                                 "Spoke with partner hospital");
                 AdmissionRequest result = AdmissionRequest.builder().id(reqId)
                                 .operationalDelayReason("Spoke with partner hospital").build();

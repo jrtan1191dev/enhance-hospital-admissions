@@ -1,7 +1,7 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.Gender;
-import com.hospital.admissions.domain.WardClass;
+import com.hospital.admissions.entity.Gender;
+import com.hospital.admissions.entity.WardClass;
 import lombok.*;
 
 import java.util.UUID;

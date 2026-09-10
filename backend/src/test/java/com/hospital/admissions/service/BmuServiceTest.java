@@ -1,6 +1,6 @@
 package com.hospital.admissions.service;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.BedRecommendation;
 import com.hospital.admissions.dto.BmuConfigUpdateRequest;
 import com.hospital.admissions.dto.SisterHospitalReferralResponse;

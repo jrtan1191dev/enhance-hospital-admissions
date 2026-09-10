@@ -1,8 +1,8 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.AcuityTier;
-import com.hospital.admissions.domain.SpecialtyCluster;
-import com.hospital.admissions.domain.WardClass;
+import com.hospital.admissions.entity.AcuityTier;
+import com.hospital.admissions.entity.SpecialtyCluster;
+import com.hospital.admissions.entity.WardClass;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

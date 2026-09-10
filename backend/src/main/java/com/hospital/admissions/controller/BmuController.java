@@ -1,15 +1,11 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
-import com.hospital.admissions.domain.AdmissionRequest;
-import com.hospital.admissions.domain.BmuAlgorithmConfig;
-import com.hospital.admissions.dto.WardDto;
-import com.hospital.admissions.dto.BedAllocationRequest;
-import com.hospital.admissions.dto.BedRecommendation;
-import com.hospital.admissions.dto.BmuConfigUpdateRequest;
-import com.hospital.admissions.dto.DelayTagRequest;
-import com.hospital.admissions.dto.DiversionReferralRequest;
-import com.hospital.admissions.dto.SisterHospitalReferralResponse;
+import com.hospital.admissions.entity.AdmissionRequest;
+import com.hospital.admissions.entity.Bed;
+import com.hospital.admissions.entity.BmuAlgorithmConfig;
+import com.hospital.admissions.dto.*;
 import com.hospital.admissions.service.BmuService;
+import com.hospital.admissions.service.WardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +20,10 @@ import java.util.UUID;
 public class BmuController {
 
     private final BmuService bmuService;
-    private final com.hospital.admissions.service.WardService wardService;
+    private final WardService wardService;
 
     @GetMapping("/capacity-forecast")
-    public ResponseEntity<com.hospital.admissions.dto.BmuCapacityForecastDto> getCapacityForecast() {
+    public ResponseEntity<BmuCapacityForecastDto> getCapacityForecast() {
         return ResponseEntity.ok(wardService.getCapacityForecast());
     }
 
@@ -109,49 +105,49 @@ public class BmuController {
     @PostMapping("/requests/{id}/admitting-cluster")
     public ResponseEntity<AdmissionRequest> assignAdmittingCluster(
             @PathVariable UUID id,
-            @Valid @RequestBody com.hospital.admissions.dto.AdmittingClusterRequest request) {
+            @Valid @RequestBody AdmittingClusterRequest request) {
         return ResponseEntity.ok(bmuService.assignAdmittingCluster(id, request.getAdmittingSpecialtyCluster()));
     }
 
     @PostMapping("/deallocate")
-    public ResponseEntity<AdmissionRequest> deallocateBed(@Valid @RequestBody com.hospital.admissions.dto.BedDeallocationRequest request) {
+    public ResponseEntity<AdmissionRequest> deallocateBed(@Valid @RequestBody BedDeallocationRequest request) {
         return ResponseEntity.ok(bmuService.deallocateBed(request.getAdmissionRequestId()));
     }
 
     @PostMapping("/beds/{bedId}/arrive")
-    public ResponseEntity<com.hospital.admissions.domain.Bed> confirmArrival(@PathVariable UUID bedId) {
+    public ResponseEntity<Bed> confirmArrival(@PathVariable UUID bedId) {
         return ResponseEntity.ok(bmuService.confirmArrival(bedId));
     }
 
     @PostMapping("/beds/{bedId}/vacate")
-    public ResponseEntity<com.hospital.admissions.domain.Bed> vacateBed(@PathVariable UUID bedId) {
+    public ResponseEntity<Bed> vacateBed(@PathVariable UUID bedId) {
         return ResponseEntity.ok(bmuService.vacateBed(bedId));
     }
 
     @PostMapping("/beds/{bedId}/clean")
-    public ResponseEntity<com.hospital.admissions.domain.Bed> cleanBed(@PathVariable UUID bedId) {
+    public ResponseEntity<Bed> cleanBed(@PathVariable UUID bedId) {
         return ResponseEntity.ok(bmuService.signOffCleaning(bedId));
     }
 
     @GetMapping("/batch-suggestions")
-    public ResponseEntity<List<com.hospital.admissions.dto.BatchSuggestion>> getBatchSuggestions() {
+    public ResponseEntity<List<BatchSuggestion>> getBatchSuggestions() {
         return ResponseEntity.ok(bmuService.getBatchSuggestions());
     }
 
     @PostMapping("/batch-holding-wards/approve")
     public ResponseEntity<List<AdmissionRequest>> approveBatchHoldingWard(
-            @Valid @RequestBody com.hospital.admissions.dto.BatchApprovalRequest request) {
+            @Valid @RequestBody BatchApprovalRequest request) {
         return ResponseEntity.ok(bmuService.approveBatchHoldingWard(request));
     }
 
     @GetMapping("/cohort-swap-suggestions")
-    public ResponseEntity<List<com.hospital.admissions.dto.CohortSwapSuggestion>> getCohortSwapSuggestions() {
+    public ResponseEntity<List<CohortSwapSuggestion>> getCohortSwapSuggestions() {
         return ResponseEntity.ok(bmuService.getCohortSwapSuggestions());
     }
 
     @PostMapping("/cohort-swap/approve")
     public ResponseEntity<AdmissionRequest> approveCohortSwap(
-            @Valid @RequestBody com.hospital.admissions.dto.CohortSwapApprovalRequest request) {
+            @Valid @RequestBody CohortSwapApprovalRequest request) {
         return ResponseEntity.ok(bmuService.approveCohortSwap(request));
     }
 
@@ -168,7 +164,7 @@ public class BmuController {
     @PostMapping("/diversion/{id}/follow-up")
     public ResponseEntity<AdmissionRequest> logTelephoneFollowUp(
             @PathVariable UUID id,
-            @Valid @RequestBody com.hospital.admissions.dto.FollowUpNoteRequest request) {
+            @Valid @RequestBody FollowUpNoteRequest request) {
         return ResponseEntity.ok(bmuService.logTelephoneFollowUp(id, request.getNotes()));
     }
 

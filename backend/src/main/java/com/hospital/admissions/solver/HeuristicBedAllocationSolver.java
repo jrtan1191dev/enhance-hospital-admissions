@@ -1,9 +1,8 @@
 package com.hospital.admissions.solver;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.BedRecommendation;
 import com.hospital.admissions.repository.BedRepository;
-import com.hospital.admissions.repository.WardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 public class HeuristicBedAllocationSolver implements BedAllocationSolver {
 
     private final BedRepository bedRepository;
-    private final WardRepository wardRepository;
 
     @Override
     public List<BedRecommendation> recommendBeds(AdmissionRequest request, BmuAlgorithmConfig config) {

@@ -1,9 +1,8 @@
 package com.hospital.admissions.solver;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import com.hospital.admissions.dto.BedRecommendation;
 import com.hospital.admissions.repository.BedRepository;
-import com.hospital.admissions.repository.WardRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +21,6 @@ class HeuristicBedAllocationSolverTest {
 
     @Mock
     private BedRepository bedRepository;
-
-    @Mock
-    private WardRepository wardRepository;
 
     @InjectMocks
     private HeuristicBedAllocationSolver solver;

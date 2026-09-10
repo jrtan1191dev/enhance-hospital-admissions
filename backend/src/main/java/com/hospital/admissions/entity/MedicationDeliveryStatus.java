@@ -1,4 +1,4 @@
-package com.hospital.admissions.domain;
+package com.hospital.admissions.entity;
 
 /**
  * Inpatient bedside discharge medication dispensing and delivery status.

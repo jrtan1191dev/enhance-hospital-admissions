@@ -1,6 +1,6 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.EddConfidence;
+import com.hospital.admissions.entity.EddConfidence;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

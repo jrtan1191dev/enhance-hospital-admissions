@@ -1,4 +1,4 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

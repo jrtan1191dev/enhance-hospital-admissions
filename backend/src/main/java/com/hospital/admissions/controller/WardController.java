@@ -1,6 +1,6 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
-import com.hospital.admissions.domain.AdmissionRequest;
+import com.hospital.admissions.entity.AdmissionRequest;
 import com.hospital.admissions.dto.BmuCapacityForecastDto;
 import com.hospital.admissions.dto.DischargeRunwayDto;
 import com.hospital.admissions.dto.EddUpdateRequest;

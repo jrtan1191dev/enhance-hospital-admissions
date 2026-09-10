@@ -1,6 +1,6 @@
 package com.hospital.admissions.dto;
 
-import com.hospital.admissions.domain.TurnoverSlaStatus;
+import com.hospital.admissions.entity.TurnoverSlaStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

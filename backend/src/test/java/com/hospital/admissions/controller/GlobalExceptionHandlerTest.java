@@ -1,4 +1,4 @@
-package com.hospital.admissions.web;
+package com.hospital.admissions.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,10 +21,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import com.hospital.admissions.entity.AssessmentBroadcast;
+import com.hospital.admissions.exception.SafetyInvariantViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 class GlobalExceptionHandlerTest {
 
@@ -83,13 +88,13 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/test/safety-invariant")
         public void throwSafetyInvariant() {
-            throw new com.hospital.admissions.exception.SafetyInvariantViolationException("Biological gender cohorting violation in multi-bed ward");
+            throw new SafetyInvariantViolationException("Biological gender cohorting violation in multi-bed ward");
         }
 
         @GetMapping("/test/optimistic-lock")
         public void throwOptimisticLock() {
-            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(
-                    com.hospital.admissions.domain.AssessmentBroadcast.class, java.util.UUID.randomUUID());
+            throw new ObjectOptimisticLockingFailureException(
+                    AssessmentBroadcast.class, UUID.randomUUID());
         }
     }
 

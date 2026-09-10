@@ -1,6 +1,6 @@
 package com.hospital.admissions;
 
-import com.hospital.admissions.domain.*;
+import com.hospital.admissions.entity.*;
 import tools.jackson.databind.ObjectMapper;
 import com.hospital.admissions.dto.*;
 import com.hospital.admissions.repository.*;

@@ -161,7 +161,7 @@ export function PatientRoute() {
 
       {/* Mobile Simulator Mockup Frame */}
       <div className="flex justify-center py-4">
-        <div className="w-full max-w-[390px] rounded-[3rem] border-[10px] border-slate-900 bg-slate-900 p-2.5 shadow-2xl ring-1 ring-slate-800">
+        <div className="w-full max-w-full sm:max-w-[390px] rounded-2xl sm:rounded-[3rem] border-2 sm:border-[10px] border-slate-900 bg-slate-900 p-1.5 sm:p-2.5 shadow-2xl ring-1 ring-slate-800">
           {/* Top Notch / Dynamic Island */}
           <div className="relative mx-auto mb-2 h-5 w-28 rounded-full bg-slate-950 flex items-center justify-between px-2.5 shadow-inner">
             <div className="h-2 w-2 rounded-full bg-blue-950/80 ring-1 ring-blue-500/20"></div>
@@ -169,7 +169,7 @@ export function PatientRoute() {
           </div>
 
           {/* Screen Container */}
-          <div className="rounded-[2.4rem] bg-slate-50 overflow-hidden min-h-[660px] flex flex-col justify-between p-4 text-slate-900 shadow-inner">
+          <div className="rounded-xl sm:rounded-[2.4rem] bg-slate-50 overflow-hidden min-h-[660px] flex flex-col justify-between p-3 sm:p-4 text-slate-900 shadow-inner">
             {/* iOS Style Top Status Bar */}
             <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700 px-1 pt-0.5 pb-2">
               <span>9:41</span>

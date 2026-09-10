@@ -588,30 +588,32 @@ export function BmuRoute() {
                 <div className="bg-slate-50 px-3 py-2 font-semibold text-slate-800 border-b border-slate-200">
                   Discharge Projections by Ward
                 </div>
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50/50 text-[11px] text-slate-500 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-1.5 font-medium">Ward</th>
-                      <th className="px-3 py-1.5 font-medium">Specialty</th>
-                      <th className="px-2 py-1.5 font-medium text-center">24h</th>
-                      <th className="px-2 py-1.5 font-medium text-center">48h</th>
-                      <th className="px-2 py-1.5 font-medium text-center">72h</th>
-                      <th className="px-3 py-1.5 font-medium text-right">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
-                    {capacityForecast.byWard.map((w) => (
-                      <tr key={w.wardCode} className="hover:bg-slate-50/70">
-                        <td className="px-3 py-2 font-sans font-semibold text-slate-900">{w.wardCode}</td>
-                        <td className="px-3 py-2 font-sans text-slate-600 text-[11px]">{w.cluster || 'General'}</td>
-                        <td className="px-2 py-2 text-center text-blue-700 font-bold">{w.next24Hours}</td>
-                        <td className="px-2 py-2 text-center text-indigo-700">{w.next48Hours}</td>
-                        <td className="px-2 py-2 text-center text-purple-700">{w.next72Hours}</td>
-                        <td className="px-3 py-2 text-right font-bold text-slate-900">{w.total}</td>
+                <div className="overflow-x-auto [scrollbar-width:thin]">
+                  <table className="w-full text-left min-w-[340px]">
+                    <thead className="bg-slate-50/50 text-[11px] text-slate-500 border-b border-slate-100">
+                      <tr>
+                        <th className="px-3 py-1.5 font-medium">Ward</th>
+                        <th className="px-3 py-1.5 font-medium">Specialty</th>
+                        <th className="px-2 py-1.5 font-medium text-center">24h</th>
+                        <th className="px-2 py-1.5 font-medium text-center">48h</th>
+                        <th className="px-2 py-1.5 font-medium text-center">72h</th>
+                        <th className="px-3 py-1.5 font-medium text-right">Total</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-mono">
+                      {capacityForecast.byWard.map((w) => (
+                        <tr key={w.wardCode} className="hover:bg-slate-50/70">
+                          <td className="px-3 py-2 font-sans font-semibold text-slate-900">{w.wardCode}</td>
+                          <td className="px-3 py-2 font-sans text-slate-600 text-[11px]">{w.cluster || 'General'}</td>
+                          <td className="px-2 py-2 text-center text-blue-700 font-bold">{w.next24Hours}</td>
+                          <td className="px-2 py-2 text-center text-indigo-700">{w.next48Hours}</td>
+                          <td className="px-2 py-2 text-center text-purple-700">{w.next72Hours}</td>
+                          <td className="px-3 py-2 text-right font-bold text-slate-900">{w.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* By Specialty Cluster Table */}
@@ -619,28 +621,30 @@ export function BmuRoute() {
                 <div className="bg-slate-50 px-3 py-2 font-semibold text-slate-800 border-b border-slate-200">
                   Discharge Projections by Specialty Cluster
                 </div>
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50/50 text-[11px] text-slate-500 border-b border-slate-100">
-                    <tr>
-                      <th className="px-3 py-1.5 font-medium">Specialty Cluster</th>
-                      <th className="px-2 py-1.5 font-medium text-center">24h</th>
-                      <th className="px-2 py-1.5 font-medium text-center">48h</th>
-                      <th className="px-2 py-1.5 font-medium text-center">72h</th>
-                      <th className="px-3 py-1.5 font-medium text-right">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
-                    {capacityForecast.byCluster.map((c) => (
-                      <tr key={c.cluster} className="hover:bg-slate-50/70">
-                        <td className="px-3 py-2 font-sans font-semibold text-slate-900">{c.cluster.replace('_', ' ')}</td>
-                        <td className="px-2 py-2 text-center text-blue-700 font-bold">{c.next24Hours}</td>
-                        <td className="px-2 py-2 text-center text-indigo-700">{c.next48Hours}</td>
-                        <td className="px-2 py-2 text-center text-purple-700">{c.next72Hours}</td>
-                        <td className="px-3 py-2 text-right font-bold text-slate-900">{c.total}</td>
+                <div className="overflow-x-auto [scrollbar-width:thin]">
+                  <table className="w-full text-left min-w-[340px]">
+                    <thead className="bg-slate-50/50 text-[11px] text-slate-500 border-b border-slate-100">
+                      <tr>
+                        <th className="px-3 py-1.5 font-medium">Specialty Cluster</th>
+                        <th className="px-2 py-1.5 font-medium text-center">24h</th>
+                        <th className="px-2 py-1.5 font-medium text-center">48h</th>
+                        <th className="px-2 py-1.5 font-medium text-center">72h</th>
+                        <th className="px-3 py-1.5 font-medium text-right">Total</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-mono">
+                      {capacityForecast.byCluster.map((c) => (
+                        <tr key={c.cluster} className="hover:bg-slate-50/70">
+                          <td className="px-3 py-2 font-sans font-semibold text-slate-900">{c.cluster.replace('_', ' ')}</td>
+                          <td className="px-2 py-2 text-center text-blue-700 font-bold">{c.next24Hours}</td>
+                          <td className="px-2 py-2 text-center text-indigo-700">{c.next48Hours}</td>
+                          <td className="px-2 py-2 text-center text-purple-700">{c.next72Hours}</td>
+                          <td className="px-3 py-2 text-right font-bold text-slate-900">{c.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -776,7 +780,7 @@ export function BmuRoute() {
               ) : queue.length === 0 ? (
                 <div className="p-8 text-center text-slate-500 text-sm">No pending admission requests.</div>
               ) : (
-                <Table>
+                <Table className="min-w-[760px]">
                   <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow key={headerGroup.id}>

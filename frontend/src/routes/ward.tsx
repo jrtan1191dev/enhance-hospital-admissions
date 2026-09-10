@@ -293,7 +293,7 @@ export function WardRoute() {
             </div>
 
             {/* Ward Selector Pills */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200 overflow-x-auto [scrollbar-width:none] flex-nowrap sm:flex-wrap">
               {wards.map((w) => {
                 const total = w.beds?.length || 0;
                 const occ =
@@ -304,7 +304,7 @@ export function WardRoute() {
                     key={w.wardCode}
                     type="button"
                     onClick={() => setActiveWardCode(w.wardCode)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
                       isSelected
                         ? 'bg-white text-blue-900 shadow-2xs font-semibold'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'

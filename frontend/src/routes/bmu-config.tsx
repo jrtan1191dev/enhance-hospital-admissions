@@ -23,17 +23,17 @@ export function BmuConfigRoute() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Top Banner */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+      <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Sliders className="h-6 w-6 text-blue-600" />
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Sliders className="h-6 w-6 text-blue-600 shrink-0" />
             BMU Optimization Weight Configuration
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Real-time constraint tuning for the pure Java heuristic engine and future Timefold solver profiles.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
           <Link
             to="/bmu"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer"

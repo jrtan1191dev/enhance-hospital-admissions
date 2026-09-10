@@ -185,10 +185,10 @@ export function EdRoute() {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Stethoscope className="h-6 w-6 text-blue-600" />
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Stethoscope className="h-6 w-6 text-blue-600 shrink-0" />
             Emergency Department (ED) Clinical Intake
           </h1>
           <p className="text-sm text-slate-500 mt-1">
@@ -235,11 +235,11 @@ export function EdRoute() {
       )}
 
       {/* Board Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto [scrollbar-width:none]">
         <button
           type="button"
           onClick={() => setActiveTab('WAITING')}
-          className={`px-4 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 cursor-pointer transition-all ${
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 cursor-pointer transition-all shrink-0 ${
             activeTab === 'WAITING'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -254,7 +254,7 @@ export function EdRoute() {
         <button
           type="button"
           onClick={() => setActiveTab('ASSESSED')}
-          className={`px-4 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 cursor-pointer transition-all ${
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 flex items-center gap-2 cursor-pointer transition-all shrink-0 ${
             activeTab === 'ASSESSED'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -297,7 +297,7 @@ export function EdRoute() {
             ) : assessedAdmissions.length === 0 ? (
               <div className="p-8 text-center text-slate-500 text-sm">No admissions have been assessed yet.</div>
             ) : (
-              <Table>
+              <Table className="min-w-[850px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-xs font-semibold">Patient & Token</TableHead>
@@ -463,7 +463,7 @@ export function EdRoute() {
               ) : patients.length === 0 ? (
                 <div className="p-8 text-center text-slate-500 text-sm">No patients currently waiting in ED triage.</div>
               ) : (
-                <Table>
+                <Table className="min-w-[620px]">
                   <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow key={headerGroup.id}>

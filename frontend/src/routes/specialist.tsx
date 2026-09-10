@@ -234,11 +234,11 @@ export function SpecialistRoute() {
       )}
 
       {/* Specialty Cluster Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-xl border border-slate-200 shadow-2xs">
+      <div className="flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-xl border border-slate-200 shadow-2xs overflow-x-auto [scrollbar-width:none] flex-nowrap sm:flex-wrap">
         <button
           type="button"
           onClick={() => setSelectedCluster(undefined)}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
             selectedCluster === undefined
               ? 'bg-white text-slate-900 shadow-2xs font-semibold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
@@ -262,7 +262,7 @@ export function SpecialistRoute() {
               key={cluster}
               type="button"
               onClick={() => setSelectedCluster(cluster)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                 selectedCluster === cluster
                   ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'

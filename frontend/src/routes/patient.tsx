@@ -189,7 +189,7 @@ export function PatientRoute() {
                     🏥
                   </div>
                   <div>
-                    <span className="font-bold text-xs text-slate-900 tracking-tight block">HealthHub SingHealth</span>
+                    <span className="font-bold text-xs text-slate-900 tracking-tight block">HealthHub Integration</span>
                   </div>
                 </div>
                 <Badge variant="outline" className="text-[10px] font-mono bg-white text-emerald-800 border-emerald-300">
@@ -450,7 +450,7 @@ export function PatientRoute() {
 
             {/* Bottom Nav Simulation */}
             <div className="pt-3 border-t border-slate-200 text-center text-[10px] text-slate-400">
-              Singapore Ministry of Health • HealthHub Platform
+              Singapore Ministry of Health • HealthHub Application
             </div>
           </div>
         </div>

@@ -25,7 +25,7 @@ const rootRoute = createRootRoute({
         <Outlet />
       </main>
       <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        SingHealth Bed Capacity Orchestration System • Prototype Evaluation Mode
+        Emergency & Bed Capacity Orchestration System • Prototype Evaluation Mode
       </footer>
       <ToastContainer />
     </div>

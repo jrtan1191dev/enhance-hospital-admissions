@@ -48,5 +48,6 @@ public class AssessmentBroadcast extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     private DiversionPathway diversionPathway;
 
+    private Boolean isConcordant;
     private UUID parentBroadcastId;
 }

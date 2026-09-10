@@ -71,6 +71,7 @@ public class AdmissionRequest extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     private EddConfidence eddConfidence;
     private String eddRationale;
+    private LocalDateTime eddRecordedAt;
     private LocalDateTime dischargeSignoffAt;
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -86,6 +87,7 @@ public class AdmissionRequest extends AuditableEntity {
     @com.fasterxml.jackson.annotation.JsonProperty("discordant")
     private Boolean isDiscordant;
 
+    private Double edTurnaroundMinutes;
     private String overrideReasonCode;
     private String delayReasonTag;
     private String operationalDelayReason;
@@ -98,10 +100,12 @@ public class AdmissionRequest extends AuditableEntity {
     private LocalDateTime lastPeriodicUpdateSentAt;
 
     private LocalDateTime referralDispatchedAt;
+    private LocalDateTime referralCompletedAt;
     @Builder.Default
     private Integer referralSlaMinutes = 30;
     private String referralFacility;
     private String virtualBedNumber;
+    private Boolean isBatchHoldingWardAllocated;
 
     @Builder.Default
     private Boolean waitingInEd = true;

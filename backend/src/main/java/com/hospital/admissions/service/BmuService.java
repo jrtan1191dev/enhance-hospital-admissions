@@ -630,6 +630,7 @@ public class BmuService {
             req.setAssignedBed(bed);
             req.setStatus(AdmissionStatus.BED_ALLOCATED);
             req.setAllocatedAt(LocalDateTime.now());
+            req.setIsBatchHoldingWardAllocated(true);
             admissionRequestRepository.save(req);
             allocatedRequests.add(req);
         }

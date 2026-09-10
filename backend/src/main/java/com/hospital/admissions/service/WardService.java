@@ -50,6 +50,7 @@ public class WardService {
         admissionRequest.setEdd(request.getEdd());
         admissionRequest.setEddConfidence(request.getEddConfidence());
         admissionRequest.setEddRationale(request.getRationale());
+        admissionRequest.setEddRecordedAt(LocalDateTime.now());
 
         AdmissionRequest saved = admissionRequestRepository.save(admissionRequest);
 

@@ -77,6 +77,7 @@ public class ClinicianService {
                 (patient.getCreatedAt() != null ? Math.max(1.0, java.time.Duration.between(patient.getCreatedAt(), LocalDateTime.now()).toMinutes()) : 12.5);
 
         admissionRequest.setIsRecommendationAccepted(recommendedAccepted);
+        admissionRequest.setEdTurnaroundMinutes(elapsedMins);
         admissionRequest = admissionRequestRepository.save(admissionRequest);
 
         if (requiresConsult) {
@@ -177,8 +178,6 @@ public class ClinicianService {
         broadcast.setSecondaryTelemetry(req.getSecondaryTelemetry());
         broadcast.setDiversionPathway(req.getDiversionPathway());
 
-        broadcast = broadcastRepository.save(broadcast);
-
         AdmissionRequest request = broadcast.getAdmissionRequest();
         request.setSecondaryAcuityTier(req.getSecondaryAcuityTier());
         if (req.getSecondaryTelemetry() != null) {
@@ -235,6 +234,8 @@ public class ClinicianService {
         admissionRequestRepository.save(request);
 
         boolean isConcordant = !anyDiscordant;
+        broadcast.setIsConcordant(isConcordant);
+        broadcastRepository.save(broadcast);
         java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
         details.put("PrimaryAcuity", request.getPrimaryAcuityTier());
         details.put("SecondaryAcuity", req.getSecondaryAcuityTier());

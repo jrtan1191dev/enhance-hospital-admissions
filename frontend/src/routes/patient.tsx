@@ -20,6 +20,8 @@ import {
   Phone,
   PhoneCall,
   BellRing,
+  Calendar,
+  Pill,
 } from 'lucide-react';
 
 const MILESTONES = [
@@ -299,6 +301,52 @@ export function PatientRoute() {
                       <Badge variant="outline" className="text-[10px] bg-white text-blue-700 font-medium border-blue-200">
                         Assigned
                       </Badge>
+                    </div>
+                  )}
+
+                  {/* Bedside Medication Hand-off Banner (Ticket 02) */}
+                  {tracker.medicationDeliveryStatus === 'DELIVERED_BEDSIDE' && (
+                    <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 text-xs text-emerald-950 space-y-1.5 shadow-xs">
+                      <div className="flex items-center gap-2 font-bold text-emerald-900 text-sm">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                        Medications Received at Bedside — Ready to Vacate
+                      </div>
+                      <p className="text-[11px] text-emerald-800 leading-relaxed">
+                        Pre-packed discharge medications have been delivered and explained at your bedside. You may proceed with departure.
+                      </p>
+                    </div>
+                  )}
+
+                  {tracker.medicationDeliveryStatus === 'PACKING_IN_PROGRESS' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-xs text-blue-950 flex items-center gap-2.5 shadow-2xs">
+                      <Pill className="h-4 w-4 text-blue-600 animate-pulse flex-shrink-0" />
+                      <div className="text-[11px] leading-tight">
+                        <strong className="block text-blue-900 mb-0.5">Discharge Medications in Preparation</strong>
+                        Inpatient pharmacy is pre-packing medications for delivery directly to your bedside.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Planned Estimated Date of Discharge (EDD) Card (Ticket 01) */}
+                  {tracker.estimatedDateOfDischarge && (
+                    <div className="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-3.5 text-xs text-indigo-950 space-y-1.5 shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold flex items-center gap-1.5 text-indigo-950">
+                          <Calendar className="h-4 w-4 text-indigo-600" />
+                          Planned Discharge Date (EDD)
+                        </span>
+                        {tracker.eddConfidence && (
+                          <Badge variant="outline" className="text-[9px] bg-white text-indigo-800 border-indigo-300">
+                            {tracker.eddConfidence} Confidence
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-base font-bold text-indigo-900">
+                        {tracker.estimatedDateOfDischarge}
+                      </div>
+                      <p className="text-[10px] text-indigo-700 leading-snug">
+                        Your clinical care team has scheduled your expected discharge date.
+                      </p>
                     </div>
                   )}
 

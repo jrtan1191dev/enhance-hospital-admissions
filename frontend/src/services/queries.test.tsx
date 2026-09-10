@@ -8,6 +8,7 @@ import {
   specialistQueries,
   bmuQueries,
   patientQueries,
+  wardQueries,
   useSubmitEdAssessment,
   useClaimBroadcast,
   useSubmitConsult,
@@ -28,6 +29,9 @@ import {
   useCheckinPatient,
   useVacatePatient,
   useCleanBed,
+  useUpdateEdd,
+  useDischargeSignoff,
+  useDeliverMedication,
   useSimulatePeriodicUpdate,
   useRecordPatientAction,
 } from './queries';
@@ -70,6 +74,12 @@ vi.mock('./api', () => ({
     cleanBed: vi.fn().mockResolvedValue({ id: 'bed-1' }),
     simulatePeriodicUpdate: vi.fn().mockResolvedValue({ dispatchedCount: 2, message: 'Simulated' }),
     recordPatientAction: vi.fn().mockResolvedValue({ status: 'ACK' }),
+    updateEdd: vi.fn().mockResolvedValue({ id: 'adm-1' }),
+    getRunway: vi.fn().mockResolvedValue([]),
+    getCapacityForecast: vi.fn().mockResolvedValue({ totalNext24Hours: 1, totalNext48Hours: 1, totalNext72Hours: 0, byWard: [], byCluster: [] }),
+    dischargeSignoff: vi.fn().mockResolvedValue({ id: 'adm-1' }),
+    deliverMedication: vi.fn().mockResolvedValue({ id: 'adm-1' }),
+    getTurnoverTasks: vi.fn().mockResolvedValue([]),
   },
 }));
 
@@ -483,6 +493,48 @@ describe('services/queries', () => {
       await act(async () => {
         await recResult.current.mutateAsync({ token: 't1', actionType: 'MSW_CALL' });
       });
+
+      // Ward Runway and Discharge hooks
+      const eddSuccess = vi.fn();
+      const { result: eddResult } = renderHook(() => useUpdateEdd(eddSuccess), { wrapper });
+      await act(async () => {
+        await eddResult.current.mutateAsync({ patientId: 'p-1', data: { edd: '2026-09-12', eddConfidence: 'HIGH' } });
+      });
+      expect(api.updateEdd).toHaveBeenCalledWith('p-1', { edd: '2026-09-12', eddConfidence: 'HIGH' });
+      expect(eddSuccess).toHaveBeenCalled();
+
+      const signoffSuccess = vi.fn();
+      const { result: signoffResult } = renderHook(() => useDischargeSignoff(signoffSuccess), { wrapper });
+      await act(async () => {
+        await signoffResult.current.mutateAsync('p-1');
+      });
+      expect(api.dischargeSignoff).toHaveBeenCalledWith('p-1');
+      expect(signoffSuccess).toHaveBeenCalled();
+
+      const deliverSuccess = vi.fn();
+      const { result: deliverResult } = renderHook(() => useDeliverMedication(deliverSuccess), { wrapper });
+      await act(async () => {
+        await deliverResult.current.mutateAsync('p-1');
+      });
+      expect(api.deliverMedication).toHaveBeenCalledWith('p-1');
+      expect(deliverSuccess).toHaveBeenCalled();
+    });
+
+    it('tests ward queryOptions keys and fetchers', async () => {
+      expect(wardQueries.runway().queryKey).toEqual(['ward', 'runway']);
+      await expect(wardQueries.runway().queryFn()).resolves.toEqual([]);
+
+      expect(wardQueries.capacityForecast().queryKey).toEqual(['ward', 'capacity-forecast']);
+      await expect(wardQueries.capacityForecast().queryFn()).resolves.toEqual({
+        totalNext24Hours: 1,
+        totalNext48Hours: 1,
+        totalNext72Hours: 0,
+        byWard: [],
+        byCluster: [],
+      });
+
+      expect(wardQueries.turnoverTasks().queryKey).toEqual(['ward', 'turnover-tasks']);
+      await expect(wardQueries.turnoverTasks().queryFn()).resolves.toEqual([]);
     });
   });
 });

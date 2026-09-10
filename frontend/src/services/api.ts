@@ -21,6 +21,10 @@ import type {
   SpecialistConsultRequest,
   SpecialtyCluster,
   Ward,
+  DischargeRunwayDto,
+  BmuCapacityForecastDto,
+  EddUpdateRequest,
+  TurnoverTaskDto,
 } from '../types/admissions';
 
 const ROLE_STORAGE_KEY = 'admissions_role_persona';
@@ -124,4 +128,18 @@ export const api = {
     http.post<{ status: string; dispatchedCount: number; message: string }>('/api/v1/patients/simulate-periodic-update').then((r) => r.data),
   recordPatientAction: (token: string, actionType: 'MSW_CALL' | 'FINANCE_CALL') =>
     http.post<{ id: string; token: string; actionType: string; createdAt: string }>(`/api/v1/patients/track/${token}/actions`, { actionType }).then((r) => r.data),
+
+  // Ward Runway & Rapid Bed Turnover
+  updateEdd: (patientId: string, data: EddUpdateRequest) =>
+    http.post<AdmissionRequest>(`/api/v1/ward/patients/${patientId}/edd`, data).then((r) => r.data),
+  getRunway: () =>
+    http.get<DischargeRunwayDto[]>('/api/v1/ward/runway').then((r) => r.data),
+  getCapacityForecast: () =>
+    http.get<BmuCapacityForecastDto>('/api/v1/ward/capacity-forecast').then((r) => r.data),
+  dischargeSignoff: (patientId: string) =>
+    http.post<AdmissionRequest>(`/api/v1/ward/patients/${patientId}/discharge-signoff`).then((r) => r.data),
+  deliverMedication: (patientId: string) =>
+    http.post<AdmissionRequest>(`/api/v1/ward/patients/${patientId}/deliver-medication`).then((r) => r.data),
+  getTurnoverTasks: () =>
+    http.get<TurnoverTaskDto[]>('/api/v1/ward/turnover-tasks').then((r) => r.data),
 };

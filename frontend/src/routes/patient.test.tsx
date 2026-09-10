@@ -185,4 +185,27 @@ describe('PatientRoute component', () => {
     );
     expect(screen.getByText('Evaluating Patient Journey')).toBeInTheDocument();
   });
+
+  it('renders planned EDD and bedside medications received banner when present', () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClient.setQueryData(['patient', 'available'], mockPatients);
+    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], {
+      ...mockTrackerData,
+      admissionStatus: 'ADMITTED_INPATIENT',
+      estimatedDateOfDischarge: '2026-09-12',
+      eddConfidence: 'HIGH',
+      medicationDeliveryStatus: 'DELIVERED_BEDSIDE',
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PatientRoute />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText(/Planned Discharge Date \(EDD\)/i)).toBeInTheDocument();
+    expect(screen.getByText('2026-09-12')).toBeInTheDocument();
+    expect(screen.getByText('HIGH Confidence')).toBeInTheDocument();
+    expect(screen.getByText(/Medications Received at Bedside — Ready to Vacate/i)).toBeInTheDocument();
+  });
 });

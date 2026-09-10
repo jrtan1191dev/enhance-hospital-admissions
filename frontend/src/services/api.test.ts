@@ -107,6 +107,25 @@ describe('services/api', () => {
     await expect(api.cleanBed('bed1')).resolves.toEqual({ test: 'post-data' });
     await expect(api.simulatePeriodicUpdate()).resolves.toEqual({ test: 'post-data' });
     await expect(api.recordPatientAction('token123', 'MSW_CALL')).resolves.toEqual({ test: 'post-data' });
+
+    // Test Ward Runway & Turnover endpoints
+    await expect(api.updateEdd('p1', { edd: '2026-09-12', eddConfidence: 'HIGH' })).resolves.toEqual({ test: 'post-data' });
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/ward/patients/p1/edd', { edd: '2026-09-12', eddConfidence: 'HIGH' });
+
+    await expect(api.getRunway()).resolves.toEqual({ test: 'get-data' });
+    expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/ward/runway');
+
+    await expect(api.getCapacityForecast()).resolves.toEqual({ test: 'get-data' });
+    expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/ward/capacity-forecast');
+
+    await expect(api.dischargeSignoff('p1')).resolves.toEqual({ test: 'post-data' });
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/ward/patients/p1/discharge-signoff');
+
+    await expect(api.deliverMedication('p1')).resolves.toEqual({ test: 'post-data' });
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/ward/patients/p1/deliver-medication');
+
+    await expect(api.getTurnoverTasks()).resolves.toEqual({ test: 'get-data' });
+    expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/ward/turnover-tasks');
   });
 
   it('tests axios interceptor logic (request header and response problem handling)', async () => {

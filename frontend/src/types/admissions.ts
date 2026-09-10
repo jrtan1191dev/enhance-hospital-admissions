@@ -199,6 +199,81 @@ export interface PatientMilestoneResponse {
   careGuidance?: string;
   diversionRecommended?: boolean;
   diversionPathway?: DiversionPathway;
+  estimatedDateOfDischarge?: string;
+  eddConfidence?: EddConfidence;
+  medicationDeliveryStatus?: MedicationDeliveryStatus;
+  runwayStage?: DischargeRunwayStage;
+}
+
+export type EddConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export type DischargeRunwayStage =
+  | 'RUNWAY_D3'
+  | 'RUNWAY_D2'
+  | 'RUNWAY_D1'
+  | 'READY_FOR_MORNING_SIGNOFF'
+  | 'MEDICATIONS_PENDING'
+  | 'READY_TO_VACATE'
+  | 'VACATED';
+
+export type MedicationDeliveryStatus =
+  | 'NOT_DISPATCHED'
+  | 'PACKING_IN_PROGRESS'
+  | 'DELIVERED_BEDSIDE';
+
+export type TurnoverSlaStatus = 'ON_TRACK' | 'APPROACHING_SLA' | 'BREACHED';
+
+export interface EddUpdateRequest {
+  edd: string;
+  eddConfidence: EddConfidence;
+  rationale?: string;
+}
+
+export interface DischargeRunwayDto {
+  patientId: string;
+  patientName: string;
+  bedId?: string;
+  bedNumber: string;
+  wardCode: string;
+  levelNumber?: number;
+  estimatedDateOfDischarge?: string;
+  confidence?: EddConfidence;
+  runwayStage?: DischargeRunwayStage;
+  dischargeSignoffAt?: string;
+  medicationStatus: MedicationDeliveryStatus;
+  rationale?: string;
+}
+
+export interface BmuCapacityForecastDto {
+  totalNext24Hours: number;
+  totalNext48Hours: number;
+  totalNext72Hours: number;
+  byWard: Array<{
+    wardCode: string;
+    cluster?: SpecialtyCluster;
+    next24Hours: number;
+    next48Hours: number;
+    next72Hours: number;
+    total: number;
+  }>;
+  byCluster: Array<{
+    cluster: SpecialtyCluster;
+    next24Hours: number;
+    next48Hours: number;
+    next72Hours: number;
+    total: number;
+  }>;
+}
+
+export interface TurnoverTaskDto {
+  bedId: string;
+  bedNumber: string;
+  wardCode: string;
+  levelNumber?: number;
+  vacatedAt: string;
+  cleaningStartedAt: string;
+  remainingMinutes: number;
+  slaStatus: TurnoverSlaStatus;
 }
 
 export interface SisterHospitalReferralResponse {

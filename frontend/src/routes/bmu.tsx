@@ -7,7 +7,7 @@ import {
   flexRender,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { bmuQueries, specialistQueries, useAllocateBed, useDeallocateBed, useAssignAdmittingCluster, useReferSisterHospital, useRequestReconciliation, useApproveBatchHoldingWard, useApproveCohortSwap, useRecallDiversion, useExtendDiversionSla, useLogTelephoneFollowUp, useAttachDelayTag } from '../services/queries';
+import { bmuQueries, specialistQueries, wardQueries, useAllocateBed, useDeallocateBed, useAssignAdmittingCluster, useReferSisterHospital, useRequestReconciliation, useApproveBatchHoldingWard, useApproveCohortSwap, useRecallDiversion, useExtendDiversionSla, useLogTelephoneFollowUp, useAttachDelayTag } from '../services/queries';
 import type { AdmissionRequest, Bed, SpecialtyCluster, DelayReasonCode } from '../types/admissions';
 import { DELAY_REASON_TALKING_POINTS } from '../types/admissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -68,6 +68,7 @@ export function BmuRoute() {
   );
   const { data: batchSuggestions = [] } = useQuery(bmuQueries.batchSuggestions());
   const { data: cohortSwapSuggestions = [] } = useQuery(bmuQueries.cohortSwapSuggestions());
+  const { data: capacityForecast } = useQuery(wardQueries.capacityForecast());
 
   // Batch Holding Ward Mutation Hook
   const approveBatchMutation = useApproveBatchHoldingWard(() => {
@@ -548,6 +549,103 @@ export function BmuRoute() {
           </div>
         );
       })()}
+
+      {/* Advance Discharge Runway Capacity Forecast (24h to 72h) */}
+      <Card className="border-slate-200 bg-white shadow-xs">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-5 w-5 text-blue-600" />
+                Inpatient Discharge Runway & Capacity Forecast (24h to 72h)
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Aggregate capacity projections established during morning clinical ward rounds to anticipate bed vacancies.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200 text-xs">
+                Next 24h: <strong>{capacityForecast?.totalNext24Hours ?? 0} Beds</strong>
+              </Badge>
+              <Badge variant="outline" className="bg-indigo-50 text-indigo-800 border-indigo-200 text-xs">
+                Next 48h: <strong>{capacityForecast?.totalNext48Hours ?? 0} Beds</strong>
+              </Badge>
+              <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200 text-xs">
+                Next 72h: <strong>{capacityForecast?.totalNext72Hours ?? 0} Beds</strong>
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {(!capacityForecast?.byWard || capacityForecast.byWard.length === 0) ? (
+            <div className="text-xs text-slate-500 py-2 italic text-center">
+              No upcoming advance discharges scheduled within the next 72 hours.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              {/* By Ward Table */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="bg-slate-50 px-3 py-2 font-semibold text-slate-800 border-b border-slate-200">
+                  Discharge Projections by Ward
+                </div>
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50/50 text-[11px] text-slate-500 border-b border-slate-100">
+                    <tr>
+                      <th className="px-3 py-1.5 font-medium">Ward</th>
+                      <th className="px-3 py-1.5 font-medium">Specialty</th>
+                      <th className="px-2 py-1.5 font-medium text-center">24h</th>
+                      <th className="px-2 py-1.5 font-medium text-center">48h</th>
+                      <th className="px-2 py-1.5 font-medium text-center">72h</th>
+                      <th className="px-3 py-1.5 font-medium text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-mono">
+                    {capacityForecast.byWard.map((w) => (
+                      <tr key={w.wardCode} className="hover:bg-slate-50/70">
+                        <td className="px-3 py-2 font-sans font-semibold text-slate-900">{w.wardCode}</td>
+                        <td className="px-3 py-2 font-sans text-slate-600 text-[11px]">{w.cluster || 'General'}</td>
+                        <td className="px-2 py-2 text-center text-blue-700 font-bold">{w.next24Hours}</td>
+                        <td className="px-2 py-2 text-center text-indigo-700">{w.next48Hours}</td>
+                        <td className="px-2 py-2 text-center text-purple-700">{w.next72Hours}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-900">{w.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* By Specialty Cluster Table */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="bg-slate-50 px-3 py-2 font-semibold text-slate-800 border-b border-slate-200">
+                  Discharge Projections by Specialty Cluster
+                </div>
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50/50 text-[11px] text-slate-500 border-b border-slate-100">
+                    <tr>
+                      <th className="px-3 py-1.5 font-medium">Specialty Cluster</th>
+                      <th className="px-2 py-1.5 font-medium text-center">24h</th>
+                      <th className="px-2 py-1.5 font-medium text-center">48h</th>
+                      <th className="px-2 py-1.5 font-medium text-center">72h</th>
+                      <th className="px-3 py-1.5 font-medium text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-mono">
+                    {capacityForecast.byCluster.map((c) => (
+                      <tr key={c.cluster} className="hover:bg-slate-50/70">
+                        <td className="px-3 py-2 font-sans font-semibold text-slate-900">{c.cluster.replace('_', ' ')}</td>
+                        <td className="px-2 py-2 text-center text-blue-700 font-bold">{c.next24Hours}</td>
+                        <td className="px-2 py-2 text-center text-indigo-700">{c.next48Hours}</td>
+                        <td className="px-2 py-2 text-center text-purple-700">{c.next72Hours}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-900">{c.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Dynamic Holding Ward Batching Suggestion Banner */}
       {batchSuggestions.length > 0 && (

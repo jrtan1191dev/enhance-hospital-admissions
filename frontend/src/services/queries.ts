@@ -10,6 +10,7 @@ import type {
   EdAssessmentSubmitRequest,
   SpecialistConsultRequest,
   SpecialtyCluster,
+  EddUpdateRequest,
 } from '../types/admissions';
 
 // ============================================================================
@@ -103,6 +104,28 @@ export const patientQueries = {
     queryOptions({
       queryKey: [...patientQueries.all(), 'available'] as const,
       queryFn: api.getAvailablePatients,
+    }),
+};
+
+export const wardQueries = {
+  all: () => ['ward'] as const,
+  runway: () =>
+    queryOptions({
+      queryKey: [...wardQueries.all(), 'runway'] as const,
+      queryFn: api.getRunway,
+      refetchInterval: 3000,
+    }),
+  capacityForecast: () =>
+    queryOptions({
+      queryKey: [...wardQueries.all(), 'capacity-forecast'] as const,
+      queryFn: api.getCapacityForecast,
+      refetchInterval: 3000,
+    }),
+  turnoverTasks: () =>
+    queryOptions({
+      queryKey: [...wardQueries.all(), 'turnover-tasks'] as const,
+      queryFn: api.getTurnoverTasks,
+      refetchInterval: 3000,
     }),
 };
 
@@ -358,6 +381,7 @@ export function useCheckinPatient(onSuccess?: () => void) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bmuQueries.inventory().queryKey });
       queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      queryClient.invalidateQueries({ queryKey: wardQueries.all() });
       onSuccess?.();
     },
   });
@@ -370,18 +394,70 @@ export function useVacatePatient(onSuccess?: () => void) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
       queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      queryClient.invalidateQueries({ queryKey: wardQueries.all() });
       onSuccess?.();
     },
   });
 }
 
-export function useCleanBed(onSuccess?: () => void) {
+export function useCleanBed(onSuccess?: () => void, onError?: (err: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (bedId: string) => api.cleanBed(bedId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      queryClient.invalidateQueries({ queryKey: wardQueries.all() });
       onSuccess?.();
+    },
+    onError: (err) => {
+      onError?.(err);
+    },
+  });
+}
+
+export function useUpdateEdd(onSuccess?: () => void, onError?: (err: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { patientId: string; data: EddUpdateRequest }) =>
+      api.updateEdd(variables.patientId, variables.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: wardQueries.all() });
+      queryClient.invalidateQueries({ queryKey: bmuQueries.all() });
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.();
+    },
+    onError: (err) => {
+      onError?.(err);
+    },
+  });
+}
+
+export function useDischargeSignoff(onSuccess?: () => void, onError?: (err: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (patientId: string) => api.dischargeSignoff(patientId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: wardQueries.all() });
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.();
+    },
+    onError: (err) => {
+      onError?.(err);
+    },
+  });
+}
+
+export function useDeliverMedication(onSuccess?: () => void, onError?: (err: Error) => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (patientId: string) => api.deliverMedication(patientId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: wardQueries.all() });
+      queryClient.invalidateQueries({ queryKey: patientQueries.all() });
+      onSuccess?.();
+    },
+    onError: (err) => {
+      onError?.(err);
     },
   });
 }

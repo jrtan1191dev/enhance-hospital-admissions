@@ -5,11 +5,11 @@ Benchmark inpatient discharge efficiency, advance runway establishment, and bed 
 
 **Blocked by:** 01: Analytics Platform Foundation & ED Clinical Intake Metrics
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `KpiMetricsService` computes Epic 4 metrics: `dischargeBeforeNoonRatePct` (KPI 19), `advanceRunwayEstablishmentRatePct` (KPI 20), `bedsideMedicationDeliveryAdoptionPct` (KPI 21), `housekeepingTurnoverAvgMinutes`, and `housekeeping30mSlaCompliancePct` (KPI 22).
-- [ ] Discharge before noon evaluates `EXTRACT(HOUR FROM dischargedAt) < 12` over all completed discharges.
-- [ ] Advance runway establishment calculates the proportion of admitted/discharged patients who had an EDD recorded $\ge 48$ hours prior to discharge.
-- [ ] Turnover metrics compute average cleaning duration in minutes (`lastCleanedAt - cleaningStartedAt`) and the percentage completed within the 30-minute SLA threshold.
-- [ ] `/analytics` dashboard renders the Inpatient Discharge Runway & Rapid Turnover domain section with executive stat cards, target benchmarks (e.g. Target: $\ge 40\%$ before noon, SLA: $\le 30$ mins), and health status badges.
-- [ ] Integration tests verify noon discharge arithmetic, advance EDD evaluation, and cleaning latency calculations against test datasets.
+- [x] `KpiMetricsService` computes Epic 4 metrics: `dischargeBeforeNoonRatePct` (KPI 19), `advanceRunwayEstablishmentRatePct` (KPI 20), `bedsideMedicationDeliveryAdoptionPct` (KPI 21), `housekeepingTurnoverAvgMinutes`, and `housekeeping30mSlaCompliancePct` (KPI 22).
+- [x] Discharge before noon evaluates `EXTRACT(HOUR FROM dischargedAt) < 12` over all completed discharges.
+- [x] Advance runway establishment calculates the proportion of admitted/discharged patients who had an EDD recorded $\ge 48$ hours prior to discharge.
+- [x] Turnover metrics compute average cleaning duration in minutes (`lastCleanedAt - cleaningStartedAt`) and the percentage completed within the 30-minute SLA threshold.
+- [x] `/analytics` dashboard renders the Inpatient Discharge Runway & Rapid Turnover domain section with executive stat cards, target benchmarks (e.g. Target: $\ge 40\%$ before noon, SLA: $\le 30$ mins), and health status badges.
+- [x] Integration tests verify noon discharge arithmetic, advance EDD evaluation, and cleaning latency calculations against test datasets.

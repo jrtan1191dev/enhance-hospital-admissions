@@ -5,11 +5,11 @@ Measure digital patient engagement, communication consistency, and caregiver sup
 
 **Blocked by:** 01: Analytics Platform Foundation & ED Clinical Intake Metrics
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `KpiMetricsService` computes Epic 3 metrics: `patientTrackerAccessRatePct` (KPI 14), `twoHourPeriodicUpdateDeliveryPct` (KPI 15), `prolongedWaitCommunicationRatePct`, and caregiver counseling connect rates (KPI 18).
-- [ ] Access rate calculation identifies distinct admitted requests with `firstTrackerAccessedAt IS NOT NULL` over total dispatched bed requests.
-- [ ] Periodic update delivery evaluates patients waiting in queue $\ge 120$ minutes (or prototype threshold) who received at least one periodic refresh broadcast.
-- [ ] Counseling connect rate tracks 1-click calls recorded in `patient_audit_interactions` for MSW and Financial Counseling hotlines among diversion candidates.
-- [ ] `/analytics` dashboard renders the Patient & Family Milestone Tracking domain section featuring engagement rate stat cards and compliance badges.
-- [ ] Integration tests verify access rate calculations, periodic update tracking queries, and counseling interaction aggregation.
+- [x] `KpiMetricsService` computes Epic 3 metrics: `patientTrackerAccessRatePct` (KPI 14), `twoHourPeriodicUpdateDeliveryPct` (KPI 15), `prolongedWaitCommunicationRatePct`, and caregiver counseling connect rates (KPI 18).
+- [x] Access rate calculation identifies distinct admitted requests with `firstTrackerAccessedAt IS NOT NULL` over total dispatched bed requests.
+- [x] Periodic update delivery evaluates patients waiting in queue $\ge 120$ minutes (or prototype threshold) who received at least one periodic refresh broadcast.
+- [x] Counseling connect rate tracks 1-click calls recorded in `patient_audit_interactions` for MSW and Financial Counseling hotlines among diversion candidates.
+- [x] `/analytics` dashboard renders the Patient & Family Milestone Tracking domain section featuring engagement rate stat cards and compliance badges.
+- [x] Integration tests verify access rate calculations, periodic update tracking queries, and counseling interaction aggregation.

@@ -5,12 +5,12 @@ Establish the core hospital analytics architecture and the Epic 1 Emergency Depa
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `KpiMetricsService` calculates Epic 1 operational metrics: `avgEdTurnaroundMinutes`, `edTurnaroundP95Minutes`, `specialistClaimLatencyAvgMinutes`, `primarySpecialistConcordanceRatePct`, and `digitalBedRequestCount`.
-- [ ] All rate, percentage, and average formulas are division-by-zero guarded, returning `0.0` for empty cohorts.
-- [ ] `GET /api/v1/analytics/kpis/summary` supports optional ISO-8601 `startDate` and `endDate` query parameters, defaulting to all-time reporting when omitted.
-- [ ] Top-level `/analytics` route is registered in `router.tsx` and an "Analytics" navigation item is added to `Header.tsx`.
-- [ ] Executive dashboard layout renders temporal filter controls (`All Time`, `Today`, `Past 7 Days`, date pickers) and an active 5-second background polling cycle (`refetchInterval: 5000`) with manual refresh button.
-- [ ] Clinical Intake domain section renders executive stat cards showing metric value, units, benchmark targets (e.g., target turnaround < 15 mins), and health status badges.
-- [ ] Unit and MockMvc tests verify calculation formulas, 0-division guards, temporal filtering, and JSON schema compliance.
+- [x] `KpiMetricsService` calculates Epic 1 operational metrics: `avgEdTurnaroundMinutes`, `edTurnaroundP95Minutes`, `specialistClaimLatencyAvgMinutes`, `primarySpecialistConcordanceRatePct`, and `digitalBedRequestCount`.
+- [x] All rate, percentage, and average formulas are division-by-zero guarded, returning `0.0` for empty cohorts.
+- [x] `GET /api/v1/analytics/kpis/summary` supports optional ISO-8601 `startDate` and `endDate` query parameters, defaulting to all-time reporting when omitted.
+- [x] Top-level `/analytics` route is registered in `router.tsx` and an "Analytics" navigation item is added to `Header.tsx`.
+- [x] Executive dashboard layout renders temporal filter controls (`All Time`, `Today`, `Past 7 Days`, date pickers) and an active 5-second background polling cycle (`refetchInterval: 5000`) with manual refresh button.
+- [x] Clinical Intake domain section renders executive stat cards showing metric value, units, benchmark targets (e.g., target turnaround < 15 mins), and health status badges.
+- [x] Unit and MockMvc tests verify calculation formulas, 0-division guards, temporal filtering, and JSON schema compliance.

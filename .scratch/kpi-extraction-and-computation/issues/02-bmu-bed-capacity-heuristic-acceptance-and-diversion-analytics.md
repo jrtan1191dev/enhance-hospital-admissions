@@ -5,11 +5,11 @@ Quantify the operational performance of central bed management, algorithmic matc
 
 **Blocked by:** 01: Analytics Platform Foundation & ED Clinical Intake Metrics
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `KpiMetricsService` computes Epic 2 metrics: `bmuSuggestionAcceptanceRatePct`, `bmuManualOverrideCount`, `totalDiversionCount`, `diversionRatePct`, `sisterHospitalSlaCompliancePct`, and `batchHoldingWardAdoptionRatePct`.
-- [ ] Override metrics extract structured breakdown counts across reason codes (`GOVERNMENT_SUBSIDY_CLASS_UPGRADE`, `EMERGENCY_PORTABLE_TELEMETRY_DEPLOYED`, `NON_TOP_RANK_SELECTION`).
-- [ ] Transfer SLA compliance evaluates elapsed minutes between `referralDispatchedAt` and completion against the 30-minute SLA window.
-- [ ] `/analytics` dashboard displays the BMU Capacity Orchestration & Diversions domain section with stat cards, target benchmarks, and health badges.
-- [ ] Dashboard renders a visual breakdown of structured override reasons and alternative care diversion channels (Community Hospitals vs. MIC@Home).
-- [ ] Integration tests verify metric computations across varied allocation states, overrides, sister hospital referrals, and holding ward batches.
+- [x] `KpiMetricsService` computes Epic 2 metrics: `bmuSuggestionAcceptanceRatePct`, `bmuManualOverrideCount`, `totalDiversionCount`, `diversionRatePct`, `sisterHospitalSlaCompliancePct`, and `batchHoldingWardAdoptionRatePct`.
+- [x] Override metrics extract structured breakdown counts across reason codes (`GOVERNMENT_SUBSIDY_CLASS_UPGRADE`, `EMERGENCY_PORTABLE_TELEMETRY_DEPLOYED`, `NON_TOP_RANK_SELECTION`).
+- [x] Transfer SLA compliance evaluates elapsed minutes between `referralDispatchedAt` and completion against the 30-minute SLA window.
+- [x] `/analytics` dashboard displays the BMU Capacity Orchestration & Diversions domain section with stat cards, target benchmarks, and health badges.
+- [x] Dashboard renders a visual breakdown of structured override reasons and alternative care diversion channels (Community Hospitals vs. MIC@Home).
+- [x] Integration tests verify metric computations across varied allocation states, overrides, sister hospital referrals, and holding ward batches.

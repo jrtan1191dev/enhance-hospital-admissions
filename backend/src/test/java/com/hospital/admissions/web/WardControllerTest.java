@@ -1,7 +1,6 @@
 package com.hospital.admissions.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.json.JsonMapper;
 import com.hospital.admissions.domain.AdmissionRequest;
 import com.hospital.admissions.domain.DischargeRunwayStage;
 import com.hospital.admissions.domain.EddConfidence;
@@ -39,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class WardControllerTest {
 
     private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
 
     @Mock
     private WardService wardService;
@@ -53,8 +52,7 @@ class WardControllerTest {
                 .standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper = JsonMapper.builder().build();
     }
 
     @Test

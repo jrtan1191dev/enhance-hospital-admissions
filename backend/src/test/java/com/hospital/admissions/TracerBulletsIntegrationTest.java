@@ -1,7 +1,7 @@
 package com.hospital.admissions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hospital.admissions.domain.*;
+import tools.jackson.databind.ObjectMapper;
 import com.hospital.admissions.dto.*;
 import com.hospital.admissions.repository.*;
 import com.hospital.admissions.service.ClinicianService;

@@ -1,7 +1,5 @@
 package com.hospital.admissions.domain;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hospital.admissions.config.JacksonConfig;
 import com.hospital.admissions.dto.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,14 +11,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DomainAndDtoTest {
-
-    @Test
-    @DisplayName("JacksonConfig provides configured ObjectMapper with JavaTimeModule")
-    void testJacksonConfig() {
-        JacksonConfig config = new JacksonConfig();
-        ObjectMapper mapper = config.objectMapper();
-        assertThat(mapper).isNotNull();
-    }
 
     @Test
     @DisplayName("Verify Enums coverage")

@@ -1,6 +1,6 @@
 package com.hospital.admissions.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.hospital.admissions.domain.*;
 import com.hospital.admissions.dto.EdAssessmentSubmitRequest;
 import com.hospital.admissions.dto.SpecialistConsultRequest;
@@ -38,7 +38,7 @@ class ClinicianControllerTest {
     @InjectMocks
     private ClinicianController clinicianController;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper objectMapper = JsonMapper.builder().build();
 
     @BeforeEach
     void setUp() {

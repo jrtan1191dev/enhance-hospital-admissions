@@ -1,6 +1,6 @@
 package com.hospital.admissions.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.hospital.admissions.domain.AdmissionRequest;
 import com.hospital.admissions.domain.BmuAlgorithmConfig;
 import com.hospital.admissions.dto.BedAllocationRequest;
@@ -49,7 +49,7 @@ class BmuControllerTest {
         @InjectMocks
         private BmuController bmuController;
 
-        private final ObjectMapper objectMapper = new ObjectMapper();
+        private final JsonMapper objectMapper = JsonMapper.builder().build();
 
         @BeforeEach
         void setUp() {

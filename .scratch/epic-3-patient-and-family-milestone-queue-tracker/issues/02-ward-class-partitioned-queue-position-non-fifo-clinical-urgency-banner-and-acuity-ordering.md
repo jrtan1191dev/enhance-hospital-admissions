@@ -5,11 +5,11 @@ Provide patients with accurate, transparent queue expectations while removing mi
 
 **Blocked by:** 01: Quiescent Triage State, 3-Stage Milestone Stepper, and Token Access Auditing
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Queue position calculator evaluates active `BED_REQUESTED` admissions partitioned by the patient's requested ward class (`requestedWardClass`).
-- [ ] Queue ranking sorts patients by `effectiveAcuityTier` (highest acuity first) and secondarily by `requestedAt` timestamp (earliest request first).
-- [ ] `PatientMilestoneResponse` payload includes `queuePosition` (1-indexed position in ward queue) and `patientsAhead` (`queuePosition - 1`), returning 0 once allocated or admitted.
-- [ ] Mobile tracker interface displays the count of patients ahead scoped to the patient's ward class category.
-- [ ] Mobile tracker interface prominently displays an empathetic non-FIFO clinical priority banner explaining that admissions are prioritized by acute clinical urgency and infection prevention rather than first-come-first-served sequence.
-- [ ] Unit and integration tests verify queue position and patients ahead calculations across multiple ward classes and differing acuity tiers.
+- [x] Queue position calculator evaluates active `BED_REQUESTED` admissions partitioned by the patient's requested ward class (`requestedWardClass`).
+- [x] Queue ranking sorts patients by `effectiveAcuityTier` (highest acuity first) and secondarily by `requestedAt` timestamp (earliest request first).
+- [x] `PatientMilestoneResponse` payload includes `queuePosition` (1-indexed position in ward queue) and `patientsAhead` (`queuePosition - 1`), returning 0 once allocated or admitted.
+- [x] Mobile tracker interface displays the count of patients ahead scoped to the patient's ward class category.
+- [x] Mobile tracker interface prominently displays an empathetic non-FIFO clinical priority banner explaining that admissions are prioritized by acute clinical urgency and infection prevention rather than first-come-first-served sequence.
+- [x] Unit and integration tests verify queue position and patients ahead calculations across multiple ward classes and differing acuity tiers.

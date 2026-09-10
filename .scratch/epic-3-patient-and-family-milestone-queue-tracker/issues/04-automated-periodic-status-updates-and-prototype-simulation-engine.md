@@ -5,11 +5,11 @@ Keep waiting patients and families informed automatically while reducing repetit
 
 **Blocked by:** 01: Quiescent Triage State, 3-Stage Milestone Stepper, and Token Access Auditing
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Periodic update scheduler identifies active `BED_REQUESTED` admissions with dwell time $\ge 5$ minutes in prototype mode ($\ge 120$ minutes in production).
-- [ ] Dispatching updates sets `last_periodic_update_sent_at` on `AdmissionRequest` and emits structured audit log `DISPATCH_PERIODIC_UPDATE` capturing channel, token, milestone step, dwell minutes, and delivery status (KPI 15).
-- [ ] Endpoint `POST /api/v1/patients/simulate-periodic-update` is exposed under `@Profile("prototype")` to trigger a simulated notification broadcast cycle for all waiting patients.
-- [ ] Milestone progression triggers immediate notification dispatch / audit logging upon state advancement.
-- [ ] Prototype tracker UI includes a "Simulate Periodic Update" action button in the simulator controls with instant visual toast confirmation.
-- [ ] Automated tests verify periodic update selection criteria, timestamp updating, prototype endpoint execution, and structured audit log emissions.
+- [x] Periodic update scheduler identifies active `BED_REQUESTED` admissions with dwell time $\ge 5$ minutes in prototype mode ($\ge 120$ minutes in production).
+- [x] Dispatching updates sets `last_periodic_update_sent_at` on `AdmissionRequest` and emits structured audit log `DISPATCH_PERIODIC_UPDATE` capturing channel, token, milestone step, dwell minutes, and delivery status (KPI 15).
+- [x] Endpoint `POST /api/v1/patients/simulate-periodic-update` is exposed under `@Profile("prototype")` to trigger a simulated notification broadcast cycle for all waiting patients.
+- [x] Milestone progression triggers immediate notification dispatch / audit logging upon state advancement.
+- [x] Prototype tracker UI includes a "Simulate Periodic Update" action button in the simulator controls with instant visual toast confirmation.
+- [x] Automated tests verify periodic update selection criteria, timestamp updating, prototype endpoint execution, and structured audit log emissions.

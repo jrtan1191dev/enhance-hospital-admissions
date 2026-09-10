@@ -5,15 +5,15 @@ Deliver the core token-activated public tracking experience for patients and fam
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Public endpoint `GET /api/v1/patients/track/{token}` returns patient-safe milestone data without exposing internal clinical notes, diagnostic findings, or other patients' PII.
-- [ ] Looking up an invalid or non-existent token returns an RFC 7807 `404 Not Found` ProblemDetail.
-- [ ] Pre-admission triage state (`ASSESSMENT_PENDING`) renders a quiescent state indicating ED clinical assessment is ongoing before advancing to Milestone 1.
-- [ ] Active bed requests (`BED_REQUESTED`) activate Milestone 1 (`Admission Decision Confirmed & Bed Queued`).
-- [ ] Approved bed allocations (`BED_ALLOCATED`) automatically advance the tracker to Milestone 2 (`Bed Assigned & Preparing Room`) and display the assigned bed number, ward name, and floor level.
-- [ ] Bedside check-in (`ADMITTED_INPATIENT`) advances the tracker to Milestone 3 (`Admitted to Inpatient Ward Bed`).
-- [ ] Patient tracking access updates `first_tracker_accessed_at`, `last_tracker_accessed_at`, and increments `tracker_access_count` on `AdmissionRequest`, emitting a structured `TRACK_PATIENT_ACCESS` audit event (KPI 14).
-- [ ] Frontend mobile tracker displays the 3-stage visual milestone stepper inside a mobile phone mockup frame with 3-second background polling (`refetchInterval: 3000`).
-- [ ] Prototype interface includes a patient quick-picker dropdown populated by `GET /api/v1/patients/tokens` allowing one-click switching between simulated patient tokens.
-- [ ] Automated integration and web tests verify milestone transitions, token security, 404 handling, and access audit log emissions.
+- [x] Public endpoint `GET /api/v1/patients/track/{token}` returns patient-safe milestone data without exposing internal clinical notes, diagnostic findings, or other patients' PII.
+- [x] Looking up an invalid or non-existent token returns an RFC 7807 `404 Not Found` ProblemDetail.
+- [x] Pre-admission triage state (`ASSESSMENT_PENDING`) renders a quiescent state indicating ED clinical assessment is ongoing before advancing to Milestone 1.
+- [x] Active bed requests (`BED_REQUESTED`) activate Milestone 1 (`Admission Decision Confirmed & Bed Queued`).
+- [x] Approved bed allocations (`BED_ALLOCATED`) automatically advance the tracker to Milestone 2 (`Bed Assigned & Preparing Room`) and display the assigned bed number, ward name, and floor level.
+- [x] Bedside check-in (`ADMITTED_INPATIENT`) advances the tracker to Milestone 3 (`Admitted to Inpatient Ward Bed`).
+- [x] Patient tracking access updates `first_tracker_accessed_at`, `last_tracker_accessed_at`, and increments `tracker_access_count` on `AdmissionRequest`, emitting a structured `TRACK_PATIENT_ACCESS` audit event (KPI 14).
+- [x] Frontend mobile tracker displays the 3-stage visual milestone stepper inside a mobile phone mockup frame with 3-second background polling (`refetchInterval: 3000`).
+- [x] Prototype interface includes a patient quick-picker dropdown populated by `GET /api/v1/patients/tokens` allowing one-click switching between simulated patient tokens.
+- [x] Automated integration and web tests verify milestone transitions, token security, 404 handling, and access audit log emissions.

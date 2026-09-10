@@ -5,10 +5,10 @@ Empower patients and caregivers experiencing financial distress or care concerns
 
 **Blocked by:** 05: Interactive Financial & Care Explainer with Step-Down Care Benchmarks
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Mobile tracker interface renders prominent 1-click hotline action buttons for "Call Medical Social Work (MSW)" and "Call Financial Counseling".
-- [ ] Endpoint `POST /api/v1/patients/track/{token}/actions` accepts patient action types (`MSW_CALL`, `FINANCE_CALL`) without requiring user authentication.
-- [ ] Action invocations persist interaction records in `patient_audit_interactions` table and emit structured audit events `CONNECT_MSW_HOTLINE` and `CONNECT_FINANCIAL_COUNSELING` (KPI 18).
-- [ ] Initiating hotline action triggers device telephone protocol (`tel:`) while logging the audit interaction.
-- [ ] Integration tests verify unauthenticated token-action persistence, structured audit logging, and counseling connect metrics extraction.
+- [x] Mobile tracker interface renders prominent 1-click hotline action buttons for "Call Medical Social Work (MSW)" and "Call Financial Counseling".
+- [x] Endpoint `POST /api/v1/patients/track/{token}/actions` accepts patient action types (`MSW_CALL`, `FINANCE_CALL`) without requiring user authentication.
+- [x] Action invocations persist interaction records in `patient_audit_interactions` table and emit structured audit events `CONNECT_MSW_HOTLINE` and `CONNECT_FINANCIAL_COUNSELING` (KPI 18).
+- [x] Initiating hotline action triggers device telephone protocol (`tel:`) while logging the audit interaction.
+- [x] Integration tests verify unauthenticated token-action persistence, structured audit logging, and counseling connect metrics extraction.

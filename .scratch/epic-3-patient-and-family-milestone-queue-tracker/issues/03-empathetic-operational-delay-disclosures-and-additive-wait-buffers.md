@@ -5,12 +5,12 @@ Transform technical bed-management bottlenecks into compassionate, transparent d
 
 **Blocked by:** 01: Quiescent Triage State, 3-Stage Milestone Stepper, and Token Access Auditing
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Standard delay tags (`HOUSEKEEPING_DELAY`, `BED_SHORTAGE`, `SPECIALIZED_ISOLATION_CLEANING`, `SURGE_TRAUMA_EVENT`) map to predefined compassionate disclosures explaining the operational context and safety rationale.
-- [ ] Free-text coordinator remarks or `OTHER` delay tags fall back to empathetic clinical coordination copy with liaison contact details.
-- [ ] Operational delay buffers (+20 mins for housekeeping, +30 mins for bed shortage/isolation cleaning, +45 mins for trauma surge) are additively included in `estimatedWaitMinutes`.
-- [ ] `PatientMilestoneResponse` includes `delayReason` and `delayContactHotline` fields when an operational delay is active.
-- [ ] Active delay tags and reasons are automatically archived into `archivedDelayReasonTag` and `archivedOperationalDelayReason` upon advancing to `BED_ALLOCATED`.
-- [ ] Mobile tracker interface renders a distinct, empathetic delay card with liaison contact details when a delay is active, and hides it when no delay is present.
-- [ ] Integration tests verify delay tag translation, additive wait buffer arithmetic, active delay clearing on bed allocation, and response serialization.
+- [x] Standard delay tags (`HOUSEKEEPING_DELAY`, `BED_SHORTAGE`, `SPECIALIZED_ISOLATION_CLEANING`, `SURGE_TRAUMA_EVENT`) map to predefined compassionate disclosures explaining the operational context and safety rationale.
+- [x] Free-text coordinator remarks or `OTHER` delay tags fall back to empathetic clinical coordination copy with liaison contact details.
+- [x] Operational delay buffers (+20 mins for housekeeping, +30 mins for bed shortage/isolation cleaning, +45 mins for trauma surge) are additively included in `estimatedWaitMinutes`.
+- [x] `PatientMilestoneResponse` includes `delayReason` and `delayContactHotline` fields when an operational delay is active.
+- [x] Active delay tags and reasons are automatically archived into `archivedDelayReasonTag` and `archivedOperationalDelayReason` upon advancing to `BED_ALLOCATED`.
+- [x] Mobile tracker interface renders a distinct, empathetic delay card with liaison contact details when a delay is active, and hides it when no delay is present.
+- [x] Integration tests verify delay tag translation, additive wait buffer arithmetic, active delay clearing on bed allocation, and response serialization.

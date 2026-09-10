@@ -5,11 +5,11 @@ Relieve patient and caregiver anxiety regarding hospitalization costs and altern
 
 **Blocked by:** 01: Quiescent Triage State, 3-Stage Milestone Stepper, and Token Access Auditing
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] `PatientMilestoneResponse` returns structured financial insights and care guidance based on `requestedWardClass`, `diversionRecommended`, and `diversionPathway`.
-- [ ] Financial advisory card displays daily out-of-pocket co-pay estimates, government subsidy tiers (up to 70% for Class B2/C), and MediShield Life applicability.
-- [ ] Interface prominently displays an informational peace-of-mind disclaimer ("FYI Insights") clarifying that estimates do not require upfront deposits or digital signatures.
-- [ ] For patients recommended for Community Hospital transfer, the explainer displays rehabilitation length of stay benchmarks (14–21 days) and sub-acute cost expectations.
-- [ ] For patients recommended for MIC@Home, the explainer outlines virtual ward monitoring, home equipment delivery, and visiting nurse schedules.
-- [ ] Unit and component tests verify correct subsidy calculations, text copy per ward class, and conditional rendering of step-down care pathways.
+- [x] `PatientMilestoneResponse` returns structured financial insights and care guidance based on `requestedWardClass`, `diversionRecommended`, and `diversionPathway`.
+- [x] Financial advisory card displays daily out-of-pocket co-pay estimates, government subsidy tiers (up to 70% for Class B2/C), and MediShield Life applicability.
+- [x] Interface prominently displays an informational peace-of-mind disclaimer ("FYI Insights") clarifying that estimates do not require upfront deposits or digital signatures.
+- [x] For patients recommended for Community Hospital transfer, the explainer displays rehabilitation length of stay benchmarks (14–21 days) and sub-acute cost expectations.
+- [x] For patients recommended for MIC@Home, the explainer outlines virtual ward monitoring, home equipment delivery, and visiting nurse schedules.
+- [x] Unit and component tests verify correct subsidy calculations, text copy per ward class, and conditional rendering of step-down care pathways.

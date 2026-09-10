@@ -5,20 +5,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
- * Default security configuration — active when no prototype profile is set.
- * Denies all API access without valid authentication.
- * Production deployment requires implementing OAuth2/JWT via Spring Security's
- * spring-boot-starter-oauth2-resource-server library.
+ * Prototype security configuration — active only under @Profile("prototype").
+ * Permits all API access with header-driven persona switching via PrototypeSecurityFilter.
+ * Enables H2 console access and relaxed CSRF for local development.
  */
 @Configuration
 @EnableWebSecurity
-@Profile("!prototype")
-public class SecurityConfig {
+@Profile("prototype")
+public class PrototypeSecurityConfig {
+
+    private final PrototypeSecurityFilter prototypeSecurityFilter;
+
+    public PrototypeSecurityConfig(PrototypeSecurityFilter prototypeSecurityFilter) {
+        this.prototypeSecurityFilter = prototypeSecurityFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -29,11 +36,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(requestHandler)
+                        .ignoringRequestMatchers("/h2-console/**")
                 )
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/h2-console/**", "/actuator/**", "/api/**").permitAll()
                         .anyRequest().authenticated()
-                );
+                )
+                .addFilterBefore(prototypeSecurityFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

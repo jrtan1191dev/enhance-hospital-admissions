@@ -38,6 +38,8 @@ class KpiAuditLoggingTest {
     @Mock
     private BedRepository bedRepository;
     @Mock
+    private PatientAuditInteractionRepository patientAuditInteractionRepository;
+    @Mock
     private WardRepository wardRepository;
     @Mock
     private BmuAlgorithmConfigRepository configRepository;
@@ -60,7 +62,7 @@ class KpiAuditLoggingTest {
 
         clinicianService = new ClinicianService(patientRepository, admissionRequestRepository, broadcastRepository, auditLogger);
         bmuService = new BmuService(admissionRequestRepository, bedRepository, wardRepository, configRepository, solver, sisterHospitalGateway, auditLogger);
-        trackerService = new PatientTrackerService(patientRepository, admissionRequestRepository, bedRepository, auditLogger);
+        trackerService = new PatientTrackerService(patientRepository, admissionRequestRepository, bedRepository, patientAuditInteractionRepository, auditLogger);
     }
 
     @AfterEach

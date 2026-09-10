@@ -231,7 +231,19 @@ class DomainAndDtoTest {
         PatientEhrSummary ehr = new PatientEhrSummary("S****123A", "None", "None", "Normal", "Clear");
         assertThat(ehr.getNricMasked()).isEqualTo("S****123A");
 
-        PatientMilestoneResponse milestone = new PatientMilestoneResponse(id, "John", "TOKEN-1", AdmissionStatus.BED_REQUESTED, 1, 25, "8A-01", "Ward 8A", 8, "$30", "Wait seated");
+        PatientMilestoneResponse milestone = PatientMilestoneResponse.builder()
+                .patientId(id)
+                .patientName("John")
+                .queueToken("TOKEN-1")
+                .admissionStatus(AdmissionStatus.BED_REQUESTED)
+                .queuePosition(1)
+                .estimatedWaitMinutes(25)
+                .assignedBedNumber("8A-01")
+                .assignedWardName("Ward 8A")
+                .assignedLevel(8)
+                .coPayEstimate("$30")
+                .careGuidance("Wait seated")
+                .build();
         assertThat(milestone.getPatientId()).isEqualTo(id);
         assertThat(milestone.getPatientName()).isEqualTo("John");
         assertThat(milestone.getQueueToken()).isEqualTo("TOKEN-1");

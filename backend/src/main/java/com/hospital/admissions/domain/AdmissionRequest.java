@@ -83,6 +83,10 @@ public class AdmissionRequest extends AuditableEntity {
     private String archivedDelayReasonTag;
     private String archivedOperationalDelayReason;
     private LocalDateTime firstTrackerAccessedAt;
+    private LocalDateTime lastTrackerAccessedAt;
+    @Builder.Default
+    private Integer trackerAccessCount = 0;
+    private LocalDateTime lastPeriodicUpdateSentAt;
 
     private LocalDateTime referralDispatchedAt;
     @Builder.Default

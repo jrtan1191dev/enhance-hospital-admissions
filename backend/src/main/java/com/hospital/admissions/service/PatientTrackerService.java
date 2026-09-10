@@ -4,6 +4,7 @@ import com.hospital.admissions.domain.*;
 import com.hospital.admissions.dto.PatientMilestoneResponse;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.BedRepository;
+import com.hospital.admissions.repository.PatientAuditInteractionRepository;
 import com.hospital.admissions.repository.PatientRepository;
 import com.hospital.admissions.security.AuditLogger;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class PatientTrackerService {
     private final PatientRepository patientRepository;
     private final AdmissionRequestRepository admissionRequestRepository;
     private final BedRepository bedRepository;
+    private final PatientAuditInteractionRepository patientAuditInteractionRepository;
     private final AuditLogger auditLogger;
 
     public PatientMilestoneResponse trackPatient(String queueToken) {
@@ -36,13 +38,18 @@ public class PatientTrackerService {
         Optional<AdmissionRequest> optRequest = admissionRequestRepository.findByPatient_QueueToken(queueToken);
 
         AdmissionStatus status = optRequest.map(AdmissionRequest::getStatus).orElse(AdmissionStatus.ASSESSMENT_PENDING);
+        WardClass requestedWardClass = optRequest.map(AdmissionRequest::getRequestedWardClass).orElse(WardClass.B2);
         int queuePosition = 1;
+        int patientsAhead = 0;
         int estimatedWaitMinutes = 15;
 
         if (status == AdmissionStatus.BED_REQUESTED) {
             List<AdmissionRequest> pendingRequests = admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED).stream()
-                    .sorted(Comparator.comparing((AdmissionRequest r) -> r.getPrimaryAcuityTier().ordinal())
-                            .thenComparing(AdmissionRequest::getRequestedAt))
+                    .filter(r -> r.getRequestedWardClass() == requestedWardClass)
+                    .sorted(Comparator.comparing((AdmissionRequest r) -> {
+                        AcuityTier tier = r.getEffectiveAcuityTier() != null ? r.getEffectiveAcuityTier() : r.getPrimaryAcuityTier();
+                        return tier != null ? tier.ordinal() : Integer.MAX_VALUE;
+                    }).thenComparing(AdmissionRequest::getRequestedAt))
                     .collect(Collectors.toList());
 
             UUID currentReqId = optRequest.get().getId();
@@ -52,13 +59,27 @@ public class PatientTrackerService {
                     break;
                 }
             }
-            estimatedWaitMinutes = queuePosition * 25;
+            patientsAhead = Math.max(0, queuePosition - 1);
+            int delayBuffer = optRequest.map(r -> getDelayBufferMinutes(r.getDelayReasonTag())).orElse(0);
+            estimatedWaitMinutes = (queuePosition * 25) + delayBuffer;
         } else if (status == AdmissionStatus.BED_ALLOCATED) {
             queuePosition = 0;
+            patientsAhead = 0;
             estimatedWaitMinutes = 5;
         } else if (status == AdmissionStatus.ADMITTED_INPATIENT || status == AdmissionStatus.DISCHARGED) {
             queuePosition = 0;
+            patientsAhead = 0;
             estimatedWaitMinutes = 0;
+        }
+
+        String delayReason = null;
+        String delayContactHotline = null;
+        if (optRequest.isPresent()) {
+            AdmissionRequest req = optRequest.get();
+            if (req.getDelayReasonTag() != null || (req.getOperationalDelayReason() != null && !req.getOperationalDelayReason().isBlank())) {
+                delayReason = getDelayDisclosure(req.getDelayReasonTag(), req.getOperationalDelayReason());
+                delayContactHotline = "+65 6321 4311";
+            }
         }
 
         String assignedBedNumber = null;
@@ -72,16 +93,24 @@ public class PatientTrackerService {
             assignedLevel = bed.getWard().getLevel();
         }
 
-        String coPay = "Estimated Co-Pay: $35 - $60 / day (MediShield Life & Subsidized Class "
-                + (optRequest.map(r -> r.getRequestedWardClass().name()).orElse("B2")) + " applied)";
-        String guidance = "Please remain seated in the ED observation area. Our portering team will escort you once your bed is prepared.";
+        String coPay = getCoPayEstimate(requestedWardClass);
+        String guidance = getCareGuidance(optRequest);
+        Boolean diversionRecommended = optRequest.map(AdmissionRequest::isDiversionRecommended).orElse(false);
+        DiversionPathway diversionPathway = optRequest.map(AdmissionRequest::getDiversionPathway).orElse(null);
 
         if (optRequest.isPresent()) {
             AdmissionRequest req = optRequest.get();
-            if (req.getFirstTrackerAccessedAt() == null) {
-                req.setFirstTrackerAccessedAt(LocalDateTime.now());
-                admissionRequestRepository.save(req);
+            LocalDateTime now = LocalDateTime.now();
+            boolean isFirstAccess = (req.getFirstTrackerAccessedAt() == null);
+            if (isFirstAccess) {
+                req.setFirstTrackerAccessedAt(now);
+            }
+            req.setLastTrackerAccessedAt(now);
+            int count = (req.getTrackerAccessCount() == null ? 0 : req.getTrackerAccessCount()) + 1;
+            req.setTrackerAccessCount(count);
+            admissionRequestRepository.save(req);
 
+            if (isFirstAccess) {
                 java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
                 details.put("PatientId", patient.getId());
                 details.put("AdmissionStatus", status);
@@ -100,14 +129,107 @@ public class PatientTrackerService {
                 .patientName(patient.getName())
                 .queueToken(queueToken)
                 .admissionStatus(status)
+                .requestedWardClass(requestedWardClass)
                 .queuePosition(queuePosition)
+                .patientsAhead(patientsAhead)
                 .estimatedWaitMinutes(estimatedWaitMinutes)
                 .assignedBedNumber(assignedBedNumber)
                 .assignedWardName(assignedWardName)
                 .assignedLevel(assignedLevel)
+                .delayReason(delayReason)
+                .delayContactHotline(delayContactHotline)
                 .coPayEstimate(coPay)
                 .careGuidance(guidance)
+                .diversionRecommended(diversionRecommended)
+                .diversionPathway(diversionPathway)
                 .build();
+    }
+
+    private String getCoPayEstimate(WardClass wardClass) {
+        if (wardClass == null) {
+            wardClass = WardClass.B2;
+        }
+        return switch (wardClass) {
+            case A -> "Estimated Co-Pay: $450 - $650 / day (Non-subsidized Class A; MediShield Life claimable up to policy limits)";
+            case B1 -> "Estimated Co-Pay: $220 - $340 / day (Government subsidized up to 20%; MediShield Life claimable)";
+            case B2 -> "Estimated Co-Pay: $60 - $110 / day (Government subsidized up to 70% means-tested; MediShield Life claimable)";
+            case C -> "Estimated Co-Pay: $35 - $60 / day (Government subsidized up to 80% means-tested; MediShield Life claimable)";
+        };
+    }
+
+    private String getCareGuidance(Optional<AdmissionRequest> optRequest) {
+        if (optRequest.isPresent()) {
+            AdmissionRequest req = optRequest.get();
+            if (req.isDiversionRecommended()) {
+                if (req.getDiversionPathway() == DiversionPathway.COMMUNITY_HOSPITAL) {
+                    return "Community Hospital Transfer: Sub-acute rehabilitation with average length of stay 14 to 21 days at Outram / St. Andrew's Community Hospital.";
+                } else if (req.getDiversionPathway() == DiversionPathway.HOSPITAL_AT_HOME_MIC) {
+                    return "MIC@Home (Hospital-at-Home): Virtual ward monitoring, regular visiting nurse schedules, and delivery of home medical equipment.";
+                }
+            }
+        }
+        return "Please remain seated in the ED observation area. Our portering team will escort you once your bed is prepared.";
+    }
+
+    private int getDelayBufferMinutes(String tag) {
+        if (tag == null) return 0;
+        return switch (tag) {
+            case "HOUSEKEEPING_DELAY" -> 20;
+            case "BED_SHORTAGE", "SPECIALIZED_ISOLATION_CLEANING" -> 30;
+            case "SURGE_TRAUMA_EVENT" -> 45;
+            default -> 0;
+        };
+    }
+
+    private String getDelayDisclosure(String tag, String customReason) {
+        if (tag != null) {
+            switch (tag) {
+                case "HOUSEKEEPING_DELAY":
+                    return "Your ward bed is currently undergoing final housekeeping sanitization and linen preparation.";
+                case "BED_SHORTAGE":
+                    return "Our clinical coordinators are actively prioritizing ward beds across the hospital to ensure optimal clinical placement.";
+                case "SPECIALIZED_ISOLATION_CLEANING":
+                    return "Your specialized isolation room is completing a mandatory 30-minute UV disinfection cycle for your safety.";
+                case "SURGE_TRAUMA_EVENT":
+                    return "The emergency department is currently managing critical trauma arrivals. Thank you for your patience as urgent cases are stabilized.";
+            }
+        }
+        if (customReason != null && !customReason.isBlank()) {
+            return "Our clinical coordination team is actively managing bed assignments: " + customReason;
+        }
+        return "Our clinical coordination team is actively managing bed assignments. For assistance, contact the ward liaison.";
+    }
+
+    @Transactional
+    public int dispatchPeriodicUpdates(LocalDateTime currentTime, int thresholdMinutes) {
+        List<AdmissionRequest> waitingRequests = admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED);
+        int count = 0;
+        for (AdmissionRequest req : waitingRequests) {
+            LocalDateTime reqTime = req.getRequestedAt() != null ? req.getRequestedAt() : req.getCreatedAt();
+            long dwellMins = reqTime != null ? Math.max(0, java.time.Duration.between(reqTime, currentTime).toMinutes()) : 0;
+            if (dwellMins >= thresholdMinutes) {
+                req.setLastPeriodicUpdateSentAt(currentTime);
+                admissionRequestRepository.save(req);
+
+                java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+                details.put("Channel", "SMS_PUSH");
+                details.put("Token", req.getPatient() != null ? req.getPatient().getQueueToken() : "UNKNOWN");
+                details.put("Milestone", "MILESTONE_1_ADMISSION_CONFIRMED");
+                details.put("DwellMins", dwellMins);
+                details.put("DeliveryStatus", "SUCCESS");
+
+                auditLogger.logAction("SYSTEM_SCHEDULER", "DISPATCH_PERIODIC_UPDATE",
+                        "AdmissionRequest:" + req.getId(),
+                        AuditLogger.formatDetails(details));
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Transactional
+    public int dispatchPeriodicUpdates() {
+        return dispatchPeriodicUpdates(LocalDateTime.now(), 5);
     }
 
     @Transactional
@@ -199,5 +321,42 @@ public class PatientTrackerService {
                 AuditLogger.formatDetails(details));
 
         return savedBed;
+    }
+
+    @Transactional
+    public PatientAuditInteraction recordPatientAction(String token, String actionType) {
+        Patient patient = patientRepository.findByQueueToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found for token: " + token));
+
+        Optional<AdmissionRequest> optRequest = admissionRequestRepository.findByPatient_QueueToken(token);
+        UUID admissionId = optRequest.map(AdmissionRequest::getId).orElse(null);
+
+        PatientAuditInteraction interaction = PatientAuditInteraction.builder()
+                .token(token)
+                .admissionId(admissionId)
+                .actionType(actionType)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        PatientAuditInteraction saved = patientAuditInteractionRepository.save(interaction);
+
+        String auditAction = "MSW_CALL".equalsIgnoreCase(actionType)
+                ? "CONNECT_MSW_HOTLINE"
+                : "CONNECT_FINANCIAL_COUNSELING";
+
+        String serviceName = "MSW_CALL".equalsIgnoreCase(actionType)
+                ? "MEDICAL_SOCIAL_WORK"
+                : "FINANCIAL_COUNSELING";
+
+        java.util.Map<String, Object> details = new java.util.LinkedHashMap<>();
+        details.put("Service", serviceName);
+        details.put("AdmissionId", admissionId != null ? admissionId : "NONE");
+        details.put("Action", "CLICK_TO_CALL");
+
+        auditLogger.logAction("PUBLIC_TOKEN", auditAction,
+                "Patient:" + patient.getId(),
+                AuditLogger.formatDetails(details));
+
+        return saved;
     }
 }

@@ -60,7 +60,21 @@ class PatientTrackerControllerTest {
         mockMvc.perform(get("/api/v1/patients/track/TOKEN-123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.queueToken").value("TOKEN-123"))
-                .andExpect(jsonPath("$.patientName").value("Alice"));
+                .andExpect(jsonPath("$.patientName").value("Alice"))
+                .andExpect(jsonPath("$.clinicalNotes").doesNotExist())
+                .andExpect(jsonPath("$.diagnosticFindings").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/patients/track/{token} returns 404 ProblemDetail for invalid token")
+    void testTrackPatient_NotFound() throws Exception {
+        when(patientTrackerService.trackPatient("TOKEN-INVALID"))
+                .thenThrow(new IllegalArgumentException("Patient not found for token: TOKEN-INVALID"));
+
+        mockMvc.perform(get("/api/v1/patients/track/TOKEN-INVALID"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value("Patient not found for token: TOKEN-INVALID"));
     }
 
     @Test
@@ -108,5 +122,36 @@ class PatientTrackerControllerTest {
         mockMvc.perform(post("/api/v1/patients/beds/" + bedId + "/clean"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("EMPTY_CLEANED"));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/patients/simulate-periodic-update returns dispatched count")
+    void testSimulatePeriodicUpdate() throws Exception {
+        when(patientTrackerService.dispatchPeriodicUpdates()).thenReturn(3);
+
+        mockMvc.perform(post("/api/v1/patients/simulate-periodic-update"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUCCESS"))
+                .andExpect(jsonPath("$.dispatchedCount").value(3));
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/patients/track/{token}/actions records patient interaction")
+    void testRecordPatientAction() throws Exception {
+        com.hospital.admissions.domain.PatientAuditInteraction interaction =
+                com.hospital.admissions.domain.PatientAuditInteraction.builder()
+                        .token("TOKEN-123")
+                        .actionType("MSW_CALL")
+                        .createdAt(java.time.LocalDateTime.now())
+                        .build();
+
+        when(patientTrackerService.recordPatientAction("TOKEN-123", "MSW_CALL")).thenReturn(interaction);
+
+        mockMvc.perform(post("/api/v1/patients/track/TOKEN-123/actions")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("{\"actionType\":\"MSW_CALL\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("TOKEN-123"))
+                .andExpect(jsonPath("$.actionType").value("MSW_CALL"));
     }
 }

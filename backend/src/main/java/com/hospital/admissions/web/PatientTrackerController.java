@@ -25,6 +25,13 @@ public class PatientTrackerController {
         return ResponseEntity.ok(patientTrackerService.trackPatient(token));
     }
 
+    @PostMapping("/track/{token}/actions")
+    public ResponseEntity<com.hospital.admissions.domain.PatientAuditInteraction> recordPatientAction(
+            @PathVariable String token,
+            @RequestBody com.hospital.admissions.dto.PatientActionRequest request) {
+        return ResponseEntity.ok(patientTrackerService.recordPatientAction(token, request.getActionType()));
+    }
+
     @GetMapping("/tokens")
     public ResponseEntity<List<Patient>> getAvailablePatientsForPicker() {
         return ResponseEntity.ok(patientRepository.findAll());
@@ -38,6 +45,16 @@ public class PatientTrackerController {
     @PostMapping("/beds/{bedId}/vacate")
     public ResponseEntity<Bed> vacatePatient(@PathVariable UUID bedId) {
         return ResponseEntity.ok(patientTrackerService.vacatePatient(bedId));
+    }
+
+    @PostMapping("/simulate-periodic-update")
+    public ResponseEntity<java.util.Map<String, Object>> simulatePeriodicUpdate() {
+        int count = patientTrackerService.dispatchPeriodicUpdates();
+        return ResponseEntity.ok(java.util.Map.of(
+                "status", "SUCCESS",
+                "dispatchedCount", count,
+                "message", "Simulated periodic status updates dispatched to " + count + " waiting patient(s)"
+        ));
     }
 
     @PostMapping("/beds/{bedId}/clean")

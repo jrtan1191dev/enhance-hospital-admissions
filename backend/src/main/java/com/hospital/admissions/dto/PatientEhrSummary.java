@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Summary DTO containing patient clinical baseline information from the Electronic Health Record (EHR).
+ */
 @Data
 @Builder
 @NoArgsConstructor

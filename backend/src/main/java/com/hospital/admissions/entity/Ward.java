@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Entity representing an inpatient hospital ward, including floor level, ward class,
+ * specialty cluster alignment, negative pressure capability, and associated beds.
+ */
 @Entity
 @Table(name = "wards")
 @Getter

@@ -37,6 +37,10 @@ public class WardService {
     /**
      * Establishes or updates an advance Estimated Date of Discharge (EDD) for an admitted inpatient.
      * Emits a structured RECORD_EDD audit log event to track forward planning compliance (KPI 20).
+     *
+     * @param patientId the unique identifier of the admitted patient.
+     * @param request   the {@link EddUpdateRequest} containing date, confidence, and rationale.
+     * @return the updated {@link AdmissionRequest}.
      */
     @Transactional
     public AdmissionRequest updateEdd(UUID patientId, EddUpdateRequest request) {
@@ -80,6 +84,11 @@ public class WardService {
     /**
      * Pure function calculating the dynamic discharge runway stage based on the target EDD,
      * morning sign-off timestamp, and bedside medication dispensing status.
+     *
+     * @param edd                the estimated date of discharge.
+     * @param dischargeSignoffAt optional morning clinician authorization timestamp.
+     * @param medicationStatus   current dispensing status of discharge medications.
+     * @return dynamic {@link DischargeRunwayStage}.
      */
     public static DischargeRunwayStage calculateRunwayStage(
             LocalDate edd,
@@ -113,6 +122,8 @@ public class WardService {
 
     /**
      * Returns the active discharge runway list across all wards for currently admitted inpatients.
+     *
+     * @return list of {@link DischargeRunwayDto} tracking each inpatient's discharge runway status.
      */
     @Transactional(readOnly = true)
     public List<DischargeRunwayDto> getRunway() {
@@ -150,6 +161,8 @@ public class WardService {
 
     /**
      * Computes aggregate 24 to 72-hour discharge capacity projections grouped by ward and specialty cluster.
+     *
+     * @return {@link BmuCapacityForecastDto} containing projected vacancy metrics.
      */
     @Transactional(readOnly = true)
     public BmuCapacityForecastDto getCapacityForecast() {
@@ -223,6 +236,9 @@ public class WardService {
     /**
      * Executes morning discharge authorization (targeted before 09:30 AM),
      * moving medication delivery status to PACKING_IN_PROGRESS and logging audit events.
+     *
+     * @param patientId the unique identifier of the patient being authorized.
+     * @return the updated {@link AdmissionRequest}.
      */
     @Transactional
     public AdmissionRequest dischargeSignoff(UUID patientId) {
@@ -264,6 +280,9 @@ public class WardService {
 
     /**
      * Confirms bedside delivery of pre-packed medications, advancing runway stage to READY_TO_VACATE.
+     *
+     * @param patientId the unique identifier of the patient receiving discharge meds.
+     * @return the updated {@link AdmissionRequest}.
      */
     @Transactional
     public AdmissionRequest deliverMedication(UUID patientId) {
@@ -296,6 +315,8 @@ public class WardService {
 
     /**
      * Retrieves active vacated beds in EMPTY_PENDING_CLEANING with dynamic 30-minute SLA countdowns.
+     *
+     * @return list of {@link TurnoverTaskDto} representing pending terminal sanitization tasks.
      */
     @Transactional(readOnly = true)
     public List<TurnoverTaskDto> getTurnoverTasks() {

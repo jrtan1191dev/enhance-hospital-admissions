@@ -11,10 +11,22 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * REST controller for authentication and user persona discovery.
+ * <p>
+ * Exposes the currently active security principal, authenticated status,
+ * and assigned Spring Security authorities.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
+    /**
+     * Retrieves the currently active user session and security context.
+     *
+     * @return {@link ResponseEntity} containing a map with authentication status,
+     *         username, and list of granted roles/authorities.
+     */
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

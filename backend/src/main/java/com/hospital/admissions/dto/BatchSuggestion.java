@@ -8,6 +8,10 @@ import lombok.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * BMU solver suggestion for batch-allocating multiple ED boarding patients
+ * sharing common ward class, gender, and infection status to a holding ward.
+ */
 @Data
 @Builder
 @NoArgsConstructor

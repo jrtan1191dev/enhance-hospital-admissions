@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Represents a clinician override of automated triage baseline data with audit rationale.
+ */
 @Data
 @Builder
 @NoArgsConstructor

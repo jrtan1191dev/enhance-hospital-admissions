@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response payload confirming receipt and dispatch of an acute referral to a sister hospital.
+ */
 @Data
 @Builder
 @NoArgsConstructor

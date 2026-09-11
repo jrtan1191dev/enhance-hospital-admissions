@@ -6,6 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entity representing an inpatient admission request lifecycle from emergency department triage
+ * through bed allocation, transfer, inpatient stay, and discharge.
+ */
 @Entity
 @Table(name = "admission_requests")
 @Getter

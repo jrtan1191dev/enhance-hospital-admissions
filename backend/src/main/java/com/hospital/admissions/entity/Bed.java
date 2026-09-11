@@ -7,6 +7,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entity representing an individual hospital bed within a ward, including its telemetry capabilities,
+ * proximity to the nursing station, cleaning status, and current occupancy.
+ */
 @Entity
 @Table(name = "beds")
 @Getter

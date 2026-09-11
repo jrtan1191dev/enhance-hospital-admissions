@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request payload for updating the admitting specialty cluster of an admission request.
+ */
 @Data
 @Builder
 @NoArgsConstructor

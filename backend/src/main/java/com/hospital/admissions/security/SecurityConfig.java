@@ -20,6 +20,13 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 @Profile("!prototype")
 public class SecurityConfig {
 
+    /**
+     * Configures the production security filter chain with CSRF protection and authenticated API restrictions.
+     *
+     * @param http the {@link HttpSecurity} builder.
+     * @return the configured {@link SecurityFilterChain}.
+     * @throws Exception in case of configuration errors.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();

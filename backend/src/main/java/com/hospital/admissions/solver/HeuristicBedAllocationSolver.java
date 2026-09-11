@@ -13,6 +13,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Prototype heuristic implementation of {@link BedAllocationSolver}.
+ * <p>
+ * Filters candidate beds by enforcing 4 non-negotiable hard constraints:
+ * <ol>
+ *   <li>Ward class match (A, B1, B2, C)</li>
+ *   <li>Locked gender cohorting match</li>
+ *   <li>Telemetry equipment availability when required</li>
+ *   <li>Infection containment and negative pressure isolation rules</li>
+ * </ol>
+ * Scores valid beds using soft weights: specialty service alignment (+40%),
+ * gender/infection consolidation (+30%), and fall risk proximity to nursing stations (+15%).
+ */
 @Slf4j
 @Component
 @Profile("prototype")
@@ -21,6 +34,13 @@ public class HeuristicBedAllocationSolver implements BedAllocationSolver {
 
     private final BedRepository bedRepository;
 
+    /**
+     * Recommends beds by filtering hard constraints and ranking by composite soft score.
+     *
+     * @param request the {@link AdmissionRequest} containing clinical requirements and triage tiers.
+     * @param config  the {@link BmuAlgorithmConfig} containing weighting factors.
+     * @return list of top 3 ranked {@link BedRecommendation} instances.
+     */
     @Override
     public List<BedRecommendation> recommendBeds(AdmissionRequest request, BmuAlgorithmConfig config) {
         Patient patient = request.getPatient();

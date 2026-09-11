@@ -9,10 +9,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
+/**
+ * JPA Auditing configuration to automatically populate {@code createdBy} and {@code lastModifiedBy}
+ * entity properties using the current Spring Security context.
+ */
 @Configuration
 @EnableJpaAuditing
 public class JpaAuditConfig {
 
+    /**
+     * Resolves the current authenticated auditor username from {@link SecurityContextHolder}.
+     *
+     * @return {@link AuditorAware} provider returning the authenticated username, or empty if anonymous.
+     */
     @Bean
     public AuditorAware<String> auditorAware() {
         return () -> Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())

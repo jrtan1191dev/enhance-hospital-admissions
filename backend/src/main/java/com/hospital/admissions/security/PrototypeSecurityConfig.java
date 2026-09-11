@@ -23,10 +23,22 @@ public class PrototypeSecurityConfig {
 
     private final PrototypeSecurityFilter prototypeSecurityFilter;
 
+    /**
+     * Constructs the prototype security configuration with the persona switching filter.
+     *
+     * @param prototypeSecurityFilter the {@link PrototypeSecurityFilter}.
+     */
     public PrototypeSecurityConfig(PrototypeSecurityFilter prototypeSecurityFilter) {
         this.prototypeSecurityFilter = prototypeSecurityFilter;
     }
 
+    /**
+     * Configures the prototype security filter chain allowing persona-driven authentication.
+     *
+     * @param http the {@link HttpSecurity} builder.
+     * @return the configured {@link SecurityFilterChain}.
+     * @throws Exception in case of configuration errors.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();

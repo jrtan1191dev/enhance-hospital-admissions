@@ -9,11 +9,22 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * Prototype mock implementation of {@link SisterHospitalGateway} returning simulated fast-track referral confirmations.
+ */
 @Slf4j
 @Component
 @Profile("prototype")
 public class MockSisterHospitalGateway implements SisterHospitalGateway {
 
+    /**
+     * Generates a simulated referral confirmation code and 30-minute SLA window.
+     *
+     * @param patient        the {@link Patient} being diverted.
+     * @param request        the current {@link AdmissionRequest}.
+     * @param targetFacility destination hospital facility name.
+     * @return synthetic {@link SisterHospitalReferralResponse}.
+     */
     @Override
     public SisterHospitalReferralResponse referPatient(Patient patient, AdmissionRequest request, String targetFacility) {
         String referralId = "REF-" + (targetFacility != null ? targetFacility.toUpperCase() : "OCH") + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();

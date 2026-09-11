@@ -19,11 +19,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Service managing Emergency Department triage assessments and Specialist Consult Broadcasts.
+ * <p>
+ * Handles electronic assessment submission, dynamic creation of multi-cluster consult broadcasts,
+ * specialist claiming, peer consultation opinions, safety-first discordance reconciliation,
+ * consult chaining, and scheduled auto-escalation of overdue consultations.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClinicianService {
 
+    /** Default fallback specialist logins for each medical specialty cluster when auto-escalating. */
     public static final Map<SpecialtyCluster, String> DEFAULT_SPECIALISTS = Map.of(
             SpecialtyCluster.CARDIOLOGY, "dr_lim_cardio",
             SpecialtyCluster.GENERAL_MEDICINE, "dr_tan_genmed",
@@ -36,14 +44,31 @@ public class ClinicianService {
     private final AssessmentBroadcastRepository broadcastRepository;
     private final AuditLogger auditLogger;
 
+    /**
+     * Retrieves all ED intake patients awaiting clinical assessment.
+     *
+     * @return list of {@link Patient} entities without active admissions.
+     */
     public List<Patient> getEdWaitingPatients() {
         return patientRepository.findPatientsWithoutActiveAdmission();
     }
 
+    /**
+     * Retrieves all admission requests initiated by Emergency Department clinicians.
+     *
+     * @return list of {@link AdmissionRequest} entities ordered by requested timestamp descending.
+     */
     public List<AdmissionRequest> getEdSubmittedAdmissions() {
         return admissionRequestRepository.findAllByOrderByRequestedAtDesc();
     }
 
+    /**
+     * Submits an ED clinical intake assessment, creating an admission request and triggering
+     * specialist consult broadcasts if multi-specialty opinion is indicated.
+     *
+     * @param req the {@link EdAssessmentSubmitRequest} containing clinical observations and triage tiers.
+     * @return the created {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest submitEdAssessment(EdAssessmentSubmitRequest req) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -126,6 +151,12 @@ public class ClinicianService {
         return admissionRequest;
     }
 
+    /**
+     * Retrieves open or historical specialist broadcasts, optionally scoped to a medical specialty cluster.
+     *
+     * @param cluster optional {@link SpecialtyCluster} filter.
+     * @return list of matching {@link AssessmentBroadcast} objects.
+     */
     public List<AssessmentBroadcast> getBroadcasts(SpecialtyCluster cluster) {
         if (cluster != null) {
             return broadcastRepository.findByTargetCluster(cluster);
@@ -133,6 +164,12 @@ public class ClinicianService {
         return broadcastRepository.findAll();
     }
 
+    /**
+     * Claims an open specialist broadcast consultation on behalf of the calling clinician.
+     *
+     * @param broadcastId the unique identifier of the broadcast.
+     * @return the claimed {@link AssessmentBroadcast}.
+     */
     @Transactional
     public AssessmentBroadcast claimBroadcast(UUID broadcastId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -165,6 +202,14 @@ public class ClinicianService {
         return broadcast;
     }
 
+    /**
+     * Submits specialist consultation findings, assessing acuity tiers, telemetry needs, and diversion options.
+     * Evaluates multi-broadcast consensus and flags clinical discordance.
+     *
+     * @param broadcastId the unique identifier of the broadcast.
+     * @param req         the {@link SpecialistConsultRequest} containing clinical opinions and recommendations.
+     * @return the completed {@link AssessmentBroadcast}.
+     */
     @Transactional
     public AssessmentBroadcast submitConsult(UUID broadcastId, SpecialistConsultRequest req) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -254,6 +299,13 @@ public class ClinicianService {
         return broadcast;
     }
 
+    /**
+     * Amends an existing specialist consult recommendation with updated clinical findings.
+     *
+     * @param broadcastId the unique identifier of the broadcast.
+     * @param req         the updated {@link SpecialistConsultRequest}.
+     * @return the amended {@link AssessmentBroadcast}.
+     */
     @Transactional
     public AssessmentBroadcast amendConsult(UUID broadcastId, SpecialistConsultRequest req) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -345,6 +397,13 @@ public class ClinicianService {
         return broadcast;
     }
 
+    /**
+     * Chains a secondary specialist consult from an existing consultation for multi-disciplinary review.
+     *
+     * @param broadcastId the parent broadcast identifier.
+     * @param req         the {@link com.hospital.admissions.dto.ChainConsultRequest} specifying target cluster and rationale.
+     * @return the newly created chained {@link AssessmentBroadcast}.
+     */
     @Transactional
     public AssessmentBroadcast chainConsult(UUID broadcastId, com.hospital.admissions.dto.ChainConsultRequest req) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -383,12 +442,24 @@ public class ClinicianService {
         return chainedBroadcast;
     }
 
+    /**
+     * Periodically scans open broadcasts and auto-escalates consultations exceeding SLA thresholds.
+     * Runs on a scheduled 30-second interval.
+     *
+     * @return number of broadcasts auto-escalated.
+     */
     @Scheduled(fixedRate = 30000)
     @Transactional
     public int autoEscalateOverdueBroadcasts() {
         return autoEscalateOverdueBroadcasts(LocalDateTime.now());
     }
 
+    /**
+     * Evaluates open broadcasts against a reference timestamp and auto-escalates overdue requests.
+     *
+     * @param now the current reference timestamp.
+     * @return number of broadcasts auto-escalated.
+     */
     @Transactional
     public int autoEscalateOverdueBroadcasts(LocalDateTime now) {
         List<AssessmentBroadcast> openBroadcasts = broadcastRepository.findByStatus(BroadcastStatus.OPEN);

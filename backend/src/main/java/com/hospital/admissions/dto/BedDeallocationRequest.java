@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.util.UUID;
 
+/**
+ * Request payload for deallocating or reverting an assigned bed back to the unallocated queue.
+ */
 @Data
 @Builder
 @NoArgsConstructor

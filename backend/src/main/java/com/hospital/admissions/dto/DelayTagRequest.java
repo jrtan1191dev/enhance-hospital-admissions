@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request payload for tagging an admission request with an operational delay reason code and notes.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,6 +22,11 @@ public class DelayTagRequest {
     private String note;
     private String operationalDelayReason;
 
+    /**
+     * Resolves the effective explanatory note, prioritizing explicit notes over operational delay notes.
+     *
+     * @return effective delay note string
+     */
     public String getEffectiveNote() {
         if (note != null && !note.isBlank()) {
             return note;

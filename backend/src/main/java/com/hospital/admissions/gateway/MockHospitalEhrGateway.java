@@ -5,11 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+/**
+ * Prototype mock implementation of {@link HospitalEhrGateway} returning synthetic electronic health records.
+ */
 @Slf4j
 @Component
 @Profile("prototype")
 public class MockHospitalEhrGateway implements HospitalEhrGateway {
 
+    /**
+     * Returns simulated clinical EHR data for demonstration and rapid prototype testing.
+     *
+     * @param nric the patient's National Registration Identity Card number.
+     * @return synthetic {@link PatientEhrSummary}.
+     */
     @Override
     public PatientEhrSummary fetchEhrSummary(String nric) {
         log.info("[PROTOTYPE MOCK] Fetching synthetic EHR summary for NRIC {}", nric);

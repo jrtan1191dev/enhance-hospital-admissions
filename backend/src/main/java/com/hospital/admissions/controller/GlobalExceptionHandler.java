@@ -28,10 +28,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /**
+     * Initializes the global exception handler with static message resolution.
+     */
     public GlobalExceptionHandler() {
         setMessageSource(new org.springframework.context.support.StaticMessageSource());
     }
 
+    /**
+     * Handles internal Spring MVC framework exceptions with structured logging and timestamp injection.
+     *
+     * @param ex         the exception to handle.
+     * @param body       the optional response body.
+     * @param headers    the HTTP headers to return.
+     * @param statusCode the HTTP status code.
+     * @param request    the current web request.
+     * @return {@link ResponseEntity} containing the formatted response entity.
+     */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception ex,
@@ -55,6 +68,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return response;
     }
 
+    /**
+     * Handles hard clinical safety invariant violations (e.g., infectious cohorting or gender mismatch).
+     *
+     * @param ex      the {@link com.hospital.admissions.exception.SafetyInvariantViolationException}.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 422 Unprocessable Entity.
+     */
     @ExceptionHandler(com.hospital.admissions.exception.SafetyInvariantViolationException.class)
     public ProblemDetail handleSafetyInvariantViolation(com.hospital.admissions.exception.SafetyInvariantViolationException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.UNPROCESSABLE_ENTITY, ex, request);
@@ -64,6 +84,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Handles bean validation constraint violations on method arguments.
+     *
+     * @param ex      the {@link ConstraintViolationException}.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 400 Bad Request.
+     */
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.BAD_REQUEST, ex, request);
@@ -73,6 +100,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Handles illegal argument exceptions, translating not-found conditions into HTTP 404 or HTTP 400.
+     *
+     * @param ex      the {@link IllegalArgumentException}.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with appropriate status code.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         HttpStatus status = (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("not found"))
@@ -86,6 +120,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Handles invalid state transitions and resource conflicts.
+     *
+     * @param ex      the {@link IllegalStateException}.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 409 Conflict.
+     */
     @ExceptionHandler(IllegalStateException.class)
     public ProblemDetail handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.CONFLICT, ex, request);
@@ -95,6 +136,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Handles concurrent database update conflicts and optimistic lock failures.
+     *
+     * @param ex      the optimistic locking exception.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 409 Conflict.
+     */
     @ExceptionHandler({
         jakarta.persistence.OptimisticLockException.class,
         org.springframework.orm.ObjectOptimisticLockingFailureException.class
@@ -109,6 +157,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Handles role-based access control and security authorization rejections.
+     *
+     * @param ex      the {@link org.springframework.security.access.AccessDeniedException}.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 403 Forbidden.
+     */
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(org.springframework.security.access.AccessDeniedException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.FORBIDDEN, ex, request);
@@ -118,6 +173,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Handles calls to features not yet implemented or active in the current profile.
+     *
+     * @param ex      the {@link UnsupportedOperationException}.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 501 Not Implemented.
+     */
     @ExceptionHandler(UnsupportedOperationException.class)
     public ProblemDetail handleUnsupportedOperation(UnsupportedOperationException ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.NOT_IMPLEMENTED, ex, request);
@@ -127,6 +189,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problem;
     }
 
+    /**
+     * Fallback handler for uncaught server-side runtime exceptions.
+     *
+     * @param ex      the unhandled exception.
+     * @param request the current HTTP servlet request.
+     * @return RFC 7807 {@link ProblemDetail} with HTTP 500 Internal Server Error.
+     */
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnhandledException(Exception ex, HttpServletRequest request) {
         logDiagnostic(HttpStatus.INTERNAL_SERVER_ERROR, ex, request);

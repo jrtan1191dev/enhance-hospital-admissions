@@ -5,6 +5,10 @@ import lombok.*;
 
 import java.util.UUID;
 
+/**
+ * Entity representing an individual patient admitted to the hospital or emergency department,
+ * including masked identification, clinical attributes, and public queue token.
+ */
 @Entity
 @Table(name = "patients")
 @Getter

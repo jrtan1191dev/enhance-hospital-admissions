@@ -23,6 +23,9 @@ public class BmuCapacityForecastDto {
     private List<WardCapacityProjection> byWard;
     private List<ClusterCapacityProjection> byCluster;
 
+    /**
+     * Ward-level projection of anticipated bed capacity over upcoming time horizons.
+     */
     @Data
     @Builder
     @NoArgsConstructor
@@ -36,6 +39,9 @@ public class BmuCapacityForecastDto {
         private int total;
     }
 
+    /**
+     * Specialty cluster level projection of anticipated bed capacity.
+     */
     @Data
     @Builder
     @NoArgsConstructor

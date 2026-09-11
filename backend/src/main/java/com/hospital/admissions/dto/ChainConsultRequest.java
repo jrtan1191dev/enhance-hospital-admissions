@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request payload for chaining a secondary or cross-specialty consult to another department.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -6,6 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entity representing a clinical assessment broadcast dispatched to specialist pools
+ * for secondary acuity assessment or subspecialty consults.
+ */
 @Entity
 @Table(name = "assessment_broadcasts")
 @Getter

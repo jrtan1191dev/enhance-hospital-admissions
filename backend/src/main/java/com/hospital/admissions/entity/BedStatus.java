@@ -2,6 +2,9 @@ package com.hospital.admissions.entity;
 
 import lombok.Getter;
 
+/**
+ * Status enumeration for physical hospital beds with associated UI color coding and descriptions.
+ */
 @Getter
 public enum BedStatus {
     /**

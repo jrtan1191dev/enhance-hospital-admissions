@@ -17,11 +17,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Prototype servlet filter translating {@code X-User-Role} HTTP headers into mock Spring Security authentication.
+ * <p>
+ * Enabled only in the {@code prototype} profile to allow evaluators to switch seamlessly between
+ * clinical personas (ED attending, BMU coordinator, specialist, nurse, housekeeping, patient).
+ */
 @Slf4j
 @Component
 @Profile("prototype")
 public class PrototypeSecurityFilter extends OncePerRequestFilter {
 
+    /** Map associating prototype roles to synthetic demonstration usernames. */
     private static final Map<String, String> ROLE_TO_USER = Map.of(
             "ED_ATTENDING", "dr_tan_ed",
             "SPECIALIST", "dr_lim_cardio",
@@ -31,6 +38,15 @@ public class PrototypeSecurityFilter extends OncePerRequestFilter {
             "HOUSEKEEPING", "evs_staff_kumar"
     );
 
+    /**
+     * Inspects incoming HTTP requests for persona headers and establishes SecurityContextHolder authentication.
+     *
+     * @param request     the current HTTP request.
+     * @param response    the current HTTP response.
+     * @param filterChain the servlet filter execution chain.
+     * @throws ServletException in case of servlet processing errors.
+     * @throws IOException      in case of network or I/O errors.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

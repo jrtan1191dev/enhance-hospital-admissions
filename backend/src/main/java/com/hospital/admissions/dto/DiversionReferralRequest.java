@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+/**
+ * Request payload for referring an acute patient to a partner sister hospital or community facility.
+ */
 @Data
 @Builder
 @NoArgsConstructor

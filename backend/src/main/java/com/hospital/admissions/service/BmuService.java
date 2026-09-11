@@ -34,6 +34,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Core business service for the Bed Management Unit (BMU).
+ * <p>
+ * Implements clinical triage queue prioritization, constraint-based bed recommendation scoring,
+ * strict multi-bed gender and infection safety invariant verification, clinician override audits,
+ * external sister hospital subacute diversion workflows, and batch holding ward flex-management.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,6 +54,13 @@ public class BmuService {
     private final SisterHospitalGateway sisterHospitalGateway;
     private final AuditLogger auditLogger;
 
+    /**
+     * Retrieves the prioritized queue of admission requests waiting for bed allocation.
+     * Requests are ordered by effective acuity tier (Tier 1 critical first), telemetry requirement,
+     * and submission timestamp (FIFO).
+     *
+     * @return sorted list of pending {@link AdmissionRequest} instances.
+     */
     public List<AdmissionRequest> getPrioritizedQueue() {
         List<AdmissionRequest> pendingRequests = admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED);
 
@@ -61,10 +75,21 @@ public class BmuService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Alias for {@link #getPrioritizedQueue()}.
+     *
+     * @return sorted list of pending {@link AdmissionRequest} instances.
+     */
     public List<AdmissionRequest> getQueue() {
         return getPrioritizedQueue();
     }
 
+    /**
+     * Computes candidate bed recommendations for an admission request using the configured solver.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @return list of scored {@link BedRecommendation} candidates.
+     */
     public List<BedRecommendation> getRecommendations(UUID admissionRequestId) {
         AdmissionRequest request = admissionRequestRepository.findById(admissionRequestId)
                 .orElseThrow(() -> new IllegalArgumentException("Admission request not found: " + admissionRequestId));
@@ -73,11 +98,29 @@ public class BmuService {
         return solver.recommendBeds(request, config);
     }
 
+    /**
+     * Allocates a bed using default recommendation rank and score without clinician override.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @param bedId              the unique identifier of the destination bed.
+     * @return the updated {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest allocateBed(UUID admissionRequestId, UUID bedId) {
         return allocateBed(admissionRequestId, bedId, 1, 85.0, null);
     }
 
+    /**
+     * Allocates a bed to a patient, enforcing hard clinical safety invariants (biological gender
+     * cohorting and infection isolation) and auditing soft constraint overrides.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @param bedId              the unique identifier of the target bed.
+     * @param rank               the solver recommendation rank (or null if unranked).
+     * @param score              the recommendation composite score (or null).
+     * @param overrideReason     clinical justification reason if overriding solver recommendations.
+     * @return the updated {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest allocateBed(UUID admissionRequestId, UUID bedId, Integer rank, Double score, String overrideReason) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -191,6 +234,11 @@ public class BmuService {
         return savedRequest;
     }
 
+    /**
+     * Retrieves the current ward and bed inventory status, grouped by floor level and ward name.
+     *
+     * @return list of {@link WardDto} transfer objects representing ward occupancy.
+     */
     public List<WardDto> getInventory() {
         return wardRepository.findAllByOrderByLevelAscNameAsc().stream()
                 .map(w -> new WardDto(
@@ -215,6 +263,11 @@ public class BmuService {
                 .toList();
     }
 
+    /**
+     * Retrieves the singleton BMU algorithm scoring configuration or initializes defaults.
+     *
+     * @return active {@link BmuAlgorithmConfig} entity.
+     */
     public BmuAlgorithmConfig getOrCreateConfig() {
         return configRepository.findAll().stream().findFirst().orElseGet(() -> {
             BmuAlgorithmConfig defaultConfig = BmuAlgorithmConfig.builder()
@@ -227,6 +280,12 @@ public class BmuService {
         });
     }
 
+    /**
+     * Updates optimization weights and operational thresholds for the BMU solver.
+     *
+     * @param req the {@link BmuConfigUpdateRequest} containing new weight percentages.
+     * @return the persisted {@link BmuAlgorithmConfig}.
+     */
     @Transactional
     public BmuAlgorithmConfig updateConfig(BmuConfigUpdateRequest req) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -243,6 +302,13 @@ public class BmuService {
         return updated;
     }
 
+    /**
+     * Refers an acute patient to an external community or sister hospital facility.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @param targetFacility     the name or code of the receiving medical facility.
+     * @return {@link SisterHospitalReferralResponse} confirming transmission and referral SLA window.
+     */
     @Transactional
     public SisterHospitalReferralResponse referToSisterHospital(UUID admissionRequestId, String targetFacility) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -285,6 +351,12 @@ public class BmuService {
         return response;
     }
 
+    /**
+     * Recalls a diverted patient back to the acute inpatient admission queue upon condition change or patient preference.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @return the updated {@link AdmissionRequest} with BED_REQUESTED status.
+     */
     @Transactional
     public AdmissionRequest recallDiversionToAcuteQueue(UUID admissionRequestId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -308,6 +380,12 @@ public class BmuService {
         return saved;
     }
 
+    /**
+     * Extends the referral response SLA deadline for a pending community hospital transfer.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @return the updated {@link AdmissionRequest} with extended SLA minutes.
+     */
     @Transactional
     public AdmissionRequest extendDiversionSla(UUID admissionRequestId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -329,6 +407,13 @@ public class BmuService {
         return saved;
     }
 
+    /**
+     * Records a telephone follow-up communication note for subacute or Hospital-at-Home patients.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @param notes              the communication notes or clinical update.
+     * @return the updated {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest logTelephoneFollowUp(UUID admissionRequestId, String notes) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -348,6 +433,12 @@ public class BmuService {
         return saved;
     }
 
+    /**
+     * Flags an admission request for multi-disciplinary clinical reconciliation when consults disagree.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @return the updated {@link AdmissionRequest} with reconciliation requested.
+     */
     @Transactional
     public AdmissionRequest requestReconciliation(UUID admissionRequestId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -372,6 +463,13 @@ public class BmuService {
         return saved;
     }
 
+    /**
+     * Explicitly assigns or overrides the admitting medical specialty cluster for an admission request.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @param cluster            the assigned {@link SpecialtyCluster}.
+     * @return the updated {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest assignAdmittingCluster(UUID admissionRequestId, SpecialtyCluster cluster) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -394,6 +492,12 @@ public class BmuService {
         return saved;
     }
 
+    /**
+     * Deallocates a previously assigned bed before patient arrival, restoring bed to clean inventory.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @return the reset {@link AdmissionRequest} back in BED_REQUESTED status.
+     */
     @Transactional
     public AdmissionRequest deallocateBed(UUID admissionRequestId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -401,7 +505,7 @@ public class BmuService {
                 : "bmu_coordinator";
 
         AdmissionRequest request = admissionRequestRepository.findById(admissionRequestId)
-                .orElseThrow(() -> new IllegalArgumentException("Admission request not found: " + admissionRequestId));
+                .orElseThrow(() -> new IllegalArgumentException("No admission request found for ID: " + admissionRequestId));
 
         Bed bed = request.getAssignedBed();
         if (bed == null) {
@@ -428,6 +532,12 @@ public class BmuService {
         return saved;
     }
 
+    /**
+     * Confirms patient physical arrival in the ward, transitioning bed to OCCUPIED_TAKEN.
+     *
+     * @param bedId the unique identifier of the assigned bed.
+     * @return the updated {@link Bed} entity.
+     */
     @Transactional
     public Bed confirmArrival(UUID bedId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -456,6 +566,12 @@ public class BmuService {
         return savedBed;
     }
 
+    /**
+     * Vacates a bed upon patient discharge or transfer, initiating terminal cleaning SLA.
+     *
+     * @param bedId the unique identifier of the bed to vacate.
+     * @return the updated {@link Bed} with EMPTY_PENDING_CLEANING status.
+     */
     @Transactional
     public Bed vacateBed(UUID bedId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -487,6 +603,12 @@ public class BmuService {
         return savedBed;
     }
 
+    /**
+     * Housekeeping sign-off after completing terminal sanitization, releasing cohort locks if all beds are clean.
+     *
+     * @param bedId the unique identifier of the cleaned bed.
+     * @return the updated {@link Bed} with EMPTY_CLEANED status.
+     */
     @Transactional
     public Bed signOffCleaning(UUID bedId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -529,6 +651,11 @@ public class BmuService {
         return savedBed;
     }
 
+    /**
+     * Evaluates the pending queue for batches of 3+ compatible patients for holding ward flex assignment.
+     *
+     * @return list of {@link BatchSuggestion} holding ward proposals.
+     */
     public List<BatchSuggestion> getBatchSuggestions() {
         List<AdmissionRequest> pendingRequests = admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED);
 
@@ -595,6 +722,12 @@ public class BmuService {
         return suggestions;
     }
 
+    /**
+     * Approves batch conversion of a clean ward into a designated holding ward, placing matching patients in bulk.
+     *
+     * @param request the {@link BatchApprovalRequest} detailing the target ward and admission request IDs.
+     * @return list of allocated {@link AdmissionRequest} entities.
+     */
     @Transactional
     public List<AdmissionRequest> approveBatchHoldingWard(BatchApprovalRequest request) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -650,6 +783,11 @@ public class BmuService {
         return allocatedRequests;
     }
 
+    /**
+     * Identifies blocked flex wards and suggests lateral swaps of single-assigned patients to open capacity.
+     *
+     * @return list of {@link CohortSwapSuggestion} proposals.
+     */
     public List<CohortSwapSuggestion> getCohortSwapSuggestions() {
         List<Ward> allWards = wardRepository.findAll();
         List<CohortSwapSuggestion> suggestions = new ArrayList<>();
@@ -745,6 +883,12 @@ public class BmuService {
         return suggestions;
     }
 
+    /**
+     * Executes a lateral cohort bed swap, relocating a patient from a blocked flex ward to free up capacity.
+     *
+     * @param request the {@link CohortSwapApprovalRequest} specifying swap parameters.
+     * @return the reallocated {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest approveCohortSwap(CohortSwapApprovalRequest request) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication() != null
@@ -804,6 +948,13 @@ public class BmuService {
         return req;
     }
 
+    /**
+     * Attaches an operational delay tag and dwell duration metrics to an admission request.
+     *
+     * @param admissionRequestId the unique identifier of the admission request.
+     * @param delayTagRequest    the {@link DelayTagRequest} detailing delay category and explanation.
+     * @return the tagged {@link AdmissionRequest}.
+     */
     @Transactional
     public AdmissionRequest attachDelayTag(UUID admissionRequestId, DelayTagRequest delayTagRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

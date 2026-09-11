@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Request payload for modifying dynamic weights and batching thresholds used in BMU optimization.
+ */
 @Data
 @Builder
 @NoArgsConstructor

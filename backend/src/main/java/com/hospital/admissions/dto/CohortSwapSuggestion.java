@@ -6,6 +6,10 @@ import lombok.*;
 
 import java.util.UUID;
 
+/**
+ * Suggestion produced by BMU solvers to relocate an existing patient to another bed/ward,
+ * unlocking multi-bed cohort rooms for waiting patients.
+ */
 @Data
 @Builder
 @NoArgsConstructor

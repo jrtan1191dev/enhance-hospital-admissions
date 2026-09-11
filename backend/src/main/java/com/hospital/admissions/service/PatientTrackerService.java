@@ -20,6 +20,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service managing the patient and family queue journey experience.
+ * <p>
+ * Provides transparent real-time milestone tracking, dynamic queue position estimation,
+ * empathetic delay communication, automated status update dispatch, bed check-in,
+ * vacating, terminal cleaning SLA monitoring, and patient reassurance logging.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +38,13 @@ public class PatientTrackerService {
     private final PatientAuditInteractionRepository patientAuditInteractionRepository;
     private final AuditLogger auditLogger;
 
+    /**
+     * Retrieves comprehensive real-time journey milestone tracking data for a patient by queue token.
+     * Computes queue position relative to same-ward-class patients and estimates wait time.
+     *
+     * @param queueToken the unique alphanumeric token issued to the patient.
+     * @return the populated {@link PatientMilestoneResponse} with milestone progress and reassurance narrative.
+     */
     public PatientMilestoneResponse trackPatient(String queueToken) {
         Patient patient = patientRepository.findByQueueToken(queueToken)
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found for token: " + queueToken));
@@ -212,6 +226,13 @@ public class PatientTrackerService {
         return "Our clinical coordination team is actively managing bed assignments. For assistance, contact the ward liaison.";
     }
 
+    /**
+     * Dispatches periodic reassuring push/SMS updates to patients who have been waiting in queue beyond a threshold.
+     *
+     * @param currentTime      the reference evaluation timestamp.
+     * @param thresholdMinutes minimum waiting time in minutes to trigger update.
+     * @return count of dispatched notifications.
+     */
     @Transactional
     public int dispatchPeriodicUpdates(LocalDateTime currentTime, int thresholdMinutes) {
         List<AdmissionRequest> waitingRequests = admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED);
@@ -239,11 +260,22 @@ public class PatientTrackerService {
         return count;
     }
 
+    /**
+     * Dispatches periodic updates with default threshold of 5 minutes from current system time.
+     *
+     * @return count of dispatched notifications.
+     */
     @Transactional
     public int dispatchPeriodicUpdates() {
         return dispatchPeriodicUpdates(LocalDateTime.now(), 5);
     }
 
+    /**
+     * Completes physical patient bed check-in, setting bed to OCCUPIED_TAKEN and admission to ADMITTED_INPATIENT.
+     *
+     * @param bedId the unique identifier of the destination bed.
+     * @return the updated {@link Bed} entity.
+     */
     @Transactional
     public Bed checkinPatient(UUID bedId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -269,6 +301,12 @@ public class PatientTrackerService {
         return savedBed;
     }
 
+    /**
+     * Vacates a bed upon patient discharge, transitioning status to EMPTY_PENDING_CLEANING and initiating cleaning SLA.
+     *
+     * @param bedId the unique identifier of the bed being vacated.
+     * @return the updated {@link Bed} entity.
+     */
     @Transactional
     public Bed vacatePatient(UUID bedId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -305,6 +343,12 @@ public class PatientTrackerService {
         return savedBed;
     }
 
+    /**
+     * Performs terminal cleaning sign-off for a vacated bed, validating 30-minute cleaning SLA compliance.
+     *
+     * @param bedId the unique identifier of the bed cleaned.
+     * @return the updated {@link Bed} in EMPTY_CLEANED status.
+     */
     @Transactional
     public Bed cleanBed(UUID bedId) {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -340,6 +384,13 @@ public class PatientTrackerService {
         return savedBed;
     }
 
+    /**
+     * Records an interactive patient or family reassurance engagement (e.g., Medical Social Worker call).
+     *
+     * @param token      the patient's tracking token.
+     * @param actionType the action category (e.g., MSW_CALL or FINANCIAL_COUNSELING).
+     * @return the logged {@link PatientAuditInteraction}.
+     */
     @Transactional
     public PatientAuditInteraction recordPatientAction(String token, String actionType) {
         Patient patient = patientRepository.findByQueueToken(token)

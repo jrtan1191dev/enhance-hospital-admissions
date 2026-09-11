@@ -5,6 +5,10 @@ import lombok.*;
 
 import java.util.UUID;
 
+/**
+ * Configuration entity controlling the weights and thresholds used by the BMU optimization
+ * and bed allocation solvers.
+ */
 @Entity
 @Table(name = "bmu_algorithm_config")
 @Getter

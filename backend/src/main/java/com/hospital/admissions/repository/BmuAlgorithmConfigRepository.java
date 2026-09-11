@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+/**
+ * Spring Data JPA repository for persistent {@link BmuAlgorithmConfig} parameter settings.
+ */
 @Repository
 public interface BmuAlgorithmConfigRepository extends JpaRepository<BmuAlgorithmConfig, UUID> {
 }

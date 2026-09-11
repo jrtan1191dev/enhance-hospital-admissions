@@ -6,6 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Entity capturing patient and family interactions on the public tracking portal
+ * for compliance auditing and communication engagement analytics.
+ */
 @Entity
 @Table(name = "patient_audit_interactions")
 @Getter

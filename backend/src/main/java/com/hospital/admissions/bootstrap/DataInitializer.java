@@ -11,6 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * Bootstrap component that populates the embedded H2 database with realistic prototype clinical data.
+ * <p>
+ * Active only under the {@code prototype} profile. Seeds wards across multiple levels,
+ * diverse patient acuity profiles, pre-allocated inpatient admissions, pending triage queues,
+ * and default BMU solver algorithm configurations.
+ */
 @Slf4j
 @Component
 @Profile("prototype")
@@ -24,6 +31,11 @@ public class DataInitializer implements CommandLineRunner {
     private final BmuAlgorithmConfigRepository configRepository;
     private final AssessmentBroadcastRepository broadcastRepository;
 
+    /**
+     * Executes data seeding upon Spring Boot application startup.
+     *
+     * @param args command-line runner arguments.
+     */
     @Override
     @Transactional
     public void run(String... args) {

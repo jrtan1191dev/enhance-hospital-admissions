@@ -14,6 +14,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Response payload returned to the patient tracker portal detailing the patient's queue position,
+ * estimated wait time, assigned bed/ward milestones, and delay explanations.
+ */
 @Data
 @Builder
 @NoArgsConstructor

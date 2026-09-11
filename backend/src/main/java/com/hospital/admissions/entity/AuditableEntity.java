@@ -13,6 +13,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+/**
+ * Base mapped superclass tracking audit timestamps and principal identities across entities.
+ */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter

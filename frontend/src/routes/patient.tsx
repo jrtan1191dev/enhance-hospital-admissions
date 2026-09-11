@@ -131,12 +131,12 @@ export function PatientRoute() {
 
         {/* Quick-Picker & Simulation Actions */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-            <span className="text-xs font-semibold text-slate-600">Simulate Patient:</span>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200 w-full sm:w-auto max-w-full">
+            <span className="text-xs font-semibold text-slate-600 shrink-0">Simulate Patient:</span>
             <select
               value={selectedToken}
               onChange={(e) => setSelectedToken(e.target.value)}
-              className="text-xs font-medium bg-white border border-slate-300 rounded px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 shadow-xs cursor-pointer"
+              className="text-xs font-medium bg-white border border-slate-300 rounded px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500 shadow-xs cursor-pointer min-w-0 flex-1 w-full sm:w-auto sm:max-w-xs max-w-full truncate"
             >
               {availablePatients.map((p) => (
                 <option key={p.id} value={p.queueToken}>
@@ -151,7 +151,7 @@ export function PatientRoute() {
             variant="outline"
             onClick={handleSimulatePeriodicUpdate}
             disabled={simulateMutation.isPending}
-            className="text-xs font-semibold gap-1.5 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+            className="text-xs font-semibold gap-1.5 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800 w-full sm:w-auto shrink-0"
           >
             <BellRing className="h-3.5 w-3.5 text-blue-600" />
             {simulateMutation.isPending ? 'Broadcasting...' : 'Simulate Periodic Update'}

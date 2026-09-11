@@ -467,16 +467,20 @@ export function BmuRoute() {
             Deterministic heuristic constraint solver, dynamic holding batch recommendations, and 4-state bed lifecycle orchestration.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/bmu/config"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer"
+            className="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer"
           >
             <Sliders className="h-3.5 w-3.5 text-slate-600" />
             Solver Config
           </Link>
-          <Badge variant="outline" className="px-3 py-1 text-xs bg-slate-50 text-slate-700">
-            BMU Coordinator: Wong (bmu_coord_wong)
+          <Badge
+            variant="outline"
+            className="px-3 py-1 text-xs bg-slate-50 text-slate-700 min-w-0 max-w-full"
+            title="BMU Coordinator: Wong (bmu_coord_wong)"
+          >
+            <span className="truncate">BMU Coordinator: Wong (bmu_coord_wong)</span>
           </Badge>
         </div>
       </div>

@@ -26,7 +26,7 @@
 
 Having accompanied family members through Singapore's public hospital ED admission process multiple times — experiencing the hours-long waits with zero queue visibility, the phone-tag between ED and BMU staff, and the afternoon discharge gridlocks — I set out to understand the systemic root causes.
 
-I mapped the actual patient journey and stakeholder pain points across each persona (ED attending, specialist, BMU coordinator, ward nurse, patient/family), informed by personal experience and [public discourse documenting these persistent issues](https://youtu.be/tQ_zwPpyn6c?si=gB8O5wNbTb_8Rnfl). This analysis identified **6 core pain points** — from multi-doctor admission decision latency to discharge medication bottlenecks — which became the foundation for this system.
+I mapped the actual patient journey and stakeholder pain points across each persona (ED attending, specialist, BMU coordinator, ward nurse, patient/family), informed by personal experience as well as [CNA Talking Point Video: public discourse documenting these persistent issues](https://youtu.be/tQ_zwPpyn6c?si=gB8O5wNbTb_8Rnfl). Those helped me shaped my analysis by identifying **6 core pain points** — from multi-doctor admission decision latency to discharge medication bottlenecks — which became the foundation for this prototype.
 
 ---
 

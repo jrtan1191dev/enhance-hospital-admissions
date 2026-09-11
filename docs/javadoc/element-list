@@ -1,0 +1,12 @@
+com.hospital.admissions
+com.hospital.admissions.bootstrap
+com.hospital.admissions.config
+com.hospital.admissions.controller
+com.hospital.admissions.dto
+com.hospital.admissions.entity
+com.hospital.admissions.exception
+com.hospital.admissions.gateway
+com.hospital.admissions.repository
+com.hospital.admissions.security
+com.hospital.admissions.service
+com.hospital.admissions.solver

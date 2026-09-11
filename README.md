@@ -159,7 +159,7 @@ These components are **not implemented** — they are architectural placeholders
 
 ## Testing & Quality
 
-Testing follows a **deliberate pyramid strategy**: >90% line coverage across both frontend (Vitest + V8) and backend (JUnit 5 + JaCoCo), concentrated at the unit and integration test layers where domain invariants provide the highest confidence-per-test. Coverage is measured against the prototype profile — the code that actually executes. Production adapter stubs are tested to verify they fail-fast with `UnsupportedOperationException`, confirming the profile boundary contract.
+Testing is structured as: >90% line coverage across both frontend (Vitest + V8) and backend (JUnit 5 + JaCoCo), concentrated at the unit and integration test layers where domain invariants provide the highest confidence-per-test. Coverage is measured against the prototype profile — the code that actually executes. Production adapter stubs are tested to verify they fail-fast with `UnsupportedOperationException`, confirming the profile boundary contract.
 
 **What's tested at the domain layer:**
 
@@ -194,7 +194,7 @@ cd frontend
 npm install && npm run dev
 ```
 
-Starts on `http://localhost:5173` with hot-reload.
+Starts on `http://localhost:3000` with hot-reload.
 
 ### Single JAR (Full Build)
 
@@ -208,24 +208,9 @@ java -Dspring.profiles.active=prototype -jar target/admissions-0.0.1-SNAPSHOT.ja
 
 ---
 
-## Design Philosophy — Write Minimum
-
-Every line of custom code is a liability. I follow a strict **6-tier decision ladder** that prioritizes eliminating unnecessary code before writing any:
-
-1. **Don't write it** (YAGNI) → 2. **Reuse existing code** → 3. **Use framework built-ins** → 4. **Use installed libraries** → 5. **Evaluate external libraries** → 6. **Write custom code (last resort)**
-
-This philosophy is codified in a [reusable engineering standard](.agents/skills/write-minimum/SKILL.md) that governs all code in this project. The result:
-
-- **3 controllers** — not 30. Consolidated API surface using native Spring ProblemDetail error handling
-- **0 custom UI primitives** — shadcn/ui + Base UI provide all components
-- **0 hand-rolled HTTP/CSRF/cache handling** — framework defaults and TanStack Query handle everything
-- **No single-implementation interfaces** — concrete service classes directly, not `FooService` / `FooServiceImpl`. Interfaces are used only where genuine runtime polymorphism exists: gateway adapters and solver strategies that swap between prototype mocks and production implementations via Spring profiles.
-
----
-
 ## AI-Augmented Development
 
-I used AI coding agents as a development accelerator throughout this project. The `.agents/` directory contains the evidence — and I want to be transparent about how.
+I used AI coding agents as a development accelerator throughout this project.
 
 **What I directed:**
 
@@ -239,7 +224,7 @@ I used AI coding agents as a development accelerator throughout this project. Th
 - Automated compliance reviews against the standards I defined
 - Test generation aligned with acceptance criteria I specified
 
-**Why this matters for a TLM role:** A tech lead who can leverage AI agents to multiply a small team's output — while maintaining architectural control and quality standards — is how modern engineering teams ship fast without sacrificing reliability. The reusable skills I built ([write-minimum](.agents/skills/write-minimum/SKILL.md), [code-review](.agents/skills/code-review/SKILL.md), [im8-review](.agents/skills/im8-review/SKILL.md)) are the kind of engineering process infrastructure a TLM builds for their team.
+**Why this matters:** Leveraging AI coding agents to multiply a small team's output — while maintaining architectural control and quality standards — is how modern engineering teams ship fast without sacrificing reliability.
 
 ---
 

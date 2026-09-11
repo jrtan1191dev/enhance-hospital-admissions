@@ -1,8 +1,8 @@
 # Testing Strategy
 
-## Philosophy
+## Testing Approach
 
-My testing approach follows a deliberate pyramid strategy with coverage concentrated where domain invariants provide the highest confidence-per-test. The acceptance criteria derived directly from our user stories (written in Gherkin in `product-idea/user-stories.md`) drove my test case design from the ground up.
+My approach follows the acceptance criteria derived directly from our user stories (written in Gherkin in `product-idea/user-stories.md`).
 
 ## Test Pyramid
 

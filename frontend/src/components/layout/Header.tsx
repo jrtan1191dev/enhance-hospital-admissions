@@ -18,6 +18,10 @@ const ROLES: { id: RolePersona; label: string; icon: string; path: string; user:
   { id: 'PATIENT', label: 'Patient Tracker', icon: '📱', path: '/patient', user: 'patient_p101' },
 ];
 
+/**
+ * Application header displaying hospital branding, active persona switcher,
+ * live synchronization indicator, and mobile navigation menu.
+ */
 export function Header() {
   const navigate = useNavigate();
   const location = useLocation();

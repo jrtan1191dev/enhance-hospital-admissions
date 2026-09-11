@@ -32,10 +32,20 @@ import { useState, useEffect } from 'react';
 
 const ROLE_STORAGE_KEY = 'admissions_role_persona';
 
+/**
+ * Retrieves the currently selected role persona from localStorage or returns default ED_ATTENDING.
+ *
+ * @returns Active RolePersona value.
+ */
 export function getActiveRole(): RolePersona {
   return (typeof window !== 'undefined' && (localStorage.getItem(ROLE_STORAGE_KEY) as RolePersona)) || 'ED_ATTENDING';
 }
 
+/**
+ * Persists and broadcasts a change in the active role persona across the browser session.
+ *
+ * @param role - Target role persona to activate.
+ */
 export function setActiveRole(role: RolePersona) {
   if (typeof window !== 'undefined') {
     localStorage.setItem(ROLE_STORAGE_KEY, role);
@@ -92,6 +102,9 @@ http.interceptors.response.use(
   }
 );
 
+/**
+ * Typed HTTP REST client for the Hospital Admissions & Bed Management backend API.
+ */
 export const api = {
   // Auth & Session
   getAuthStatus: () => http.get<{ authenticated: boolean; username?: string; roles?: string[] }>('/api/v1/auth/me').then((r) => r.data),

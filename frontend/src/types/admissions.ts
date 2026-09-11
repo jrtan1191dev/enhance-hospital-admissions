@@ -1,3 +1,6 @@
+/**
+ * Clinical triage acuity tier representing patient severity and priority.
+ */
 export type AcuityTier = 
   | 'TIER_1_CRITICAL'
   | 'TIER_2_ACUTE_URGENT'
@@ -5,28 +8,46 @@ export type AcuityTier =
   | 'TIER_4_SUBACUTE_DIVERSION'
   | 'TIER_5_OBSERVATION';
 
+/**
+ * Hospital clinical department or specialty cluster.
+ */
 export type SpecialtyCluster = 
   | 'CARDIOLOGY'
   | 'GENERAL_MEDICINE'
   | 'SURGERY'
   | 'ORTHOPAEDICS';
 
+/**
+ * Inpatient accommodation ward class tier.
+ */
 export type WardClass = 'A' | 'B1' | 'B2' | 'C';
 
+/**
+ * Biological gender used for room cohorting.
+ */
 export type Gender = 'MALE' | 'FEMALE';
 
+/**
+ * Infection control isolation classification.
+ */
 export type InfectionStatus = 
   | 'NONE'
   | 'CONTACT_MRSA'
   | 'AIRBORNE_COVID'
   | 'DROPLET';
 
+/**
+ * Operational bed state and color-coded status.
+ */
 export type BedStatus = 
   | 'EMPTY_PENDING_CLEANING' // MUSTARD YELLOW (Discharged, vacated, 30m cleaning pending)
   | 'EMPTY_CLEANED'          // WHITE (Cleaned, ready for assignment)
   | 'EMPTY_ASSIGNED'         // GREEN (Allocated by BMU, patient in transit)
   | 'OCCUPIED_TAKEN';        // GREY (Patient physically admitted/occupied)
 
+/**
+ * End-to-end lifecycle status of an admission request.
+ */
 export type AdmissionStatus = 
   | 'ASSESSMENT_PENDING'
   | 'BED_REQUESTED'
@@ -35,10 +56,19 @@ export type AdmissionStatus =
   | 'DISCHARGED'
   | 'DIVERTED_HAH';
 
+/**
+ * Status of a specialist assessment broadcast.
+ */
 export type BroadcastStatus = 'OPEN' | 'CLAIMED' | 'AUTO_ESCALATED' | 'COMPLETED';
 
+/**
+ * Care diversion options to alternative facilities or home hospitalization.
+ */
 export type DiversionPathway = 'NONE' | 'COMMUNITY_HOSPITAL' | 'HOSPITAL_AT_HOME_MIC';
 
+/**
+ * Patient demographic and clinical baseline information.
+ */
 export interface Patient {
   id: string;
   name: string;
@@ -59,6 +89,9 @@ export interface Patient {
   waitingInEd?: boolean;
 }
 
+/**
+ * Physical bed representation with capabilities and current occupant.
+ */
 export interface Bed {
   id: string;
   bedNumber: string;
@@ -69,6 +102,9 @@ export interface Bed {
   assignedPatient?: Patient;
 }
 
+/**
+ * Hospital ward unit details including specialty alignment and room locks.
+ */
 export interface Ward {
   id: string;
   wardCode: string;
@@ -80,6 +116,9 @@ export interface Ward {
   beds?: Bed[];
 }
 
+/**
+ * Clinical baseline field override entered during emergency department triage.
+ */
 export interface ClinicalBaselineOverride {
   field: string;
   originalValue: string;
@@ -87,6 +126,9 @@ export interface ClinicalBaselineOverride {
   overrideReason?: string;
 }
 
+/**
+ * Request payload for submitting an ED clinical admission assessment.
+ */
 export interface EdAssessmentSubmitRequest {
   patientId: string;
   suspectedDiagnosisService: SpecialtyCluster;
@@ -102,6 +144,9 @@ export interface EdAssessmentSubmitRequest {
   elapsedMins?: number;
 }
 
+/**
+ * Inpatient admission request model capturing the entire clinical and operational flow.
+ */
 export interface AdmissionRequest {
   id: string;
   patient: Patient;
@@ -137,6 +182,9 @@ export interface AdmissionRequest {
   virtualBedNumber?: string;
 }
 
+/**
+ * Specialist assessment broadcast record for collaborative triage reviews.
+ */
 export interface AssessmentBroadcast {
   id: string;
   admissionRequest: AdmissionRequest;
@@ -152,6 +200,9 @@ export interface AssessmentBroadcast {
   createdAt?: string;
 }
 
+/**
+ * Optimization weights and parameters used by BMU solver algorithms.
+ */
 export interface BmuAlgorithmConfig {
   id: string;
   weightSpecialtyCluster: number;
@@ -160,6 +211,9 @@ export interface BmuAlgorithmConfig {
   batchHoldingWardThreshold: number;
 }
 
+/**
+ * Update request payload for BMU solver weights.
+ */
 export interface BmuConfigUpdateRequest {
   weightSpecialtyCluster: number;
   weightConsolidation: number;
@@ -167,6 +221,9 @@ export interface BmuConfigUpdateRequest {
   batchHoldingWardThreshold: number;
 }
 
+/**
+ * Ranked bed allocation recommendation generated for an admission request.
+ */
 export interface BedRecommendation {
   bedId: string;
   bedNumber: string;
@@ -181,6 +238,9 @@ export interface BedRecommendation {
   operationalOverrideReason?: string;
 }
 
+/**
+ * Real-time queue and journey status response provided to the patient tracker portal.
+ */
 export interface PatientMilestoneResponse {
   patientId?: string;
   patientName: string;
@@ -205,8 +265,14 @@ export interface PatientMilestoneResponse {
   runwayStage?: DischargeRunwayStage;
 }
 
+/**
+ * Confidence level of the Estimated Date of Discharge (EDD).
+ */
 export type EddConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
 
+/**
+ * Discharge runway readiness milestone stages.
+ */
 export type DischargeRunwayStage =
   | 'RUNWAY_D3'
   | 'RUNWAY_D2'
@@ -216,19 +282,31 @@ export type DischargeRunwayStage =
   | 'READY_TO_VACATE'
   | 'VACATED';
 
+/**
+ * Discharge medication delivery and dispensing status.
+ */
 export type MedicationDeliveryStatus =
   | 'NOT_DISPATCHED'
   | 'PACKING_IN_PROGRESS'
   | 'DELIVERED_BEDSIDE';
 
+/**
+ * SLA tracking status for 30-minute bed turnover sanitization.
+ */
 export type TurnoverSlaStatus = 'ON_TRACK' | 'APPROACHING_SLA' | 'BREACHED';
 
+/**
+ * Payload for setting or updating Estimated Date of Discharge.
+ */
 export interface EddUpdateRequest {
   edd: string;
   eddConfidence: EddConfidence;
   rationale?: string;
 }
 
+/**
+ * Inpatient discharge runway record tracking readiness milestones.
+ */
 export interface DischargeRunwayDto {
   patientId: string;
   patientName: string;
@@ -244,6 +322,9 @@ export interface DischargeRunwayDto {
   rationale?: string;
 }
 
+/**
+ * Multi-day bed capacity projection forecast across wards and specialty clusters.
+ */
 export interface BmuCapacityForecastDto {
   totalNext24Hours: number;
   totalNext48Hours: number;
@@ -265,6 +346,9 @@ export interface BmuCapacityForecastDto {
   }>;
 }
 
+/**
+ * Bed cleaning and sanitization task tracking Environmental Services (EVS) SLAs.
+ */
 export interface TurnoverTaskDto {
   bedId: string;
   bedNumber: string;
@@ -276,6 +360,9 @@ export interface TurnoverTaskDto {
   slaStatus: TurnoverSlaStatus;
 }
 
+/**
+ * Response payload confirming receipt and dispatch of an acute referral to a partner sister hospital.
+ */
 export interface SisterHospitalReferralResponse {
   referralId: string;
   destinationFacility: string;
@@ -284,12 +371,17 @@ export interface SisterHospitalReferralResponse {
   notes?: string;
 }
 
-
+/**
+ * Payload for chaining an in-flight specialist consult to another clinical department.
+ */
 export interface ChainConsultRequest {
   targetCluster: SpecialtyCluster;
   rationale?: string;
 }
 
+/**
+ * Specialist review and consult recommendation payload.
+ */
 export interface SpecialistConsultRequest {
   secondaryAcuityTier: AcuityTier;
   secondaryTelemetry?: boolean;
@@ -298,6 +390,9 @@ export interface SpecialistConsultRequest {
   diversionPathway?: DiversionPathway;
 }
 
+/**
+ * Request payload for allocating an inpatient bed to an admission request.
+ */
 export interface BedAllocationRequest {
   admissionRequestId: string;
   bedId: string;
@@ -306,11 +401,17 @@ export interface BedAllocationRequest {
   overrideReason?: string;
 }
 
+/**
+ * Request payload for referring an acute patient to an external diversion facility.
+ */
 export interface DiversionReferralRequest {
   admissionRequestId: string;
   facility: string;
 }
 
+/**
+ * BMU solver suggestion for batch-allocating cohort-compatible patients to a holding ward.
+ */
 export interface BatchSuggestion {
   suggestionId: string;
   targetWardId: string;
@@ -324,12 +425,18 @@ export interface BatchSuggestion {
   unlockedCapacityCount: number;
 }
 
+/**
+ * Approval payload for executing a batch holding ward allocation.
+ */
 export interface BatchApprovalRequest {
   suggestionId: string;
   targetWardId: string;
   admissionRequestIds: string[];
 }
 
+/**
+ * Suggestion to swap an existing inpatient's bed to release multi-bed capacity for pending admissions.
+ */
 export interface CohortSwapSuggestion {
   suggestionId: string;
   admissionRequestId: string;
@@ -348,11 +455,17 @@ export interface CohortSwapSuggestion {
   unlockedCapacityCount: number;
 }
 
+/**
+ * Approval payload for executing an inpatient cohort bed swap.
+ */
 export interface CohortSwapApprovalRequest {
   admissionRequestId: string;
   targetBedId: string;
 }
 
+/**
+ * Simulated user persona role for testing and role-based interface views.
+ */
 export type RolePersona = 
   | 'ED_ATTENDING'
   | 'SPECIALIST'
@@ -361,18 +474,27 @@ export type RolePersona =
   | 'WARD_NURSE'
   | 'HOUSEKEEPING';
 
+/**
+ * Standard delay reason categories for patient admissions and transfers.
+ */
 export type DelayReasonCode = 
   | 'HOUSEKEEPING_DELAY'
   | 'BED_SHORTAGE'
   | 'SPECIALIZED_ISOLATION_CLEANING'
   | 'SURGE_TRAUMA_EVENT';
 
+/**
+ * Payload for tagging an admission request with an operational delay code and explanation.
+ */
 export interface DelayTagRequest {
   delayReasonCode: DelayReasonCode;
   note?: string;
   operationalDelayReason?: string;
 }
 
+/**
+ * Patient and family reassuring talking points corresponding to standard delay reason codes.
+ */
 export const DELAY_REASON_TALKING_POINTS: Record<DelayReasonCode, string> = {
   HOUSEKEEPING_DELAY: 'A bed in the assigned ward has been identified and our environmental services team is currently completing terminal cleaning and sanitization to ensure maximum patient safety.',
   BED_SHORTAGE: 'Hospital wards are currently experiencing high census. Our central bed management unit is actively reviewing bed turnover and prioritizing acute placement.',
@@ -380,6 +502,9 @@ export const DELAY_REASON_TALKING_POINTS: Record<DelayReasonCode, string> = {
   SURGE_TRAUMA_EVENT: 'The emergency department is managing a temporary acute surge in critical emergency admissions. Additional clinical staff and bed allocations are being mobilized.',
 };
 
+/**
+ * Consolidated operational KPIs across ED intake, BMU capacity, patient tracking, and discharge.
+ */
 export interface HospitalKpiSummaryDto {
   periodStart: string;
   periodEnd: string;

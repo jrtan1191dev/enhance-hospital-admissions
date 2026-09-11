@@ -17,6 +17,9 @@ import type {
 // 1. TanStack Query Options (Encapsulated Keys, Fetchers & Polling Rules)
 // ============================================================================
 
+/**
+ * Authentication and current user session queries.
+ */
 export const authQueries = {
   all: () => ['auth'] as const,
   me: () =>
@@ -26,6 +29,9 @@ export const authQueries = {
     }),
 };
 
+/**
+ * Emergency Department (ED) triage and admission queries.
+ */
 export const edQueries = {
   all: () => ['ed'] as const,
   patients: () =>
@@ -42,6 +48,9 @@ export const edQueries = {
     }),
 };
 
+/**
+ * Specialist consult broadcast queries.
+ */
 export const specialistQueries = {
   all: () => ['specialist'] as const,
   broadcasts: (cluster?: SpecialtyCluster) =>
@@ -52,6 +61,9 @@ export const specialistQueries = {
     }),
 };
 
+/**
+ * Bed Management Unit (BMU) queue, recommendations, inventory, and solver suggestions queries.
+ */
 export const bmuQueries = {
   all: () => ['bmu'] as const,
   queue: () =>
@@ -91,6 +103,9 @@ export const bmuQueries = {
     }),
 };
 
+/**
+ * Patient tracking and self-service status queries.
+ */
 export const patientQueries = {
   all: () => ['patient'] as const,
   track: (token: string) =>
@@ -107,6 +122,9 @@ export const patientQueries = {
     }),
 };
 
+/**
+ * Inpatient ward runway, turnover tasks, and capacity forecast queries.
+ */
 export const wardQueries = {
   all: () => ['ward'] as const,
   runway: () =>
@@ -133,6 +151,12 @@ export const wardQueries = {
 // 2. Centralized Mutation Hooks with Automatic Cache Invalidation
 // ============================================================================
 
+/**
+ * React Query mutation hook to submit an emergency department admission assessment.
+ * Automatically invalidates ED and BMU queue queries upon success.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useSubmitEdAssessment(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -146,6 +170,12 @@ export function useSubmitEdAssessment(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for an on-call specialist to claim a consult broadcast.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useClaimBroadcast(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -161,6 +191,11 @@ export function useClaimBroadcast(onSuccess?: () => void, onError?: (error: Erro
   });
 }
 
+/**
+ * React Query mutation hook for submitting specialist consult notes and secondary acuity.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useSubmitConsult(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -174,6 +209,12 @@ export function useSubmitConsult(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for amending previously submitted specialist consult findings.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useAmendConsult(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -191,6 +232,12 @@ export function useAmendConsult(onSuccess?: () => void, onError?: (error: Error)
   });
 }
 
+/**
+ * React Query mutation hook for requesting clinical reconciliation between discordant assessments.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useRequestReconciliation(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -207,6 +254,12 @@ export function useRequestReconciliation(onSuccess?: () => void, onError?: (erro
   });
 }
 
+/**
+ * React Query mutation hook for assigning an admitting specialty cluster to an admission request.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useAssignAdmittingCluster(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -222,6 +275,12 @@ export function useAssignAdmittingCluster(onSuccess?: () => void, onError?: (err
   });
 }
 
+/**
+ * React Query mutation hook for chaining a consult to an additional specialty cluster.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useChainConsult(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -238,6 +297,11 @@ export function useChainConsult(onSuccess?: () => void, onError?: (error: Error)
   });
 }
 
+/**
+ * React Query mutation hook for BMU bed allocation.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useAllocateBed(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -250,6 +314,11 @@ export function useAllocateBed(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for deallocating or releasing an assigned bed.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useDeallocateBed(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -262,6 +331,12 @@ export function useDeallocateBed(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for approving a batch holding ward allocation.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useApproveBatchHoldingWard(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -277,6 +352,12 @@ export function useApproveBatchHoldingWard(onSuccess?: () => void, onError?: (er
   });
 }
 
+/**
+ * React Query mutation hook for approving a patient cohort bed swap.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useApproveCohortSwap(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -292,6 +373,11 @@ export function useApproveCohortSwap(onSuccess?: () => void, onError?: (error: E
   });
 }
 
+/**
+ * React Query mutation hook for referring an acute patient to a sister hospital.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useReferSisterHospital(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -303,6 +389,12 @@ export function useReferSisterHospital(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for recalling a previously initiated diversion back to acute hospital care.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useRecallDiversion(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -317,6 +409,12 @@ export function useRecallDiversion(onSuccess?: () => void, onError?: (error: Err
   });
 }
 
+/**
+ * React Query mutation hook for extending the sister hospital acceptance SLA window.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useExtendDiversionSla(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -331,6 +429,12 @@ export function useExtendDiversionSla(onSuccess?: () => void, onError?: (error: 
   });
 }
 
+/**
+ * React Query mutation hook for logging telephone counseling notes for waiting patients.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useLogTelephoneFollowUp(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -346,6 +450,12 @@ export function useLogTelephoneFollowUp(onSuccess?: () => void, onError?: (error
   });
 }
 
+/**
+ * React Query mutation hook for tagging an admission request with an operational delay code and note.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useAttachDelayTag(onSuccess?: () => void, onError?: (error: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -362,6 +472,11 @@ export function useAttachDelayTag(onSuccess?: () => void, onError?: (error: Erro
   });
 }
 
+/**
+ * React Query mutation hook for modifying dynamic BMU algorithm weights.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useUpdateBmuConfig(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -374,6 +489,11 @@ export function useUpdateBmuConfig(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook to record patient arrival and check-in to an inpatient bed.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useCheckinPatient(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -387,6 +507,11 @@ export function useCheckinPatient(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for vacating a bed when a patient is discharged, triggering cleaning SLA.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ */
 export function useVacatePatient(onSuccess?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -400,6 +525,12 @@ export function useVacatePatient(onSuccess?: () => void) {
   });
 }
 
+/**
+ * React Query mutation hook for completing bed sanitization by housekeeping staff.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useCleanBed(onSuccess?: () => void, onError?: (err: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -415,6 +546,12 @@ export function useCleanBed(onSuccess?: () => void, onError?: (err: Error) => vo
   });
 }
 
+/**
+ * React Query mutation hook for updating Estimated Date of Discharge (EDD).
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useUpdateEdd(onSuccess?: () => void, onError?: (err: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -432,6 +569,12 @@ export function useUpdateEdd(onSuccess?: () => void, onError?: (err: Error) => v
   });
 }
 
+/**
+ * React Query mutation hook for attending physician morning discharge sign-off.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useDischargeSignoff(onSuccess?: () => void, onError?: (err: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -447,6 +590,12 @@ export function useDischargeSignoff(onSuccess?: () => void, onError?: (err: Erro
   });
 }
 
+/**
+ * React Query mutation hook for recording bedside delivery of discharge medication.
+ *
+ * @param onSuccess - Optional callback triggered on success.
+ * @param onError - Optional callback triggered on error.
+ */
 export function useDeliverMedication(onSuccess?: () => void, onError?: (err: Error) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -462,6 +611,11 @@ export function useDeliverMedication(onSuccess?: () => void, onError?: (err: Err
   });
 }
 
+/**
+ * React Query mutation hook for triggering simulated 2-hour periodic SMS updates to patients.
+ *
+ * @param onSuccess - Optional callback triggered on success with dispatch counts.
+ */
 export function useSimulatePeriodicUpdate(onSuccess?: (data: { dispatchedCount: number; message: string }) => void) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -473,6 +627,9 @@ export function useSimulatePeriodicUpdate(onSuccess?: (data: { dispatchedCount: 
   });
 }
 
+/**
+ * React Query mutation hook for logging patient self-service call actions from the tracker.
+ */
 export function useRecordPatientAction() {
   return useMutation({
     mutationFn: (variables: { token: string; actionType: 'MSW_CALL' | 'FINANCE_CALL' }) =>
@@ -480,6 +637,9 @@ export function useRecordPatientAction() {
   });
 }
 
+/**
+ * Analytics and operational KPI summary queries.
+ */
 export const analyticsQueries = {
   all: () => ['analytics'] as const,
   kpiSummary: (startDate?: string, endDate?: string) =>

@@ -92,6 +92,9 @@ const routeTree = rootRoute.addChildren([
   analyticsRoute,
 ]);
 
+/**
+ * TanStack Router instance configured with hospital application routes and error fallback boundary.
+ */
 export const router = createRouter({
   routeTree,
   defaultErrorComponent: ({ error, reset }) => (

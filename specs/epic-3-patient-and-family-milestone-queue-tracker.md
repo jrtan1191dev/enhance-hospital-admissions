@@ -39,7 +39,7 @@ The system introduces a secure, token-activated mobile **Patient & Family Public
 8. As a Patient or Family Member, I want to see a dynamically calculated estimated wait duration (e.g., "~45 mins"), with additive operational buffers applied when delays occur, so that I have realistic expectations of boarding time.
 9. As a Patient or Family Member, I want to see the number of patients ahead of me in the queue for my matching ward class category (`requestedWardClass`), prioritized by effective acuity tier, so that queue progress is transparent.
 10. As a Patient or Family Member, I want the tracker to display clear context explaining that hospital admissions are prioritized by acute clinical urgency and safety rather than first-come-first-served order, so that I understand why arrival sequence does not dictate bed allocation.
-11. As an Evaluator or Prototype Demonstrator, I want a patient quick-picker dropdown in the simulator interface, so that I can switch between simulated patient tokens (`TOKEN-P101`, `TOKEN-P102`) in one click without manually typing URLs.
+11. As an Evaluator or Prototype Demonstrator, I want a patient quick-picker dropdown in the simulator interface, so that I can switch between simulated patient tokens (`Q-P101`, `Q-P102`) in one click without manually typing URLs.
 
 ### Feature 3.2: Automated Status Updates & Delay Explanations
 
@@ -75,7 +75,7 @@ The system introduces a secure, token-activated mobile **Patient & Family Public
 
 ### 2. Domain Glossary & Milestone State Mapping
 
-- **Public Token (`queueToken`)**: Secure alphanumeric token (e.g., `TOKEN-P101`, `TOKEN-P102`) generated upon admission creation.
+- **Public Token (`queueToken`)**: Secure alphanumeric token (e.g., `Q-P101`, `Q-P102`) generated upon admission creation.
 - **Milestone Stepper States**:
   - **`Quiescent Pre-Milestone: ED Assessment in Progress`**: Displayed when `AdmissionRequest.status` is `ASSESSMENT_PENDING`.
   - **`Milestone 1: Admission Decision Confirmed`**: Triggered when `AdmissionRequest.status` is `BED_REQUESTED`.

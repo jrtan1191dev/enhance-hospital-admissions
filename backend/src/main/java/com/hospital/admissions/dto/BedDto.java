@@ -1,5 +1,6 @@
 package com.hospital.admissions.dto;
 
+import com.hospital.admissions.entity.Bed;
 import com.hospital.admissions.entity.BedStatus;
 import com.hospital.admissions.entity.Patient;
 
@@ -22,4 +23,21 @@ public record BedDto(
         boolean telemetryCapable,
         boolean nearNursingStation,
         Patient assignedPatient
-) {}
+) {
+    /**
+     * Maps a {@link Bed} entity to its transfer representation.
+     *
+     * @param bed the bed entity to convert.
+     * @return a {@link BedDto} projection of the bed.
+     */
+    public static BedDto from(Bed bed) {
+        return new BedDto(
+                bed.getId(),
+                bed.getBedNumber(),
+                bed.getStatus(),
+                bed.isHasTelemetry(),
+                bed.isNearNursingStation(),
+                bed.getCurrentPatient()
+        );
+    }
+}

@@ -3,6 +3,7 @@ package com.hospital.admissions.controller;
 import com.hospital.admissions.entity.Bed;
 import com.hospital.admissions.entity.Patient;
 import com.hospital.admissions.entity.PatientAuditInteraction;
+import com.hospital.admissions.dto.BedDto;
 import com.hospital.admissions.dto.PatientActionRequest;
 import com.hospital.admissions.dto.PatientMilestoneResponse;
 import com.hospital.admissions.repository.PatientRepository;
@@ -68,22 +69,22 @@ public class PatientTrackerController {
      * Completes patient check-in into their assigned inpatient bed.
      *
      * @param bedId the unique identifier of the assigned {@link Bed}.
-     * @return {@link ResponseEntity} containing the updated {@link Bed} with status OCCUPIED_TAKEN.
+     * @return {@link ResponseEntity} containing the updated {@link BedDto} with status OCCUPIED_TAKEN.
      */
     @PostMapping("/beds/{bedId}/checkin")
-    public ResponseEntity<Bed> checkinPatient(@PathVariable UUID bedId) {
-        return ResponseEntity.ok(patientTrackerService.checkinPatient(bedId));
+    public ResponseEntity<BedDto> checkinPatient(@PathVariable UUID bedId) {
+        return ResponseEntity.ok(BedDto.from(patientTrackerService.checkinPatient(bedId)));
     }
 
     /**
      * Marks a bed as vacated upon patient discharge, transitioning status to EMPTY_PENDING_CLEANING.
      *
      * @param bedId the unique identifier of the bed being vacated.
-     * @return {@link ResponseEntity} containing the updated {@link Bed} entity.
+     * @return {@link ResponseEntity} containing the updated {@link BedDto}.
      */
     @PostMapping("/beds/{bedId}/vacate")
-    public ResponseEntity<Bed> vacatePatient(@PathVariable UUID bedId) {
-        return ResponseEntity.ok(patientTrackerService.vacatePatient(bedId));
+    public ResponseEntity<BedDto> vacatePatient(@PathVariable UUID bedId) {
+        return ResponseEntity.ok(BedDto.from(patientTrackerService.vacatePatient(bedId)));
     }
 
     /**
@@ -105,10 +106,10 @@ public class PatientTrackerController {
      * Marks a vacated bed as cleaned and ready for the next patient assignment.
      *
      * @param bedId the unique identifier of the cleaned bed.
-     * @return {@link ResponseEntity} containing the updated {@link Bed} with status EMPTY_CLEANED.
+     * @return {@link ResponseEntity} containing the updated {@link BedDto} with status EMPTY_CLEANED.
      */
     @PostMapping("/beds/{bedId}/clean")
-    public ResponseEntity<Bed> cleanBed(@PathVariable UUID bedId) {
-        return ResponseEntity.ok(patientTrackerService.cleanBed(bedId));
+    public ResponseEntity<BedDto> cleanBed(@PathVariable UUID bedId) {
+        return ResponseEntity.ok(BedDto.from(patientTrackerService.cleanBed(bedId)));
     }
 }

@@ -250,14 +250,7 @@ public class BmuService {
                         w.getLockedGender(),
                         w.getLockedInfectionStatus(),
                         w.getBeds().stream()
-                                .map(b -> new BedDto(
-                                        b.getId(),
-                                        b.getBedNumber(),
-                                        b.getStatus(),
-                                        b.isHasTelemetry(),
-                                        b.isNearNursingStation(),
-                                        b.getCurrentPatient()
-                                ))
+                                .map(BedDto::from)
                                 .toList()
                 ))
                 .toList();

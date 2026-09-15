@@ -13,15 +13,18 @@
 
 ## Demo
 
-https://github.com/user-attachments/assets/intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4
-
 > 🎥 ** Patient Admission & Discharge Management Application ** — end-to-end walkthrough of the three clinical workflows:
 >
 > - **ED Clinician — Diagnostic Assessment:** Pre-populated diagnostic synthesis from clinical data. The ED attending reviews AI-suggested acuity tier, specialty, and care requirements — then confirms with 1-click or adjusts via dropdown chips.
 > - **BMU Coordinator — Bed Allocation:** Severity-prioritized bed queue with Top-3 recommendations showing constraint match rationale. BMU coordinators approve allocations with 1-click or override with a mandatory structured reason.
 > - **Patient Milestone Tracker:** Mobile-optimised 3-stage milestone stepper showing queue position partitioned by ward class, estimated wait duration, and empathetic operational delay explanations.
 
-▶️ [Watch the demo video](https://github.com/user-attachments/assets/2d42330f-014c-4b09-9c29-69b1c3d5651a)
+▶️ [Watch the demo video]
+<html>
+     <video width="640" height="360" controls>
+       <source src="https://github.com/user-attachments/assets/2d42330f-014c-4b09-9c29-69b1c3d5651a" type="video/mp4">
+     </video>
+</html>
 
 ---
 

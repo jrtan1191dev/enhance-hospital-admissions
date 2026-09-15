@@ -20,7 +20,10 @@
 > - **Patient Milestone Tracker:** Mobile-optimised 3-stage milestone stepper showing queue position partitioned by ward class, estimated wait duration, and empathetic operational delay explanations.
 
 ▶️ [Watch the demo video]
-<video src="https://github.com/user-attachments/assets/2d42330f-014c-4b09-9c29-69b1c3d5651a" controls="controls" style="max-width: 100%;"> </video>
+
+https://github.com/user-attachments/assets/eaccdfff-5034-438f-b8e7-0a6146ecb312
+
+
 
 ---
 

@@ -1,6 +1,6 @@
 # User Stories & Acceptance Criteria Specification
 
-## Intelligent Patient Flow & Bed Capacity Orchestration System
+## Patient Admission & Discharge Management Application
 
 ---
 

@@ -1,4 +1,4 @@
-# Wayfinder Map: Intelligent Patient Flow & Bed Capacity Orchestration System
+# Wayfinder Map: Patient Admission & Discharge Management Application
 
 ## Destination
 

@@ -1,6 +1,6 @@
 # Technical Architecture Document (TAD) & Implementation Specification
 
-## Intelligent Patient Flow & Bed Capacity Orchestration System
+## Patient Admission & Discharge Management Application
 
 - **Version**: `1.0.0-PROTOTYPE`
 - **Status**: `APPROVED FOR IMPLEMENTATION`
@@ -28,7 +28,7 @@
 
 Hospital emergency department (ED) overcrowding and prolonged admission boarding times represent critical systemic healthcare challenges. Current workflows suffer from fragmented phone/EHR handoffs, clinical discordance between ED physicians and inpatient specialists, manual spreadsheet-based bed allocation by Bed Management Units (BMU), poor visibility for anxious patients and families, and delayed post-discharge room turnover.
 
-The **Intelligent Patient Flow & Bed Capacity Orchestration System** resolves these bottlenecks by providing:
+The **Patient Admission & Discharge Management Application** resolves these bottlenecks by providing:
 
 1. **Clinical Assessment & Broadcast Hub**: Primary ED intake with 1-click clinical submission, paired with a parallel broadcast feed for on-call inpatient specialists to eliminate phone tag and surface discordant acuity evaluations.
 2. **Heuristic Bed Allocation & Dynamic Batching Engine**: Real-time bed recommendation balancing clinical constraints (ward class, infection control, gender cohorts, telemetry) with operational efficiency (consolidation packing, dynamic holding ward batching, and cohort-swap reallocations).

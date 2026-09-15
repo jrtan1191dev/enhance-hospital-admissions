@@ -1,4 +1,4 @@
-# Intelligent Patient Flow & Bed Capacity Orchestration System
+# Patient Admission & Discharge Management Application
 
 ## Product Definition & Architecture Specification
 

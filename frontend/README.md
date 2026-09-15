@@ -1,4 +1,4 @@
-# Intelligent Patient Flow & Bed Capacity Orchestration System — Frontend
+# Patient Admission & Discharge Management Application — Frontend
 
 A lightweight, modern React 19 Single Page Application built with Vite, Tailwind CSS v4, official **shadcn/ui** components, and the **TanStack** suite.
 

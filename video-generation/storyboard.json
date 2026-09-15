@@ -64,14 +64,31 @@
           "width": 1280,
           "height": 966
         },
-        "hash": "eb8c86307c80"
+        "hash": "e72f24065820"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 966
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/01-problem.wav",
+        "durationMs": 21400,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "ea9b25e3a576"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 21800,
+        "ratePct": 0,
+        "padVisualMs": 21800,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "02-ed-queue",
@@ -105,14 +122,31 @@
           "width": 906.390625,
           "height": 393.5
         },
-        "hash": "672f36cc68a5"
+        "hash": "61681032945c"
       },
       "roi": {
         "x": 352,
         "y": 420.703125,
         "width": 906.390625,
         "height": 393.5
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02-ed-queue.wav",
+        "durationMs": 10800,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "6ddb0e653fe1"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 11200,
+        "ratePct": 0,
+        "padVisualMs": 11200,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "03-ed-synthesis",
@@ -126,13 +160,13 @@
         "setupScript": "scenes/setup-ed.mjs",
         "showActions": true,
         "actionLabelPosition": "top-right",
-        "tailMs": 6500,
+        "tailMs": 8500,
         "steps": [
           {
             "action": "click",
             "selector": "tr:has-text(\"Chua Wee Kiat\") >> button",
             "target": "Assess button on Chua Wee Kiat row",
-            "delayMs": 3500
+            "delayMs": 5000
           },
           {
             "action": "waitForText",
@@ -153,21 +187,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/03-ed-synthesis.mp4",
-        "durationMs": 10664.436767578125,
+        "durationMs": 14114.303955078125,
         "roi": {
           "x": 1185.5,
           "y": 712.203125,
           "width": 64.890625,
           "height": 28
         },
-        "hash": "3ac92b05d0c4"
+        "hash": "ec85af937df3"
       },
       "roi": {
         "x": 1185.5,
         "y": 712.203125,
         "width": 64.890625,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/03-ed-synthesis.r.wav",
+        "durationMs": 14300,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "eeda65870e27"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit-capped",
+        "sceneMs": 14349,
+        "ratePct": 7,
+        "padVisualMs": 234,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 7
     },
     {
       "id": "04-ed-confirm",
@@ -180,7 +231,7 @@
         "url": "/ed",
         "setupScript": "scenes/setup-ed.mjs",
         "showActions": true,
-        "tailMs": 5000,
+        "tailMs": 3500,
         "steps": [
           {
             "action": "click",
@@ -193,7 +244,7 @@
             "role": "button",
             "name": "Confirm Direct Admission",
             "target": "Confirm Direct Admission",
-            "delayMs": 6000
+            "delayMs": 3000
           }
         ]
       },
@@ -209,21 +260,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/04-ed-confirm.mp4",
-        "durationMs": 18831.429931640625,
+        "durationMs": 11350.43505859375,
         "roi": {
           "x": 1091.328125,
           "y": 1079.125,
           "width": 460.671875,
           "height": 32
         },
-        "hash": "cae5f644c376"
+        "hash": "a8add6ab8029"
       },
       "roi": {
         "x": 1091.328125,
         "y": 1079.125,
         "width": 460.671875,
         "height": 32
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04-ed-confirm.r.wav",
+        "durationMs": 10700,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "c403cc93b334"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 11350,
+        "ratePct": -4.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -4.1
     },
     {
       "id": "05-specialist-pool",
@@ -256,14 +324,31 @@
           "width": 1280,
           "height": 1467.46875
         },
-        "hash": "c22701a9d109"
+        "hash": "b085067d235f"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 1467.46875
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05-specialist-pool.wav",
+        "durationMs": 11500,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "81f323a4c593"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 11900,
+        "ratePct": 0,
+        "padVisualMs": 11900,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "06-specialist-claim",
@@ -276,14 +361,14 @@
         "url": "/specialist",
         "setupScript": "scenes/setup-specialist.mjs",
         "showActions": true,
-        "tailMs": 5500,
+        "tailMs": 3000,
         "steps": [
           {
             "action": "highlight",
             "role": "button",
             "name": "Claim Case",
             "target": "Claim Case button on first broadcast",
-            "delayMs": 6000
+            "delayMs": 3000
           }
         ]
       },
@@ -299,21 +384,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/06-specialist-claim.mp4",
-        "durationMs": 17482.187744140625,
+        "durationMs": 9002.655029296875,
         "roi": {
           "x": 623.46875,
           "y": 559.65625,
           "width": 107.609375,
           "height": 28
         },
-        "hash": "3df2e32e0574"
+        "hash": "f34d7560b382"
       },
       "roi": {
         "x": 623.46875,
         "y": 559.65625,
         "width": 107.609375,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06-specialist-claim.r.wav",
+        "durationMs": 9225,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "de7028b7333b"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit-capped",
+        "sceneMs": 9395,
+        "ratePct": 7,
+        "padVisualMs": 393,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 7
     },
     {
       "id": "07-safety-discordance",
@@ -346,14 +448,31 @@
           "width": 1280,
           "height": 2972.484375
         },
-        "hash": "38516923a351"
+        "hash": "cbc408ed99ef"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 2972.484375
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07-safety-discordance.wav",
+        "durationMs": 16024.999999999998,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "37ad491f8781"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 16425,
+        "ratePct": 0,
+        "padVisualMs": 16425,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "08-bmu-capacity",
@@ -388,14 +507,31 @@
           "width": 1280,
           "height": 2972.484375
         },
-        "hash": "6e9b7ad62805"
+        "hash": "332ead30b572"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 2972.484375
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08-bmu-capacity.wav",
+        "durationMs": 14325,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "c95898b31e78"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 14725,
+        "ratePct": 0,
+        "padVisualMs": 14725,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "09-bmu-solver",
@@ -408,14 +544,14 @@
         "url": "/bmu",
         "setupScript": "scenes/setup-bmu.mjs",
         "showActions": true,
-        "tailMs": 6500,
+        "tailMs": 8000,
         "steps": [
           {
             "action": "click",
             "role": "button",
             "name": "Select",
             "target": "Select button on first queued request",
-            "delayMs": 4000
+            "delayMs": 5500
           },
           {
             "action": "waitForText",
@@ -435,21 +571,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/09-bmu-solver.mp4",
-        "durationMs": 11130.773193359375,
+        "durationMs": 14135.754150390625,
         "roi": {
           "x": 1422.265625,
           "y": 1212.28125,
           "width": 58.265625,
           "height": 28
         },
-        "hash": "c54df35342bb"
+        "hash": "1dfccb7f7e7c"
       },
       "roi": {
         "x": 1422.265625,
         "y": 1212.28125,
         "width": 58.265625,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09-bmu-solver.r.wav",
+        "durationMs": 13975,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3fae581953bb"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 14136,
+        "ratePct": 5.6,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 5.6
     },
     {
       "id": "10-cohort-swap",
@@ -462,14 +615,14 @@
         "url": "/bmu",
         "setupScript": "scenes/setup-bmu.mjs",
         "showActions": true,
-        "tailMs": 6000,
+        "tailMs": 5000,
         "steps": [
           {
             "action": "highlight",
             "role": "button",
             "name": "Approve Cohort Swap",
             "target": "Approve Cohort Swap",
-            "delayMs": 11000
+            "delayMs": 8000
           }
         ]
       },
@@ -485,21 +638,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/10-cohort-swap.mp4",
-        "durationMs": 27981.64208984375,
+        "durationMs": 20983.489013671875,
         "roi": {
           "x": 1407.75,
           "y": 920.140625,
           "width": 144.25,
           "height": 28
         },
-        "hash": "2a88bebbb359"
+        "hash": "f72d314b35cf"
       },
       "roi": {
         "x": 1407.75,
         "y": 920.140625,
         "width": 144.25,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10-cohort-swap.r.wav",
+        "durationMs": 18350,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3d179615a86b"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit-capped",
+        "sceneMs": 20983,
+        "ratePct": -7,
+        "padVisualMs": 0,
+        "padAudioMs": 1686,
+        "warnings": []
+      },
+      "ratePct": -7
     },
     {
       "id": "11-bed-matrix",
@@ -533,14 +703,31 @@
           "width": 1280,
           "height": 2972.484375
         },
-        "hash": "6f17655e516f"
+        "hash": "dea05dd74943"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 2972.484375
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/11-bed-matrix.wav",
+        "durationMs": 9325,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "4dc4bef46e95"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 9725,
+        "ratePct": 0,
+        "padVisualMs": 9725,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "12-diversion",
@@ -574,14 +761,31 @@
           "width": 1280,
           "height": 2972.484375
         },
-        "hash": "1b527e419b26"
+        "hash": "cbfd91910630"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 2972.484375
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/12-diversion.wav",
+        "durationMs": 16000,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b012c0028cd3"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 16400,
+        "ratePct": 0,
+        "padVisualMs": 16400,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "13-patient-tracker",
@@ -610,8 +814,25 @@
         "filePath": "assets/recordings/13-patient-tracker.mp4",
         "durationMs": 5000,
         "roi": null,
-        "hash": "06ce13974142"
-      }
+        "hash": "795588630e88"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/13-patient-tracker.wav",
+        "durationMs": 12750,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3347015247c9"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13150,
+        "ratePct": 0,
+        "padVisualMs": 13150,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "14-patient-update",
@@ -625,14 +846,14 @@
         "setupScript": "scenes/setup-patient.mjs",
         "roiSelector": ".max-w-\\[390px\\]",
         "showActions": true,
-        "tailMs": 6000,
+        "tailMs": 4000,
         "steps": [
           {
             "action": "highlight",
             "role": "button",
             "name": "Simulate Periodic Update",
             "target": "Simulate Periodic Update",
-            "delayMs": 9000
+            "delayMs": 5500
           }
         ]
       },
@@ -648,21 +869,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/14-patient-update.mp4",
-        "durationMs": 23998.670166015625,
+        "durationMs": 14980.990234375,
         "roi": {
           "x": 1057.703125,
           "y": 180,
           "width": 187.03125,
           "height": 28
         },
-        "hash": "fe082ea73c1a"
+        "hash": "3493a8b5b054"
       },
       "roi": {
         "x": 1057.703125,
         "y": 180,
         "width": 187.03125,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/14-patient-update.r.wav",
+        "durationMs": 14375,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "5b031ac470f5"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 14981,
+        "ratePct": -2.4,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -2.4
     },
     {
       "id": "15-ward-runway",
@@ -695,14 +933,31 @@
           "width": 1280,
           "height": 1056.203125
         },
-        "hash": "a4941bc2bd3d"
+        "hash": "b3059a768fea"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 1056.203125
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/15-ward-runway.wav",
+        "durationMs": 13325,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "67b7d1ec685d"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13725,
+        "ratePct": 0,
+        "padVisualMs": 13725,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "16-ward-turnover",
@@ -735,14 +990,31 @@
           "width": 1280,
           "height": 1056.203125
         },
-        "hash": "a657ffe6ca2e"
+        "hash": "24c199151ee1"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 1056.203125
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/16-ward-turnover.wav",
+        "durationMs": 13500,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "e8a1adcd5eb9"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13900,
+        "ratePct": 0,
+        "padVisualMs": 13900,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "17-analytics",
@@ -775,14 +1047,31 @@
           "width": 1280,
           "height": 1162.8125
         },
-        "hash": "f138f3fc9aad"
+        "hash": "0188883d7b61"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 1162.8125
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/17-analytics.wav",
+        "durationMs": 16175,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3612897d59f5"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 16575,
+        "ratePct": 0,
+        "padVisualMs": 16575,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "18-analytics-refresh",
@@ -795,14 +1084,14 @@
         "url": "/analytics",
         "setupScript": "scenes/setup-bmu.mjs",
         "showActions": true,
-        "tailMs": 6000,
+        "tailMs": 4000,
         "steps": [
           {
             "action": "highlight",
             "role": "button",
             "name": "Refresh Metrics",
             "target": "Refresh Metrics",
-            "delayMs": 7000
+            "delayMs": 3500
           }
         ]
       },
@@ -818,21 +1107,38 @@
       },
       "resolvedVisual": {
         "filePath": "assets/recordings/18-analytics-refresh.mp4",
-        "durationMs": 19979.6708984375,
+        "durationMs": 10997.68603515625,
         "roi": {
           "x": 1410.015625,
           "y": 128,
           "width": 136.984375,
           "height": 28
         },
-        "hash": "5644c92e056d"
+        "hash": "be3766c1a164"
       },
       "roi": {
         "x": 1410.015625,
         "y": 128,
         "width": 136.984375,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/18-analytics-refresh.r.wav",
+        "durationMs": 10850,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b7aaa25676b2"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit-capped",
+        "sceneMs": 11031,
+        "ratePct": 7,
+        "padVisualMs": 33,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 7
     },
     {
       "id": "19-cta",
@@ -869,14 +1175,31 @@
           "width": 1280,
           "height": 1162.8125
         },
-        "hash": "1c353a78205d"
+        "hash": "83b2216d04a6"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
         "height": 1162.8125
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/19-cta.wav",
+        "durationMs": 19950,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d394b04d41fe"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 20350,
+        "ratePct": 0,
+        "padVisualMs": 20350,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     }
   ]
 }

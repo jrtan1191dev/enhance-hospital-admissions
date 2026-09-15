@@ -11,14 +11,28 @@
 
 ---
 
-## Screenshots
+## Demo
 
-<!-- Replace these placeholders with actual screenshots -->
+https://github.com/user-attachments/assets/intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4
 
-| ED Clinician — Diagnostic Assessment | BMU Coordinator — Bed Allocation | Patient Milestone Tracker |
-| :---: | :---: | :---: |
-| *<!-- ![ED Clinician View](docs/screenshots/ed-clinician.png) -->* | *<!-- ![BMU Dashboard](docs/screenshots/bmu-dashboard.png) -->* | *<!-- ![Patient Tracker](docs/screenshots/patient-tracker.png) -->* |
-| Pre-populated diagnostic synthesis from clinical data. The ED attending reviews AI-suggested acuity tier, specialty, and care requirements — then confirms with 1-click or adjusts via dropdown chips. | Severity-prioritized bed queue with Top-3 recommendations showing constraint match rationale. BMU coordinators approve allocations with 1-click or override with a mandatory structured reason. | Mobile-optimised 3-stage milestone stepper showing queue position partitioned by ward class, estimated wait duration, and empathetic operational delay explanations. |
+> 🎥 ** Patient Admission & Discharge Management Application ** — end-to-end walkthrough of the three clinical workflows:
+>
+> - **ED Clinician — Diagnostic Assessment:** Pre-populated diagnostic synthesis from clinical data. The ED attending reviews AI-suggested acuity tier, specialty, and care requirements — then confirms with 1-click or adjusts via dropdown chips.
+> - **BMU Coordinator — Bed Allocation:** Severity-prioritized bed queue with Top-3 recommendations showing constraint match rationale. BMU coordinators approve allocations with 1-click or override with a mandatory structured reason.
+> - **Patient Milestone Tracker:** Mobile-optimised 3-stage milestone stepper showing queue position partitioned by ward class, estimated wait duration, and empathetic operational delay explanations.
+
+<!--
+  The video above is stored at the repo root:
+  intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4
+
+  GitHub only auto-embeds videos uploaded via the web UI (which produces a
+  user-attachments URL). To embed the committed file directly, replace the
+  bare URL above with the raw link once pushed, e.g.:
+
+  <video src="./intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4" controls></video>
+-->
+
+▶️ [Watch the demo video](./intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4)
 
 ---
 

@@ -21,18 +21,7 @@ https://github.com/user-attachments/assets/intelligent-patient-flow-and-bed-capa
 > - **BMU Coordinator — Bed Allocation:** Severity-prioritized bed queue with Top-3 recommendations showing constraint match rationale. BMU coordinators approve allocations with 1-click or override with a mandatory structured reason.
 > - **Patient Milestone Tracker:** Mobile-optimised 3-stage milestone stepper showing queue position partitioned by ward class, estimated wait duration, and empathetic operational delay explanations.
 
-<!--
-  The video above is stored at the repo root:
-  intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4
-
-  GitHub only auto-embeds videos uploaded via the web UI (which produces a
-  user-attachments URL). To embed the committed file directly, replace the
-  bare URL above with the raw link once pushed, e.g.:
-
-  <video src="./intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4" controls></video>
--->
-
-▶️ [Watch the demo video](./intelligent-patient-flow-and-bed-capacity-orchestration.landscape.mp4)
+▶️ [Watch the demo video](https://github.com/user-attachments/assets/2d42330f-014c-4b09-9c29-69b1c3d5651a)
 
 ---
 

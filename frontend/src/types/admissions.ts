@@ -29,11 +29,12 @@ export type Gender = 'MALE' | 'FEMALE';
 
 /**
  * Infection control isolation classification.
+ * Mirrors the backend {@code InfectionStatus} enum exactly.
  */
 export type InfectionStatus = 
-  | 'NONE'
-  | 'CONTACT_MRSA'
-  | 'AIRBORNE_COVID'
+  | 'NON_INFECTIOUS'
+  | 'RESPIRATORY'
+  | 'MRSA'
   | 'DROPLET';
 
 /**
@@ -72,13 +73,13 @@ export type DiversionPathway = 'NONE' | 'COMMUNITY_HOSPITAL' | 'HOSPITAL_AT_HOME
 export interface Patient {
   id: string;
   name: string;
-  nric: string;
+  nricMasked: string;
   gender: Gender;
   age: number;
   queueToken: string;
   wardClassPreference: WardClass;
   infectionStatus: InfectionStatus;
-  telemetryRequired: boolean;
+  needsTelemetry: boolean;
   fallRiskScore: number;
   vitalsBp?: string;
   vitalsHr?: number;

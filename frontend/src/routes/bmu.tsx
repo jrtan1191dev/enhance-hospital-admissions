@@ -315,7 +315,7 @@ export function BmuRoute() {
       cell: ({ row }) => (
         <div className="text-xs space-y-0.5">
           <Badge variant="outline" className="text-[10px]">{row.original.patient.wardClassPreference}</Badge>
-          {(row.original.effectiveTelemetry || row.original.primaryTelemetry || row.original.patient.telemetryRequired) && (
+          {(row.original.effectiveTelemetry || row.original.primaryTelemetry || row.original.patient.needsTelemetry) && (
             <span className="block text-[10px] text-amber-700 font-medium">Telemetry Req</span>
           )}
         </div>
@@ -1087,7 +1087,7 @@ export function BmuRoute() {
                       <span>{selectedRequest.patient.gender}, {selectedRequest.patient.age}y</span>
                     </div>
                     <div className="text-slate-600">
-                      Class: <strong>{selectedRequest.patient.wardClassPreference}</strong> • Telemetry: <strong>{selectedRequest.effectiveTelemetry || selectedRequest.patient.telemetryRequired ? 'Yes' : 'No'}</strong> • Fall Risk: <strong>{selectedRequest.patient.fallRiskScore}</strong>
+                      Class: <strong>{selectedRequest.patient.wardClassPreference}</strong> • Telemetry: <strong>{selectedRequest.effectiveTelemetry || selectedRequest.patient.needsTelemetry ? 'Yes' : 'No'}</strong> • Fall Risk: <strong>{selectedRequest.patient.fallRiskScore}</strong>
                     </div>
                   </div>
 
@@ -1325,7 +1325,7 @@ export function BmuRoute() {
 
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <span>Cohort Lock: <strong>{ward.genderCohortLocked || 'Unlocked (Flex)'}</strong></span>
-                      {ward.infectionLocked && ward.infectionLocked !== 'NONE' && (
+                      {ward.infectionLocked && ward.infectionLocked !== 'NON_INFECTIOUS' && (
                         <Badge variant="destructive" className="text-[10px]">
                           {ward.infectionLocked}
                         </Badge>
@@ -1380,7 +1380,7 @@ export function BmuRoute() {
             <DialogDescription>
               {selectedRequest && (
                 <span>
-                  Digital Referral Packet for <strong>{selectedRequest.patient.name}</strong> ({selectedRequest.patient.nric})
+                  Digital Referral Packet for <strong>{selectedRequest.patient.name}</strong> ({selectedRequest.patient.nricMasked})
                 </span>
               )}
             </DialogDescription>
@@ -1400,7 +1400,7 @@ export function BmuRoute() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-600">
                     <div>
                       <span className="text-[10px] text-slate-400 block">NRIC / Token</span>
-                      <span className="font-medium text-slate-800">{selectedRequest.patient.nric} ({selectedRequest.patient.queueToken})</span>
+                      <span className="font-medium text-slate-800">{selectedRequest.patient.nricMasked} ({selectedRequest.patient.queueToken})</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-400 block">Age / Gender</span>
@@ -1626,7 +1626,7 @@ export function BmuRoute() {
             <DialogDescription>
               {comparisonRequest && (
                 <span>
-                  Patient: <strong>{comparisonRequest.patient.name}</strong> ({comparisonRequest.patient.nric}) • Token: {comparisonRequest.patient.queueToken} • Class: {comparisonRequest.requestedWardClass || 'B2'}
+                  Patient: <strong>{comparisonRequest.patient.name}</strong> ({comparisonRequest.patient.nricMasked}) • Token: {comparisonRequest.patient.queueToken} • Class: {comparisonRequest.requestedWardClass || 'B2'}
                 </span>
               )}
             </DialogDescription>

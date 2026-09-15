@@ -380,7 +380,7 @@ export function WardRoute({ role: roleProp }: WardRouteProps = {}) {
                   <span>
                     Cohort Lock: <strong>{activeWard.genderCohortLocked || 'Unlocked (Flex)'}</strong>
                   </span>
-                  {activeWard.infectionLocked && activeWard.infectionLocked !== 'NONE' && (
+                  {activeWard.infectionLocked && activeWard.infectionLocked !== 'NON_INFECTIOUS' && (
                     <Badge variant="destructive" className="text-[10px]">
                       {activeWard.infectionLocked}
                     </Badge>

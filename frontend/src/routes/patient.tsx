@@ -43,7 +43,7 @@ const MILESTONES = [
 ];
 
 export function PatientRoute() {
-  const [selectedToken, setSelectedToken] = useState<string>('TOKEN-P101');
+  const [selectedToken, setSelectedToken] = useState<string>('Q-P101');
 
   // Fetch available patient tokens for quick-picker
   const { data: availablePatients = [] } = useQuery(patientQueries.availablePatients());

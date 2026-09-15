@@ -122,7 +122,7 @@ export function SpecialistRoute() {
       broadcast.secondaryAcuityTier || broadcast.admissionRequest.secondaryAcuityTier || broadcast.admissionRequest.primaryAcuityTier
     );
     setSecondaryTelemetry(
-      broadcast.secondaryTelemetry ?? broadcast.admissionRequest.patient.telemetryRequired ?? true
+      broadcast.secondaryTelemetry ?? broadcast.admissionRequest.patient.needsTelemetry ?? true
     );
     setDiversionPathway(
       broadcast.diversionPathway || broadcast.admissionRequest.diversionPathway || 'NONE'
@@ -401,12 +401,12 @@ export function SpecialistRoute() {
                       </Badge>
                     </div>
                     <div className="flex flex-wrap gap-1 pt-1">
-                      {patient.telemetryRequired && (
+                      {patient.needsTelemetry && (
                         <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-800 border-amber-200">
                           Telemetry Required
                         </Badge>
                       )}
-                      {patient.infectionStatus !== 'NONE' && (
+                      {patient.infectionStatus !== 'NON_INFECTIOUS' && (
                         <Badge variant="destructive" className="text-[10px]">
                           {patient.infectionStatus}
                         </Badge>
@@ -516,7 +516,7 @@ export function SpecialistRoute() {
             <DialogDescription>
               {consultModalBroadcast && (
                 <span>
-                  Patient: <strong>{consultModalBroadcast.admissionRequest.patient.name}</strong> ({consultModalBroadcast.admissionRequest.patient.nric}) • Cluster: {consultModalBroadcast.targetCluster}
+                  Patient: <strong>{consultModalBroadcast.admissionRequest.patient.name}</strong> ({consultModalBroadcast.admissionRequest.patient.nricMasked}) • Cluster: {consultModalBroadcast.targetCluster}
                 </span>
               )}
             </DialogDescription>
@@ -632,7 +632,7 @@ export function SpecialistRoute() {
             <DialogDescription>
               {chainModalBroadcast && (
                 <span>
-                  Spawn concurrent specialist review for <strong>{chainModalBroadcast.admissionRequest.patient.name}</strong> ({chainModalBroadcast.admissionRequest.patient.nric}).
+                  Spawn concurrent specialist review for <strong>{chainModalBroadcast.admissionRequest.patient.name}</strong> ({chainModalBroadcast.admissionRequest.patient.nricMasked}).
                 </span>
               )}
             </DialogDescription>

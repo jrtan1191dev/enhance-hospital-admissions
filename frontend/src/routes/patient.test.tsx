@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PatientRoute } from './patient';
 
 const mockPatients = [
-  { id: 'p101', name: 'Tan Ah Seng', queueToken: 'TOKEN-P101' },
-  { id: 'p102', name: 'Siti Binte Ahmad', queueToken: 'TOKEN-P102' },
+  { id: 'p101', name: 'Tan Ah Seng', queueToken: 'Q-P101' },
+  { id: 'p102', name: 'Siti Binte Ahmad', queueToken: 'Q-P102' },
 ];
 
 const mockTrackerData: any = {
@@ -60,8 +60,8 @@ function renderPatientRoute() {
   });
   queryClient.setQueryData(['patient', 'available'], mockPatients);
   if (!mockIsLoading && !mockError && mockTrackerData) {
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], mockTrackerData);
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P102'], {
+    queryClient.setQueryData(['patient', 'track', 'Q-P101'], mockTrackerData);
+    queryClient.setQueryData(['patient', 'track', 'Q-P102'], {
       ...mockTrackerData,
       patientName: 'Siti Binte Ahmad',
       admissionStatus: 'BED_REQUESTED',
@@ -99,10 +99,10 @@ describe('PatientRoute component', () => {
   it('handles simulator token switching', () => {
     renderPatientRoute();
     const select = screen.getByRole('combobox');
-    expect(select).toHaveValue('TOKEN-P101');
+    expect(select).toHaveValue('Q-P101');
 
-    fireEvent.change(select, { target: { value: 'TOKEN-P102' } });
-    expect(select).toHaveValue('TOKEN-P102');
+    fireEvent.change(select, { target: { value: 'Q-P102' } });
+    expect(select).toHaveValue('Q-P102');
   });
 
   it('handles simulate update and hotline buttons', () => {
@@ -114,14 +114,14 @@ describe('PatientRoute component', () => {
     const mswBtn = screen.getByRole('button', { name: /Call MSW/i });
     fireEvent.click(mswBtn);
     expect(mockRecordActionMutate).toHaveBeenCalledWith({
-      token: 'TOKEN-P101',
+      token: 'Q-P101',
       actionType: 'MSW_CALL',
     });
 
     const financeBtn = screen.getByRole('button', { name: /Call Finance/i });
     fireEvent.click(financeBtn);
     expect(mockRecordActionMutate).toHaveBeenCalledWith({
-      token: 'TOKEN-P101',
+      token: 'Q-P101',
       actionType: 'FINANCE_CALL',
     });
   });
@@ -129,7 +129,7 @@ describe('PatientRoute component', () => {
   it('renders different admission statuses properly', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     queryClient.setQueryData(['patient', 'available'], mockPatients);
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], {
+    queryClient.setQueryData(['patient', 'track', 'Q-P101'], {
       ...mockTrackerData,
       admissionStatus: 'ADMITTED_INPATIENT',
       assignedBedNumber: undefined,
@@ -150,7 +150,7 @@ describe('PatientRoute component', () => {
   it('handles ASSESSMENT_PENDING, DISCHARGED, and UNKNOWN statuses', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     queryClient.setQueryData(['patient', 'available'], mockPatients);
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], {
+    queryClient.setQueryData(['patient', 'track', 'Q-P101'], {
       ...mockTrackerData,
       admissionStatus: 'ASSESSMENT_PENDING',
       delayReason: undefined,
@@ -163,7 +163,7 @@ describe('PatientRoute component', () => {
     );
     expect(screen.getAllByText('ED Clinical Assessment in Progress').length).toBeGreaterThanOrEqual(1);
 
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], {
+    queryClient.setQueryData(['patient', 'track', 'Q-P101'], {
       ...mockTrackerData,
       admissionStatus: 'DISCHARGED',
     });
@@ -174,7 +174,7 @@ describe('PatientRoute component', () => {
     );
     expect(screen.getByText('Patient Discharged')).toBeInTheDocument();
 
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], {
+    queryClient.setQueryData(['patient', 'track', 'Q-P101'], {
       ...mockTrackerData,
       admissionStatus: 'UNKNOWN_STATUS',
     });
@@ -189,7 +189,7 @@ describe('PatientRoute component', () => {
   it('renders planned EDD and bedside medications received banner when present', () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     queryClient.setQueryData(['patient', 'available'], mockPatients);
-    queryClient.setQueryData(['patient', 'track', 'TOKEN-P101'], {
+    queryClient.setQueryData(['patient', 'track', 'Q-P101'], {
       ...mockTrackerData,
       admissionStatus: 'ADMITTED_INPATIENT',
       estimatedDateOfDischarge: '2026-09-12',

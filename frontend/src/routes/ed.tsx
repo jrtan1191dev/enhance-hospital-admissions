@@ -202,7 +202,7 @@ export function EdRoute() {
   const [wardClass, setWardClass] = useState<WardClass>('B2');
   const [telemetry, setTelemetry] = useState<boolean>(true);
   const [fallRisk, setFallRisk] = useState<boolean>(true);
-  const [isolation, setIsolation] = useState<InfectionStatus>('NONE');
+  const [isolation, setIsolation] = useState<InfectionStatus>('NON_INFECTIOUS');
   const [clinicalNotes, setClinicalNotes] = useState<string>('Pre-populated diagnostic synthesis: Elevated Troponin with chest pain.');
   const [requiresSpecialistConsult, setRequiresSpecialistConsult] = useState<boolean>(false);
   const [targetClusters, setTargetClusters] = useState<SpecialtyCluster[]>(['CARDIOLOGY']);
@@ -240,7 +240,7 @@ export function EdRoute() {
       setTelemetry(false);
     }
     setWardClass(patient.wardClassPreference || 'B2');
-    setIsolation(patient.infectionStatus || 'NONE');
+    setIsolation(patient.infectionStatus || 'NON_INFECTIOUS');
     setFallRisk((patient.fallRiskScore || 0) > 50);
     setClinicalNotes(`EHR Synthesis: ${patient.suspectedDiagnosis || 'Acute presentation'}. Vitals BP ${patient.vitalsBp || '120/80'}, SpO2 ${patient.vitalsSpo2 || 98}%.`);
   };
@@ -294,7 +294,7 @@ export function EdRoute() {
       cell: ({ row }) => (
         <div>
           <div className="font-semibold text-slate-900">{row.original.name}</div>
-          <div className="text-xs text-slate-500 font-mono">{row.original.nric} • {row.original.gender}, {row.original.age}y</div>
+          <div className="text-xs text-slate-500 font-mono">{row.original.nricMasked} • {row.original.gender}, {row.original.age}y</div>
         </div>
       ),
     },
@@ -323,7 +323,7 @@ export function EdRoute() {
       cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
           <Badge variant="outline" className="text-[10px]">{row.original.wardClassPreference}</Badge>
-          {row.original.infectionStatus !== 'NONE' && (
+          {row.original.infectionStatus !== 'NON_INFECTIOUS' && (
             <Badge variant="destructive" className="text-[10px]">{row.original.infectionStatus}</Badge>
           )}
         </div>
@@ -483,7 +483,7 @@ export function EdRoute() {
                       <TableCell className="py-3 text-xs">
                         <div className="font-semibold text-slate-900">{admission.patient?.name || 'Unknown Patient'}</div>
                         <div className="text-[11px] text-slate-500 font-mono">
-                          {admission.patient?.queueToken || admission.id.slice(0, 8)} • {admission.patient?.nric || 'N/A'}
+                          {admission.patient?.queueToken || admission.id.slice(0, 8)} • {admission.patient?.nricMasked || 'N/A'}
                         </div>
                       </TableCell>
                       <TableCell className="py-3 text-xs">
@@ -690,7 +690,7 @@ export function EdRoute() {
                   <div className="p-3 bg-gradient-to-r from-blue-50/80 to-slate-50 rounded-xl border border-blue-100 text-xs space-y-2">
                     <div className="font-semibold text-blue-950 flex items-center justify-between">
                       <span className="text-sm">{selectedPatient.name}</span>
-                      <span className="font-mono text-slate-500">{selectedPatient.nric}</span>
+                      <span className="font-mono text-slate-500">{selectedPatient.nricMasked}</span>
                     </div>
                     <div className="text-slate-600 text-[11px]">
                       <strong>Suspected:</strong> {selectedPatient.suspectedDiagnosis || 'Chest pain under evaluation'}
@@ -806,10 +806,10 @@ export function EdRoute() {
                       onChange={(e) => setIsolation(e.target.value as InfectionStatus)}
                       className="w-full text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-medium shadow-2xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all cursor-pointer"
                     >
-                      <option value="NONE">None (Standard Precautions)</option>
-                      <option value="CONTACT_MRSA">Contact Isolation (MRSA/VRE)</option>
-                      <option value="AIRBORNE_COVID">Airborne Isolation (COVID/TB - Negative Pressure)</option>
-                      <option value="DROPLET">Droplet Isolation (Influenza)</option>
+                      <option value="NON_INFECTIOUS">None (Standard Precautions)</option>
+                      <option value="MRSA">Contact Isolation (MRSA/VRE)</option>
+                      <option value="DROPLET">Droplet Isolation (Contact Precautions)</option>
+                      <option value="RESPIRATORY">Respiratory Isolation (COVID/TB/Influenza - Negative Pressure)</option>
                     </select>
                   </div>
 

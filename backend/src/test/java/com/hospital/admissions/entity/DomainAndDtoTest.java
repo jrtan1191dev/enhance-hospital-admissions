@@ -49,7 +49,8 @@ class DomainAndDtoTest {
         assertThat(InfectionStatus.values()).contains(
                 InfectionStatus.NON_INFECTIOUS,
                 InfectionStatus.RESPIRATORY,
-                InfectionStatus.MRSA
+                InfectionStatus.MRSA,
+                InfectionStatus.DROPLET
         );
 
         assertThat(SpecialtyCluster.values()).contains(
@@ -73,7 +74,24 @@ class DomainAndDtoTest {
         UUID id = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
 
-        Patient patient = new Patient(id, "S****123A", "Tan Ah Meng", 68, Gender.MALE, InfectionStatus.NON_INFECTIOUS, 65, true, "TOKEN-P101");
+        Patient patient = Patient.builder()
+                .id(id)
+                .nricMasked("S****123A")
+                .name("Tan Ah Meng")
+                .age(68)
+                .gender(Gender.MALE)
+                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                .fallRiskScore(65)
+                .needsTelemetry(true)
+                .queueToken("Q-P101")
+                .wardClassPreference(WardClass.B2)
+                .suspectedDiagnosis("Acute Coronary Syndrome (troponin-positive chest pain)")
+                .vitalsBp("98/62")
+                .vitalsHr(112)
+                .vitalsSpo2(94)
+                .labTroponin("180 ng/L")
+                .labWbc("13.2 x10^9/L")
+                .build();
         assertThat(patient.getId()).isEqualTo(id);
         assertThat(patient.getName()).isEqualTo("Tan Ah Meng");
         assertThat(patient.getNricMasked()).isEqualTo("S****123A");
@@ -82,7 +100,14 @@ class DomainAndDtoTest {
         assertThat(patient.getInfectionStatus()).isEqualTo(InfectionStatus.NON_INFECTIOUS);
         assertThat(patient.getFallRiskScore()).isEqualTo(65);
         assertThat(patient.isNeedsTelemetry()).isTrue();
-        assertThat(patient.getQueueToken()).isEqualTo("TOKEN-P101");
+        assertThat(patient.getQueueToken()).isEqualTo("Q-P101");
+        assertThat(patient.getWardClassPreference()).isEqualTo(WardClass.B2);
+        assertThat(patient.getSuspectedDiagnosis()).isEqualTo("Acute Coronary Syndrome (troponin-positive chest pain)");
+        assertThat(patient.getVitalsBp()).isEqualTo("98/62");
+        assertThat(patient.getVitalsHr()).isEqualTo(112);
+        assertThat(patient.getVitalsSpo2()).isEqualTo(94);
+        assertThat(patient.getLabTroponin()).isEqualTo("180 ng/L");
+        assertThat(patient.getLabWbc()).isEqualTo("13.2 x10^9/L");
 
         Ward ward = Ward.builder()
                 .id(id)
@@ -224,7 +249,7 @@ class DomainAndDtoTest {
         PatientMilestoneResponse milestone = PatientMilestoneResponse.builder()
                 .patientId(id)
                 .patientName("John")
-                .queueToken("TOKEN-1")
+                .queueToken("Q-1")
                 .admissionStatus(AdmissionStatus.BED_REQUESTED)
                 .queuePosition(1)
                 .estimatedWaitMinutes(25)
@@ -236,7 +261,7 @@ class DomainAndDtoTest {
                 .build();
         assertThat(milestone.getPatientId()).isEqualTo(id);
         assertThat(milestone.getPatientName()).isEqualTo("John");
-        assertThat(milestone.getQueueToken()).isEqualTo("TOKEN-1");
+        assertThat(milestone.getQueueToken()).isEqualTo("Q-1");
         assertThat(milestone.getAdmissionStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
 
         SisterHospitalReferralResponse sisRes = new SisterHospitalReferralResponse("REF-1", "OCH", "ACCEPTED", 30, "Notes");

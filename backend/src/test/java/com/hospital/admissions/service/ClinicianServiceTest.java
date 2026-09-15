@@ -14,9 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,12 +64,13 @@ class ClinicianServiceTest {
     @DisplayName("getEdWaitingPatients returns unassessed patients")
     void testGetEdWaitingPatients() {
         Patient patient = Patient.builder().id(UUID.randomUUID()).name("Test Patient").build();
-        when(patientRepository.findPatientsWithoutActiveAdmission()).thenReturn(List.of(patient));
+        when(patientRepository.findAll(ArgumentMatchers.<Specification<Patient>>any()))
+                .thenReturn(List.of(patient));
 
         List<Patient> result = clinicianService.getEdWaitingPatients();
 
         assertThat(result).containsExactly(patient);
-        verify(patientRepository).findPatientsWithoutActiveAdmission();
+        verify(patientRepository).findAll(ArgumentMatchers.<Specification<Patient>>any());
     }
 
     @Test

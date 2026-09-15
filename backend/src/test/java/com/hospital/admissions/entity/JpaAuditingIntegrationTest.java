@@ -53,7 +53,7 @@ class JpaAuditingIntegrationTest {
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(10)
                 .needsTelemetry(false)
-                .queueToken("TOKEN-AUDIT-001")
+                .queueToken("Q-AUDIT-001")
                 .build();
 
         Patient saved = patientRepository.saveAndFlush(patient);
@@ -77,7 +77,7 @@ class JpaAuditingIntegrationTest {
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(20)
                 .needsTelemetry(true)
-                .queueToken("TOKEN-AUDIT-002")
+                .queueToken("Q-AUDIT-002")
                 .build();
 
         Patient saved = patientRepository.saveAndFlush(patient);
@@ -109,7 +109,7 @@ class JpaAuditingIntegrationTest {
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(15)
                 .needsTelemetry(false)
-                .queueToken("TOKEN-AUDIT-003")
+                .queueToken("Q-AUDIT-003")
                 .build());
 
         AdmissionRequest request = AdmissionRequest.builder()

@@ -64,9 +64,9 @@ class PatientTrackerServiceTest {
     @Test
     @DisplayName("trackPatient throws when token is not found")
     void testTrackPatient_TokenNotFound() {
-        when(patientRepository.findByQueueToken("TOKEN-NONE")).thenReturn(Optional.empty());
+        when(patientRepository.findByQueueToken("Q-NONE")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> trackerService.trackPatient("TOKEN-NONE"))
+        assertThatThrownBy(() -> trackerService.trackPatient("Q-NONE"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Patient not found for token");
     }
@@ -75,12 +75,12 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient without AdmissionRequest returns ASSESSMENT_PENDING status")
     void testTrackPatient_NoAdmissionRequest() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Alice").queueToken("TOKEN-A").build();
+        Patient patient = Patient.builder().id(patientId).name("Alice").queueToken("Q-A").build();
 
-        when(patientRepository.findByQueueToken("TOKEN-A")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-A")).thenReturn(Optional.empty());
+        when(patientRepository.findByQueueToken("Q-A")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-A")).thenReturn(Optional.empty());
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-A");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-A");
 
         assertThat(res.getAdmissionStatus()).isEqualTo(AdmissionStatus.ASSESSMENT_PENDING);
         assertThat(res.getQueuePosition()).isEqualTo(1);
@@ -92,7 +92,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient with BED_REQUESTED calculates queue position and wait minutes")
     void testTrackPatient_BedRequested() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Alice").queueToken("TOKEN-A").build();
+        Patient patient = Patient.builder().id(patientId).name("Alice").queueToken("Q-A").build();
 
         UUID reqId = UUID.randomUUID();
         AdmissionRequest myReq = AdmissionRequest.builder()
@@ -111,12 +111,12 @@ class PatientTrackerServiceTest {
                 .requestedAt(LocalDateTime.now().minusMinutes(5))
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-A")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-A")).thenReturn(Optional.of(myReq));
+        when(patientRepository.findByQueueToken("Q-A")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-A")).thenReturn(Optional.of(myReq));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED))
                 .thenReturn(List.of(otherReq, myReq));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-A");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-A");
 
         assertThat(res.getAdmissionStatus()).isEqualTo(AdmissionStatus.BED_REQUESTED);
         assertThat(res.getQueuePosition()).isEqualTo(2);
@@ -129,7 +129,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient partitions queue by ward class and sorts by effective acuity tier")
     void testTrackPatient_WardClassPartitioningAndEffectiveAcuity() {
         UUID patientIdA = UUID.randomUUID();
-        Patient patientA = Patient.builder().id(patientIdA).name("Patient A").queueToken("TOKEN-W1").build();
+        Patient patientA = Patient.builder().id(patientIdA).name("Patient A").queueToken("Q-W1").build();
 
         // Target patient: Class B2, Primary Tier 3, Effective Tier 1 (escalated), requested at T-10m
         AdmissionRequest myReq = AdmissionRequest.builder()
@@ -164,12 +164,12 @@ class PatientTrackerServiceTest {
                 .requestedAt(LocalDateTime.now().minusMinutes(30))
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-W1")).thenReturn(Optional.of(patientA));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-W1")).thenReturn(Optional.of(myReq));
+        when(patientRepository.findByQueueToken("Q-W1")).thenReturn(Optional.of(patientA));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-W1")).thenReturn(Optional.of(myReq));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED))
                 .thenReturn(List.of(classAOtherReq, b2OtherReq, myReq));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-W1");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-W1");
 
         // Target patient should be #1 in Class B2 queue despite requestedAt being later than b2OtherReq because Tier 1 > Tier 2
         // And classAOtherReq is ignored because of different ward class
@@ -182,7 +182,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient translates delay tags to compassionate disclosures and applies additive wait buffers")
     void testTrackPatient_OperationalDelayTagAndAdditiveBuffer() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Delayed Patient").queueToken("TOKEN-DELAY").build();
+        Patient patient = Patient.builder().id(patientId).name("Delayed Patient").queueToken("Q-DELAY").build();
 
         AdmissionRequest req = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
@@ -194,11 +194,11 @@ class PatientTrackerServiceTest {
                 .delayReasonTag("HOUSEKEEPING_DELAY")
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-DELAY")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-DELAY")).thenReturn(Optional.of(req));
+        when(patientRepository.findByQueueToken("Q-DELAY")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-DELAY")).thenReturn(Optional.of(req));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED)).thenReturn(List.of(req));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-DELAY");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-DELAY");
 
         // Base wait: position 1 * 25 = 25m. Additive buffer for HOUSEKEEPING_DELAY: +20m -> 45m
         assertThat(res.getEstimatedWaitMinutes()).isEqualTo(45);
@@ -210,7 +210,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient handles isolation UV cleaning and trauma surge delay buffers")
     void testTrackPatient_IsolationAndSurgeDelayBuffers() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Isolation Patient").queueToken("TOKEN-ISO").build();
+        Patient patient = Patient.builder().id(patientId).name("Isolation Patient").queueToken("Q-ISO").build();
 
         AdmissionRequest reqIso = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
@@ -222,11 +222,11 @@ class PatientTrackerServiceTest {
                 .delayReasonTag("SPECIALIZED_ISOLATION_CLEANING")
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-ISO")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-ISO")).thenReturn(Optional.of(reqIso));
+        when(patientRepository.findByQueueToken("Q-ISO")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-ISO")).thenReturn(Optional.of(reqIso));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED)).thenReturn(List.of(reqIso));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-ISO");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-ISO");
 
         // Base wait: position 1 * 25 = 25m. Buffer for SPECIALIZED_ISOLATION_CLEANING: +30m -> 55m
         assertThat(res.getEstimatedWaitMinutes()).isEqualTo(55);
@@ -238,7 +238,7 @@ class PatientTrackerServiceTest {
     void testDispatchPeriodicUpdates_ThresholdAndAuditLogging() {
         LocalDateTime now = LocalDateTime.now();
 
-        Patient p1 = Patient.builder().id(UUID.randomUUID()).queueToken("TOKEN-PER-1").build();
+        Patient p1 = Patient.builder().id(UUID.randomUUID()).queueToken("Q-PER-1").build();
         AdmissionRequest eligibleReq = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
                 .patient(p1)
@@ -246,7 +246,7 @@ class PatientTrackerServiceTest {
                 .requestedAt(now.minusMinutes(12))
                 .build();
 
-        Patient p2 = Patient.builder().id(UUID.randomUUID()).queueToken("TOKEN-PER-2").build();
+        Patient p2 = Patient.builder().id(UUID.randomUUID()).queueToken("Q-PER-2").build();
         AdmissionRequest ineligibleReq = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
                 .patient(p2)
@@ -276,7 +276,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient returns tailored financial subsidy copy and step-down Community Hospital benchmarks")
     void testTrackPatient_FinancialAndStepDownCareExplainer_CommunityHospital() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("CH Diversion Patient").queueToken("TOKEN-CH").build();
+        Patient patient = Patient.builder().id(patientId).name("CH Diversion Patient").queueToken("Q-CH").build();
 
         AdmissionRequest chReq = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
@@ -289,11 +289,11 @@ class PatientTrackerServiceTest {
                 .diversionPathway(DiversionPathway.COMMUNITY_HOSPITAL)
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-CH")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-CH")).thenReturn(Optional.of(chReq));
+        when(patientRepository.findByQueueToken("Q-CH")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-CH")).thenReturn(Optional.of(chReq));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED)).thenReturn(List.of(chReq));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-CH");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-CH");
 
         assertThat(res.getRequestedWardClass()).isEqualTo(WardClass.B2);
         assertThat(res.getCoPayEstimate()).contains("70%").contains("MediShield Life");
@@ -306,7 +306,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient returns MIC@Home virtual ward guidance when recommended")
     void testTrackPatient_FinancialAndStepDownCareExplainer_MicAtHome() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("MIC Patient").queueToken("TOKEN-MIC").build();
+        Patient patient = Patient.builder().id(patientId).name("MIC Patient").queueToken("Q-MIC").build();
 
         AdmissionRequest micReq = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
@@ -319,11 +319,11 @@ class PatientTrackerServiceTest {
                 .diversionPathway(DiversionPathway.HOSPITAL_AT_HOME_MIC)
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-MIC")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-MIC")).thenReturn(Optional.of(micReq));
+        when(patientRepository.findByQueueToken("Q-MIC")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-MIC")).thenReturn(Optional.of(micReq));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED)).thenReturn(List.of(micReq));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-MIC");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-MIC");
 
         assertThat(res.getRequestedWardClass()).isEqualTo(WardClass.C);
         assertThat(res.getCoPayEstimate()).contains("80%").contains("MediShield Life");
@@ -336,7 +336,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient updates first/last access timestamps, increments access count, and emits audit log")
     void testTrackPatient_AccessAuditingAndCounters() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("David").queueToken("TOKEN-D").build();
+        Patient patient = Patient.builder().id(patientId).name("David").queueToken("Q-D").build();
 
         AdmissionRequest req = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
@@ -349,32 +349,32 @@ class PatientTrackerServiceTest {
                 .trackerAccessCount(0)
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-D")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-D")).thenReturn(Optional.of(req));
+        when(patientRepository.findByQueueToken("Q-D")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-D")).thenReturn(Optional.of(req));
         when(admissionRequestRepository.findByStatus(AdmissionStatus.BED_REQUESTED)).thenReturn(List.of(req));
 
         // First access
-        trackerService.trackPatient("TOKEN-D");
+        trackerService.trackPatient("Q-D");
 
         assertThat(req.getFirstTrackerAccessedAt()).isNotNull();
         assertThat(req.getLastTrackerAccessedAt()).isNotNull();
         assertThat(req.getTrackerAccessCount()).isEqualTo(1);
         verify(admissionRequestRepository, times(1)).save(req);
-        verify(auditLogger, times(1)).logAction(eq("PUBLIC_TOKEN"), eq("TRACK_PATIENT_ACCESS"), eq("PatientToken:TOKEN-D"), contains("PatientId="));
+        verify(auditLogger, times(1)).logAction(eq("PUBLIC_TOKEN"), eq("TRACK_PATIENT_ACCESS"), eq("PatientToken:Q-D"), contains("PatientId="));
 
         // Subsequent access
-        trackerService.trackPatient("TOKEN-D");
+        trackerService.trackPatient("Q-D");
         assertThat(req.getTrackerAccessCount()).isEqualTo(2);
         verify(admissionRequestRepository, times(2)).save(req);
         // Verify no duplicate audit log
-        verify(auditLogger, times(1)).logAction(eq("PUBLIC_TOKEN"), eq("TRACK_PATIENT_ACCESS"), eq("PatientToken:TOKEN-D"), anyString());
+        verify(auditLogger, times(1)).logAction(eq("PUBLIC_TOKEN"), eq("TRACK_PATIENT_ACCESS"), eq("PatientToken:Q-D"), anyString());
     }
 
     @Test
     @DisplayName("trackPatient with BED_ALLOCATED returns wait 5m and bed location details")
     void testTrackPatient_BedAllocated() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Bob").queueToken("TOKEN-B").build();
+        Patient patient = Patient.builder().id(patientId).name("Bob").queueToken("Q-B").build();
 
         Ward ward = Ward.builder().name("Ward 8A").level(8).build();
         Bed bed = Bed.builder().bedNumber("8A-02").ward(ward).build();
@@ -387,10 +387,10 @@ class PatientTrackerServiceTest {
                 .assignedBed(bed)
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-B")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-B")).thenReturn(Optional.of(req));
+        when(patientRepository.findByQueueToken("Q-B")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-B")).thenReturn(Optional.of(req));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-B");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-B");
 
         assertThat(res.getAdmissionStatus()).isEqualTo(AdmissionStatus.BED_ALLOCATED);
         assertThat(res.getQueuePosition()).isEqualTo(0);
@@ -404,7 +404,7 @@ class PatientTrackerServiceTest {
     @DisplayName("trackPatient with ADMITTED_INPATIENT or DISCHARGED returns 0 wait minutes")
     void testTrackPatient_InpatientOrDischarged() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Charlie").queueToken("TOKEN-C").build();
+        Patient patient = Patient.builder().id(patientId).name("Charlie").queueToken("Q-C").build();
 
         AdmissionRequest req = AdmissionRequest.builder()
                 .id(UUID.randomUUID())
@@ -413,10 +413,10 @@ class PatientTrackerServiceTest {
                 .requestedWardClass(WardClass.B2)
                 .build();
 
-        when(patientRepository.findByQueueToken("TOKEN-C")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-C")).thenReturn(Optional.of(req));
+        when(patientRepository.findByQueueToken("Q-C")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-C")).thenReturn(Optional.of(req));
 
-        PatientMilestoneResponse res = trackerService.trackPatient("TOKEN-C");
+        PatientMilestoneResponse res = trackerService.trackPatient("Q-C");
 
         assertThat(res.getAdmissionStatus()).isEqualTo(AdmissionStatus.ADMITTED_INPATIENT);
         assertThat(res.getQueuePosition()).isEqualTo(0);
@@ -544,17 +544,17 @@ class PatientTrackerServiceTest {
     void testRecordPatientAction_MswCall() {
         UUID patientId = UUID.randomUUID();
         UUID admissionId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Action Patient").queueToken("TOKEN-ACT-1").build();
+        Patient patient = Patient.builder().id(patientId).name("Action Patient").queueToken("Q-ACT-1").build();
         AdmissionRequest req = AdmissionRequest.builder().id(admissionId).patient(patient).build();
 
-        when(patientRepository.findByQueueToken("TOKEN-ACT-1")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-ACT-1")).thenReturn(Optional.of(req));
+        when(patientRepository.findByQueueToken("Q-ACT-1")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-ACT-1")).thenReturn(Optional.of(req));
         when(patientAuditInteractionRepository.save(any(PatientAuditInteraction.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        PatientAuditInteraction result = trackerService.recordPatientAction("TOKEN-ACT-1", "MSW_CALL");
+        PatientAuditInteraction result = trackerService.recordPatientAction("Q-ACT-1", "MSW_CALL");
 
-        assertThat(result.getToken()).isEqualTo("TOKEN-ACT-1");
+        assertThat(result.getToken()).isEqualTo("Q-ACT-1");
         assertThat(result.getActionType()).isEqualTo("MSW_CALL");
         assertThat(result.getAdmissionId()).isEqualTo(admissionId);
         assertThat(result.getCreatedAt()).isNotNull();
@@ -572,16 +572,16 @@ class PatientTrackerServiceTest {
     @DisplayName("recordPatientAction persists interaction and emits CONNECT_FINANCIAL_COUNSELING audit log")
     void testRecordPatientAction_FinanceCall() {
         UUID patientId = UUID.randomUUID();
-        Patient patient = Patient.builder().id(patientId).name("Action Patient").queueToken("TOKEN-ACT-2").build();
+        Patient patient = Patient.builder().id(patientId).name("Action Patient").queueToken("Q-ACT-2").build();
 
-        when(patientRepository.findByQueueToken("TOKEN-ACT-2")).thenReturn(Optional.of(patient));
-        when(admissionRequestRepository.findByPatient_QueueToken("TOKEN-ACT-2")).thenReturn(Optional.empty());
+        when(patientRepository.findByQueueToken("Q-ACT-2")).thenReturn(Optional.of(patient));
+        when(admissionRequestRepository.findByPatient_QueueToken("Q-ACT-2")).thenReturn(Optional.empty());
         when(patientAuditInteractionRepository.save(any(PatientAuditInteraction.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        PatientAuditInteraction result = trackerService.recordPatientAction("TOKEN-ACT-2", "FINANCE_CALL");
+        PatientAuditInteraction result = trackerService.recordPatientAction("Q-ACT-2", "FINANCE_CALL");
 
-        assertThat(result.getToken()).isEqualTo("TOKEN-ACT-2");
+        assertThat(result.getToken()).isEqualTo("Q-ACT-2");
         assertThat(result.getActionType()).isEqualTo("FINANCE_CALL");
         assertThat(result.getAdmissionId()).isNull();
 

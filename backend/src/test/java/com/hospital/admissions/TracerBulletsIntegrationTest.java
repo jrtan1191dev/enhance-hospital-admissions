@@ -82,7 +82,7 @@ class TracerBulletsIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
 
-        String queueToken = "TOKEN-TB1-" + UUID.randomUUID();
+        String queueToken = "Q-TB1-" + UUID.randomUUID();
         Patient p101 = patientRepository.save(Patient.builder()
                 .name("TB1 Flow Patient")
                 .nricMasked("S****101A")
@@ -191,7 +191,7 @@ class TracerBulletsIntegrationTest {
     @Test
     @DisplayName("Tracer Bullet 2: Patient Milestone Tracker -> Nurse Checkin/Vacate -> Housekeeping Clean")
     void testTracerBullet2_PatientTrackerAndTurnoverLoop() throws Exception {
-        String token = "TOKEN-TB2-" + UUID.randomUUID();
+        String token = "Q-TB2-" + UUID.randomUUID();
         Patient patient = patientRepository.save(Patient.builder()
                 .name("Tracker Loop Patient")
                 .nricMasked("S****202C")
@@ -279,7 +279,7 @@ class TracerBulletsIntegrationTest {
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(20)
                 .needsTelemetry(false)
-                .queueToken("TOKEN-TB3-" + UUID.randomUUID())
+                .queueToken("Q-TB3-" + UUID.randomUUID())
                 .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
@@ -318,7 +318,7 @@ class TracerBulletsIntegrationTest {
                 .gender(Gender.FEMALE)
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(25)
-                .queueToken("TOKEN-CONSULT-" + java.util.UUID.randomUUID())
+                .queueToken("Q-CONSULT-" + java.util.UUID.randomUUID())
                 .build());
 
         // Step 2: Submit consult-gated admission with 2 clusters (CARDIOLOGY and SURGERY)
@@ -399,7 +399,7 @@ class TracerBulletsIntegrationTest {
                 .gender(Gender.MALE)
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(30)
-                .queueToken("TOKEN-CHAIN-" + java.util.UUID.randomUUID())
+                .queueToken("Q-CHAIN-" + java.util.UUID.randomUUID())
                 .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
@@ -494,7 +494,7 @@ class TracerBulletsIntegrationTest {
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(25)
                 .needsTelemetry(false)
-                .queueToken("TOKEN-TB6-" + UUID.randomUUID())
+                .queueToken("Q-TB6-" + UUID.randomUUID())
                 .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
@@ -571,7 +571,7 @@ class TracerBulletsIntegrationTest {
     @DisplayName("Tracer Bullet 7: Multi-Broadcast Consensus Gate, Acuity Escalation & BMU Dispatch")
     void testTracerBullet7_ConsensusCompletionGateAndSafetyFirstBmuDispatch() throws Exception {
         // Step 1: Submit ED assessment for P103 with multiple target clusters (CARDIOLOGY + SURGERY)
-        String queueTokenP103 = "TOKEN-TB7-" + UUID.randomUUID();
+        String queueTokenP103 = "Q-TB7-" + UUID.randomUUID();
         Patient p103 = patientRepository.save(Patient.builder()
                 .name("TB7 Consensus Patient")
                 .nricMasked("S****103C")
@@ -691,7 +691,7 @@ class TracerBulletsIntegrationTest {
                 .gender(Gender.MALE)
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(15)
-                .queueToken("TOKEN-AMEND-" + java.util.UUID.randomUUID())
+                .queueToken("Q-AMEND-" + java.util.UUID.randomUUID())
                 .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
@@ -823,7 +823,7 @@ class TracerBulletsIntegrationTest {
                 .gender(Gender.MALE)
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(20)
-                .queueToken("TOKEN-REALLOC-" + java.util.UUID.randomUUID())
+                .queueToken("Q-REALLOC-" + java.util.UUID.randomUUID())
                 .build());
 
         EdAssessmentSubmitRequest submitReq = EdAssessmentSubmitRequest.builder()
@@ -1046,7 +1046,7 @@ class TracerBulletsIntegrationTest {
                 .status(BedStatus.OCCUPIED_TAKEN)
                 .build());
 
-        String token = "TOKEN-TB11-" + UUID.randomUUID();
+        String token = "Q-TB11-" + UUID.randomUUID();
         Patient inpatient = patientRepository.save(Patient.builder()
                 .name("TB11 Inpatient")
                 .nricMasked("S****111A")
@@ -1082,7 +1082,7 @@ class TracerBulletsIntegrationTest {
                 .infectionStatus(InfectionStatus.NON_INFECTIOUS)
                 .fallRiskScore(30)
                 .needsTelemetry(false)
-                .queueToken("TOKEN-TB11-ED-" + UUID.randomUUID())
+                .queueToken("Q-TB11-ED-" + UUID.randomUUID())
                 .build());
 
         AdmissionRequest edAdmission = admissionRequestRepository.save(AdmissionRequest.builder()

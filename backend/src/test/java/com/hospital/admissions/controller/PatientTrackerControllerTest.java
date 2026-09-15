@@ -54,15 +54,15 @@ class PatientTrackerControllerTest {
     @DisplayName("GET /api/v1/patients/track/{token} returns milestone response")
     void testTrackPatient() throws Exception {
         PatientMilestoneResponse response = PatientMilestoneResponse.builder()
-                .queueToken("TOKEN-123")
+                .queueToken("Q-123")
                 .patientName("Alice")
                 .build();
 
-        when(patientTrackerService.trackPatient("TOKEN-123")).thenReturn(response);
+        when(patientTrackerService.trackPatient("Q-123")).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/patients/track/TOKEN-123"))
+        mockMvc.perform(get("/api/v1/patients/track/Q-123"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.queueToken").value("TOKEN-123"))
+                .andExpect(jsonPath("$.queueToken").value("Q-123"))
                 .andExpect(jsonPath("$.patientName").value("Alice"))
                 .andExpect(jsonPath("$.clinicalNotes").doesNotExist())
                 .andExpect(jsonPath("$.diagnosticFindings").doesNotExist());
@@ -71,13 +71,13 @@ class PatientTrackerControllerTest {
     @Test
     @DisplayName("GET /api/v1/patients/track/{token} returns 404 ProblemDetail for invalid token")
     void testTrackPatient_NotFound() throws Exception {
-        when(patientTrackerService.trackPatient("TOKEN-INVALID"))
-                .thenThrow(new IllegalArgumentException("Patient not found for token: TOKEN-INVALID"));
+        when(patientTrackerService.trackPatient("Q-INVALID"))
+                .thenThrow(new IllegalArgumentException("Patient not found for token: Q-INVALID"));
 
-        mockMvc.perform(get("/api/v1/patients/track/TOKEN-INVALID"))
+        mockMvc.perform(get("/api/v1/patients/track/Q-INVALID"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.detail").value("Patient not found for token: TOKEN-INVALID"));
+                .andExpect(jsonPath("$.detail").value("Patient not found for token: Q-INVALID"));
     }
 
     @Test
@@ -92,15 +92,20 @@ class PatientTrackerControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/patients/beds/{bedId}/checkin returns checked in bed")
+    @DisplayName("POST /api/v1/patients/beds/{bedId}/checkin returns checked in bed as BedDto")
     void testCheckinPatient() throws Exception {
         UUID bedId = UUID.randomUUID();
-        Bed bed = Bed.builder().id(bedId).status(BedStatus.OCCUPIED_TAKEN).build();
+        Bed bed = Bed.builder().id(bedId).bedNumber("8A-01").status(BedStatus.OCCUPIED_TAKEN)
+                .hasTelemetry(true).isNearNursingStation(true).build();
         when(patientTrackerService.checkinPatient(bedId)).thenReturn(bed);
 
         mockMvc.perform(post("/api/v1/patients/beds/" + bedId + "/checkin"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("OCCUPIED_TAKEN"));
+                .andExpect(jsonPath("$.status").value("OCCUPIED_TAKEN"))
+                .andExpect(jsonPath("$.bedNumber").value("8A-01"))
+                .andExpect(jsonPath("$.telemetryCapable").value(true))
+                .andExpect(jsonPath("$.nearNursingStation").value(true))
+                .andExpect(jsonPath("$.hasTelemetry").doesNotExist());
     }
 
     @Test
@@ -154,18 +159,18 @@ class PatientTrackerControllerTest {
     @DisplayName("POST /api/v1/patients/track/{token}/actions records patient interaction")
     void testRecordPatientAction() throws Exception {
         PatientAuditInteraction interaction = PatientAuditInteraction.builder()
-                .token("TOKEN-123")
+                .token("Q-123")
                 .actionType("MSW_CALL")
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        when(patientTrackerService.recordPatientAction("TOKEN-123", "MSW_CALL")).thenReturn(interaction);
+        when(patientTrackerService.recordPatientAction("Q-123", "MSW_CALL")).thenReturn(interaction);
 
-        mockMvc.perform(post("/api/v1/patients/track/TOKEN-123/actions")
+        mockMvc.perform(post("/api/v1/patients/track/Q-123/actions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"actionType\":\"MSW_CALL\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("TOKEN-123"))
+                .andExpect(jsonPath("$.token").value("Q-123"))
                 .andExpect(jsonPath("$.actionType").value("MSW_CALL"));
     }
 }

@@ -6,6 +6,7 @@ import com.hospital.admissions.dto.DischargeRunwayDto;
 import com.hospital.admissions.dto.TurnoverTaskDto;
 import com.hospital.admissions.entity.DischargeRunwayStage;
 import com.hospital.admissions.entity.MedicationDeliveryStatus;
+import com.hospital.admissions.entity.Patient;
 import com.hospital.admissions.entity.TurnoverSlaStatus;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +35,29 @@ class CuratedDataInitializerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Test
+    @DisplayName("Curated Data: ED waiting board lists only patients with no admission request, excluding discharged")
+    void testEdWaitingBoardExcludesDischargedAndPipelinePatients() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/clinicians/ed/patients")
+                        .header("X-User-Role", "ED_ATTENDING"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<Patient> waiting = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, Patient.class)
+        );
+
+        List<String> tokens = waiting.stream().map(Patient::getQueueToken).toList();
+
+        // Pure ED arrivals with no admission request appear on the board.
+        assertThat(tokens).contains("Q-P103", "Q-P104", "Q-P108", "Q-P109", "Q-P120", "Q-P121");
+        // Discharged inpatient (only a DISCHARGED admission request) must NOT appear.
+        assertThat(tokens).doesNotContain("Q-DIS-334");
+        // Patients already in the admission pipeline must NOT appear.
+        assertThat(tokens).doesNotContain("Q-P101", "Q-P102", "Q-P110", "Q-INP-881");
+    }
 
     @Test
     @DisplayName("Curated Data: Batch Holding Ward Suggestion generated for Ward 8B on startup")
@@ -138,15 +162,15 @@ class CuratedDataInitializerIntegrationTest {
     @Test
     @DisplayName("Curated Data: Public Patient Tracker demonstrates Sister Hospital referral and UV sanitization delay")
     void testPublicTrackerCuratedScenarios() throws Exception {
-        // TOKEN-P116: Sister Hospital Referral
-        mockMvc.perform(get("/api/v1/patients/track/TOKEN-P116"))
+        // Q-P116: Sister Hospital Referral
+        mockMvc.perform(get("/api/v1/patients/track/Q-P116"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.patientName").value("Mr Ahmad Ibrahim"))
                 .andExpect(jsonPath("$.diversionRecommended").value(true))
                 .andExpect(jsonPath("$.diversionPathway").value("COMMUNITY_HOSPITAL"));
 
-        // TOKEN-P118: Specialized UV isolation delay tag
-        mockMvc.perform(get("/api/v1/patients/track/TOKEN-P118"))
+        // Q-P118: Specialized UV isolation delay tag
+        mockMvc.perform(get("/api/v1/patients/track/Q-P118"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.patientName").value("Mdm Wong Siew Kuan"))
                 .andExpect(jsonPath("$.delayReason").isNotEmpty())

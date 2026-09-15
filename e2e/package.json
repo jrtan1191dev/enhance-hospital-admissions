@@ -1,0 +1,23 @@
+{
+  "name": "e2e-harness",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "E2E test harness (Playwright + Allure 3) for the Hospital Admissions prototype.",
+  "scripts": {
+    "harness:start": "node scripts/harness.mjs start",
+    "harness:stop": "node scripts/harness.mjs stop",
+    "harness:status": "node scripts/harness.mjs status",
+    "smoke": "playwright test foundation.smoke.spec.ts",
+    "test": "playwright test",
+    "allure:generate": "allure awesome -o allure-report allure-results",
+    "allure:version": "allure --version",
+    "mcp": "playwright-mcp --caps=devtools"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "0.0.81",
+    "@playwright/test": "1.63.0",
+    "allure": "3.17.0",
+    "allure-playwright": "3.12.1"
+  }
+}

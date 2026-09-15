@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "protected_files": [
+    {
+      "path": "playwright.config.ts",
+      "sha256": "93a858636e6c26e4868afc135fe9fd5165c52d9215ec8d760dac8cb588e27aa1"
+    },
+    {
+      "path": "package.json",
+      "sha256": "374a2f6ca152d166ecb080fb60c64db27baf69cd7b03c7ecee3bfd68d5f8d194"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "0c5c8b0fff44b7d7cb05e41f4ecb19522142f13bf9a9638ff00bb797b1c698a6"
+    },
+    {
+      "path": "README.md",
+      "sha256": "aa8590a69e6377f0901578e1118c27228ddb3a9f33cba0ce8c04c78d06b7f17c"
+    },
+    {
+      "path": "scripts/harness.mjs",
+      "sha256": "79f2931e124ae0cded9e9faf2ba7dadd673e7bc4db8131cd3a372130cb1ff84b"
+    },
+    {
+      "path": "fixtures/global-setup.mjs",
+      "sha256": "e1efc1af49c3b49ff67d4199430d5b09a1d03e68e87cee3a7a91ef0293a810d6"
+    },
+    {
+      "path": "fixtures/global-teardown.mjs",
+      "sha256": "0e8fd7c1ec43a8c1206f4231c81699e00f378000f889e6428b761f8e8db73c27"
+    },
+    {
+      "path": "fixtures/personas.ts",
+      "sha256": "533976fdb58e68d7571fb6dd05fc8cc0f031b86e657c0cd4e6015d8135c5de41"
+    },
+    {
+      "path": "tests/foundation.smoke.spec.ts",
+      "sha256": "03ebd717882834bbfc8ee77e1613c524f0fd77a7d21f3214157a9905b1ef852c"
+    }
+  ]
+}

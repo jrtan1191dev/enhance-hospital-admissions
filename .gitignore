@@ -59,6 +59,17 @@ cypress/screenshots/
 storybook-static/
 
 # ==============================================================================
+# E2E harness — generated campaign evidence (not runnable test source)
+# ==============================================================================
+# Local, per-campaign evidence produced by the E2E harness. The runnable
+# harness (e2e/) is version-controlled; generated results/reports are not.
+artifacts/e2e/
+e2e/node_modules/
+e2e/allure-results/
+e2e/allure-report/
+e2e/test-results/
+
+# ==============================================================================
 # Spring Boot / Java / Maven / Gradle Essentials
 # ==============================================================================
 # Compiled class files

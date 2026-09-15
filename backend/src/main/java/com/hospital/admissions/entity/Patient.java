@@ -47,4 +47,22 @@ public class Patient extends AuditableEntity {
 
     @Column(nullable = false, unique = true)
     private String queueToken;
+
+    // Clinical baseline synthesized from EHR diagnostic arrivals (labs, vitals, imaging).
+    // Nullable: only ED intake patients with completed diagnostics carry a synthesized baseline.
+
+    @Enumerated(EnumType.STRING)
+    private WardClass wardClassPreference;
+
+    private String suspectedDiagnosis;
+
+    private String vitalsBp;
+
+    private Integer vitalsHr;
+
+    private Integer vitalsSpo2;
+
+    private String labTroponin;
+
+    private String labWbc;
 }

@@ -2,18 +2,21 @@ package com.hospital.admissions.repository;
 
 import com.hospital.admissions.entity.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Spring Data JPA repository for {@link Patient} demographic and clinical profiles.
+ * <p>
+ * Extends {@link JpaSpecificationExecutor} so callers can compose dynamic query criteria via
+ * {@link com.hospital.admissions.repository.spec.PatientSpecifications} instead of hardcoded JPQL.
  */
 @Repository
-public interface PatientRepository extends JpaRepository<Patient, UUID> {
+public interface PatientRepository
+        extends JpaRepository<Patient, UUID>, JpaSpecificationExecutor<Patient> {
 
     /**
      * Finds a patient record by their public tracking token.
@@ -22,13 +25,4 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
      * @return optional containing the matching {@link Patient}.
      */
     Optional<Patient> findByQueueToken(String queueToken);
-
-    /**
-     * Queries patients who are currently waiting in the emergency intake area without an active admission.
-     *
-     * @return list of {@link Patient} entities without active admissions.
-     */
-    @Query("SELECT p FROM Patient p WHERE p.id NOT IN " +
-            "(SELECT ar.patient.id FROM AdmissionRequest ar WHERE ar.status != com.hospital.admissions.entity.AdmissionStatus.DISCHARGED)")
-    List<Patient> findPatientsWithoutActiveAdmission();
 }

@@ -6,6 +6,7 @@ import com.hospital.admissions.dto.SpecialistConsultRequest;
 import com.hospital.admissions.repository.AdmissionRequestRepository;
 import com.hospital.admissions.repository.AssessmentBroadcastRepository;
 import com.hospital.admissions.repository.PatientRepository;
+import com.hospital.admissions.repository.spec.PatientSpecifications;
 import com.hospital.admissions.security.AuditLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class ClinicianService {
      * @return list of {@link Patient} entities without active admissions.
      */
     public List<Patient> getEdWaitingPatients() {
-        return patientRepository.findPatientsWithoutActiveAdmission();
+        return patientRepository.findAll(PatientSpecifications.withoutActiveAdmission());
     }
 
     /**

@@ -37,7 +37,7 @@ The reset is therefore **process-level and harness-owned** — `e2e/scripts/harn
 
 - **`start`** — allocates a unique free port + `lifecycleId`, launches the JAR,
   waits for `/actuator/health` = `UP`, then runs a harness-owned **read-back**
-  (asserts seeded token `TOKEN-P101` via `/api/v1/patients/tokens`) before
+  (asserts seeded token `Q-P101` via `/api/v1/patients/tokens`) before
   printing `baseUrl` + `lifecycleId`. Fails closed and tears down on any failure.
 - **`stop --lifecycle <id>`** — tears down **only** the process this harness
   created (by recorded PID group) and removes only its own lifecycle record.

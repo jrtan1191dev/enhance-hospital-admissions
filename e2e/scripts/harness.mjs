@@ -107,7 +107,7 @@ async function waitForHealth(baseUrl) {
 /**
  * Harness-owned READ-BACK of the declared state: the fresh JVM must have
  * reseeded the known baseline. We assert the deterministic seed is present
- * (seeded patient token TOKEN-P101 exists) rather than trusting health alone.
+ * (seeded patient token Q-P101 exists) rather than trusting health alone.
  * `/api/v1/patients/tokens` lists every seeded patient token, so it is a
  * stable baseline probe independent of per-workflow status filtering.
  */
@@ -117,8 +117,8 @@ async function readBackSeedBaseline(baseUrl) {
   });
   const body = await res.text();
   if (res.status !== 200) throw new Error(`seed read-back failed: HTTP ${res.status}`);
-  if (!body.includes('TOKEN-P101')) {
-    throw new Error('seed read-back failed: expected seeded patient token TOKEN-P101 not found');
+  if (!body.includes('Q-P101')) {
+    throw new Error('seed read-back failed: expected seeded patient token Q-P101 not found');
   }
   return true;
 }

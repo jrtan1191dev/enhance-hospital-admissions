@@ -162,3 +162,9 @@ Desktop.ini
 
 # Local analytics / agent metrics
 .claude/analytics/skill-invocations.jsonl
+
+# video-generator: video-generation
+video-generation/.runtime/
+video-generation/assets/
+video-generation/output/
+video-generation/*.log

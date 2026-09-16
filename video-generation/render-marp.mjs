@@ -15,7 +15,8 @@
  * durations exist) and BEFORE compose.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const workDir = path.resolve('video-generation');
@@ -74,4 +75,25 @@ for (const scene of marpScenes) {
     { stdio: 'inherit' }
   );
   console.log(`${scene.id}: rendered slide held ${Math.round(sceneMs)}ms -> ${path.relative(workDir, out)}`);
+
+  // Write back resolvedVisual so compose.mjs (which reads scene.resolvedVisual
+  // .filePath) includes this marp scene instead of skipping it as
+  // "no captured visual". Mirrors what capture.mjs does for playwright scenes.
+  scene.resolvedVisual = {
+    filePath: path.relative(workDir, out),
+    durationMs: sceneMs,
+    roi: null,
+    hash: createHash('sha256')
+      .update(readFileSync(png))
+      .update(String(sceneMs))
+      .digest('hex')
+      .slice(0, 12),
+  };
 }
+
+// Persist the resolvedVisual write-backs so compose can find the marp visuals.
+writeFileSync(
+  path.join(workDir, 'storyboard.json'),
+  `${JSON.stringify(manifest, null, 2)}\n`
+);
+console.log('updated storyboard.json with marp resolvedVisual entries');

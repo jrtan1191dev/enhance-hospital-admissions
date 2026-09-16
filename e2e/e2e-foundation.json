@@ -15,11 +15,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "aa8590a69e6377f0901578e1118c27228ddb3a9f33cba0ce8c04c78d06b7f17c"
+      "sha256": "593adede714c3815f69d22fa028e860e2faeaf33146368f40a29f5bdb239227e"
     },
     {
       "path": "scripts/harness.mjs",
-      "sha256": "79f2931e124ae0cded9e9faf2ba7dadd673e7bc4db8131cd3a372130cb1ff84b"
+      "sha256": "d60e38fdbd1124368ef40605b0d8188267cebeb08730e2f0e9bf188396ad05d2"
     },
     {
       "path": "fixtures/global-setup.mjs",

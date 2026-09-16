@@ -510,6 +510,43 @@ public class DataInitializer implements CommandLineRunner {
                                 .waitingInEd(false)
                                 .build());
 
+                // ------------------------------------------------------------------
+                // Q-DIS-556 — Completed discharge exemplar (additive, off-board).
+                // Purpose: makes the finale analytics dashboard self-consistent with the
+                // narrated Beat 5 features — records an explicit ED assessment turnaround
+                // and a bedside discharge-medication delivery, so
+                // bedsideMedicationDeliveryAdoptionPct and avgEdTurnaroundMinutes read as
+                // sensible non-zero values. Not on the ED board and not in any batch/
+                // cohort-swap ward, so existing curated fixtures are unaffected.
+                // ------------------------------------------------------------------
+                Patient pastInp2 = patientRepository.save(Patient.builder()
+                                .name("Mr Ravi (Discharged)")
+                                .nricMasked("S****556T")
+                                .age(59)
+                                .gender(Gender.MALE)
+                                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                                .fallRiskScore(20)
+                                .needsTelemetry(false)
+                                .queueToken("Q-DIS-556")
+                                .build());
+
+                admissionRequestRepository.save(AdmissionRequest.builder()
+                                .patient(pastInp2)
+                                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .requestedWardClass(WardClass.B2)
+                                .status(AdmissionStatus.DISCHARGED)
+                                .edTurnaroundMinutes(18.0)
+                                .requestedAt(LocalDateTime.now().minusDays(2).minusHours(3))
+                                .allocatedAt(LocalDateTime.now().minusDays(2).minusHours(3).plusMinutes(20))
+                                .admittedAt(LocalDateTime.now().minusDays(2).minusHours(3).plusMinutes(45))
+                                .dischargedAt(LocalDateTime.now().minusDays(1).withHour(11).withMinute(15))
+                                .medicationDeliveryStatus(MedicationDeliveryStatus.DELIVERED_BEDSIDE)
+                                .waitingInEd(false)
+                                .build());
+
                 log.info("[PROTOTYPE SEEDER] Seeded Wards 8A/8B/9A/9B/10A/10B/11A, {} beds, and inpatient admission requests.",
                                 bedRepository.count());
         }

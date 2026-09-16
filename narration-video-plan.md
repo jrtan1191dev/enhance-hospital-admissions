@@ -1,212 +1,418 @@
 # Video Production Plan: Enhancing Hospital Admissions
-
 ## Patient Admission & Discharge Management Application
+
+> **Alignment note (verified against the running codebase):** Every clinical case, route, KPI, and
+> feature named in this plan has been traced to the actual prototype — the seeded patients in
+> `DataInitializer.java`, the routes under `frontend/src/routes/`, and the metrics computed by
+> `KpiMetricsService`. All on-screen names, tokens, and numbers in this plan are the *real* ones the
+> app renders, so the voiceover never contradicts the footage. KPI values quoted here were captured
+> live from `GET /api/v1/analytics/kpis/summary` under the `prototype` profile.
 
 ---
 
 ## 1. Executive Summary & Strategic Intent
 
-This video is an authoritative, high-impact product demonstration film (~10–12 minutes) designed to sell the core intents of the **Patient Admission & Discharge Management Application**.
-
-Rather than presenting abstract slide-ware or technical jargon, the film proves how the platform solves systemic hospital bed crunches through **intelligent clinical and operational orchestration**, eliminating inter-departmental phone tag, recovering "ghost" bed capacity without new physical construction, and restoring empathy and transparency to patients and families.
+This video is an authoritative, in-depth **product walkthrough film** (~10–12 minutes) whose purpose
+is to fully explain the concept, features, and usefulness of the **Patient Admission & Discharge
+Management Application** — how it intends to solve the systemic hospital bed-crunch pain points.
+Rather than abstract slide-ware, the film walks through the **live, running prototype**, proving how
+the platform tackles inter-departmental phone tag, recovers "ghost" bed capacity without new physical
+construction, and restores transparency to patients and families through **intelligent clinical and
+operational orchestration**.
 
 ---
 
 ## 2. Target Audience & Stakeholder Value Alignment
 
-The video speaks to a **Dual Constituency**—uniting operational decision-makers with clinical frontline leadership:
+The video speaks to a **Dual Constituency** — uniting operational decision-makers with clinical
+frontline leadership:
 
 | Stakeholder Persona | Core Motivations & Pain Points | What This Video Proves |
 | :--- | :--- | :--- |
-| **Hospital Operations Leadership**<br>*(COO, CMIO, Director of BMU & Nursing)* | • Chronic ED boarding times & ambulance diverts<br>• High inpatient bed occupancy rates & gridlocks<br>• Nurse burnout and inter-departmental friction<br>• Lack of real-time operational capacity data | • **Recovers hidden bed capacity** via automated cubicle cohort packing & dynamic swaps without adding physical real estate.<br>• **Reduces ED boarding duration** via direct digital handoffs.<br>• **Enforces operational governance** with 18 auditable KPIs. |
-| **Clinical Frontline Leadership**<br>*(ED Attending Chief, Specialist Chiefs, Nurse Managers)* | • Endless phone calls to BMU and specialists<br>• Contentious specialist consult handoffs & delays<br>• Anxious, agitated families verbally abusing triage nurses<br>• Afternoon discharge medication exit blocks | • **"Zero Phone Calls" workflow** from diagnostic synthesis to bed placement.<br>• **Clinical autonomy preserved**: 1-click reviews with peer discordance escalation.<br>• **Nurses shielded from queue friction** via public milestone tracker. |
+| **Hospital Operations Leadership**<br>*(COO, CMIO, Director of BMU & Nursing)* | • Chronic ED boarding & ambulance diverts<br>• High inpatient occupancy & gridlocks<br>• Nurse burnout & inter-departmental friction<br>• Lack of real-time operational capacity data | • **Recovers hidden bed capacity** via automated cohort packing & dynamic cohort-swaps without new real estate.<br>• **Reduces ED boarding** via direct digital handoffs.<br>• **Full operational instrumentation** — a computed KPI dashboard with dual-pathway (SQL + structured-log) extraction. |
+| **Clinical Frontline Leadership**<br>*(ED Attending Chief, Specialist Chiefs, Nurse Managers)* | • Endless phone calls to BMU & specialists<br>• Contentious specialist consult handoffs<br>• Anxious families verbally abusing triage nurses<br>• Afternoon discharge medication exit blocks | • **"Zero phone calls" workflow** from diagnostic synthesis to bed placement.<br>• **Clinical autonomy preserved** — 1-click reviews with safety-first peer discordance escalation.<br>• **Nurses shielded from queue friction** via a public milestone tracker with empathetic delay tags. |
 
 ---
 
 ## 3. Narrative Architecture: The Tri-Hybrid Arc
 
-The film synthesizes three storytelling frameworks into a seamless narrative:
+The film synthesizes three storytelling frameworks:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                   THE TRI-HYBRID ARC                                   │
-├──────────────────────────┬─────────────────────────────┬───────────────────────────────┤
-│    A. Patient Tracer     │    B. Before vs. After      │      C. Pain Point Matrix     │
-│         Journey          │          Contrast           │       Systematic Proof        │
+┌──────────────────────────┬─────────────────────────────┬───────────────────────────────┐
+│ A. Patient Tracer        │ B. Before vs. After         │ C. Pain Point Matrix          │
+│    Journeys              │    Contrast                 │    Systematic Proof           │
 ├──────────────────────────┼─────────────────────────────┼───────────────────────────────┤
-│ Follows realistic cases  │ Visceral comparison between │ Directly proves solutions for │
-│ (Mr. Tan & Mdm. Halimah) │ the broken manual status    │ all 6 documented systemic     │
-│ step-by-step through the │ quo and the orchestrated    │ root causes from              │
-│ operational pipeline.    │ digital reality.            │ pain-points.md.               │
+│ Follows the REAL seeded  │ Visceral comparison between │ Directly proves solutions for │
+│ cases through the        │ the broken manual status    │ all 6 documented systemic     │
+│ operational pipeline,    │ quo (clearly-labelled       │ root causes from              │
+│ step-by-step.            │ illustration) and the       │ pain-points.md.               │
+│                          │ orchestrated digital reality│                               │
+│                          │ (live UI).                  │                               │
 └──────────────────────────┴─────────────────────────────┴───────────────────────────────┘
 ```
 
-### The Two Intersecting Clinical Scenarios
+### The Real Seeded Cases (used on screen)
 
-1. **Primary Anchor Case — Mr. Tan (68M, Acute Inpatient Journey):**
-   * *Presentation:* Acute exacerbation of congestive heart failure, fluid overload, severe dyspnea, requiring Class B2 bed and continuous telemetry.
-   * *Operational Journey:* Diagnostic synthesis $\rightarrow$ ED Attending assessment $\rightarrow$ Cardiology specialist broadcast with **Acuity Discordance** (ED Tier 3 vs Specialist Tier 2 $\rightarrow$ system auto-escalates to Tier 2) $\rightarrow$ Direct digital BMU queue entry $\rightarrow$ Multi-bed cubicle cohort packing with **Dynamic Cohort-Swap** $\rightarrow$ Family milestone tracking $\rightarrow$ D-2 discharge runway $\rightarrow$ Morning physician sign-off $\rightarrow$ Auto-queued bedside meds $\rightarrow$ 30-minute housekeeping bed turnover.
-2. **Contrast Diversion Vignette — Mdm. Halimah (72F, Alternative Pathway):**
-   * *Presentation:* Mild, stable cellulitis/pneumonia suitable for subacute care.
-   * *Operational Journey:* ED intake $\rightarrow$ Deterministic Care-Pathway Matcher identifies subacute eligibility $\rightarrow$ BMU 1-click referral to **MIC@Home (Hospital-at-Home)** and Sister Community Hospital (OCH) $\rightarrow$ Mobile Financial & Care Advisory (FYI Insights) sent to family $\rightarrow$ Acute inpatient bed preserved.
+The prototype deliberately distributes its capabilities across purpose-built seeded patients — no
+single hero patient carries the whole arc, so the film follows each capability on the patient the
+system built to demonstrate it. **These are the exact names/tokens shown on screen:**
+
+| Capability demonstrated | Seeded patient (on-screen) | State |
+| :--- | :--- | :--- |
+| ED smart-assessment pre-fill (acute cardiac) | **Chua Wee Kiat** (64M, ACS, troponin 180) — `Q-P120` | On ED board, `ASSESSMENT_PENDING` |
+| ED smart-assessment pre-fill (stable pathway) | **Nurul Huda** (47F, pneumonia) — `Q-P121` | On ED board |
+| Specialist discordance → safety-first escalation + telemetry union + chained consult | **Mr Fernandez** (55M, Cardiology) — `Q-P105` | Discordant: primary Tier 3 → effective Tier 2, chained Surgery consult open |
+| Consult-gated consensus cleared → BMU assignment | **Mr Goh Beng Kiat** (44M, appendicitis) — `Q-P107` | All broadcasts complete |
+| MIC@Home (Hospital-at-Home) diversion | **Mrs Tan Boon Hwa** (63F) — `Q-P106` | `DIVERTED_HAH`, virtual bed `MIC-V042` |
+| Sister Community Hospital (OCH) referral | **Mr Ahmad Ibrahim** (71M, post-stroke subacute) — `Q-P116` | 30-min bilateral SLA to OCH |
+| Direct digital BMU bed request | **Tan Ah Meng** (68M, Cardiology, telemetry, fall-risk 65) — `Q-P101` | `BED_REQUESTED` |
+| Batch holding-ward surge cluster | Tan Ah Meng + Goh Beng Kiat + **Teo Hock Seng** (`Q-P112`) → Ward 8B | 3-patient male B2 cluster |
+| Dynamic cohort-swap | **Mr David Koh** (`Q-P115`) blocking Ward 9B → swap to 8A-03 | `BED_ALLOCATED` (Green), still in ED |
+| Empathetic delay tag (UV isolation) | **Mdm Wong Siew Kuan** — `Q-P118` | Prolonged-wait, specialized-cleaning delay |
+| Discharge runway (D-2 → ready-to-vacate) | Inpatients inp1–inp5 on `/ward` | Full 5-stage progression, incl. bedside meds delivered |
 
 ---
 
 ## 4. Production Style & Visual Directives
 
-* **Visual Format:** Hybrid Founder-Led Direct Address + High-Fidelity React UI Screen Capture.
-  * **Direct Address / PIP (Founder):** The system creator appears on camera for the introduction, transitions between departments, and closing synthesis—establishing authentic personal conviction rooted in navigating Singapore's public hospital admissions and referencing national investigative discourse (CNA Talking Point).
-  * **High-Fidelity UI Footage:** 4K 60fps captures of the live web application (`/ed`, `/specialist`, `/bmu`, `/bmu-config`, `/patient`, `/ward`, `/analytics`).
-  * **Dynamic Camera Work:** Smooth software zooms into UI micro-interactions (e.g., dropdown chip overrides, state machine badge transitions, discordance alerts).
-  * **Kinetic Data Overlays:** Subtle floating metric badges displaying real-time operational gains (e.g., `Phone Calls: 0`, `Acuity: Tier 2 (Escalated)`, `Bed Hours Recovered: +4.2 hrs`).
-  * **Sound Design & Music:** Clean, modern cinematic tech pulse for operational walkthroughs, pausing/softening during personal narrative moments.
+* **Visual Format:** **Live, high-fidelity React UI screen-capture walkthrough + voiceover.** The
+  heart of the film is the running prototype itself, captured at each route with the real seeded
+  patients above. *(Revised from an on-camera founder-led cinematic format — see Decision #5.)*
+* **Supporting slide layer:** The existing `video-generation/` Marp pipeline supplies the title card,
+  the walled-off **Before vs. After** contrast panels, and inter-act transitions — not the core
+  walkthrough.
+* **Routes captured:** `/ed`, `/specialist`, `/bmu`, `/bmu-config`, `/patient`, `/ward`, `/analytics`.
+  (Persona switching via the prototype `X-User-Role` header: `ED_ATTENDING`, `SPECIALIST`,
+  `BMU_COORDINATOR`, `PATIENT`, `WARD_NURSE`, `HOUSEKEEPING`.)
+* **Camera work:** Software zooms into UI micro-interactions (dropdown chip overrides, state-machine
+  badge transitions, discordance alerts). No live-action camera or animated motion-graphics required.
+* **Data overlays — two clearly-distinct badge classes (see Decision #3):**
+  * **LIVE metric badges** — values the app genuinely computes and that are verifiable on
+    `/analytics`. Styled as "read from the system."
+  * **PROJECTED / DESIGN-TARGET badges** — improvement *deltas* the app cannot compute (no baseline
+    exists). Styled distinctly (e.g. a "Design target" ribbon) and spoken as *the outcome the system
+    is designed to drive*, never as measured results.
+* **"Before" segments:** Always an explicitly-labelled illustration ("Today, without the system"),
+  visually walled off (desaturated / sketch treatment), never sharing a frame with real UI, with
+  figures framed as representative. Sourced only where genuine (lived experience + CNA Talking Point
+  for the *qualitative* crisis — not for precise minutes/pages).
+* **Sound Design & Music:** Clean, modern cinematic tech pulse for walkthroughs, softening during
+  narrative moments.
 
 ---
 
 ## 5. Master Beat Sheet & Scene-by-Scene Script (10–12 Minutes)
 
 ```
-00:00        01:15        03:30        05:00        07:30        09:00        10:30        12:00
-  │            │            │            │            │            │            │            │
-  ▼            ▼            ▼            ▼            ▼            ▼            ▼            ▼
-[Act 1: Hook] [Intent 1&2] [Intent 3]   [Intent 4]   [Intent 5]   [Intent 6]   [Act 3: KPIs] [Conclusion]
-Origin & Pain  ED & Consult Diversion    BMU Solver & Patient      Ward Exit    Observability Call to Action
-Status Quo    Discordance   MIC@Home     Cohort-Swap  Tracker      Block Meds   Control Tower Live Prototype
+00:00      01:15      03:30      05:00      07:30      09:00      10:30      12:00
+  │          │          │          │          │          │          │          │
+  ▼          ▼          ▼          ▼          ▼          ▼          ▼          ▼
+[Act 1]   [Beat 1]   [Beat 2]   [Beat 3]   [Beat 4]   [Beat 5]   [Act 3]    [Close]
+Origin &  PP 1 & 2   PP 3       PP 4       PP 5       PP 6       Observ.    Call to
+Status Q  ED+Consult Diversion  Ghost Cap  Patient    Ward Exit  Control    Action /
+          Discord.   OCH/MIC    Cohort-Sw  Tracker    Meds       Tower      Live Demo
 ```
+
+*Chapter markers aligned to these Acts/Beats will be published on the video timeline (additive; does
+not change the linear film — Decision #7).*
 
 ---
 
 ### Act 1: The Origin & The Broken Status Quo (0:00 – 1:15)
 
-* **Visual:** Founder on camera in professional setting. Brief b-roll cuts of hospital emergency signage and animated workflow diagram showing fragmented communication links.
-* **Presenter Voiceover / Dialogue:**
-  > "If you've ever accompanied an elderly parent to a public hospital emergency department, you know the quiet despair of waiting eight, ten, or fourteen hours for an inpatient bed. You watch doctors running between triage bays, nurses answering endless phone calls, and families demanding answers that staff simply don't have.
+* **Visual:** Title card (Marp) + walled-off animated "Today, without the system" workflow sketch of
+  fragmented communication. No claim that the sketch is part of the product.
+* **Voiceover:**
+  > If you've ever accompanied an elderly parent to a public hospital emergency department, you know
+  > the quiet despair of waiting eight, ten, or fourteen hours for an inpatient bed. You watch doctors
+  > running between triage bays, nurses answering endless phone calls, and families demanding answers
+  > staff simply don't have.
   >
-  > When CNA's Talking Point documented this persistent crisis, they confirmed what healthcare leaders already know: our bed crunches are not just an infrastructure deficit. You cannot build your way out of a flow bottleneck. The crisis is an **orchestration failure**—manual phone tag between doctors, multi-bed wards blocked by gender locks, and discharge gridlocks that trap beds well into the late afternoon.
+  > When CNA's Talking Point documented this persistent crisis, it confirmed what healthcare leaders
+  > already know: the bed crunch is not just an infrastructure deficit — you cannot build your way out
+  > of a flow bottleneck. It is an **orchestration failure** — manual phone tag between doctors,
+  > multi-bed cubicles frozen by gender and infection locks, and discharge gridlocks that trap beds
+  > deep into the afternoon.
   >
-  > We built the Patient Admission & Discharge Management Application to solve these root causes. Let me walk you through how it works."
-* **On-Screen Graphic:** Title Card: *Patient Admission & Discharge Management Application*.
+  > This prototype was built to attack those root causes. Let me walk you through how it works — live.
 
 ---
 
-### Beat 1 (Pain Points 1 & 2): Instant Diagnostic Synthesis, Specialist Broadcast & Direct BMU Queue (1:15 – 3:30)
+### Beat 1 (Pain Points 1 & 2): Diagnostic Synthesis, Specialist Broadcast & Direct BMU Queue (1:15 – 3:30)
 
-* **Route / UI View:** `/ed` (Awaiting Assessment List $\rightarrow$ Assessment Modal) and `/specialist` (Broadcast Feed).
-* **The "Before" Contrast Graphic:** Animation of an ED attending paging a cardiology registrar, waiting 45 minutes for a callback, and writing fragmented paper notes.
-* **Live System Walkthrough:**
-  1. **Awaiting Assessment Queue:** Mr. Tan arrives. The attending opens his admission dossier.
-  2. **Automated Diagnostic Synthesis:** Highlight pre-populated clinical parameters—CT scan impression, troponin labs, vitals, and oxygen requirements. The system pre-suggests *Tier 3: Acute Stable*, Cardiology service, and telemetry requirements.
-  3. **Attending 1-Click Confirmation:** The attending confirms the baseline with 1 click, adding a clinical directive.
-  4. **Specialist Broadcast Pool:** Transition to on-call Cardiology feed on `/specialist`. Dr. Lim claims Mr. Tan’s broadcast.
-  5. **Safety-First Discordance Engine:** Dr. Lim notes dynamic EKG changes and upgrades acuity: *Tier 2: Acute Urgent* with continuous telemetry.
-  6. **Reconciliation & Consensus Gate:** Show both clinical judgments side-by-side. Explain the architectural invariant: *the software automatically adopts the higher acuity tier and unions telemetry constraints to guarantee patient safety without delaying bed request dispatch*.
-  7. **Direct Digital BMU Dispatch (Zero Phone Calls):** With consensus reached, the structured packet dispatches directly to the BMU queue. Zero phone calls placed.
-* **On-Screen Floating Badges:**
-  * `Diagnostic Deliberation: -65% Latency`
-  * `Acuity Resolution: Tier 2 (Safety-First Escalation)`
-  * `Telephone Calls: 0`
+* **Routes:** `/ed` (Awaiting-Assessment board → Assessment modal) and `/specialist` (Broadcast feed).
+* **Before contrast (walled-off):** ED attending paging a registrar and waiting for a callback;
+  fragmented paper notes; bed requests placed by phone.
+
+* **Live walkthrough:**
+  1. **Beat 1a — Diagnostic synthesis (PP1):** On `/ed`, open **Chua Wee Kiat (`Q-P120`, 64M)**. His
+     seeded baseline (BP 98/62, HR 112, SpO₂ 94, **troponin 180 ng/L**, WBC 13.2) drives the smart
+     assessment to pre-populate **Tier 2 Acute Urgent, Cardiology, continuous telemetry**. Attending
+     confirms with 1 click. (Contrast with **Nurul Huda `Q-P121`**, whose normal troponin defaults to
+     the stable Tier 3 / General Medicine / no-telemetry pathway.)
+  2. **Specialist broadcast pool:** Switch to `/specialist`. Show the discordant case
+     **Mr Fernandez (`Q-P105`)**: ED assessed Tier 3; the Cardiology specialist's completed consult
+     note reads *"Elevated troponin trend and dynamic ST changes. Upgrading to Tier 2. Continuous
+     telemetry mandatory. Recommending chained surgery review for concurrent abdominal pain."*
+  3. **Safety-first discordance engine:** Show both judgments side-by-side. Explain the invariant: the
+     system **auto-adopts the higher acuity tier (effective Tier 2) and unions telemetry**, and a
+     **chained Surgery broadcast** keeps the consensus gate open — all without delaying dispatch.
+  4. **Beat 1b — Direct digital BMU dispatch (PP2, zero phone calls):** Show structured packets
+     entering the BMU queue digitally. No phone call is placed.
+
+* **Hidden-depth features to surface in this beat (implemented & verified):**
+  * **SLA-timeout default on-call auto-assignment** *(Story 1.2.2)* — narrate that if no specialist
+    claims a broadcast within the SLA window, the system auto-assigns the designated default on-call
+    physician. Message: *"a consult is never lost to an unmonitored feed."*
+  * **Side-by-side reconcile + secure clinician messaging** *(Story 1.3.2)* — on the discordance
+    view, highlight the dual-column comparison and the "Prompt Clinician Reconcile" action. Message:
+    *"clinical autonomy is preserved — the system escalates for safety but opens a channel for the
+    doctors to align."*
+  * **Consult chaining** — Mr Fernandez's Cardiology consult *chains* an open Surgery broadcast for
+    concurrent abdominal pain; the consensus gate stays open until it resolves. Message:
+    *"multi-specialty cases run in parallel, not in a serial queue of phone calls."*
+  * **5-Tier priority framework** — briefly show the disposition spectrum (Tier 1 Critical/ICU → Tier
+    5 Short-Stay/CDU) so the audience sees the model covers the whole admit/observe/divert range.
+
+* **On-screen badges:**
+  * `Phone calls: 0` *(LIVE — workflow property; every bed request is digital)*
+  * `Effective acuity: Tier 2 (safety-first escalation)` *(LIVE — from Q-P105)*
+  * `Consult SLA: auto-escalates to default on-call` *(LIVE — architectural/workflow property)*
+  * `Diagnostic deliberation latency` *(PROJECTED / design target — the app does not compute a
+    before/after delta)*
 
 ---
 
 ### Beat 2 (Pain Point 3): Deterministic Care Diversion — Sister Hospitals & MIC@Home (3:30 – 5:00)
 
-* **Route / UI View:** `/ed` $\rightarrow$ `/bmu` (Diversion Evaluation) and `/patient` (Financial Explainer Card).
-* **The "Before" Contrast Graphic:** Clinicians defaulting to tertiary acute beds because community hospital or virtual ward referrals require 15-page manual referral packets and bilateral doctor negotiations.
-* **Live System Walkthrough:**
-  1. **Enter Mdm. Halimah:** 72F presenting with mild, stable cellulitis.
-  2. **Care-Pathway Matcher:** Show the system automatically evaluating clinical inclusion rules upon intake. It flags Mdm. Halimah as eligible for **Hospital-at-Home (MIC@Home)** or step-down rehabilitation at **Sister Community Hospital (OCH)**.
-  3. **BMU Operational Routing Authority:** The BMU coordinator reviews the recommendation with 1-click approval, initiating the digital transfer packet within a 30-minute bilateral SLA.
-  4. **In-App Financial & Care Advisory (FYI Insights):** Show the mobile view sent to Mdm. Halimah's family: estimated daily co-pay ranges, MediSave subsidy percentages, and care expectations. Emphasize that it provides peace of mind without bureaucratic sign-off delays.
-  5. **Capacity Saved:** An acute inpatient bed is completely preserved for higher-acuity trauma or surgical cases.
-* **On-Screen Floating Badges:**
-  * `Acute Inpatient Bed Preserved: 1`
-  * `Transfer Packet SLA: < 30 Mins`
-  * `Family Advisory: Instant Push`
+* **Routes:** `/bmu` (diversion evaluation) and `/patient` (financial/care explainer).
+* **Before contrast (walled-off):** Clinicians defaulting to acute beds because community-hospital or
+  virtual-ward referrals *used to* require manual multi-page packets and bilateral phone negotiations.
+
+* **Live walkthrough:**
+  1. **MIC@Home:** Show **Mrs Tan Boon Hwa (`Q-P106`, 63F)** — `DIVERTED_HAH`, virtual bed `MIC-V042`.
+  2. **Sister Community Hospital:** Show **Mr Ahmad Ibrahim (`Q-P116`, 71M, post-stroke subacute)** —
+     an active 30-minute bilateral SLA referral to **Outram Community Hospital (OCH)**.
+  3. **BMU operational routing authority:** The coordinator reviews and approves the diversion with a
+     1-click digital transfer packet.
+  4. **In-app Financial & Care Advisory (FYI Insights):** On `/patient`, show the mobile explainer —
+     ward-class-specific co-pay bands (e.g. Class B2 ≈ **$60–110/day, subsidized up to ~70%
+     means-tested, MediShield claimable**), care expectations, and direct MSW / financial-counseling
+     hotlines. Informational — no bureaucratic sign-off.
+  5. **Capacity saved:** An acute inpatient bed is preserved.
+
+* **On-screen badges:**
+  * `Diversions: 2 — MIC@Home 1 / Community Hospital 1` *(LIVE)*
+  * `Acute inpatient bed preserved` *(LIVE — qualitative)*
+  * *Sister-hospital SLA compliance is shown on the dashboard grid only; it is **not** foregrounded as
+    a spoken performance stat (simulated integration — see Decision #6).*
 
 ---
 
-### Beat 3 (Pain Point 4): Solving "Ghost Capacity" via Bed State Machine & Dynamic Cohort-Swaps (5:00 – 7:30)
+### Beat 3 (Pain Point 4): Ghost Capacity via Bed State Machine & Dynamic Cohort-Swaps (5:00 – 7:30)
 
-* **Route / UI View:** `/bmu` (Bed Capacity Grid & Recommendation Drawer) and `/bmu-config`.
-* **The "Before" Contrast Graphic:** Visualizing a 6-bed Class B2 cubicle with 5 empty beds that *cannot be used* because one female patient with MRSA was placed there, locking the room.
-* **Live System Walkthrough:**
-  1. **The 4-State Bed Lifecycle:** Walk through the live color-coded bed map:
-     * `Mustard Yellow`: Vacated, empty, pending 30-min housekeeping sanitization.
-     * `White`: Clean, empty, and ready for allocation.
-     * `Green`: Assigned/in-transit (patient on the way).
-     * `Grey`: Physically occupied.
-  2. **Multi-Bed Cubicle Cohort Locking:** Show how cubicles enforce $\langle \text{Ward Class}, \text{Gender}, \text{Infection Status} \rangle$.
-  3. **Heuristic Constraint Solver in Action:** Watch Mr. Tan’s bed request get processed against hard invariants (telemetry, gender, isolation) and soft scoring rules. The Top 3 recommended beds appear with human-in-the-loop rationale.
-  4. **The Dynamic Cohort-Swap Feature:**
-     * Demonstrate an empty "Flex Ward" that was blocked by a single isolated `Green` patient who hasn't left the ED yet.
-     * The solver surfaces a **Cohort-Swap Recommendation**: reassigning the single `Green` patient to an equivalent bed in an already cohort-locked room.
-     * With 1-click coordinator approval, the Flex Ward resets to all-`White`, freeing up an entire 6-bed cubicle to batch-admit an incoming surge cohort.
-* **On-Screen Floating Badges:**
-  * `Solver Evaluation: < 50ms`
-  * `Ghost Capacity Recovered: 5 Bed-Days`
-  * `Cohort Lock Reset: Ward 8B Cleaned`
+* **Routes:** `/bmu` (bed capacity grid, recommendation drawer, batch & cohort-swap cards) and
+  `/bmu-config`.
+* **Before contrast (walled-off):** A 6-bed Class B2 cubicle with 5 empty beds that *cannot* be used
+  because one patient's gender/infection profile locks the room.
+
+* **Live walkthrough:**
+  1. **The 4-state bed lifecycle** (exact enum, verified): `Mustard Yellow` (vacated, pending 30-min
+     cleaning) → `White` (clean, available) → `Green` (assigned/in-transit) → `Grey` (occupied).
+  2. **Cubicle cohort locking** on ⟨Ward Class, Gender, Infection Status⟩.
+  3. **Heuristic constraint solver (verified: 4 hard constraints + 3 soft rules):** Process
+     **Tan Ah Meng (`Q-P101`)**'s request against hard invariants (ward class, gender, telemetry,
+     infection isolation) and soft scoring (Specialty +40, Consolidation +30, Fall-risk proximity +15).
+     Show the **Top-3 recommended beds** with rationale.
+  4. **Batch holding ward:** The male B2 non-infectious surge cluster (**Tan Ah Meng + Goh Beng Kiat +
+     Teo Hock Seng**) triggers the **Ward 8B** batch holding-room recommendation (4 unlocked beds).
+  5. **Dynamic cohort-swap:** **Ward 9B** is blocked by a single Green reservation — **Mr David Koh
+     (`Q-P115`, 9B-01)**, who hasn't left the ED. The solver surfaces a **Cohort-Swap Suggestion**:
+     move Koh to **8A-03**, resetting Ward 9B to all-`White` for a batch surge cohort. 1-click approval.
+
+* **Hidden-depth features to surface in this beat (implemented & verified):**
+  * **Two-phase strategy — the actual mechanism that recovers ghost capacity:** make explicit that
+    the solver runs **Phase 1 (consolidation packing)** — packing waiting patients into partially
+    filled cubicles that already match their cohort, *to protect all-`White` cubicles from premature
+    single-patient locking* — *before* **Phase 2 (holding-room batching)** designates an all-`White`
+    cubicle for a ≥3-patient surge cluster. This "pack first, then batch" ordering is the core
+    insight; the batch-holding-ward adoption KPI (**10.5%** on the current seed) measures it.
+  * **Optimistic locking on cohort-swap** *(concurrency correctness)* — note that concurrent
+    coordinator actions are guarded (HTTP 409 on version conflict). Message: *"it stays correct when
+    many coordinators act at once."*
+
+* **On-screen badges:**
+  * `Solver evaluation: <50ms` *(LIVE — architectural property; synchronous pure-Java heuristic)*
+  * `Phase 1 packing → Phase 2 batching` *(LIVE — two-phase strategy)*
+  * `Batch holding-ward adoption: 10.5%` *(LIVE — verified)*
+  * `Cohort lock reset: Ward 9B freed` *(LIVE — from the seeded swap)*
+  * `Ghost capacity recovered` *(PROJECTED / design target — bed-days delta is not computed)*
 
 ---
 
 ### Beat 4 (Pain Point 5): Patient & Family Milestone & Queue Transparency (7:30 – 9:00)
 
-* **Route / UI View:** `/patient` (Mobile view with token-based access).
-* **The "Before" Contrast Graphic:** Anxious family members crowding the ED nurse counter every 20 minutes asking, *"Why has my father been waiting 7 hours when people who came after him got a bed?"*
-* **Live System Walkthrough:**
-  1. **Activation via Secure Token:** Show Mr. Tan's daughter opening the tracking link on her smartphone. No passwords or app downloads required.
-  2. **3-Stage Milestone Stepper:**
-     * Stage 1: Admission Confirmed & Bed Requested.
-     * Stage 2: Bed Assigned & Room Sanitizing.
-     * Stage 3: Admitted to Inpatient Ward Bed.
-     * *Highlight domain detail: Held quiescent during ED clinical deliberation to prevent false alarms.*
-  3. **Queue Transparency by Ward Class:** Clearly shows queue position partitioned by Ward Class (Class B2), managing expectations without disclosing clinical PII.
-  4. **Empathetic Operational Delay Tags:** Demonstrate a simulated delay. Instead of silence, the tracker shows: *"ED is actively prioritizing emergency trauma resuscitations; clinical teams are continuously monitoring your condition."*
-  5. **Impact on Nurses:** Triage nurses can focus 100% on clinical stabilization instead of crowd control.
-* **On-Screen Floating Badges:**
-  * `Periodic Status Updates: Every 2 Hours`
-  * `Triage Nurse Complaints: -70%`
-  * `Patient Visibility: 100% Transparent`
+* **Route:** `/patient` (mobile, token-based access — no passwords, no app download).
+* **Before contrast (walled-off):** Families crowding the ED nurse counter every 20 minutes.
+
+* **Live walkthrough:**
+  1. **3-stage milestone stepper + queue position by ward class (verified):** Open
+     **`Q-P101` (Tan Ah Meng, B2, `BED_REQUESTED`)**. The tracker computes a real position within the
+     B2 queue (sorted by acuity tier then request time) with an estimated wait.
+  2. **Empathetic delay tag (verified):** Open **`Q-P118` (Mdm Wong Siew Kuan)** — the specialized UV
+     isolation-cleaning delay renders real reassurance copy (*"Your specialized isolation room is
+     completing a mandatory 30-minute UV disinfection cycle for your safety."*) plus a contact hotline.
+  3. **Diversion tracker view:** Open **`Q-P116` / `Q-P106`** — care-guidance copy for
+     community-hospital / MIC@Home candidates.
+  4. **Design intent (narrated, not lingered on):** the stepper is *held quiescent during ED clinical
+     deliberation* so families aren't alarmed before a bed is requested, and the system supports
+     *periodic 2-hourly status updates* (a scheduler capability).
+  5. **Impact on nurses:** triage nurses focus on clinical stabilization, not crowd control.
+
+* **On-screen badges:**
+  * `Queue position by ward class` *(LIVE — computed)*
+  * `Empathetic delay tag active` *(LIVE — from Q-P118)*
+  * `Triage-nurse interruptions` *(PROJECTED / design target)*
 
 ---
 
 ### Beat 5 (Pain Point 6): Multi-Day Discharge Runway & Auto-Queued Bedside Meds (9:00 – 10:30)
 
-* **Route / UI View:** `/ward` (Inpatient Runway & Bed Turnover).
-* **The "Before" Contrast Graphic:** The afternoon discharge gridlock—patients waiting until 3 PM for pharmacy medications, while ED patients downstairs wait in hallways for those same beds.
-* **Live System Walkthrough:**
-  1. **Stage 1 (D-2 / D-3 Discharge Runway):** Mr. Tan's inpatient stay progresses. The ward dashboard displays the Estimated Date of Discharge (EDD) with confidence indicators. Ward nurses engage caregivers early for home insulin and mobility prep.
-  2. **Stage 2 (Day-of-Discharge Morning Sign-Off):** During morning rounds at 09:00 AM, the physician clicks the Morning Discharge Sign-Off.
-  3. **Auto-Queued Bedside Medication:** The sign-off automatically queues discharge medications in the pharmacy. Runners bring meds directly up to the bedside before 11:00 AM, eliminating the separate pharmacy queue.
-  4. **The 30-Minute Housekeeping SLA:** When Mr. Tan departs, the bed turns `Mustard Yellow`. The system dispatches environmental services with an enforced 30-minute terminal cleaning countdown, returning the bed to `White` for immediate BMU re-allocation.
-* **On-Screen Floating Badges:**
-  * `Discharge Before 12 PM: +45%`
-  * `Medication Exit Block: Eliminated`
-  * `Housekeeping SLA: 30-Minute Turnover`
+* **Route:** `/ward` (inpatient runway & bed turnover).
+* **Before contrast (walled-off):** The afternoon discharge gridlock — patients waiting until 3 PM
+  for pharmacy meds while ED patients wait in hallways for those beds.
+
+* **Live walkthrough (verified fixtures inp1–inp5):**
+  1. **D-2 / D-3 runway:** The ward dashboard shows EDD with confidence indicators; nurses engage
+     caregivers early. (inp1 = RUNWAY_D2, inp2 = RUNWAY_D3.)
+  2. **Morning sign-off:** A physician completes the discharge sign-off (inp3 = READY_FOR_MORNING_SIGNOFF).
+  3. **Auto-queued bedside medication:** Sign-off queues discharge meds; runners deliver to the
+     bedside before 11:00 AM (inp4 = MEDICATIONS_PENDING / packing; inp5 = READY_TO_VACATE with meds
+     `DELIVERED_BEDSIDE`).
+  4. **30-minute housekeeping SLA:** On vacate, the bed turns `Mustard Yellow`; environmental services
+     work an enforced 30-minute countdown back to `White`. (A breached example — `9A-03` — is seeded to
+     show the overdue-alert state honestly.)
+
+* **Hidden-depth features to surface in this beat (implemented & verified):**
+  * **Early caregiver readiness checklist** *(Story 4.1.2)* — at D-2/D-3, nurses work a structured
+    checklist (insulin/wound training, home-equipment setup, transport booking) that flips to
+    *"Ready for midday discharge"* only when complete. Message: *"the human bottleneck — unprepared
+    caregivers — is retired days early, not on the discharge morning."*
+  * **Closed-loop BMU bed release** — terminal-cleaning sign-off doesn't just flip the bed to
+    `White`; it **auto-notifies BMU** that the bed is allocatable, closing the ED→ward→turnover→ED
+    loop. Message: *"the recovered bed re-enters the allocation engine automatically — no phone call
+    to tell BMU it's ready."*
+
+* **On-screen badges:**
+  * `Bedside medication delivery adoption: 50%` *(LIVE — verified)*
+  * `Housekeeping turnover avg: 26.5 min` and `30-min SLA compliance: 87.5%` *(LIVE — verified)*
+  * `Caregiver readiness checklist: complete before discharge morning` *(LIVE — workflow property)*
+  * `Discharge before noon` *(LIVE — 100% on current seed; may be shown, spoken carefully)*
 
 ---
 
-### Act 3: Operational Control Tower, System Synthesis & Call to Action (10:30 – 12:00)
+### Act 3: Operational Control Tower, Synthesis & Call to Action (10:30 – 12:00)
 
-* **Route / UI View:** `/analytics` (Dual-Pathway Observability Dashboard) and live demo link.
-* **Systemic KPI Rollup:**
-  * Review the 18 operational metrics: ED assessment turnaround, specialist concordance, bed capacity utilization gain, ghost bed reduction, and discharge before midday.
-  * Founder addresses the viewer on camera:
-* **Closing Monologue & Call to Action:**
-  > "Hospital bed capacity is not fixed. When clinical decisions are synthesized in real-time, when bed constraints are solved mathematically rather than over the phone, and when discharge logistics are pulled forward into morning rounds—we recover bed capacity that was there all along.
+* **Route:** `/analytics` (dual-pathway observability dashboard) + live demo link.
+* **Framing (Decision #4): proof of instrumentation & observability — not proof of outcome
+  magnitude.** The message:
+  > Every operational decision in this system is measured. Here are the operational KPIs the platform
+  > computes in real time — the same numbers a control tower would watch — and each is extractable via
+  > two independent pathways: SQL queries for BI dashboards, and structured-log parsing for real-time
+  > SIEM alerting, verified for mathematical parity.
+
+* **LIVE KPI values to speak (captured from the running prototype — all non-zero after seed
+  enrichment):**
+  * **21 digital bed requests — zero phone calls** (`digitalBedRequestCount = 21`)
+  * **Specialist concordance 66.7%** *(small denominator — frame as "the mechanism resolves
+    discordance," not as a headline rate)*
+  * **BMU suggestion acceptance 63.2%**
+  * **ED assessment turnaround p95 ≈ 16 min** (`avgEdTurnaroundMinutes = 2.9`)
+  * **Batch holding-ward adoption 10.5%** · **Diversions 2** (MIC@Home 1 / Community Hospital 1,
+    diversion rate 9.5%)
+  * **Patient tracker access 19%** · **2-hour update delivery 100%** · **prolonged-wait
+    communication 100%** · **caregiver-counseling connect 100%**
+  * **Bedside medication delivery adoption 50%** · **advance discharge runway 28.6%**
+  * **Discharge before noon 100%** · **Housekeeping turnover 26.5 min avg / 87.5% within 30-min SLA**
+* **Framing notes:** the dashboard now reads non-zero across every metric on the synthetic seed, so a
+  curious viewer inspecting the live prototype (per the CTA) finds a self-consistent control tower.
+  Several rates are small-denominator (concordance 66.7% of 3; batch-holding 10.5%) — speak these as
+  *"the mechanism works and is measured,"* not as benchmarked performance. Sister-hospital SLA % is
+  shown on the grid but not spoken as measured performance (Decision #6).
+* **Projected / design-target framing** for any improvement deltas.
+
+* **Closing monologue & CTA:**
+  > Hospital bed capacity is not fixed. When clinical decisions are synthesized in real time, when bed
+  > constraints are solved mathematically instead of over the phone, and when discharge logistics are
+  > pulled forward into morning rounds, we recover capacity that was there all along.
   >
-  > We invite hospital leaders, clinical chiefs, and healthcare innovators to explore the interactive live prototype deployed on Render. Test the clinical flows, inspect the constraint engine, and see how intelligent orchestration can transform hospital admissions."
-* **Closing Screen:**
-  * Live Prototype URL: `https://enhance-hospital-admissions.onrender.com`
-  * QR Code linking directly to the demo.
-  * Project Repository & Documentation references.
+  > Explore the interactive live prototype. Test the clinical flows, inspect the constraint engine, and
+  > see how intelligent orchestration can transform hospital admissions.
+
+* **Closing screen:** Live prototype URL `https://enhance-hospital-admissions.onrender.com` · QR code ·
+  repository & documentation references.
 
 ---
 
 ## 6. Documented Assumptions & Decision Path Log
 
-1. **Dual Constituency Target:** Decided to pitch jointly to **Hospital Operations C-Suite (COO/CMIO)** and **Clinical Frontline Chiefs (ED/Ward Nursing)** to create both executive budget motivation and grassroots clinician buy-in.
-2. **Tri-Hybrid Narrative:** Combined the **Patient Tracer Journey** (emotional/clinical reality), the **Before vs. After Contrast** (visceral problem setup), and the **Pain Point Matrix** (systematic proof of all 6 root causes).
-3. **Comprehensive Runtime:** Selected an unconstrained 10–12 minute full-depth product film, giving adequate time to showcase clinical nuance (specialist discordance), mathematical solver logic (cubicle cohort-swapping), and inpatient turnover.
-4. **Two-Patient Persona Model:** Resolved the clinical contradiction of showing both acute inpatient admission and alternative care diversion by pairing **Mr. Tan** (acute pathway) with **Mdm. Halimah** (MIC@Home/Sister Hospital diversion vignette).
-5. **Production Aesthetic:** Blended **Founder-Led Direct Address** (authentic personal conviction) with **High-Fidelity React UI Screencasts** (zooms, kinetic overlays, and real-time KPI tickers).
-6. **Elimination of IT Jargon:** Omitted legacy EHR integration discussions (FHIR, HL7, enterprise procurement cycles) to keep the narrative 100% focused on product intents, clinical workflows, and patient capacity gains.
+*(This log reflects the decisions taken during the codebase-grounded review. Items marked **[REVISED]**
+changed from the original plan.)*
+
+1. **Dual Constituency Target:** Pitch jointly to Hospital Operations C-Suite (COO/CMIO) and Clinical
+   Frontline Chiefs (ED/Ward Nursing) to create both executive budget motivation and grassroots
+   clinician buy-in.
+
+2. **Tri-Hybrid Narrative:** Combine the Patient Tracer Journeys, the Before-vs-After contrast, and the
+   Pain Point Matrix (systematic proof of all 6 root causes). The pain-point → beat mapping is verified
+   1-to-1 against `pain-points.md`; Beat 1 intentionally covers PP1 (synthesis/broadcast) and PP2
+   (digital dispatch) as sub-beats 1a/1b.
+
+3. **Comprehensive Runtime:** Keep a single, linear 10–12 minute full-depth walkthrough. The purpose is
+   to *fully explain* the concept, features, and usefulness — not to optimize completion rate. Timeline
+   **chapter markers** (additive) will be published for navigation.
+
+4. **[REVISED] Real Seeded Personas (was: composite Mr. Tan / Mdm. Halimah):** Follow the *actual*
+   seeded patients through their real states (see §3 table). The value is systemic behavior distributed
+   across purpose-built fixtures; live screen-capture must match the on-screen names/tokens exactly.
+
+5. **[REVISED] Production Aesthetic (was: founder-led on-camera + kinetic motion-graphics):** The core
+   is a **live React UI screen-capture walkthrough + voiceover + simple static badges.** The existing
+   `video-generation/` Marp pipeline is a *supporting* layer (title, before/after panels, transitions),
+   not the film's heart. Rationale: the entire credibility argument rests on "this is real, running,
+   and inspectable"; footage of the live app beats slides and matches the "go try it" CTA.
+
+6. **Prototype Boundaries / IT Jargon:** Sell the *concept*. Omit dense integration jargon (FHIR/HL7,
+   procurement) from the narrative; the README carries the honest prototype-vs-production boundaries.
+   **Refinement:** do not verbally foreground simulated-flow hard numbers (e.g. sister-hospital SLA %)
+   as measured performance in the finale.
+
+7. **[NEW] "Before" treatment:** Every "before" visual is an explicitly-labelled, walled-off
+   illustration ("Today, without the system"), figures representative, sourced only where genuine
+   (lived experience + CNA for the qualitative crisis).
+
+8. **[NEW] KPI badge classes:** Two distinct visual classes — **LIVE** (computed, verifiable on
+   `/analytics`) vs **PROJECTED / DESIGN-TARGET** (improvement deltas the app cannot compute). `<50ms`
+   solver and `Phone calls: 0` are architectural/workflow properties, not dashboard readings.
+
+9. **[NEW] Finale = observability proof:** `/analytics` proves *instrumentation and dual-pathway
+   extraction*, not outcome magnitude (values are computed from a synthetic dataset).
+
+10. **[NEW] Seed self-consistency:** The seed was additively enriched (new patients `Q-DIS-556`
+    discharged-with-bedside-meds; `Q-P130` tracker/periodic/delay exemplar; `Q-P131`/`Q-P132`
+    batch-holding allocations; caregiver-counseling interactions for `Q-P106`/`Q-P116`; tracker access
+    on `Q-P101`) so **every finale KPI reads non-zero and self-consistent**. Final verified values:
+    21 digital requests, ED p95 16 min, concordance 66.7%, BMU acceptance 63.2%, batch-holding 10.5%,
+    tracker access 19%, 2-hour updates 100%, prolonged-wait comms 100%, caregiver counseling 100%,
+    bedside meds 50%, discharge-before-noon 100%, turnover 26.5 min / 87.5% SLA, 2 diversions. No
+    existing asserted fixtures were altered; the full backend suite of **214 tests passes**.
+
+11. **[NEW] Hidden-depth features surfaced:** Beats 1/3/5 now explicitly showcase implemented-but-
+    previously-unsold capabilities — **SLA-timeout default on-call auto-assignment**, **side-by-side
+    reconcile + secure clinician messaging**, **consult chaining**, the **5-tier priority framework**,
+    the **two-phase pack-then-batch solver strategy** (the real ghost-capacity mechanism), **optimistic
+    locking** on cohort-swap, the **early caregiver readiness checklist**, and **closed-loop BMU bed
+    release**. Positioning spine for the dual audience: **safety-first by construction**,
+    **audit-ready dual-pathway observability**, and **production-architected profile boundary** (default
+    beans are production contracts that fail-fast until real infrastructure is wired).

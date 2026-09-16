@@ -33,6 +33,7 @@ public class DataInitializer implements CommandLineRunner {
         private final AdmissionRequestRepository admissionRequestRepository;
         private final BmuAlgorithmConfigRepository configRepository;
         private final AssessmentBroadcastRepository broadcastRepository;
+        private final PatientAuditInteractionRepository patientAuditInteractionRepository;
 
         /**
          * Executes data seeding upon Spring Boot application startup.
@@ -581,6 +582,9 @@ public class DataInitializer implements CommandLineRunner {
                                 .requestedWardClass(WardClass.B2)
                                 .status(AdmissionStatus.BED_REQUESTED)
                                 .isRecommendationAccepted(true)
+                                .firstTrackerAccessedAt(LocalDateTime.now().minusMinutes(30))
+                                .lastTrackerAccessedAt(LocalDateTime.now().minusMinutes(4))
+                                .trackerAccessCount(5)
                                 .requestedAt(LocalDateTime.now().minusMinutes(45))
                                 .build());
 
@@ -1106,6 +1110,138 @@ public class DataInitializer implements CommandLineRunner {
                                 .waitingInEd(true)
                                 .build());
 
-                log.info("[PROTOTYPE SEEDER] Seeded ED patients P101-P118: BED_REQUESTED (P101/P107/P111/P112/P116/P118), ASSESSMENT_PENDING+broadcasts (P102/P105), BED_ALLOCATED (P110 in-transit, P115 cohort-swap block), DIVERTED_HAH (P106), Sister Hospital OCH referral (P116), discordant consult (P105), delay tags (P111/P118), clean test-reserved (P103/P104), awaiting-assessment (P108/P109), synthesized clinical baseline (P120 acute-cardiac, P121 stable).");
+                // ------------------------------------------------------------------
+                // P130 — Female, GENERAL_MEDICINE, Tier 3, Class A, BED_REQUESTED (additive,
+                // Epic-3 analytics exemplar). Off the batch/cohort-swap wards (Class A has
+                // no flex fixture), so batch/swap tests are unaffected. Carries an accessed
+                // tracker, a delivered 2-hour periodic update, and a prolonged-wait delay
+                // tag so the finale dashboard reads sensible non-zero values for
+                // patientTrackerAccessRatePct, twoHourPeriodicUpdateDeliveryPct, and
+                // prolongedWaitCommunicationRatePct.
+                // ------------------------------------------------------------------
+                Patient p130 = patientRepository.save(Patient.builder()
+                                .name("Mdm Faridah")
+                                .nricMasked("S****130Z")
+                                .age(69)
+                                .gender(Gender.FEMALE)
+                                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                                .fallRiskScore(30)
+                                .needsTelemetry(false)
+                                .queueToken("Q-P130")
+                                .build());
+
+                admissionRequestRepository.save(AdmissionRequest.builder()
+                                .patient(p130)
+                                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .primaryTelemetry(false)
+                                .effectiveTelemetry(false)
+                                .requestedWardClass(WardClass.A)
+                                .status(AdmissionStatus.BED_REQUESTED)
+                                .isRecommendationAccepted(true)
+                                .edTurnaroundMinutes(14.0)
+                                .firstTrackerAccessedAt(LocalDateTime.now().minusMinutes(120))
+                                .lastTrackerAccessedAt(LocalDateTime.now().minusMinutes(5))
+                                .trackerAccessCount(4)
+                                .lastPeriodicUpdateSentAt(LocalDateTime.now().minusMinutes(15))
+                                .delayReasonTag(DelayReasonCode.BED_SHORTAGE.name())
+                                .operationalDelayReason(
+                                                "Clinical coordinators are actively prioritising ward beds across the hospital to ensure optimal clinical placement.")
+                                .requestedAt(LocalDateTime.now().minusMinutes(130))
+                                .waitingInEd(true)
+                                .build());
+
+                // ------------------------------------------------------------------
+                // Early caregiver counseling connect interactions (additive, Epic-3 KPI 18).
+                // Diversion candidates P106 (MIC@Home) and P116 (OCH) have families who
+                // engaged the click-to-call support hotlines, so
+                // caregiverCounselingConnectRatePct reads a sensible non-zero value.
+                // ------------------------------------------------------------------
+                patientAuditInteractionRepository.save(PatientAuditInteraction.builder()
+                                .token("Q-P106")
+                                .actionType("FINANCIAL_COUNSELING")
+                                .createdAt(LocalDateTime.now().minusHours(1).minusMinutes(30))
+                                .build());
+                patientAuditInteractionRepository.save(PatientAuditInteraction.builder()
+                                .token("Q-P116")
+                                .actionType("MSW_CALL")
+                                .createdAt(LocalDateTime.now().minusMinutes(18))
+                                .build());
+
+                // ------------------------------------------------------------------
+                // P131 & P132 — Male, GENERAL_MEDICINE, Tier 3, Class C, allocated via a
+                // proactive BATCH HOLDING WARD (additive, Epic-2 KPI 11). Both carry the
+                // isBatchHoldingWardAllocated flag so batchHoldingWardAdoptionRatePct reads a
+                // sensible non-zero value, and both accessed their trackers so
+                // patientTrackerAccessRatePct rises. Off the asserted flex wards (8B/9B) and
+                // carry no assigned bed, so batch/cohort-swap fixtures are unaffected.
+                // ------------------------------------------------------------------
+                Patient p131 = patientRepository.save(Patient.builder()
+                                .name("Mr Rahman")
+                                .nricMasked("S****131A")
+                                .age(66)
+                                .gender(Gender.MALE)
+                                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                                .fallRiskScore(20)
+                                .needsTelemetry(false)
+                                .queueToken("Q-P131")
+                                .build());
+
+                admissionRequestRepository.save(AdmissionRequest.builder()
+                                .patient(p131)
+                                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .primaryTelemetry(false)
+                                .effectiveTelemetry(false)
+                                .requestedWardClass(WardClass.C)
+                                .status(AdmissionStatus.BED_ALLOCATED)
+                                .isRecommendationAccepted(true)
+                                .isBatchHoldingWardAllocated(true)
+                                .edTurnaroundMinutes(16.0)
+                                .firstTrackerAccessedAt(LocalDateTime.now().minusMinutes(40))
+                                .lastTrackerAccessedAt(LocalDateTime.now().minusMinutes(3))
+                                .trackerAccessCount(2)
+                                .requestedAt(LocalDateTime.now().minusMinutes(60))
+                                .allocatedAt(LocalDateTime.now().minusMinutes(12))
+                                .waitingInEd(true)
+                                .build());
+
+                Patient p132 = patientRepository.save(Patient.builder()
+                                .name("Mr Osman")
+                                .nricMasked("S****132B")
+                                .age(58)
+                                .gender(Gender.MALE)
+                                .infectionStatus(InfectionStatus.NON_INFECTIOUS)
+                                .fallRiskScore(15)
+                                .needsTelemetry(false)
+                                .queueToken("Q-P132")
+                                .build());
+
+                admissionRequestRepository.save(AdmissionRequest.builder()
+                                .patient(p132)
+                                .suspectedDiagnosisService(SpecialtyCluster.GENERAL_MEDICINE)
+                                .admittingSpecialtyCluster(SpecialtyCluster.GENERAL_MEDICINE)
+                                .primaryAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .effectiveAcuityTier(AcuityTier.TIER_3_ACUTE_STABLE)
+                                .primaryTelemetry(false)
+                                .effectiveTelemetry(false)
+                                .requestedWardClass(WardClass.C)
+                                .status(AdmissionStatus.BED_ALLOCATED)
+                                .isRecommendationAccepted(true)
+                                .isBatchHoldingWardAllocated(true)
+                                .edTurnaroundMinutes(13.0)
+                                .firstTrackerAccessedAt(LocalDateTime.now().minusMinutes(35))
+                                .lastTrackerAccessedAt(LocalDateTime.now().minusMinutes(2))
+                                .trackerAccessCount(3)
+                                .requestedAt(LocalDateTime.now().minusMinutes(58))
+                                .allocatedAt(LocalDateTime.now().minusMinutes(9))
+                                .waitingInEd(true)
+                                .build());
+
+                log.info("[PROTOTYPE SEEDER] Seeded ED patients P101-P118 + P130-P132: BED_REQUESTED (P101/P107/P111/P112/P116/P118/P130), ASSESSMENT_PENDING+broadcasts (P102/P105), BED_ALLOCATED (P110 in-transit, P115 cohort-swap block, P131/P132 batch-holding-ward), DIVERTED_HAH (P106), Sister Hospital OCH referral (P116), discordant consult (P105), delay tags (P111/P118/P130), tracker+periodic-update exemplar (P130), batch-holding adoption (P131/P132), caregiver-counseling interactions (P106/P116), clean test-reserved (P103/P104), awaiting-assessment (P108/P109), synthesized clinical baseline (P120 acute-cardiac, P121 stable).");
         }
 }

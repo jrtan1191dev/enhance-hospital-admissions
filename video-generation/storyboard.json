@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Patient Admission and Discharge Management Application",
+    "title": "Hospital Admissions Orchestration Walkthrough",
     "fps": 30,
     "captureAspect": "landscape",
     "outputs": [
@@ -16,1180 +16,730 @@
       "enabled": true,
       "sidecar": true
     },
-    "kineticCaptions": false,
     "fixedTime": "2026-01-15T09:00:00.000Z",
     "background": "#0f172a",
-    "baseUrl": "http://127.0.0.1:8080"
+    "baseUrl": "http://localhost:3000"
   },
   "scenes": [
     {
-      "id": "01-problem",
+      "id": "01-title",
       "title": "The broken status quo",
-      "narration": "If you have ever waited with an elderly parent in an emergency department, you know the despair of waiting ten hours for an inpatient bed. The bed crunch is not only a shortage of concrete. It is an orchestration failure: phone tag between doctors, wards frozen by a single lock, and discharges that gridlock beds into the afternoon.",
-      "visualEngine": "playwright_web",
+      "narration": "If you have ever waited with a parent for a hospital bed, you know the despair of a long, silent queue. The bed crunch is not only a shortage of rooms. It is a failure to orchestrate the beds a hospital already has.",
+      "visualEngine": "marp_slides",
       "captureMode": "stills",
-      "chapter": {
-        "title": "You cannot build your way out of a flow bottleneck",
-        "description": "Intelligent Patient Flow & Bed Capacity Orchestration",
-        "durationMs": 4000
-      },
-      "roiSelector": "main",
       "actionSpec": {
-        "url": "/ed",
-        "setupScript": "scenes/setup-ed.mjs",
-        "waitUntil": "networkidle",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Emergency Department (ED) Clinical Intake",
-          "Waiting ED Patients"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong",
-          "Sign in"
-        ]
+        "markdown": "scenes/01-title.md",
+        "slideIndex": 0,
+        "animation": "ken-burns"
       },
       "resolvedAudio": {
-        "filePath": "assets/audio/01-problem.wav",
-        "durationMs": 21400,
+        "filePath": "assets/audio/01-title.wav",
+        "durationMs": 13600,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "ea9b25e3a576"
+        "hash": "8f8e88b9e728"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 21800,
+        "sceneMs": 14000,
         "ratePct": 0,
-        "padVisualMs": 21800,
+        "padVisualMs": 14000,
         "padAudioMs": 0,
         "warnings": []
       },
       "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/01-problem.mp4",
-        "durationMs": 21800,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 966
-        },
-        "hash": "31bbef36edcc"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 966
+        "filePath": "assets/recordings/01-title.mp4",
+        "durationMs": 14000,
+        "roi": null,
+        "hash": "01b97e503a25"
       }
     },
     {
-      "id": "02-ed-queue",
-      "title": "Where the work starts",
-      "narration": "This is the emergency department intake board. Every waiting patient is here, ranked and visible. No paper, no clipboards, no radioing between bays.",
+      "id": "02-before-after-ed",
+      "title": "Before and after: the ED handoff",
+      "narration": "Today, an attending pages a registrar and waits. Notes are written on paper and re-keyed. We wanted the opposite: findings synthesised on arrival, confirmed in one click, and sent onward with no phone call at all.",
+      "visualEngine": "marp_slides",
+      "captureMode": "stills",
+      "actionSpec": {
+        "markdown": "scenes/02-before-after-ed.md",
+        "slideIndex": 0
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02-before-after-ed.wav",
+        "durationMs": 14525,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "e468aeb9d40c"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 14925,
+        "ratePct": 0,
+        "padVisualMs": 14925,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02-before-after-ed.mp4",
+        "durationMs": 14934,
+        "roi": null,
+        "hash": "987f81634905"
+      }
+    },
+    {
+      "id": "03-ed-queue",
+      "title": "ED intake queue",
+      "narration": "In the Emergency Department, every waiting patient is ranked and ready to review. Our tracer patient presents with acute coronary syndrome, a troponin of one hundred and eighty, and a falling blood pressure.",
       "visualEngine": "playwright_web",
       "captureMode": "stills",
-      "roiSelector": "table",
       "actionSpec": {
         "url": "/ed",
-        "setupScript": "scenes/setup-ed.mjs",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-ed.mjs",
         "roiSelector": "table"
       },
       "assert": {
         "visible": [
+          "Emergency Department",
           "Waiting ED Patients",
-          "Awaiting Assessment",
-          "Assess"
+          "Chua Wee Kiat",
+          "Acute Coronary Syndrome"
         ],
         "notVisible": [
+          "Something went wrong",
           "No static resource",
-          "Something went wrong"
+          "Sign in"
         ]
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/02-ed-queue.wav",
-        "durationMs": 10800,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "6ddb0e653fe1"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 11200,
-        "ratePct": 0,
-        "padVisualMs": 11200,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/02-ed-queue.mp4",
-        "durationMs": 11200,
+        "filePath": "assets/recordings/03-ed-queue.mp4",
+        "durationMs": 13650,
         "roi": {
           "x": 352,
-          "y": 420.703125,
+          "y": 507.359375,
           "width": 906.390625,
           "height": 393.5
         },
-        "hash": "7589ec3f5832"
+        "hash": "0bbcded7a90c"
       },
       "roi": {
         "x": 352,
-        "y": 420.703125,
+        "y": 507.359375,
         "width": 906.390625,
         "height": 393.5
-      }
-    },
-    {
-      "id": "03-ed-synthesis",
-      "title": "Instant diagnostic synthesis",
-      "narration": "The attending opens a troponin-positive chest pain case. The dossier is already filled in, proposing tier two, cardiology, with continuous telemetry. One review, not an hour of assembly.",
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "roiSelector": "form",
-      "actionSpec": {
-        "url": "/ed",
-        "setupScript": "scenes/setup-ed.mjs",
-        "showActions": true,
-        "actionLabelPosition": "top-right",
-        "tailMs": 9200,
-        "steps": [
-          {
-            "action": "click",
-            "selector": "tr:has-text(\"Chua Wee Kiat\") >> button",
-            "target": "Assess button on Chua Wee Kiat row",
-            "delayMs": 5000
-          },
-          {
-            "action": "waitForText",
-            "value": "Urgency Acuity Tier"
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "Emergency Department (ED) Clinical Intake",
-          "Smart Assessment Dossier",
-          "Waiting ED Patients"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
       },
       "resolvedAudio": {
-        "filePath": "assets/audio/03-ed-synthesis.r.wav",
-        "durationMs": 13925,
+        "filePath": "assets/audio/03-ed-queue.wav",
+        "durationMs": 13250,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "053b9fb8109a"
+        "hash": "35d778f10f81"
       },
       "resolvedTiming": {
-        "mode": "speech-fit-capped",
-        "sceneMs": 14832,
-        "ratePct": -7,
-        "padVisualMs": 0,
-        "padAudioMs": 131,
+        "mode": "audio-dictates",
+        "sceneMs": 13650,
+        "ratePct": 0,
+        "padVisualMs": 13650,
+        "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -7,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/03-ed-synthesis.mp4",
-        "durationMs": 14832.221923828125,
-        "roi": {
-          "x": 1185.5,
-          "y": 712.203125,
-          "width": 64.890625,
-          "height": 28
-        },
-        "hash": "cf14861e8a6a"
-      },
-      "roi": {
-        "x": 1185.5,
-        "y": 712.203125,
-        "width": 64.890625,
-        "height": 28
-      }
+      "ratePct": 0
     },
     {
-      "id": "04-ed-confirm",
-      "title": "One-click confirmation",
-      "narration": "The attending agrees with the synthesis and confirms a direct admission. The structured request dispatches straight to bed management. Zero phone calls placed.",
+      "id": "04-ed-dossier",
+      "title": "Smart assessment dossier",
+      "narration": "Opening his dossier, the system has already done the reading. It proposes an acuity tier, the cardiology service, a class B two bed, continuous telemetry, and fall precautions. The attending reviews, rather than retypes.",
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
-      "roiSelector": "form",
+      "roiSelector": "table",
       "actionSpec": {
         "url": "/ed",
-        "setupScript": "scenes/setup-ed.mjs",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-ed.mjs",
         "showActions": true,
-        "tailMs": 3500,
+        "actionLabelPosition": "top-right",
+        "tailMs": 1200,
         "steps": [
           {
             "action": "click",
-            "selector": "tr:has-text(\"Chua Wee Kiat\") >> button",
-            "target": "Assess button on Chua Wee Kiat row",
-            "delayMs": 1200
+            "text": "Chua Wee Kiat",
+            "target": "Chua Wee Kiat patient row",
+            "delayMs": 900
+          },
+          {
+            "action": "waitForText",
+            "value": "Smart Assessment Dossier"
           },
           {
             "action": "highlight",
-            "role": "button",
-            "name": "Confirm Direct Admission",
-            "target": "Confirm Direct Admission",
-            "delayMs": 3000
+            "target": "Continuous Telemetry Monitoring",
+            "text": "Continuous Telemetry Monitoring",
+            "delayMs": 2000
+          },
+          {
+            "action": "wait",
+            "delayMs": 5900
           }
         ]
       },
       "assert": {
         "visible": [
-          "Emergency Department (ED) Clinical Intake",
+          "Waiting ED Patients",
+          "Chua Wee Kiat",
           "Smart Assessment Dossier"
         ],
         "notVisible": [
-          "No static resource",
-          "Something went wrong"
+          "Something went wrong",
+          "No static resource"
         ]
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04-ed-dossier.mp4",
+        "durationMs": 12664.18603515625,
+        "roi": {
+          "x": 1130.328125,
+          "y": 798.96875,
+          "width": 410.671875,
+          "height": 16
+        },
+        "hash": "388a374b4b48"
+      },
+      "roi": {
+        "x": 1130.328125,
+        "y": 798.96875,
+        "width": 410.671875,
+        "height": 16
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/04-ed-confirm.r.wav",
-        "durationMs": 10700,
+        "filePath": "assets/audio/04-ed-dossier.r.wav",
+        "durationMs": 13100,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "c403cc93b334"
+        "hash": "f39e173ddd38"
       },
       "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 11332,
-        "ratePct": -4,
-        "padVisualMs": 0,
+        "mode": "reject",
+        "sceneMs": 12754,
+        "ratePct": 20,
+        "padVisualMs": 5990,
         "padAudioMs": 0,
-        "warnings": []
+        "warnings": [
+          "narration is 133% longer than the visual (limit 20%). Split the scene or rewrite the narration."
+        ]
       },
-      "ratePct": -4,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04-ed-confirm.mp4",
-        "durationMs": 11332.231201171875,
-        "roi": {
-          "x": 1091.328125,
-          "y": 1079.125,
-          "width": 460.671875,
-          "height": 32
-        },
-        "hash": "6b8a39a1dfba"
-      },
-      "roi": {
-        "x": 1091.328125,
-        "y": 1079.125,
-        "width": 460.671875,
-        "height": 32
-      }
+      "ratePct": 20
     },
     {
-      "id": "05-specialist-pool",
-      "title": "Specialist broadcast pool",
-      "narration": "When a case needs a specialist, it is broadcast to the on-call pool instead of paged to one registrar. Any cardiologist can claim it. The wait for a callback disappears.",
+      "id": "05-specialist-discordance",
+      "title": "Safety-first discordance",
+      "narration": "A second opinion is where safety is won or lost. Here the emergency tier reads acute stable, but the cardiologist sees a rising troponin and dynamic changes, and upgrades to tier two with mandatory telemetry.",
       "visualEngine": "playwright_web",
       "captureMode": "stills",
-      "roiSelector": "main",
       "actionSpec": {
         "url": "/specialist",
-        "setupScript": "scenes/setup-specialist.mjs",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-specialist.mjs",
         "roiSelector": "main"
       },
       "assert": {
         "visible": [
-          "Inpatient Specialist Consult Broadcast Pool",
-          "Claim"
+          "Consult Broadcast Pool",
+          "Mr Fernandez",
+          "Upgrading to Tier 2",
+          "TIER_2_ACUTE_URGENT"
         ],
         "notVisible": [
-          "No static resource",
-          "Something went wrong"
+          "Something went wrong",
+          "No static resource"
         ]
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/05-specialist-pool.wav",
-        "durationMs": 11500,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "81f323a4c593"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 11900,
-        "ratePct": 0,
-        "padVisualMs": 11900,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/05-specialist-pool.mp4",
-        "durationMs": 11900,
+        "filePath": "assets/recordings/05-specialist-discordance.mp4",
+        "durationMs": 15325,
         "roi": {
           "x": 320,
           "y": 65,
           "width": 1280,
-          "height": 1467.46875
+          "height": 1658.125
         },
-        "hash": "fc54aeaec594"
+        "hash": "04cc37d1baff"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
-        "height": 1467.46875
+        "height": 1658.125
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05-specialist-discordance.wav",
+        "durationMs": 14925,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "eb6391af0242"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 15325,
+        "ratePct": 0,
+        "padVisualMs": 15325,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
+    },
+    {
+      "id": "06-bmu-queue",
+      "title": "Direct digital bed queue",
+      "narration": "The moment consensus is reached, a structured packet lands in the bed management queue. No calls were placed. The coordinator sees admissions ranked by acuity, with the higher, safer tier already adopted.",
+      "visualEngine": "playwright_web",
+      "captureMode": "stills",
+      "actionSpec": {
+        "url": "/bmu",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-bmu.mjs",
+        "roiSelector": "main"
+      },
+      "assert": {
+        "visible": [
+          "Capacity & Allocation Hub",
+          "Prioritized Admission Requests",
+          "Tan Ah Meng",
+          "TIER_2_ACUTE_URGENT"
+        ],
+        "notVisible": [
+          "Something went wrong",
+          "No static resource"
+        ]
+      },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06-bmu-queue.mp4",
+        "durationMs": 14000,
+        "roi": {
+          "x": 320,
+          "y": 65,
+          "width": 1280,
+          "height": 2972.484375
+        },
+        "hash": "2bfce972fbae"
+      },
+      "roi": {
+        "x": 320,
+        "y": 65,
+        "width": 1280,
+        "height": 2972.484375
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06-bmu-queue.wav",
+        "durationMs": 13600,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "90099ae9bbf2"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 14000,
+        "ratePct": 0,
+        "padVisualMs": 14000,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
+    },
+    {
+      "id": "07-ghost-capacity",
+      "title": "Ghost capacity",
+      "narration": "But a queue is only as good as the beds behind it. And many beds are empty on paper, yet locked in practice.",
+      "visualEngine": "marp_slides",
+      "captureMode": "stills",
+      "actionSpec": {
+        "markdown": "scenes/03-ghost-capacity.md",
+        "slideIndex": 0,
+        "animation": "ken-burns"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07-ghost-capacity.wav",
+        "durationMs": 7125,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "316d68c485f2"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 7525,
+        "ratePct": 0,
+        "padVisualMs": 7525,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07-ghost-capacity.mp4",
+        "durationMs": 7534,
+        "roi": null,
+        "hash": "9398d6f3d350"
       }
     },
     {
-      "id": "06-specialist-claim",
-      "title": "Claim locks the case",
-      "narration": "A specialist claims a broadcast, and the case locks to them. Optimistic locking means two doctors can never claim the same patient.",
+      "id": "08-bmu-cohort-swap",
+      "title": "Dynamic cohort-swap",
+      "narration": "The solver finds a single patient blocking a flexible ward, and proposes moving him to an equivalent bed elsewhere. One approval liberates three beds and reopens the room for an incoming surge.",
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "roiSelector": "main",
       "actionSpec": {
-        "url": "/specialist",
-        "setupScript": "scenes/setup-specialist.mjs",
+        "url": "/bmu",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-bmu.mjs",
         "showActions": true,
-        "tailMs": 3900,
+        "actionLabelPosition": "top-right",
+        "tailMs": 1500,
         "steps": [
           {
             "action": "highlight",
-            "role": "button",
-            "name": "Claim Case",
-            "target": "Claim Case button on first broadcast",
-            "delayMs": 3000
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "Inpatient Specialist Consult Broadcast Pool",
-          "Claim Case"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/06-specialist-claim.r.wav",
-        "durationMs": 9075,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "29bbec1f22c3"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit-capped",
-        "sceneMs": 9898,
-        "ratePct": -7,
-        "padVisualMs": 0,
-        "padAudioMs": 143,
-        "warnings": []
-      },
-      "ratePct": -7,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06-specialist-claim.mp4",
-        "durationMs": 9897.705078125,
-        "roi": {
-          "x": 623.46875,
-          "y": 559.65625,
-          "width": 107.609375,
-          "height": 28
-        },
-        "hash": "3452178be202"
-      },
-      "roi": {
-        "x": 623.46875,
-        "y": 559.65625,
-        "width": 107.609375,
-        "height": 28
-      }
-    },
-    {
-      "id": "07-safety-discordance",
-      "title": "Safety-first discordance",
-      "narration": "Suppose the specialist upgrades the acuity while the attending rated it lower. The system does not stall for a debate. It adopts the higher tier and unions the telemetry requirement automatically, so patient safety is never the thing that waits.",
-      "visualEngine": "playwright_web",
-      "captureMode": "stills",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Bed Management Unit (BMU) Capacity & Allocation Hub",
-          "Safety Alignment"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07-safety-discordance.wav",
-        "durationMs": 16024.999999999998,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "37ad491f8781"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 16425,
-        "ratePct": 0,
-        "padVisualMs": 16425,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07-safety-discordance.mp4",
-        "durationMs": 16425,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 2972.484375
-        },
-        "hash": "83b522dfab91"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 2972.484375
-      }
-    },
-    {
-      "id": "08-bmu-capacity",
-      "title": "Live capacity at a glance",
-      "narration": "Bed management sees the whole hospital in four colours. Grey is occupied, green is in transit, white is clean and ready, and mustard yellow is being turned over. Occupancy is a live number, not a morning guess.",
-      "visualEngine": "playwright_web",
-      "captureMode": "stills",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Hospital Occupancy",
-          "Green (In-Transit)",
-          "White (Available)",
-          "Grey (Occupied)"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08-bmu-capacity.wav",
-        "durationMs": 14325,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "c95898b31e78"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 14725,
-        "ratePct": 0,
-        "padVisualMs": 14725,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08-bmu-capacity.mp4",
-        "durationMs": 14725,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 2972.484375
-        },
-        "hash": "419159894668"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 2972.484375
-      }
-    },
-    {
-      "id": "09-bmu-solver",
-      "title": "The solver recommends",
-      "narration": "The coordinator picks a request, and a pure Java heuristic scores every eligible bed against hard safety invariants and soft preferences in under fifty milliseconds. The top three matches appear with the reasoning shown.",
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "showActions": true,
-        "tailMs": 8000,
-        "steps": [
-          {
-            "action": "click",
-            "role": "button",
-            "name": "Select",
-            "target": "Select button on first queued request",
-            "delayMs": 5500
+            "target": "Dynamic Cohort-Swap Proposal heading",
+            "text": "Dynamic Cohort-Swap Proposal",
+            "delayMs": 1800
           },
           {
-            "action": "waitForText",
-            "value": "Solver Recommendation"
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "Solver Recommendation",
-          "Prioritized Admission Requests"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09-bmu-solver.r.wav",
-        "durationMs": 13975,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "3fae581953bb"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 14129,
-        "ratePct": 5.6,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 5.6,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09-bmu-solver.mp4",
-        "durationMs": 14129.050048828125,
-        "roi": {
-          "x": 1422.265625,
-          "y": 1212.28125,
-          "width": 58.265625,
-          "height": 28
-        },
-        "hash": "2b938f20056c"
-      },
-      "roi": {
-        "x": 1422.265625,
-        "y": 1212.28125,
-        "width": 58.265625,
-        "height": 28
-      }
-    },
-    {
-      "id": "10-cohort-swap",
-      "title": "Recovering ghost capacity",
-      "narration": "Here is capacity hiding in plain sight. A whole flex ward is blocked by one isolated patient. The solver proposes a cohort swap: move that single patient to an equivalent bed, and the entire cubicle reopens for a surge cohort. No new beds built.",
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "showActions": true,
-        "tailMs": 5000,
-        "steps": [
-          {
             "action": "highlight",
-            "role": "button",
-            "name": "Approve Cohort Swap",
-            "target": "Approve Cohort Swap",
-            "delayMs": 8000
+            "target": "Approve Cohort Swap button",
+            "text": "Approve Cohort Swap",
+            "delayMs": 2200
+          },
+          {
+            "action": "wait",
+            "delayMs": 1650
           }
         ]
       },
       "assert": {
         "visible": [
           "Dynamic Cohort-Swap Proposal",
-          "Approve Cohort Swap"
+          "Beds Liberated",
+          "Approve Cohort Swap",
+          "Live Bed Inventory Matrix"
         ],
         "notVisible": [
-          "No static resource",
-          "Something went wrong"
+          "Something went wrong",
+          "No static resource"
         ]
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10-cohort-swap.r.wav",
-        "durationMs": 18350,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "3d179615a86b"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit-capped",
-        "sceneMs": 20979,
-        "ratePct": -7,
-        "padVisualMs": 0,
-        "padAudioMs": 1682,
-        "warnings": []
-      },
-      "ratePct": -7,
       "resolvedVisual": {
-        "filePath": "assets/recordings/10-cohort-swap.mp4",
-        "durationMs": 20979.3701171875,
+        "filePath": "assets/recordings/08-bmu-cohort-swap.mp4",
+        "durationMs": 11149.421142578125,
         "roi": {
           "x": 1407.75,
           "y": 920.140625,
           "width": 144.25,
           "height": 28
         },
-        "hash": "6bd38a295eda"
+        "hash": "c3d2ac233810"
       },
       "roi": {
         "x": 1407.75,
         "y": 920.140625,
         "width": 144.25,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08-bmu-cohort-swap.r.wav",
+        "durationMs": 11350,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "bfa7a66ce493"
+      },
+      "resolvedTiming": {
+        "mode": "reject",
+        "sceneMs": 11108,
+        "ratePct": 20,
+        "padVisualMs": 1610,
+        "padAudioMs": 0,
+        "warnings": [
+          "narration is 41% longer than the visual (limit 20%). Split the scene or rewrite the narration."
+        ]
+      },
+      "ratePct": 20
     },
     {
-      "id": "11-bed-matrix",
-      "title": "The bed lifecycle",
-      "narration": "Every bed moves through the same four-state machine, with strict transition gates. The matrix makes the state of the whole building legible at once.",
+      "id": "09-bmu-config",
+      "title": "Tunable solver policy",
+      "narration": "The scoring behind those matches is not a black box. Coordinators tune specialty alignment, cubicle packing, and fall-risk proximity, or switch whole presets when a surge demands it.",
       "visualEngine": "playwright_web",
       "captureMode": "stills",
-      "roiSelector": "main",
       "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/setup-bmu.mjs",
+        "url": "/bmu/config",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-bmu.mjs",
         "roiSelector": "main"
       },
       "assert": {
         "visible": [
-          "Live Bed Inventory Matrix",
-          "Mustard Yellow",
-          "Green (Assigned)"
+          "Optimization Weight Configuration",
+          "Specialty Alignment",
+          "Consolidation Packing",
+          "Save Configuration"
         ],
         "notVisible": [
-          "No static resource",
-          "Something went wrong"
+          "Something went wrong",
+          "No static resource"
         ]
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/11-bed-matrix.wav",
-        "durationMs": 9325,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "4dc4bef46e95"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 9725,
-        "ratePct": 0,
-        "padVisualMs": 9725,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/11-bed-matrix.mp4",
-        "durationMs": 9725,
+        "filePath": "assets/recordings/09-bmu-config.mp4",
+        "durationMs": 12575,
         "roi": {
           "x": 320,
           "y": 65,
           "width": 1280,
-          "height": 2972.484375
+          "height": 1042.125
         },
-        "hash": "ecc9f9656a3e"
+        "hash": "a7947c51176c"
       },
       "roi": {
         "x": 320,
         "y": 65,
         "width": 1280,
-        "height": 2972.484375
-      }
-    },
-    {
-      "id": "12-diversion",
-      "title": "Deterministic care diversion",
-      "narration": "Not every patient needs an acute bed. A stable subacute case is endorsed for diversion, with a referral to a community hospital already attached. That frees an acute bed for someone who truly needs it, without a fifteen-page manual packet.",
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "showActions": true,
-        "actionLabelPosition": "top-right",
-        "tailMs": 2500,
-        "steps": [
-          {
-            "action": "click",
-            "selector": "tr:has-text(\"Ahmad Ibrahim\") button:has-text(\"Select\")",
-            "target": "Select button on Mr Ahmad Ibrahim subacute diversion row",
-            "delayMs": 2000
-          },
-          {
-            "action": "waitForText",
-            "value": "Outram Community Hospital"
-          },
-          {
-            "action": "highlight",
-            "role": "button",
-            "name": "Enact Diversion",
-            "target": "Enact Diversion",
-            "delayMs": 6600
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "Prioritized Admission Requests",
-          "Subacute Endorsed",
-          "REF-OCH-8812"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
+        "height": 1042.125
       },
       "resolvedAudio": {
-        "filePath": "assets/audio/12-diversion.r.wav",
-        "durationMs": 19650,
+        "filePath": "assets/audio/09-bmu-config.wav",
+        "durationMs": 12175,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "b012c0028cd3"
-      }
+        "hash": "6d9326dee5e1"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 12575,
+        "ratePct": 0,
+        "padVisualMs": 12575,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
-      "id": "13-patient-tracker",
-      "title": "The family finally sees",
-      "narration": "Meanwhile the family opens a tracker on a phone, with a token and no app to install. They see the journey in three stages, an estimated wait, and their position in the queue for their ward class.",
+      "id": "10-patient-tracker",
+      "title": "Patient milestone tracker",
+      "narration": "The family sees the same journey, without the anxiety. A phone link shows three clear milestones, the estimated wait, the queue position by ward class, and a plain-language note on cost. No calls to the nurses' counter.",
       "visualEngine": "playwright_web",
       "captureMode": "stills",
-      "roiSelector": ".max-w-\\[390px\\]",
       "actionSpec": {
         "url": "/patient",
-        "setupScript": "scenes/setup-patient.mjs",
-        "roiSelector": ".max-w-\\[390px\\]"
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-patient.mjs",
+        "roiSelector": "main"
       },
       "assert": {
         "visible": [
-          "Patient & Family Public Milestone Tracker",
+          "Public Milestone Tracker",
+          "Admission Journey Tracker",
           "Journey Milestones",
-          "Est. Wait Time"
+          "FYI Insights"
         ],
         "notVisible": [
+          "Something went wrong",
           "No static resource",
-          "Something went wrong"
+          "Failed to track"
         ]
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10-patient-tracker.mp4",
+        "durationMs": 14900,
+        "roi": {
+          "x": 320,
+          "y": 65,
+          "width": 1280,
+          "height": 1264.328125
+        },
+        "hash": "e8f3215ac8b0"
+      },
+      "roi": {
+        "x": 320,
+        "y": 65,
+        "width": 1280,
+        "height": 1264.328125
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/13-patient-tracker.wav",
-        "durationMs": 12750,
+        "filePath": "assets/audio/10-patient-tracker.wav",
+        "durationMs": 14500,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "3347015247c9"
+        "hash": "bc20b1d7e927"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 13150,
+        "sceneMs": 14900,
         "ratePct": 0,
-        "padVisualMs": 13150,
+        "padVisualMs": 14900,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
+    },
+    {
+      "id": "11-ward-discharge",
+      "title": "Discharge runway and turnover",
+      "narration": "On the ward, discharge starts two days early. Each bed carries an estimated date and a confidence, so morning sign-off queues the bedside medicines and the thirty-minute cleaning clock, freeing the bed before noon.",
+      "visualEngine": "playwright_web",
+      "captureMode": "stills",
+      "actionSpec": {
+        "url": "/ward",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-ward.mjs",
+        "roiSelector": "main"
+      },
+      "assert": {
+        "visible": [
+          "Ward Reception & Bed Control",
+          "Potential Discharge",
+          "Final Discharge Sign-Off",
+          "Bedside Meds"
+        ],
+        "notVisible": [
+          "Something went wrong",
+          "No static resource"
+        ]
+      },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/11-ward-discharge.mp4",
+        "durationMs": 13875,
+        "roi": {
+          "x": 320,
+          "y": 65,
+          "width": 1280,
+          "height": 1056.203125
+        },
+        "hash": "65b1ffb164ca"
+      },
+      "roi": {
+        "x": 320,
+        "y": 65,
+        "width": 1280,
+        "height": 1056.203125
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/11-ward-discharge.wav",
+        "durationMs": 13475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "360cb226976e"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13875,
+        "ratePct": 0,
+        "padVisualMs": 13875,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
+    },
+    {
+      "id": "12-analytics",
+      "title": "Operational control tower",
+      "narration": "Every step leaves a measurable trace. The control tower reports specialist claim latency, digital bed requests, diversions preserved, and turnaround times, across intake, allocation, experience, and discharge.",
+      "visualEngine": "playwright_web",
+      "captureMode": "stills",
+      "actionSpec": {
+        "url": "/analytics",
+        "waitUntil": "networkidle",
+        "setupScript": "scenes/role-bmu.mjs",
+        "roiSelector": "main"
+      },
+      "assert": {
+        "visible": [
+          "Operational KPI",
+          "Specialist Claim Latency",
+          "Digital Bed Requests",
+          "Turnover Cleaning Avg"
+        ],
+        "notVisible": [
+          "Something went wrong",
+          "No static resource"
+        ]
+      },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/12-analytics.mp4",
+        "durationMs": 14675,
+        "roi": {
+          "x": 320,
+          "y": 65,
+          "width": 1280,
+          "height": 1162.8125
+        },
+        "hash": "9ed94779407e"
+      },
+      "roi": {
+        "x": 320,
+        "y": 65,
+        "width": 1280,
+        "height": 1162.8125
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/12-analytics.wav",
+        "durationMs": 14275,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "8494abe829e9"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 14675,
+        "ratePct": 0,
+        "padVisualMs": 14675,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
+    },
+    {
+      "id": "13-closing",
+      "title": "Call to action",
+      "narration": "Bed capacity is not fixed. When decisions are synthesised in real time, constraints are solved by maths rather than by phone, and discharge is pulled into the morning, we recover the capacity that was there all along. Explore the live prototype.",
+      "visualEngine": "marp_slides",
+      "captureMode": "stills",
+      "actionSpec": {
+        "markdown": "scenes/09-closing.md",
+        "slideIndex": 0,
+        "animation": "ken-burns"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/13-closing.wav",
+        "durationMs": 16300,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "525443e791c7"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 16700,
+        "ratePct": 0,
+        "padVisualMs": 16700,
         "padAudioMs": 0,
         "warnings": []
       },
       "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/13-patient-tracker.mp4",
-        "durationMs": 13150,
+        "filePath": "assets/recordings/13-closing.mp4",
+        "durationMs": 16700,
         "roi": null,
-        "hash": "b7baad38c1a0"
-      }
-    },
-    {
-      "id": "14-patient-update",
-      "title": "Transparency, not silence",
-      "narration": "When there is a delay, the tracker explains it in plain, empathetic language instead of leaving the family to imagine the worst. A periodic update keeps everyone informed, and the triage nurse is freed to care for patients.",
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "roiSelector": ".max-w-\\[390px\\]",
-      "actionSpec": {
-        "url": "/patient",
-        "setupScript": "scenes/setup-patient.mjs",
-        "roiSelector": ".max-w-\\[390px\\]",
-        "showActions": true,
-        "tailMs": 4000,
-        "steps": [
-          {
-            "action": "highlight",
-            "role": "button",
-            "name": "Simulate Periodic Update",
-            "target": "Simulate Periodic Update",
-            "delayMs": 5500
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "Patient & Family Public Milestone Tracker",
-          "Simulate Periodic Update"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/14-patient-update.r.wav",
-        "durationMs": 14375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "5b031ac470f5"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 14981,
-        "ratePct": -2.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -2.4,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/14-patient-update.mp4",
-        "durationMs": 14981.200927734375,
-        "roi": {
-          "x": 1057.703125,
-          "y": 180,
-          "width": 187.03125,
-          "height": 28
-        },
-        "hash": "5cc287e95386"
-      },
-      "roi": {
-        "x": 1057.703125,
-        "y": 180,
-        "width": 187.03125,
-        "height": 28
-      }
-    },
-    {
-      "id": "15-ward-runway",
-      "title": "Discharge, pulled forward",
-      "narration": "On the ward, discharge is planned days ahead. The runway shows an estimated discharge date with a confidence rating, so caregivers are engaged early rather than surprised on the morning of departure.",
-      "visualEngine": "playwright_web",
-      "captureMode": "stills",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/ward",
-        "setupScript": "scenes/setup-ward.mjs",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Inpatient Ward Reception & Bed Control",
-          "Ward Nursing Station Bed Control"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/15-ward-runway.wav",
-        "durationMs": 13325,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "67b7d1ec685d"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13725,
-        "ratePct": 0,
-        "padVisualMs": 13725,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/15-ward-runway.mp4",
-        "durationMs": 13725,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 1056.203125
-        },
-        "hash": "32bf17bc8e1e"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 1056.203125
-      }
-    },
-    {
-      "id": "16-ward-turnover",
-      "title": "Thirty-minute turnover",
-      "narration": "When a patient leaves, the bed turns mustard yellow and housekeeping starts a thirty-minute cleaning countdown. The moment it is clean, it is white and back in the allocation pool. The afternoon gridlock is gone.",
-      "visualEngine": "playwright_web",
-      "captureMode": "stills",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/ward",
-        "setupScript": "scenes/setup-ward.mjs",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Inpatient Ward Reception & Bed Control",
-          "Ward Nursing Station Bed Control"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/16-ward-turnover.wav",
-        "durationMs": 13500,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "e8a1adcd5eb9"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13900,
-        "ratePct": 0,
-        "padVisualMs": 13900,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/16-ward-turnover.mp4",
-        "durationMs": 13900,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 1056.203125
-        },
-        "hash": "2851e5df8458"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 1056.203125
-      }
-    },
-    {
-      "id": "17-analytics",
-      "title": "The operational control tower",
-      "narration": "Every step feeds one dashboard. Eighteen operational metrics span emergency intake, bed capacity and diversions, family milestones, and discharge turnover. Each one is auditable through both a database query and the structured log.",
-      "visualEngine": "playwright_web",
-      "captureMode": "stills",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/analytics",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Hospital Operational KPI & Executive Analytics",
-          "BMU Capacity Orchestration & Diversions"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/17-analytics.wav",
-        "durationMs": 16175,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "3612897d59f5"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 16575,
-        "ratePct": 0,
-        "padVisualMs": 16575,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/17-analytics.mp4",
-        "durationMs": 16575,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 1162.8125
-        },
-        "hash": "6c70aa81b21c"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 1162.8125
-      }
-    },
-    {
-      "id": "18-analytics-refresh",
-      "title": "Live executive metrics",
-      "narration": "Leadership refreshes the numbers and sees the whole system in one view: assessment turnaround, specialist concordance, capacity recovered, and discharges before midday.",
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/analytics",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "showActions": true,
-        "tailMs": 4000,
-        "steps": [
-          {
-            "action": "highlight",
-            "role": "button",
-            "name": "Refresh Metrics",
-            "target": "Refresh Metrics",
-            "delayMs": 3500
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "Hospital Operational KPI & Executive Analytics",
-          "Refresh Metrics"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/18-analytics-refresh.r.wav",
-        "durationMs": 10850,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "b7aaa25676b2"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit-capped",
-        "sceneMs": 11031,
-        "ratePct": 7,
-        "padVisualMs": 49,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 7,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/18-analytics-refresh.mp4",
-        "durationMs": 10982.280029296875,
-        "roi": {
-          "x": 1410.015625,
-          "y": 128,
-          "width": 136.984375,
-          "height": 28
-        },
-        "hash": "9438b40c54e7"
-      },
-      "roi": {
-        "x": 1410.015625,
-        "y": 128,
-        "width": 136.984375,
-        "height": 28
-      }
-    },
-    {
-      "id": "19-cta",
-      "title": "Explore the prototype",
-      "narration": "Capacity was there all along. When decisions are synthesised in real time, beds are solved mathematically rather than over the phone, and discharge is pulled into morning rounds, hidden capacity comes back. Explore the live prototype, test the clinical flows, and inspect the constraint engine for yourself.",
-      "visualEngine": "playwright_web",
-      "captureMode": "stills",
-      "chapter": {
-        "title": "Explore the live prototype",
-        "description": "enhance-hospital-admissions.onrender.com",
-        "durationMs": 4500
-      },
-      "roiSelector": "main",
-      "actionSpec": {
-        "url": "/analytics",
-        "setupScript": "scenes/setup-bmu.mjs",
-        "roiSelector": "main"
-      },
-      "assert": {
-        "visible": [
-          "Hospital Operational KPI & Executive Analytics"
-        ],
-        "notVisible": [
-          "No static resource",
-          "Something went wrong"
-        ]
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/19-cta.wav",
-        "durationMs": 19950,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "d394b04d41fe"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 20350,
-        "ratePct": 0,
-        "padVisualMs": 20350,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/19-cta.mp4",
-        "durationMs": 20350,
-        "roi": {
-          "x": 320,
-          "y": 65,
-          "width": 1280,
-          "height": 1162.8125
-        },
-        "hash": "f15f9cb368d8"
-      },
-      "roi": {
-        "x": 320,
-        "y": 65,
-        "width": 1280,
-        "height": 1162.8125
+        "hash": "aaa67aa555a1"
       }
     }
   ]

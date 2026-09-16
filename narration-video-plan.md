@@ -192,7 +192,7 @@ Status Quo    Discordance   MIC@Home     Cohort-Swap  Tracker      Block Meds   
   * Review the 18 operational metrics: ED assessment turnaround, specialist concordance, bed capacity utilization gain, ghost bed reduction, and discharge before midday.
   * Founder addresses the viewer on camera:
 * **Closing Monologue & Call to Action:**
-  > "Hospital bed capacity is not fixed in concrete. When clinical decisions are synthesized in real-time, when bed constraints are solved mathematically rather than over the phone, and when discharge logistics are pulled forward into morning rounds—we recover bed capacity that was there all along.
+  > "Hospital bed capacity is not fixed. When clinical decisions are synthesized in real-time, when bed constraints are solved mathematically rather than over the phone, and when discharge logistics are pulled forward into morning rounds—we recover bed capacity that was there all along.
   >
   > We invite hospital leaders, clinical chiefs, and healthcare innovators to explore the interactive live prototype deployed on Render. Test the clinical flows, inspect the constraint engine, and see how intelligent orchestration can transform hospital admissions."
 * **Closing Screen:**

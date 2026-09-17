@@ -12,7 +12,8 @@
 
 ## 1. Executive Summary & Strategic Intent
 
-This video is an authoritative, in-depth **product walkthrough film** (~10–12 minutes) whose purpose
+This video is an authoritative, in-depth **product walkthrough film** (~14–16+ minutes — runtime
+ceiling lifted per Decision #20-e; full feature coverage outranks completion rate) whose purpose
 is to fully explain the concept, features, and usefulness of the **Patient Admission & Discharge
 Management Application** — how it intends to solve the systemic hospital bed-crunch pain points.
 Rather than abstract slide-ware, the film walks through the **live, running prototype**, proving how
@@ -81,7 +82,11 @@ system built to demonstrate it. **These are the exact names/tokens shown on scre
   patients above. *(Revised from an on-camera founder-led cinematic format — see Decision #5.)*
 * **Supporting slide layer:** The existing `video-generation/` Marp pipeline supplies the title card,
   the walled-off **Before vs. After** contrast panels, and inter-act transitions — not the core
-  walkthrough.
+  walkthrough. **This slide layer is being upgraded into a polished, SCR-structured pitch deck that
+  doubles as the film's narrative spine — see §7.** The deck's slides replace the current wordy Marp
+  cards and are slotted into the storyboard as per-pain-point *setup* cards ("here is the issue, here
+  is the resolution") that immediately hand off to the live Playwright walkthrough that demonstrates
+  the resolution.
 * **Routes captured:** `/ed`, `/specialist`, `/bmu`, `/bmu-config`, `/patient`, `/ward`, `/analytics`.
   (Persona switching via the prototype `X-User-Role` header: `ED_ATTENDING`, `SPECIALIST`,
   `BMU_COORDINATOR`, `PATIENT`, `WARD_NURSE`, `HOUSEKEEPING`.)
@@ -102,7 +107,9 @@ system built to demonstrate it. **These are the exact names/tokens shown on scre
 
 ---
 
-## 5. Master Beat Sheet & Scene-by-Scene Script (10–12 Minutes)
+## 5. Master Beat Sheet & Scene-by-Scene Script (est. 14–16+ Minutes, runtime ceiling lifted per
+Decision #20-e — timestamps below are pre-expansion and will shift once the 5 added capture scenes
+in Beats 1 and 3 are timed)
 
 ```
 00:00      01:15      03:30      05:00      07:30      09:00      10:30      12:00
@@ -145,42 +152,60 @@ not change the linear film — Decision #7).*
 * **Before contrast (walled-off):** ED attending paging a registrar and waiting for a callback;
   fragmented paper notes; bed requests placed by phone.
 
-* **Live walkthrough:**
-  1. **Beat 1a — Diagnostic synthesis (PP1):** On `/ed`, open **Chua Wee Kiat (`Q-P120`, 64M)**. His
-     seeded baseline (BP 98/62, HR 112, SpO₂ 94, **troponin 180 ng/L**, WBC 13.2) drives the smart
-     assessment to pre-populate **Tier 2 Acute Urgent, Cardiology, continuous telemetry**. Attending
-     confirms with 1 click. (Contrast with **Nurul Huda `Q-P121`**, whose normal troponin defaults to
-     the stable Tier 3 / General Medicine / no-telemetry pathway.)
-  2. **Specialist broadcast pool:** Switch to `/specialist`. Show the discordant case
+* **Scene-level SCR discipline (Decision #20):** every capture scene in this beat is tested against
+  the **visibility-of-tension test** (Decision #20-b): a scene earns its own micro-SCR only if the
+  complication is not visible in the same frame, or the action on screen could otherwise read as
+  arbitrary. The **first** capture after the beat's setup slide is self-contained (Option A); every
+  capture after it **threads** off the immediately preceding scene's resolution rather than
+  re-establishing tension from zero (Option B) — see Decision #20-c. Hidden-depth features get a
+  one-clause thread-in, then a direct, unhedged sell with no invented tension (Decision #20-d/g).
+
+* **Live walkthrough — six capture scenes, up from three (Decision #20-h, grounded against the
+  retired Marp storyboard `storyboard.marp-old.json`, itself re-verified live against
+  `frontend/src/routes/*.tsx`):**
+  1. **`04a` — Diagnostic synthesis (PP1), self-contained:** On `/ed`, open
+     **Chua Wee Kiat (`Q-P120`, 64M)**. His seeded baseline (BP 98/62, HR 112, SpO₂ 94,
+     **troponin 180 ng/L**, WBC 13.2) drives the smart assessment to pre-populate **Tier 2 Acute
+     Urgent, Cardiology, continuous telemetry**. Attending confirms with 1 click.
+  2. **`04a2` — The five-tier framework + stable-pathway contrast, threaded:** *(new scene)* Still on
+     `/ed`, open the **Urgency Acuity Tier** selector (`ed.tsx` line 708) to show the full spectrum —
+     Tier 1 Critical/Resuscitation through Tier 5 Extended Observation/CDU — then cut to
+     **Nurul Huda (`Q-P121`, 47F, pneumonia, normal troponin — confirmed live in
+     `DataInitializer.java` line 946/953)**, whose case defaults to the stable Tier 3 / General
+     Medicine / no-telemetry pathway. This is the PP1 contrast pair named in §3's table but never
+     previously captured — a genuine gap closed, not an invented one.
+  3. **`04b` — Specialist discordance, threaded:** Switch to `/specialist`. Show the discordant case
      **Mr Fernandez (`Q-P105`)**: ED assessed Tier 3; the Cardiology specialist's completed consult
      note reads *"Elevated troponin trend and dynamic ST changes. Upgrading to Tier 2. Continuous
-     telemetry mandatory. Recommending chained surgery review for concurrent abdominal pain."*
-  3. **Safety-first discordance engine:** Show both judgments side-by-side. Explain the invariant: the
-     system **auto-adopts the higher acuity tier (effective Tier 2) and unions telemetry**, and a
-     **chained Surgery broadcast** keeps the consensus gate open — all without delaying dispatch.
-  4. **Beat 1b — Direct digital BMU dispatch (PP2, zero phone calls):** Show structured packets
-     entering the BMU queue digitally. No phone call is placed.
-
-* **Hidden-depth features to surface in this beat (implemented & verified):**
-  * **SLA-timeout default on-call auto-assignment** *(Story 1.2.2)* — narrate that if no specialist
-    claims a broadcast within the SLA window, the system auto-assigns the designated default on-call
-    physician. Message: *"a consult is never lost to an unmonitored feed."*
-  * **Side-by-side reconcile + secure clinician messaging** *(Story 1.3.2)* — on the discordance
-    view, highlight the dual-column comparison and the "Prompt Clinician Reconcile" action. Message:
-    *"clinical autonomy is preserved — the system escalates for safety but opens a channel for the
-    doctors to align."*
-  * **Consult chaining** — Mr Fernandez's Cardiology consult *chains* an open Surgery broadcast for
-    concurrent abdominal pain; the consensus gate stays open until it resolves. Message:
-    *"multi-specialty cases run in parallel, not in a serial queue of phone calls."*
-  * **5-Tier priority framework** — briefly show the disposition spectrum (Tier 1 Critical/ICU → Tier
-    5 Short-Stay/CDU) so the audience sees the model covers the whole admit/observe/divert range.
+     telemetry mandatory."* Explain the safety-first invariant: the system auto-adopts the higher
+     acuity tier and unions telemetry.
+  4. **`04b2` — Consult chaining, threaded:** *(new scene)* Fernandez's case doesn't stop at
+     Cardiology — it **chains an open Surgery broadcast** for concurrent abdominal pain via the
+     **Chain Consult** action (confirmed live in `specialist.tsx` line 483, `useChainConsult` hook).
+     The consensus gate stays open until every chained consult resolves — multi-specialty cases run
+     in parallel, not a serial queue of phone calls.
+  5. **`04c` — Direct digital BMU dispatch (PP2, zero phone calls), threaded:** Show structured
+     packets entering the BMU queue digitally. No phone call is placed.
+  6. **`04c2` — Reconcile without blocking, hidden-depth direct-sell:** *(new scene)* On `/bmu`, the
+     coordinator is not locked out of the clinical picture — the **"View Comparative Notes"** action
+     (confirmed live in `bmu.tsx` line 381) opens a **side-by-side "Clinical Consensus & Comparative
+     Notes"** view of the ED and specialist assessments, so clinical autonomy is preserved even after
+     the safety-first escalation has already fired.
 
 * **On-screen badges:**
   * `Phone calls: 0` *(LIVE — workflow property; every bed request is digital)*
   * `Effective acuity: Tier 2 (safety-first escalation)` *(LIVE — from Q-P105)*
-  * `Consult SLA: auto-escalates to default on-call` *(LIVE — architectural/workflow property)*
+  * `Chained consult: Surgery` *(LIVE — from Q-P105)*
   * `Diagnostic deliberation latency` *(PROJECTED / design target — the app does not compute a
     before/after delta)*
+
+* **Documented gap — not captured (Decision #20-f/g):** the plan's originally-named
+  **SLA-timeout default on-call auto-assignment** has **no on-screen surface at all** — it is a
+  backend fallback map (`ClinicianService.java`, `DEFAULT_SPECIALISTS.getOrDefault(...)`) with no
+  visible countdown, banner, or button. Per Decision #20-f/g, this is still narrated — as a plain,
+  unhedged, "behind the scenes" assertion layered over the existing `/specialist` broadcast-pool
+  footage in `04b` or `04b2` — rather than dropped, accepting the credibility trade-off the user
+  explicitly chose over the recommended verbal hedge.
 
 ---
 
@@ -217,19 +242,31 @@ not change the linear film — Decision #7).*
 * **Before contrast (walled-off):** A 6-bed Class B2 cubicle with 5 empty beds that *cannot* be used
   because one patient's gender/infection profile locks the room.
 
-* **Live walkthrough:**
-  1. **The 4-state bed lifecycle** (exact enum, verified): `Mustard Yellow` (vacated, pending 30-min
-     cleaning) → `White` (clean, available) → `Green` (assigned/in-transit) → `Grey` (occupied).
-  2. **Cubicle cohort locking** on ⟨Ward Class, Gender, Infection Status⟩.
-  3. **Heuristic constraint solver (verified: 4 hard constraints + 3 soft rules):** Process
-     **Tan Ah Meng (`Q-P101`)**'s request against hard invariants (ward class, gender, telemetry,
-     infection isolation) and soft scoring (Specialty +40, Consolidation +30, Fall-risk proximity +15).
-     Show the **Top-3 recommended beds** with rationale.
-  4. **Batch holding ward:** The male B2 non-infectious surge cluster (**Tan Ah Meng + Goh Beng Kiat +
-     Teo Hock Seng**) triggers the **Ward 8B** batch holding-room recommendation (4 unlocked beds).
-  5. **Dynamic cohort-swap:** **Ward 9B** is blocked by a single Green reservation — **Mr David Koh
-     (`Q-P115`, 9B-01)**, who hasn't left the ED. The solver surfaces a **Cohort-Swap Suggestion**:
-     move Koh to **8A-03**, resetting Ward 9B to all-`White` for a batch surge cohort. 1-click approval.
+* **Live walkthrough — five capture scenes, up from four (Decision #20-h):**
+  1. **`07a` — The four-state bed lifecycle, self-contained (new scene, inserted first in this beat):**
+     Before any mechanism can make sense, the lifecycle itself has to be shown, not just narrated —
+     the old Marp-era storyboard proved this is independently capturable on `/bmu`'s
+     **"Live Bed Inventory Matrix (Level → Ward → Bed)"** panel (confirmed live in `bmu.tsx` line
+     1274), with all four states visible at once: `Mustard Yellow` (vacated, pending 30-min cleaning,
+     line 432/539) → `White` (clean, available) → `Green` (assigned/in-transit) → `Grey` (occupied).
+     This scene is placed **before** the solver scene, not after — pack-then-batch and cohort-swap are
+     both operations *on* this lifecycle, so the audience needs the states named before either
+     mechanism is demonstrated.
+  2. **`08a` — Heuristic constraint solver, threaded off the lifecycle:** Process
+     **Tan Ah Meng (`Q-P101`)**'s request against 4 hard invariants (ward class, gender, telemetry,
+     infection isolation) and 3 soft scoring rules (Specialty +40, Consolidation +30, Fall-risk
+     proximity +15). Show the **Top-3 recommended beds** with rationale, in under 50ms.
+  3. **`08b` — Batch holding ward, threaded:** The male B2 non-infectious surge cluster
+     (**Tan Ah Meng + Goh Beng Kiat + Teo Hock Seng**) triggers the **Ward 8B** batch holding-room
+     recommendation (4 unlocked beds) — the same solver, run across a cluster at once.
+  4. **`08c` — Dynamic cohort-swap, threaded:** **Ward 9B** is blocked by a single Green reservation —
+     **Mr David Koh (`Q-P115`, 9B-01)**, who hasn't left the ED. The solver surfaces a
+     **Cohort-Swap Suggestion**: move Koh to **8A-03**, resetting Ward 9B to all-`White` for a batch
+     surge cohort. 1-click approval.
+  5. **`08d` — Tunable solver policy, hidden-depth direct-sell:** The scoring behind those three
+     decisions is not fixed — a coordinator can retune **Specialty Alignment Weight** and the other
+     scoring weights live, on the **"BMU Optimization Weight Configuration"** screen (`/bmu/config`,
+     confirmed live in `bmu-config.tsx` line 30/59/162/301).
 
 * **Hidden-depth features to surface in this beat (implemented & verified):**
   * **Two-phase strategy — the actual mechanism that recovers ghost capacity:** make explicit that
@@ -295,14 +332,22 @@ not change the linear film — Decision #7).*
      show the overdue-alert state honestly.)
 
 * **Hidden-depth features to surface in this beat (implemented & verified):**
-  * **Early caregiver readiness checklist** *(Story 4.1.2)* — at D-2/D-3, nurses work a structured
-    checklist (insulin/wound training, home-equipment setup, transport booking) that flips to
-    *"Ready for midday discharge"* only when complete. Message: *"the human bottleneck — unprepared
-    caregivers — is retired days early, not on the discharge morning."*
   * **Closed-loop BMU bed release** — terminal-cleaning sign-off doesn't just flip the bed to
     `White`; it **auto-notifies BMU** that the bed is allocatable, closing the ED→ward→turnover→ED
     loop. Message: *"the recovered bed re-enters the allocation engine automatically — no phone call
-    to tell BMU it's ready."*
+    to tell BMU it's ready."* Placed as a **threaded hidden-depth clause folded into the existing
+    housekeeping-turnover capture** (the old Marp-era storyboard's `29-ward-turnover` narrated this
+    exact claim over the turnover-queue screen itself — the most specific, credible target available,
+    reused here rather than inventing a sixth Beat 5 scene per Decision #20-h's placement review).
+  * **Early caregiver readiness checklist** *(Story 4.1.2, as originally scoped)* — **documented gap,
+    not captured (Decision #20-f/g):** a full grep of `ward.tsx` for "caregiver", "checklist",
+    "insulin", "equipment", and "transport" returned **zero matches** — no structured checklist UI
+    exists on screen at D-2/D-3, unlike closed-loop release, which at least shows its effect. Per
+    Decision #20-f/g this is still narrated — as a plain, unhedged, "behind the scenes" assertion
+    layered over the existing D-2/D-3 runway capture — rather than dropped, on the same accepted
+    credibility trade-off as the SLA-timeout auto-assignment gap in Beat 1. Message: *"behind this
+    screen, nurses also work a structured readiness checklist — insulin training, home equipment,
+    transport — before the discharge morning ever arrives."*
 
 * **On-screen badges:**
   * `Bedside medication delivery adoption: 50%` *(LIVE — verified)*
@@ -369,9 +414,12 @@ changed from the original plan.)*
    1-to-1 against `pain-points.md`; Beat 1 intentionally covers PP1 (synthesis/broadcast) and PP2
    (digital dispatch) as sub-beats 1a/1b.
 
-3. **Comprehensive Runtime:** Keep a single, linear 10–12 minute full-depth walkthrough. The purpose is
-   to *fully explain* the concept, features, and usefulness — not to optimize completion rate. Timeline
-   **chapter markers** (additive) will be published for navigation.
+3. **[REVISED per Decision #20-e] Comprehensive Runtime:** Originally scoped as a single, linear
+   10–12 minute walkthrough. **Superseded** by a live design-review session (Decision #20-e): "sell
+   the prototype properly" outranks the runtime ceiling — the film now runs longer (est. 14–16+
+   minutes with the 5 added capture scenes in §5) because full feature coverage is the binding
+   constraint, not completion rate. Timeline **chapter markers** (additive) remain published for
+   navigation, which matters more once runtime grows.
 
 4. **[REVISED] Real Seeded Personas (was: composite Mr. Tan / Mdm. Halimah):** Follow the *actual*
    seeded patients through their real states (see §3 table). The value is systemic behavior distributed
@@ -416,3 +464,214 @@ changed from the original plan.)*
     release**. Positioning spine for the dual audience: **safety-first by construction**,
     **audit-ready dual-pathway observability**, and **production-architected profile boundary** (default
     beans are production contracts that fail-fast until real infrastructure is wired).
+
+12. **[NEW] SCR pitch deck as narrative spine (§7):** Author a standalone, polished, non-wordy pitch
+    deck structured on the McKinsey **Situation–Complication–Resolution** framework. The deck is the
+    *source of truth*; the same slides become the film's replacement slide layer. Rejected: SCR as a
+    mere cold-open, and a full re-skin of the film body.
+
+13. **[NEW] Nested SCR structure:** One macro-SCR — global **Situation** (the bed crunch) and
+    **Complication** (an orchestration failure, not a construction problem) are established *once*.
+    The **Resolution** then decomposes into the 6 pain points, each carrying its *own local*
+    complication→resolution. Deck and film share one SCR spine; the deck is the compressed subset, the
+    film carries every feature. Rejected: restating full S-C-R at every feature (repetition fatigue)
+    and a single macro-SCR only (undersells the features).
+
+14. **[NEW] Deck size & granularity:** ~13–15 slides at **pain-point granularity** — one *hero*
+    feature named per pain point, with supporting/hidden-depth features as sub-bullets or speaker
+    notes. One message per slide. Rejected: 6-slide ultra-compressed (undersells depth) and ~30-slide
+    feature-granularity (rebuilds the film in slides).
+
+15. **[NEW] Slides frame — not contain — the walkthrough:** The slides are polished SCR *message
+    cards* positioned around the untouched live `playwright_web` scenes. Chosen arrangement is
+    **replace + minimal insert**: replace all existing Marp slides for polish, and insert only a small
+    number of new cards where a pain point currently lacks a setup beat (a governing Resolution-overview
+    card, plus PP2 and PP5 setup cards). Per-block cadence: **setup slide (issue + resolution) → live
+    Playwright payoff**. Rejected: embedding clips inside slides (rebuilds the film, breaks the PDF
+    leave-behind) and a slide before every micro-scene (runtime bloat, breaks walkthrough momentum).
+
+16. **[NEW] Voice register — warm bookends, sharp middle:** Human/cinematic voice for the Situation
+    and the CTA; crisp analytical SCR for the 6 pain-point setup slides. SCR structure is present but
+    **unlabelled** (flows as prose, not literally tagged "Issue:/Resolution:") — contrast comes from
+    visual layout and narration cadence. *(Flag: flip to explicit labels if overt McKinsey scaffolding
+    is preferred.)*
+
+17. **[NEW] Proof placement — mechanism-only setup slides:** Setup slides carry the qualitative
+    resolution *mechanism* only (at most one LIVE architectural fact such as "zero phone calls" or
+    "<50ms solver"). All quantified proof — LIVE and PROJECTED — stays on the walkthrough footage and
+    consolidates on the control-tower slide, preserving SCR's claim-then-evidence order and the
+    LIVE-vs-PROJECTED integrity discipline (Decisions #6/#8/#9).
+
+18. **[NEW] Build format — stay in Marp:** Build the deck in the existing Marp pipeline
+    (`render-marp.mjs`: `scenes/*.md` → PNG → MP4) with an SCR **template system** (three layouts:
+    *cinematic-bookend*, *sharp-SCR-body*, *control-tower*). Polish via type scale, whitespace, a
+    restrained 2-accent palette, and fewer words. For the 1–2 diagram-heavy slides (Resolution-overview
+    map, pack-then-batch), embed an authored SVG/image asset. Rationale: keeps the deck and the film's
+    slide layer a *single source of truth*. Rejected: authoring externally (Keynote/Figma/Gamma) —
+    forks the artifact and breaks the deck-drives-film link.
+
+19. **[NEW] Narration workflow — narration-first spine + verification gate:** Write the SCR narration
+    script first; derive slide headlines from it (shared wording). Scope the rewrite to the ~10 slide
+    scenes plus a light SCR retouch of live-scene openings; leave the bulk of the verified live-scene
+    narration intact. **Mandatory gate:** any narration touching a name, token, route, or metric is
+    re-verified against the codebase and live `GET /api/v1/analytics/kpis/summary` *before*
+    re-synthesis; then re-synthesise affected audio and re-resolve timing. Rejected: slides-only
+    (wording/cadence mismatch) and a full 34-scene rewrite (cost + regression risk against the locked,
+    verified audio).
+
+20. **[NEW] Scene-level SCR + full hidden-depth coverage (Socratic design review, this session).**
+    A live question-by-question review (see chat transcript) reached the following sub-decisions,
+    which together supersede parts of Decisions #15/#19 above:
+    * **20-a — Scope:** SCR framing applies at the **individual capture-scene** level, not just the
+      beat/setup-slide level (Decision #15's original grain) — but *selectively*, not universally.
+    * **20-b — Test:** A scene earns its own micro-SCR only if it fails the **visibility-of-tension
+      test**: the complication is not visible in the same frame, or the action could otherwise read
+      as arbitrary/unmotivated. Scenes that pass (tension already visible, or continuing a beat
+      already framed by its setup slide) stay pure evidence, per Decision #17.
+    * **20-c — Threading:** Within a beat, only the **first** capture after the setup slide is
+      self-contained (states its own mini complication→resolution in isolation); every subsequent
+      capture in that beat **threads** off the immediately preceding scene's resolution rather than
+      re-establishing tension from zero — preserving flow, avoiding the "slide before every
+      micro-scene" runtime-bloat problem Decision #15 already rejected, just applied one level down.
+    * **20-d — Hidden-depth placement:** A hidden-depth/direct-sell scene landing mid-thread bridges
+      in with one clause referencing the prior scene's momentum, then pivots to a bare, un-hedged
+      capability statement — no fabricated tension is invented for features that were always meant to
+      be sold directly (per the original hidden-depth carve-out).
+    * **20-e — Runtime ceiling lifted:** superseding Decision #3 above — "sell the prototype
+      properly" is the binding goal; runtime is not a constraint. See Decision #3's revision note.
+    * **20-f/20-g — Undemonstrable features, still sold, unhedged:** two named hidden-depth features
+      (SLA-timeout default on-call auto-assignment; early caregiver readiness checklist) were found,
+      via direct grep against the live codebase, to have **no on-screen UI surface at all** — not
+      even a partial one. A third (closed-loop BMU bed release) has a demonstrable *effect* (bed
+      turns white, reappears in the BMU queue) but not a demonstrable *notification*. All three are
+      still narrated as plain, confident, **unhedged** assertions layered over the nearest relevant
+      real screen (not a dedicated new scene) — a deliberate, explicit trade of narration-vs-footage
+      credibility risk in exchange for full feature coverage. The originally-recommended verbal tell
+      (e.g. "though you won't see it here...") was considered and explicitly rejected.
+    * **20-h — Gap-fill against the retired Marp storyboard:** the pre-skill `storyboard.marp-old.json`
+      (34 scenes, superseded when the deck moved to the `video-generator` skill's `deck.yaml`/SCR
+      pipeline) was mined as a **grounding reference only** — its narration was not reused (it predates
+      every SCR/threading/hidden-depth rule above), but its Playwright selectors and `assert` blocks
+      were, since they were previously proven against the running app. This surfaced 5 real,
+      previously-uncaptured, capturable moments, all re-verified live against current route source
+      before being added to §5: the five-tier dropdown + Nurul Huda (`Q-P121`) stable-pathway
+      contrast, Chain Consult, the Reconcile / "View Comparative Notes" side-by-side view, and the
+      four-state Live Bed Inventory Matrix. Total capture scenes: **18 → 23** (see updated Beat 1 and
+      Beat 3 walkthroughs above for exact placement and threading).
+
+---
+
+## 7. SCR Pitch Deck — Narrative Spine & Slide Layer
+
+This section specifies the **Situation–Complication–Resolution (SCR)** pitch deck that is authored as
+the *source of truth* for the film. The deck exists as a standalone, polished, non-wordy artifact
+(fixing the current slides' two problems: unpolished styling and excess words) **and** provides the
+replacement slide layer that frames the live walkthrough. It reuses the existing verified narration,
+reframed to *sell* each feature via SCR.
+
+> **Why SCR:** the McKinsey SCR framework is answer-first — establish the *Situation*, name the
+> *Complication*, then deliver the *Resolution*. Our structure embodies this literally: a setup slide
+> states the issue and the resolution, and the live Playwright footage that follows is the
+> demonstration/evidence. See <https://managementconsulted.com/mckinsey-scr-framework/>.
+
+### 7.1 Nested SCR model
+
+* **Macro-Situation (once):** the bed crunch — ageing population, fixed bed stock, hours-long ED waits.
+* **Macro-Complication (once):** it is an *orchestration failure*, not a construction deficit — you
+  cannot build your way out of a flow bottleneck.
+* **Macro-Resolution (decomposed):** intelligent orchestration across the whole journey, expressed as
+  **6 local complication→resolution pairs**, one per documented pain point. Each pain point names its
+  *specific* complication (not a rephrase of the global one) and the hero feature that resolves it.
+
+This avoids repetition fatigue (the global Situation is established once) while still selling every
+feature (each pain point gets its own crisp tension→release).
+
+### 7.2 Deck outline (~13–15 slides, one message per slide)
+
+> **Note:** the "Maps to film scenes" column below still reflects this section's original
+> 34-scene numbering scheme from the pre-`video-generator`-skill Marp era. The actual, current
+> implementation lives in `video-generation/deck.yaml` and uses its own scene IDs (e.g. `04a`,
+> `04a2`, `04b`, `04b2`, `04c`, `04c2` for PP1/PP2; `07a`, `08a`–`08d` for PP4) — see the updated
+> Beat 1 and Beat 3 walkthroughs in §5 above for the current, authoritative scene list and
+> threading order per Decision #20. This table is kept for historical SCR-role/register reference
+> only; treat `deck.yaml` as the source of truth for exact scene IDs and count.
+
+| # | Slide | SCR role | Register / template | Maps to film scenes |
+| :-- | :--- | :--- | :--- | :--- |
+| 1 | Title | — | cinematic-bookend | 01 |
+| 2 | **Situation** — the human cost of the bed crunch | S (macro) | cinematic-bookend (human) | 02 |
+| 3 | **Complication + Resolution overview** — orchestration failure + the 6-part answer-first map | C + governing R | sharp-SCR-body (+ embedded SVG map) | 03 |
+| 4 | **PP1** — ED synthesis, specialist broadcast & safety-first discordance | c→r | sharp-SCR-body | 04–12 |
+| 5 | **PP2** — zero-phone digital BMU dispatch *(new card)* | c→r | sharp-SCR-body | 11–12 |
+| 6 | **PP3** — deterministic diversion (MIC@Home / sister hospital) | c→r | sharp-SCR-body | 13–16 |
+| 7 | **PP4** — ghost capacity: pack-then-batch solver + cohort-swap *(consolidates old ghost-capacity + two-phase; embedded SVG)* | c→r | sharp-SCR-body | 17–23 |
+| 8 | **PP5** — patient & family transparency *(new card)* | c→r | sharp-SCR-body | 24–25 |
+| 9 | **PP6** — discharge runway, bedside meds & closed-loop turnover | c→r | sharp-SCR-body | 26–29 |
+| 10 | **Control tower** — every decision measured (instrumentation proof) | R-proof | control-tower | 30–33 |
+| 11 | **Close / CTA** — capacity was there all along; explore the live prototype | — | cinematic-bookend (human) | 34 |
+| 12–15 | *Flex/appendix* — promote a hidden-depth feature to its own slide, or appendix | — | — | — |
+
+**Standalone deck** = these slides. **Film slide layer** = the same slides slotted at the mapped scene
+positions, each followed by its live payoff scenes.
+
+### 7.3 Per-block cadence in the film
+
+For every pain point: **SCR setup slide (issue + resolution, mechanism-only) → live Playwright
+walkthrough (the demonstration).** The setup slide plants the local complication and names the
+resolution; the footage proves it. Resulting film spine (~10 slide scenes around the untouched live
+scenes):
+
+```
+02 Situation (human) → 03 Complication + Resolution-overview map
+  → PP1 setup → live 04–12
+  → PP2 setup (new) → live 11–12
+  → PP3 setup → live 14–16
+  → PP4 setup (consolidated) → live 18–23
+  → PP5 setup (new) → live 24–25
+  → PP6 setup → live 27–29
+  → Control tower → live 31–33
+  → Close/CTA (human)
+```
+
+### 7.4 Voice & proof rules
+
+* **Register:** warm/human for the Situation and CTA bookends; crisp analytical SCR for the 6
+  pain-point setup slides. SCR structure present but **unlabelled** (prose, not "Issue:/Resolution:"
+  tags).
+* **Proof placement:** setup slides are **mechanism-only** — qualitative resolution claim, at most one
+  LIVE architectural fact (e.g. "zero phone calls", "<50ms solver"). *All* quantified metrics (both
+  LIVE and PROJECTED/design-target) stay on the walkthrough footage and consolidate on the
+  control-tower slide. This preserves the claim-then-evidence order and the LIVE-vs-PROJECTED integrity
+  discipline (Decisions #6/#8/#9).
+
+### 7.5 Build & pipeline
+
+* Author in the existing Marp pipeline (`video-generation/scenes/*.md` → `render-marp.mjs` → PNG →
+  per-scene MP4). No new tooling; the deck and the film's slide layer remain one artifact.
+* Create an SCR **template system**: three shared layouts — *cinematic-bookend*, *sharp-SCR-body*,
+  *control-tower* — with a restrained 2-accent palette, a real type scale, and generous whitespace.
+* For the 1–2 diagram-heavy slides (the 6-part Resolution-overview map; the pack-then-batch visual),
+  author the diagram as an embedded SVG/image asset within the Marp slide.
+
+### 7.6 Narration workflow (order of operations)
+
+1. Write the **SCR narration script** (the spine): macro-S, macro-C + Resolution-overview, the 6
+   local complication→resolution setups, control-tower, CTA.
+2. **Re-verify** every name, token, route, and metric against the codebase and live
+   `GET /api/v1/analytics/kpis/summary` (prototype profile).
+3. Derive **slide headlines** from the script (shared wording) and build the three Marp templates +
+   the ~11-slide deck.
+4. **Slot** slides into the storyboard, adding the PP2, PP5, and Resolution-overview scenes.
+5. **Re-synthesise** only the ~10 slide scenes + the lightly-retouched live-scene openings; leave the
+   bulk of the verified live-scene audio intact.
+6. **Re-render** via `render-marp.mjs` and re-compose.
+
+### 7.7 Open items to confirm before build
+
+* **PP4 consolidation:** the old ghost-capacity + two-phase slides are merged into one PP4 setup card
+  (one-slide-per-block pattern). If the pack-then-batch insight — the core ghost-capacity mechanism —
+  deserves its own beat, split it back into two setup slides.
+* **Unlabelled vs explicit SCR:** body slides use unlabelled SCR prose; flip to explicit
+  "Issue/Resolution" labels if overt scaffolding is preferred.
+* **Flex slides (12–15):** reserved for promoting a hidden-depth feature (e.g. two-phase solver,
+  closed-loop bed release) to its own slide, or for an appendix — currently unallocated.

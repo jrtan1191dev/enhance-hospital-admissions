@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Profile boundary — three seams</title>
+<!--
+  D17: the seam diagram is a captured web page on the :4173 origin, not a deck
+  slide and not footage. Reasons, in order of weight:
+    * a bento layout cannot express one interface fanning out to two
+      implementations, three times over;
+    * `engine` is chosen per deck and this deck is `html`, so a marp slide is not
+      available without breaking the one-renderer rule that keeps deck and film
+      pixel-identical;
+    * as an ordinary `capture` entry it inherits assert.visible / assert.notVisible
+      and the content-addressed cache, with no new pipeline machinery.
+
+  Progressive reveal: #reveal-mock then #reveal-prod, driven by Playwright clicks
+  in the storyline. A full fan-out appearing at once is not read.
+
+  Everything on this page is a name that exists in the repository. No CDN, no
+  network, no fonts to fetch — it must render identically on any machine.
+-->
+<style>
+  :root {
+    --ink: #0F172A;
+    --muted: #64748B;
+    --line: #CBD5E1;
+    --accent: #10B981;
+    --danger: #DC2626;
+    --paper: #F1F5F9;
+    --card: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 16px/1.45 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #diagram { width: 1760px; padding: 40px 48px; }
+  h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 19px; margin: 0 0 30px; }
+  .profiles { display: flex; gap: 10px; margin: 0 0 22px; }
+  .tag {
+    font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 8px 12px; border-radius: 999px; background: #E2E8F0; color: #334155;
+  }
+  .tag.on  { background: var(--ink); color: #fff; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 34px 1fr 34px 1fr;
+    align-items: center;
+    gap: 0 14px;
+    margin-bottom: 14px;
+  }
+  .cell {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; min-height: 92px;
+  }
+  .cell.iface { border-left: 5px solid var(--ink); }
+  .cell.mock  { border-left: 5px solid var(--accent); }
+  .cell.prod  { border-left: 5px solid var(--danger); }
+  .name {
+    font: 700 20px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-word;
+  }
+  .note { color: var(--muted); font-size: 15px; margin-top: 5px; }
+  .badge {
+    display: inline-block; margin-top: 8px; padding: 3px 8px; border-radius: 6px;
+    font: 700 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.04em;
+  }
+  .badge.mock { background: #D1FAE5; color: #065F46; }
+  .badge.prod { background: #FEE2E2; color: #991B1B; }
+  .arrow { color: var(--line); font-size: 26px; text-align: center; }
+
+  /* Hidden by default; the capture reveals each column in turn. */
+  .hidden { visibility: hidden; }
+
+  .legend {
+    display: flex; gap: 30px; margin-top: 26px; padding-top: 18px;
+    border-top: 1px solid var(--line); color: var(--muted); font-size: 16px;
+  }
+  .legend b { color: var(--ink); }
+  /* Controls exist only to sequence the reveal; they are cropped out by the ROI
+     and never narrated. */
+  #controls { position: fixed; bottom: 8px; right: 8px; opacity: 0.06; }
+  #controls button { font-size: 11px; }
+</style>
+</head>
+<body>
+  <main id="diagram">
+    <h1>One boundary, three seams</h1>
+    <p class="sub">The container decides which implementation exists. No call site branches on a demo flag.</p>
+
+    <div class="profiles">
+      <span class="tag on">spring.profiles.active=prototype</span>
+      <span class="tag">default profile</span>
+    </div>
+
+    <!-- Seam 1: the solver -->
+    <div class="row">
+      <div class="cell iface">
+        <div class="name">BedAllocationSolver</div>
+        <div class="note">Interface. The only type the domain services know.</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="cell mock col-mock hidden">
+        <div class="name">HeuristicBedAllocationSolver</div>
+        <div class="note">4 hard constraints, then 3 weighted preferences. Synchronous.</div>
+        <span class="badge mock">@Profile("prototype")</span>
+      </div>
+      <div class="arrow col-prod hidden">&rarr;</div>
+      <div class="cell prod col-prod hidden">
+        <div class="name">TimefoldBedAllocationSolver</div>
+        <div class="note">Declared, wired, and empty.</div>
+        <span class="badge prod">throws UnsupportedOperationException</span>
+      </div>
+    </div>
+
+    <!-- Seam 2: the records gateway -->
+    <div class="row">
+      <div class="cell iface">
+        <div class="name">HospitalEhrGateway</div>
+        <div class="note">Interface. Patient records, however they arrive.</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="cell mock col-mock hidden">
+        <div class="name">MockHospitalEhrGateway</div>
+        <div class="note">Seeded patients, fully functional.</div>
+        <span class="badge mock">@Profile("prototype")</span>
+      </div>
+      <div class="arrow col-prod hidden">&rarr;</div>
+      <div class="cell prod col-prod hidden">
+        <div class="name">FhirHospitalEhrGateway</div>
+        <div class="note">Needs an endpoint, mutual TLS and a tenant.</div>
+        <span class="badge prod">throws UnsupportedOperationException</span>
+      </div>
+    </div>
+
+    <!-- Seam 3: the transfer gateway -->
+    <div class="row">
+      <div class="cell iface">
+        <div class="name">SisterHospitalGateway</div>
+        <div class="note">Interface. Transfers out of this hospital.</div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="cell mock col-mock hidden">
+        <div class="name">MockSisterHospitalGateway</div>
+        <div class="note">Simulated acceptance against a 30-minute clock.</div>
+        <span class="badge mock">@Profile("prototype")</span>
+      </div>
+      <div class="arrow col-prod hidden">&rarr;</div>
+      <div class="cell prod col-prod hidden">
+        <div class="name">HttpSisterHospitalGateway</div>
+        <div class="note">Needs a partner endpoint and circuit breakers.</div>
+        <span class="badge prod">throws UnsupportedOperationException</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><b>Left:</b> what the domain depends on.</span>
+      <span><b>Middle:</b> what runs today.</span>
+      <span><b>Right:</b> what production replaces it with — additive, behind the same interface.</span>
+    </div>
+  </main>
+
+  <div id="controls">
+    <button id="reveal-mock" type="button">1</button>
+    <button id="reveal-prod" type="button">2</button>
+  </div>
+
+  <script>
+    const show = (sel) => document.querySelectorAll(sel).forEach((n) => n.classList.remove('hidden'));
+    document.getElementById('reveal-mock').addEventListener('click', () => show('.col-mock'));
+    document.getElementById('reveal-prod').addEventListener('click', () => {
+      show('.col-prod');
+      document.querySelectorAll('.tag')[1].classList.add('on');
+    });
+  </script>
+</body>
+</html>

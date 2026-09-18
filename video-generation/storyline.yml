@@ -126,7 +126,10 @@ deck:
   aspect: landscape
   outputs:
     - aspect: landscape     # 16:9 for the briefing and the film
-    - aspect: vertical      # 9:16 reflows via `native` — the deck owns its CSS
+    # vertical (9:16) is intentionally NOT declared: the 9:16 reframe needs
+    # Remotion (bootstrap.mjs --with-remotion), which is not installed here, and
+    # an ~10-minute film is format-mismatched for vertical (norms are <90s).
+    # Restore `- aspect: vertical` once Remotion is present AND a short cut exists.
   formats: [png, pdf, html] # png feeds the video, pdf presents, html converts to PPTX externally
   voice:
     provider: auto
@@ -331,7 +334,7 @@ entries:
       - action: waitForText
         value: Smart Assessment Dossier
       - action: wait
-        delayMs: 27300
+        delayMs: 24325
     assert:
       visible: ['Emergency Department (ED) Clinical Intake', 'Waiting ED Patients', 'Chua Wee Kiat']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -373,7 +376,7 @@ entries:
       - action: waitForText
         value: Smart Assessment Dossier
       - action: wait
-        delayMs: 12600
+        delayMs: 13725
     assert:
       visible: ['Emergency Department (ED) Clinical Intake', 'Waiting ED Patients', 'Nurul Huda']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -390,7 +393,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 20000
+        delayMs: 19600
     assert:
       visible: ['Inpatient Specialist Consult Broadcast Pool', 'Mr Fernandez', 'ED Attending Priority', 'Consult Impression']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -414,7 +417,7 @@ entries:
       - action: waitForText
         value: Chain Secondary Specialist Consult
       - action: wait
-        delayMs: 14100
+        delayMs: 13175
     assert:
       visible: ['Inpatient Specialist Consult Broadcast Pool', 'Mr Fernandez']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -432,7 +435,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 15600
+        delayMs: 14850
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Prioritized Admission Requests', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -457,7 +460,7 @@ entries:
       - action: waitForText
         value: Clinical Consensus & Comparative Notes
       - action: wait
-        delayMs: 18100
+        delayMs: 18475
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -504,7 +507,7 @@ entries:
       - action: waitForText
         value: Alternative Step-Down Care Recommended
       - action: wait
-        delayMs: 21300
+        delayMs: 18175
     assert:
       visible: ['Public Milestone Tracker']
       notVisible: ['Something went wrong', 'Failed to track']
@@ -526,7 +529,7 @@ entries:
       - action: waitForText
         value: REF-OCH-8812
       - action: wait
-        delayMs: 15300
+        delayMs: 16350
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Ahmad Ibrahim']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -570,7 +573,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 24800
+        delayMs: 21275
     assert:
       visible: ['Live Bed Inventory Matrix', 'Mustard Yellow (Cleaning)', 'White (Clean)']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -597,7 +600,7 @@ entries:
       - action: waitForText
         value: Top Algorithmic Matches
       - action: wait
-        delayMs: 36100
+        delayMs: 24650
     assert:
       visible: ['Solver Recommendation', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -615,7 +618,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 20800
+        delayMs: 19250
     assert:
       visible: ['Surge Cluster Detected', 'Approve Batch Holding Ward']
       notVisible: ['Something went wrong', 'No static resource']
@@ -633,7 +636,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 22400
+        delayMs: 20375
     assert:
       visible: ['Dynamic Cohort-Swap Proposal', 'Approve Cohort Swap']
       notVisible: ['Something went wrong', 'No static resource']
@@ -651,7 +654,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 19200
+        delayMs: 18275
     assert:
       visible: ['BMU Optimization Weight Configuration', 'Scoring Weights']
       notVisible: ['Something went wrong', 'No static resource']
@@ -696,7 +699,7 @@ entries:
       - action: waitForText
         value: Journey Milestones
       - action: wait
-        delayMs: 24500
+        delayMs: 18575
     assert:
       visible: ['Public Milestone Tracker', 'Journey Milestones', 'Queue']
       notVisible: ['Something went wrong', 'Failed to track']
@@ -717,7 +720,7 @@ entries:
       - action: waitForText
         value: Operational Care Update
       - action: wait
-        delayMs: 23300
+        delayMs: 19575
     assert:
       visible: ['Public Milestone Tracker']
       notVisible: ['Something went wrong', 'Failed to track']
@@ -733,7 +736,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 17600
+        delayMs: 15175
     assert:
       visible: ['Inpatient Ward Reception & Bed Control', 'EDD']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -757,7 +760,7 @@ entries:
       - action: waitForText
         value: Meds Delivered — Ready to Vacate
       - action: wait
-        delayMs: 23700
+        delayMs: 21350
     assert:
       visible: ['Inpatient Ward Reception & Bed Control']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -775,7 +778,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 19600
+        delayMs: 19025
     assert:
       visible: ['Housekeeping (EVS) Rapid Bed Turnover', '30-Minute Turnover Queue']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -817,7 +820,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 16400
+        delayMs: 18000
     assert:
       visible: ['Hospital Operational KPI', 'Digital Bed Requests', 'Avg ED Turnaround']
       notVisible: ['Something went wrong', 'No static resource']
@@ -831,7 +834,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 20000
+        delayMs: 18875
     assert:
       visible: ['Suggestion Acceptance', 'Total Diversions', 'Holding Ward Adoption']
       notVisible: ['Something went wrong', 'No static resource']
@@ -845,7 +848,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 18000
+        delayMs: 16950
     assert:
       visible: ['Public Tracker Access', 'Bedside Meds Delivery', 'Housekeeping 30m SLA']
       notVisible: ['Something went wrong', 'No static resource']
@@ -864,7 +867,7 @@ entries:
         target: Refresh Metrics button
         delayMs: 900
       - action: wait
-        delayMs: 14300
+        delayMs: 11475
     assert:
       visible: ['Hospital Operational KPI', 'Refresh Metrics']
       notVisible: ['Something went wrong', 'No static resource']

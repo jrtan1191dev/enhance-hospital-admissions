@@ -6,7 +6,10 @@
 #
 # Structure follows narration-video-plan.md §7 (nested SCR), reconciled to the
 # SCR archetype's hard cap of five resolution beats:
-#   - one macro Situation + macro Complication, established once
+#   - macro Situation (2 beats) + macro Complication (2 beats), established once.
+#     Both roles are now AT the archetype ceiling (deck.mjs SCR_SKELETON:
+#     situation 1-2, complication 1-2, resolution 2-5) — nothing further can be
+#     added to either without splitting the storyline.
 #   - five resolution beats, each a mechanism-only setup slide immediately
 #     followed by a run of live captures that demonstrate it (the archetype
 #     convention: the slide makes the claim, the captures are the evidence)
@@ -17,16 +20,89 @@
 #       3. ghost capacity, pack-then-batch        (PP4)
 #       4. transparency + discharge runway        (PP5 + PP6)
 #       5. the control tower — every decision measured
-#   - all quantified proof is withheld until the control-tower beat (Decision
-#     #17: setup slides carry mechanism only).
 #
 # Each beat's single capture is split into several granular capture-only
 # scenes — one per distinct mechanism or persona named in the mechanism
-# slide's cards (e.g. beat 1 has separate scenes for ED synthesis, specialist
-# discordance, and BMU dispatch) — so the film shows each moment as its own
-# clip rather than one long take. Captures carry no `role`, so this granular
-# split does NOT count toward the archetype's 5-beat cap; only `slide` entries
-# with `role: resolution` do.
+# slide's cards. Captures carry no `role`, so this granular split does NOT
+# count toward the archetype's 5-beat cap; only `slide` entries with
+# `role: resolution` do.
+#
+# ---------------------------------------------------------------------------
+# NARRATION CLARITY RULES (Decisions #21-#33, agreed in review)
+# ---------------------------------------------------------------------------
+# The prior narration was diagnosed as having four classes of comprehension gap:
+# unbound nouns ("which findings?"), undefined jargon, unstated criteria
+# ("three matching patients" — matching on what?), and features stated without
+# their payoff. Every narration line below is written against these rules:
+#
+# #21 BIND BOTH HALVES. A noun the narration leans on must be bound to the
+#     scene's own input AND output — never to a downstream payload. The ED
+#     synthesis emits tier/specialty/ward-class/monitoring, NOT a bed; the bed
+#     is the solver's output two beats later (verified: ed.tsx form fields).
+#
+# #22 PLAIN LANGUAGE IN THE VOICE, TECHNICAL LABELS ON THE CARDS.
+#     Dropped from the voice entirely: "cohort lock", "discordance",
+#     "bilateral", "subacute", "step-down", "concordance", "ghost capacity".
+#
+# #23 ARBITRARY INTERNAL LABELS ARE PARAPHRASED; PROFESSIONAL VOCABULARY IS KEPT.
+#     The bed-state colours are internal codes, so the voice says "being
+#     cleaned, ready, promised, occupied" and lets the on-screen legend supply
+#     the colours (bmu.tsx:1285-1297 already prints both). "Acuity tier",
+#     "telemetry" and "troponin" are real clinical vocabulary and are kept —
+#     glossed once on first use.
+#
+# #24 AUDIENCE IS A+B+D: technical reviewer, health executive, and the public.
+#     Hence the NO-ORPHAN RULE: plain meaning first, precise term second in
+#     apposition. A precise term is never the sole carrier of an idea.
+#
+# #25 DECISION #17 REINTERPRETED. It bars OUTCOME MAGNITUDE before the control
+#     tower, not numerals. Descriptive cardinalities ("four rules", "five
+#     beds", "thirty-minute clock") are encouraged wherever they remove
+#     ambiguity — withholding them was the direct cause of the vagueness.
+#     Only `stat` blocks and performance claims are still reserved for beat 5.
+#
+# #26 PER-SCENE SHAPE: contrast bridge -> mechanism with bound nouns -> payoff.
+#     The bridge names the old way in one clause (this replaces the old deck's
+#     separate before/after slides, which cannot return as beats given the
+#     5-resolution cap). Vary which part is explicit so it never sounds like a
+#     template.
+#
+# #27 DEIXIS AT EVERY SCREEN OR PERSONA CHANGE ("Up on the ward", "Back in bed
+#     management"). 22 hard cuts each cost the viewer a "where am I?" — two
+#     words resolve it before the content arrives.
+#
+# #28 AUTHORIAL "we" FOR DESIGN RATIONALE ONLY, rationed to ~5 uses total.
+#     Impersonal for mechanism description. Never second person.
+#
+# #29 PROTAGONIST: Mr Tan Ah Meng carries dispatch -> comparative notes ->
+#     solver match -> tracker (04c, 04c2, 08a, 10a). Every return is
+#     signposted, which doubles as the connective tissue between beats.
+#
+# #30 NAME COLLISION: Mr Tan Ah Meng and Mrs Tan Boon Hwa are distinct
+#     patients and P106 is the ONLY hospital-at-home diversion in the seed
+#     (DataInitializer.java:1245), so reselection is impossible. Both are
+#     therefore always spoken in full with honorifics, never as bare "Tan".
+#
+# #31 CLINICAL SPECIFICS RESTORED IN FULL from the seed, so the voice describes
+#     what is actually on screen: Chua Wee Kiat BP 98/62, troponin 180 ng/L
+#     (DataInitializer.java:922-935); Nurul Huda BP 124/78, troponin Normal
+#     (:946-959); Fernandez's consult note names the abdominal pain that
+#     justifies the chained surgical review (:800) — previously omitted from
+#     the voice despite being printed on screen.
+#
+# #32 THE PRICED COMPLICATION (02b) USES NO INVENTED FIGURE. product-idea/
+#     contains no citable status-quo cost, so the stat is derived from facts
+#     already in the system: a Class B2 cubicle is 5-6 beds (ed.tsx ward-class
+#     options) and gender cohorting is an absolute invariant, therefore five of
+#     six beds can only go to patients matching the first. True by construction,
+#     and a cost of TODAY rather than a claim about the prototype.
+#
+# #33 CAPTURE DELAYS ARE DERIVED, NOT GUESSED. Each capture's trailing
+#     `wait delayMs` below is set to (estimated narration ms + 400ms tail) minus
+#     the sum of its preceding step delays, keeping `ratePct` inside the +/-7%
+#     inaudible band (core.mjs RATE_FIT.INAUDIBLE). Estimates assume ~150 wpm.
+#     RE-DERIVE THESE from measured audio after the first `synthesize.mjs` run;
+#     that is the only way to avoid a second (expensive) capture pass.
 #
 # Voice register: warm/human on the Situation and CTA bookends; crisp and
 # analytical on the resolution beats (Decision #16). SCR is unlabelled — the
@@ -98,7 +174,9 @@ entries:
         text: Families track the journey on a phone, and discharge starts two days ahead of departure.
 
   # ======================================================================
-  # SITUATION — how an admission works today. Warm, human register.
+  # SITUATION beat 1 of 2 — how an admission works today. Warm, human register.
+  # Narration binds the vague "many hands" of the previous draft to the concrete
+  # thing the viewer is owed: nobody can tell them why (Rule #21).
   # ======================================================================
   - id: 01-situation
     type: slide
@@ -118,10 +196,41 @@ entries:
         title: Many roles, one patient
         text: An admission crosses the emergency department, specialists, bed management and the ward.
         detail: A shared journey
-    narration: If you have ever waited with a parent for a hospital bed, you know the quiet despair of a long, silent queue that crosses many hands before it ends.
+    narration: "If you have waited with a parent for a hospital bed, you know the quiet despair of it. Eight to fourteen hours from arrival to a ward — and for most of it, nobody can tell you why."
 
   # ======================================================================
-  # COMPLICATION — the tension, priced. The archetype requires a named cost.
+  # SITUATION beat 2 of 2 — the situation-evidence slot the archetype defines
+  # (archetypes.md:105) and the previous draft left unused. It exists to make
+  # the handoff chain countable: scene 01 asserts "many roles" but never shows
+  # them, so the film's central claim (five desks, five phone calls) had no
+  # anchor. Runs short deliberately — a second situation beat delays the first
+  # mechanism, and audience D drops off in that window.
+  # ======================================================================
+  - id: 01b-handoffs
+    type: slide
+    role: situation
+    layout: lifecycle
+    title: Five desks, four handoffs, every one a phone call
+    cards:
+      - icon: brain
+        title: Doctor to specialist
+        text: A page, then a wait for the callback.
+      - icon: users-round
+        title: Specialist to bed management
+        text: The decision, phoned or re-keyed across.
+      - icon: gauge
+        title: Bed management to ward
+        text: A bed offered, then confirmed by phone.
+      - icon: refresh-cw
+        title: Ward to housekeeping
+        text: A vacated bed, reported by phone.
+    narration: "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, a phone call."
+
+  # ======================================================================
+  # COMPLICATION beat 1 of 2 — the tension. "Cohort locks" is deliberately gone
+  # from the voice (Rule #22): it was the single most opaque term in the script
+  # and it was spoken 13 seconds in, carrying the whole complication. The card
+  # keeps the technical label; the voice carries the meaning.
   # ======================================================================
   - id: 02-complication
     type: slide
@@ -137,13 +246,45 @@ entries:
         title: Frozen capacity
         text: One patient locks a whole cubicle, and discharge delays trap beds into the afternoon.
         detail: Empty beds nobody can use
-    narration: You cannot build your way out of a flow bottleneck. Phone calls between departments, cubicles frozen by cohort locks, and afternoon discharge delays cost a hospital the capacity it already has.
+    narration: "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed at breakfast."
 
   # ======================================================================
-  # RESOLUTION — five beats, each a mechanism slide followed by a live capture.
+  # COMPLICATION beat 2 of 2 — the complication-consequence slot
+  # (archetypes.md:107), previously unused. deck.mjs:215 warns when a
+  # complication names no cost, and the prior draft priced the status quo only
+  # qualitatively. The stat here is derived, not invented — see Rule #32.
+  # This is a cost of TODAY, so it does not breach Decision #17's reservation
+  # of proof for the control tower.
+  # ======================================================================
+  - id: 02b-frozen
+    type: slide
+    role: complication
+    layout: stat-deepdive
+    title: One patient can freeze five beds
+    stat:
+      value: '5'
+      unit: beds
+      label: in a six-bed cubicle, reserved to whoever occupies the first one
+    cards:
+      - icon: lock
+        title: The first patient sets the rules
+        text: Gender, ward class and infection status are absolute — the cubicle inherits all three.
+        detail: A safety rule, not a bug
+      - icon: bed
+        title: Empty on the board, unusable in practice
+        text: If nobody matching is waiting, those beds cannot be offered to anyone at all.
+        detail: The capacity to recover
+    narration: "Here is that cost at its sharpest. Put one man in an empty six-bed cubicle, and the other five beds can now only take men — same ward class, same infection status. Five beds, empty on the board, unavailable in practice. That is the capacity we set out to recover."
+
+  # ======================================================================
+  # RESOLUTION — five beats, each a mechanism slide followed by live captures.
   # ======================================================================
 
   # ---- Beat 1: diagnostic synthesis, broadcast, safe digital dispatch (PP1+PP2)
+  # Narration binds "findings" to BOTH halves (Rule #21): the inputs are vitals
+  # and lab results, the output is tier + specialty + monitoring level. It must
+  # NOT say "recommends a bed" — that is the solver's job in beat 3, and saying
+  # it here would be both factually wrong and a spoiler.
   - id: 03-synthesis
     type: slide
     role: resolution
@@ -159,15 +300,18 @@ entries:
       - icon: send
         title: A structured packet
         text: Consensus lands in bed management as data, ranked by acuity, with no phone call.
-    narration: The first fix is the decision itself. Findings are synthesised on arrival, disagreement resolves toward the safer tier, and the moment consensus is reached the admission lands in the queue as data — no call placed.
+    narration: "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data, not as a phone call."
 
-  # Beat 1 evidence, split into three granular capture scenes so each moment
-  # of the mechanism — synthesis, discordance, dispatch — gets its own clip
-  # rather than one long take (video-generator-plan tasks #5). Captures carry
-  # no `role`, so none of these count toward the SCR beat cap.
+  # Beat 1 evidence, split into granular capture scenes so each moment of the
+  # mechanism gets its own clip. Captures carry no `role`, so none of these
+  # count toward the SCR beat cap.
+  #
+  # 04a restores the clinical specifics that are printed on this very panel
+  # (Rule #31) and glosses both "troponin" and "telemetry" on first use, so
+  # audience D is not excluded (Rule #24).
   - id: 04a-ed-synthesis-capture
     type: capture
-    narration: Chua Wee Kiat's vitals and labs already drive the smart assessment — Tier 2, Cardiology, continuous telemetry — and the attending confirms it in one click.
+    narration: "Here it is for real. Chua Wee Kiat: chest pain, blood pressure ninety-eight over sixty-two and falling, troponin one-eighty — the protein that leaks into the blood when heart muscle is dying. The dossier has read all three and filled itself in: Tier 2, Cardiology, continuous telemetry — heart rhythm watched without a break. The attending's job here is to agree, or not — to review rather than retype."
     url: /ed
     setupScript: scenes/role-ed.mjs
     roiSelector: '.lg\\:col-span-5'
@@ -180,19 +324,21 @@ entries:
       - action: waitForText
         value: Smart Assessment Dossier
       - action: wait
-        delayMs: 9124
+        delayMs: 27300
     assert:
       visible: ['Emergency Department (ED) Clinical Intake', 'Waiting ED Patients', 'Chua Wee Kiat']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
-  # Threaded off 04a: still on the dossier, the tier dropdown is opened to
-  # show the full 5-tier framework, then a cut to Nurul Huda's stable
-  # pathway supplies the contrast the plan names for PP1 (Decision #20-h,
-  # verified live: ed.tsx:708 five-tier <select>; Q-P121 seeded at
-  # DataInitializer.java:953 with normal troponin, confirmed non-cardiac).
+  # Threaded off 04a: the tier dropdown shows the full 5-tier framework, then a
+  # cut to Nurul Huda's stable pathway supplies the contrast (verified live:
+  # ed.tsx:708 five-tier <select>; Q-P121 seeded at DataInitializer.java:946
+  # with a normal troponin and stable BP 124/78).
+  #
+  # The payoff clause is the point of this scene and was previously missing: it
+  # demonstrates the synthesis is not biased toward admitting.
   - id: 04a2-tier-framework-capture
     type: capture
-    narration: The same dropdown holds the full five-tier framework, from critical resuscitation down to extended observation — and for a stable case like Nurul Huda's pneumonia, it defaults to Tier 3, General Medicine, no telemetry at all.
+    narration: "The same field spans five tiers, from critical resuscitation down to extended observation. And it does not lean toward admitting: Nurul Huda's pneumonia, normal troponin and stable blood pressure come up as Tier 3, General Medicine, with no monitoring at all."
     url: /ed
     setupScript: scenes/role-ed.mjs
     roiSelector: '.lg\\:col-span-5'
@@ -220,33 +366,35 @@ entries:
       - action: waitForText
         value: Smart Assessment Dossier
       - action: wait
-        delayMs: 8747
+        delayMs: 12600
     assert:
       visible: ['Emergency Department (ED) Clinical Intake', 'Waiting ED Patients', 'Nurul Huda']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # "Discordance" is gone from the voice (Rule #22) — the concept survives
+  # paraphrase intact, and nothing on screen uses the word. The specifics come
+  # straight off the consult note visible in this shot.
   - id: 04b-specialist-discordance-capture
     type: capture
-    narration: Mr Fernandez shows the discordance itself — the ED attending's tier beside the specialist's escalation to a safer, higher tier with telemetry endorsed.
+    narration: "Now the disagreement. Mr Fernandez came up as acute but stable; the cardiologist reads a rising troponin and changing ECG segments, and pushes him to Tier 2 with monitoring made mandatory. Both opinions stay visible — and the higher one is what the rest of the system acts on."
     url: /specialist
     setupScript: scenes/role-specialist.mjs
     roiSelector: '.grid.grid-cols-1.md\\:grid-cols-2'
     overlay: none
     steps:
       - action: wait
-        delayMs: 10514
+        delayMs: 20000
     assert:
       visible: ['Inpatient Specialist Consult Broadcast Pool', 'Mr Fernandez', 'ED Attending Priority', 'Consult Impression']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
-  # Threaded off 04b: Fernandez's case doesn't stop at one specialist — the
-  # Chain Consult action opens a second, concurrent broadcast rather than a
-  # serial callback (Decision #20-h, verified live: specialist.tsx:483
-  # button, useChainConsult hook, modal titled "Chain Secondary Specialist
-  # Consult" at specialist.tsx:629).
+  # Threaded off 04b. The previous narration said a Surgery consult was chained
+  # without saying WHAT FOR — while the reason was printed on screen the whole
+  # time (DataInitializer.java:800, "concurrent abdominal pain"). Unstated
+  # criterion, now stated.
   - id: 04b2-chain-consult-capture
     type: capture
-    narration: Fernandez's case doesn't stop at Cardiology either — chaining a concurrent Surgery consult keeps both specialties working in parallel, not a queue of callbacks.
+    narration: "He does not only need Cardiology. The same note flags abdominal pain, so a surgical review is chained on from here and runs alongside it — two specialties at once, rather than one after the other."
     url: /specialist
     setupScript: scenes/role-specialist.mjs
     roiSelector: '.grid.grid-cols-1.md\\:grid-cols-2'
@@ -259,33 +407,37 @@ entries:
       - action: waitForText
         value: Chain Secondary Specialist Consult
       - action: wait
-        delayMs: 8625
+        delayMs: 14100
     assert:
       visible: ['Inpatient Specialist Consult Broadcast Pool', 'Mr Fernandez']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # 04c binds the previously unbound "packet" to its actual contents, and
+  # introduces the protagonist (Rule #29). Mr Tan Ah Meng already appears in
+  # 04c / 04c2 / 08a / 10a — a nearly complete journey that the prior script
+  # never told the viewer to follow.
   - id: 04c-bmu-dispatch-capture
     type: capture
-    narration: The moment consensus is reached, the packet is already sitting in the bed management queue as structured data — no phone call placed.
+    narration: "Once the consults are back, the request appears here in bed management on its own: tier, specialty, ward class and monitoring needs, all attached. Nobody rang anyone. This is Mr Tan Ah Meng — follow him from here."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: '.lg\\:col-span-7'
     overlay: none
     steps:
       - action: wait
-        delayMs: 8454
+        delayMs: 15600
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Prioritized Admission Requests', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # Threaded off 04c, hidden-depth direct-sell: the coordinator is not locked
-  # out of the clinical picture after the safety-first escalation fires — the
-  # comparative-notes view keeps clinical autonomy visible (Decision #20-h,
-  # verified live: bmu.tsx:381 button, dialog titled "Clinical Consensus &
-  # Comparative Notes" at bmu.tsx:1624).
+  # out of the clinical picture after the safety-first escalation fires
+  # (verified live: bmu.tsx:381 button, dialog "Clinical Consensus &
+  # Comparative Notes" at bmu.tsx:1624). The payoff — autonomy preserved
+  # WITHOUT blocking the bed search — is the point, and is now said out loud.
   - id: 04c2-reconcile-notes-capture
     type: capture
-    narration: The coordinator isn't locked out of the clinical picture either — comparative notes lay the ED and specialist assessments side by side, so clinical judgement stays visible even after the safety-first tier has already been adopted.
+    narration: "Escalating automatically could have buried the disagreement, so it does not. Opening Mr Tan Ah Meng's comparative notes lays the emergency and specialist assessments side by side, and the coordinator can still ask the two to reconcile — while the safer bed search carries on regardless."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: '.lg\\:col-span-7'
@@ -298,12 +450,15 @@ entries:
       - action: waitForText
         value: Clinical Consensus & Comparative Notes
       - action: wait
-        delayMs: 13216
+        delayMs: 18100
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # ---- Beat 2: deterministic diversion — MIC@Home and sister hospitals (PP3)
+  # "Subacute" and "step-down" are gone from the voice (Rule #22). The contrast
+  # bridge restores the old deck's 04-before-diversion point: diversion was
+  # always possible, it was the paperwork that killed it.
   - id: 05-diversion
     type: slide
     role: resolution
@@ -319,14 +474,16 @@ entries:
       - icon: bed
         title: An acute bed preserved
         text: Each diversion returns a physical bed to the patients who need one.
-    narration: Not every admission needs a scarce acute bed. Stable patients go to a monitored virtual ward, and subacute recovery is referred to a community hospital digitally, each diversion preserving a bed.
+    narration: "The second fix is admitting fewer people at all. Diversion was always possible — it was just buried under enough paperwork that clinicians took the acute bed instead. So the alternatives became the easy path: a patient stable enough gets hospital-level monitoring at home with a daily visit, and a patient who mainly needs weeks of rehabilitation goes to a community hospital as a digital referral, with a thirty-minute clock on the reply."
 
-  # Beat 2 evidence, split so MIC@Home and the sister-hospital referral are
-  # each shown on their own patient rather than compressed into one clip
-  # (video-generator-plan task #6).
+  # Beat 2 evidence. 06a carries the name-collision fix (Rule #30): Mrs Tan Boon
+  # Hwa is spoken in full and explicitly marked as a different patient, because
+  # P106 is the only hospital-at-home diversion in the seed and cannot be
+  # swapped out. The payoff — a diversion must read as a decision, not a
+  # refusal — is the point of showing it on the patient's own screen.
   - id: 06a-mic-at-home-capture
     type: capture
-    narration: Mrs Tan Boon Hwa's tracker explains her step-down pathway to hospital-level care at home — a virtual bed, not a physical one.
+    narration: "On the patient's own screen now — and a different patient, Mrs Tan Boon Hwa. She is not queuing for a bed at all: she is on hospital-at-home care, visited daily by a monitoring team. Her tracker says exactly that, so a diversion reads as a decision made for her, not a bed she was refused."
     url: /patient
     setupScript: scenes/role-patient.mjs
     roiSelector: main
@@ -340,14 +497,16 @@ entries:
       - action: waitForText
         value: Alternative Step-Down Care Recommended
       - action: wait
-        delayMs: 7123
+        delayMs: 21300
     assert:
       visible: ['Public Milestone Tracker']
       notVisible: ['Something went wrong', 'Failed to track']
 
+  # "Bilateral" is gone from the voice (Rule #22) — replaced by what it
+  # actually means: a reply window both hospitals can see.
   - id: 06b-sister-hospital-capture
     type: capture
-    narration: Mr Ahmad Ibrahim is on a thirty-minute bilateral referral to Outram Community Hospital, tracked on the coordinator's own screen.
+    narration: "Back in bed management, the other kind of diversion. Mr Ahmad Ibrahim needs stroke rehabilitation rather than an acute ward, so a referral now sits with Outram Community Hospital under a thirty-minute reply window that both hospitals can see."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: '.lg\\:col-span-7'
@@ -360,12 +519,15 @@ entries:
       - action: waitForText
         value: REF-OCH-8812
       - action: wait
-        delayMs: 7350
+        delayMs: 15300
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Ahmad Ibrahim']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # ---- Beat 3: ghost capacity — pack-then-batch solver + cohort-swap (PP4)
+  # "Ghost capacity" is gone from the voice; the narration instead reaches back
+  # to the five frozen beds priced in 02b, which is what makes this beat land
+  # as a resolution of a stated cost rather than a clever trick.
   - id: 07-ghost
     type: slide
     role: resolution
@@ -381,34 +543,41 @@ entries:
       - icon: arrow-left-right
         title: Swap to unlock
         text: One patient blocking a ward is moved to an equal bed, freeing the whole room.
-    narration: Beds sit empty on paper yet locked in practice. The solver packs waiting patients into matching cubicles first, then batches a clean cubicle for a surge, and swaps a single blocker out to liberate an entire ward.
+    narration: "The third fix recovers those five frozen beds, and it comes down to ordering. Fill the part-used cubicles first, with patients who already match the people in them. Only then open a clean cubicle — and open it for a whole group at once. And when a single patient is the only reason a room is unusable, move that patient, not the room. Same beds, same safety rules, a different order of operations."
 
-  # Beat 3 evidence, split into the three mechanisms named in the slide —
-  # solver recommendation, batch holding, cohort-swap — plus the config
-  # screen that tunes the solver's weights (video-generator-plan task #7).
+  # Beat 3 evidence. 07a is placed first and is self-contained: the four-state
+  # lifecycle has to be established before either mechanism is demonstrated,
+  # because pack-then-batch and cohort-swap are both operations ON it
+  # (verified live: bmu.tsx:1274 panel, legend at bmu.tsx:1285-1297).
   #
-  # 07a is placed first and is self-contained: the 4-state lifecycle has to
-  # be named before either mechanism is demonstrated, because pack-then-batch
-  # and cohort-swap are both operations ON this lifecycle (Decision #20-h,
-  # verified live: bmu.tsx:1274 "Live Bed Inventory Matrix" panel, states at
-  # bmu.tsx:432/539).
+  # Per Rule #23 the voice now names the four states by MEANING and lets the
+  # on-screen legend supply the colours — the legend already prints both, so
+  # nothing is lost and the viewer has nothing to memorise. The payoff
+  # (a bed can never go quietly missing) was previously absent.
   - id: 07a-bed-lifecycle-capture
     type: capture
-    narration: Every bed here moves through the same four states — mustard yellow while it's cleaned, white once it's ready, green the moment it's reserved, grey when a patient is in it. Everything that follows is a decision made on top of this lifecycle.
+    narration: "First the board itself. Every bed in the hospital is in exactly one of four states — being cleaned, ready, promised to someone, or occupied — and the colours are simply how a coordinator reads a whole level at a glance. Every decision that follows is a move between those four, which is why a bed can never quietly go missing."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=Live Bed Inventory Matrix'
     overlay: none
     steps:
       - action: wait
-        delayMs: 14474
+        delayMs: 24800
     assert:
       visible: ['Live Bed Inventory Matrix', 'Mustard Yellow (Cleaning)', 'White (Clean)']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # 08a is the flagship technical scene and gets the largest budget. The prior
+  # narration asserted "the top three beds ... with the scoring reasoning
+  # attached" without ever saying what they were scored AGAINST — the clearest
+  # case of an unstated criterion. The hard/soft split is restored (it was in
+  # the old deck and is what lands with a technical reviewer), wrapped in the
+  # no-orphan pattern so "four rules it will never break" carries the meaning
+  # for audience D and "hard constraints vs soft scoring" is legible to A.
   - id: 08a-solver-recommendation-capture
     type: capture
-    narration: Selecting Tan Ah Meng's request returns the top three beds in under fifty milliseconds, with the scoring reasoning attached to each.
+    narration: "Mr Tan Ah Meng again — the request we watched arrive without a call. He needs heart monitoring, and he is a falls risk. Every bed in the hospital is scored against four rules the system will never break — among them, never mixing genders in a cubicle, and never placing a patient where the monitoring is not installed — and then three softer preferences it weighs, like keeping a specialty together on one ward. Three beds come back in under fifty milliseconds, each showing why it scored where it did."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: '.lg\\:col-span-5'
@@ -421,54 +590,68 @@ entries:
       - action: waitForText
         value: Top Algorithmic Matches
       - action: wait
-        delayMs: 7015
+        delayMs: 36100
     assert:
       visible: ['Solver Recommendation', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # "Three matching patients" was the sharpest unstated criterion in the script.
+  # The criteria are exact and speakable: BatchSuggestion.java:13 — patients
+  # "sharing common ward class, gender, and infection status", threshold 3
+  # (DataInitializer.java:54). The payoff ties back to 02b's frozen beds.
   - id: 08b-batch-holding-capture
     type: capture
-    narration: Three matching patients waiting at once trip a batch suggestion — a whole holding ward, offered as one approval instead of three separate placements.
+    narration: "Now the batching step. Three waiting patients share a ward class, a gender and an infection status — enough to fill a clean cubicle completely — so the whole room is offered as a single decision. One approval instead of three placements, and no half-used cubicle left behind to freeze later."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=Surge Cluster Detected'
     overlay: none
     steps:
       - action: wait
-        delayMs: 9240
+        delayMs: 20800
     assert:
       visible: ['Surge Cluster Detected', 'Approve Batch Holding Ward']
       notVisible: ['Something went wrong', 'No static resource']
 
+  # "Green reservation" is gone from the voice (Rule #23) — the state is named
+  # by meaning instead, and re-anchored rather than relying on a colour taught
+  # two scenes earlier. "He loses nothing" is the payoff: the swap has to be
+  # clinically neutral for the patient being moved, or it is not acceptable.
   - id: 08c-cohort-swap-capture
     type: capture
-    narration: One patient still in the ED is blocking a whole ward from a Green reservation. The swap proposal moves him to an equal bed and frees the room.
+    narration: "And this is the unlock. One patient, still down in the emergency department, is the only reason an entire ward cannot be released to the group waiting for it. The system offers him an equal bed — same class, same monitoring — and one approval frees the room. He loses nothing; the ward becomes usable."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=Dynamic Cohort-Swap Proposal'
     overlay: none
     steps:
       - action: wait
-        delayMs: 9690
+        delayMs: 22400
     assert:
       visible: ['Dynamic Cohort-Swap Proposal', 'Approve Cohort Swap']
       notVisible: ['Something went wrong', 'No static resource']
 
+  # 08d previously described the screen and never said why tunability matters —
+  # the clearest "feature without a payoff" in the script. The reason is now
+  # explicit: a hospital's priorities are not constant, and changing them must
+  # not require a release.
   - id: 08d-solver-config-capture
     type: capture
-    narration: The weights behind that scoring are not hard-coded — a coordinator can retune specialty, consolidation and fall-risk priority live.
+    narration: "None of that scoring is hard-coded. A coordinator can retune how much specialty grouping, cubicle packing or falls-risk proximity counts, and save it while the hospital is running. A dengue cluster changes what a good bed looks like — and that should never need a software release."
     url: /bmu/config
     setupScript: scenes/role-bmu.mjs
     roiSelector: main
     overlay: none
     steps:
       - action: wait
-        delayMs: 8762
+        delayMs: 19200
     assert:
       visible: ['BMU Optimization Weight Configuration', 'Scoring Weights']
       notVisible: ['Something went wrong', 'No static resource']
 
   # ---- Beat 4: transparency + discharge runway (PP5 + PP6)
+  # The contrast bridge restores the old deck's 06-before-discharge point (the
+  # afternoon gridlock) without spending a slide on it.
   - id: 09-experience
     type: slide
     role: resolution
@@ -484,15 +667,15 @@ entries:
       - icon: refresh-cw
         title: A closed loop
         text: Terminal cleaning turns the bed white and notifies bed management automatically.
-    narration: The family sees the same journey without the anxiety, and the last bottleneck opens early. Discharge starts two days ahead, medicines reach the bedside before eleven, and a cleaned bed rejoins the allocation engine on its own.
+    narration: "The fourth fix sits at both ends of the stay. At the front, the family stops asking the triage nurse: they see their position among the patients in their own ward class, and an honest reason when it slips. At the back, discharge starts two or three days early, the medicines are packed overnight instead of chased at noon, and the cleaning clock starts the moment a bed empties."
 
-  # Beat 4 evidence, split so the patient tracker (PP5) gets its own scenes —
-  # the 3-stage stepper, the empathetic delay tag, and the diversion-specific
-  # tracker view — distinct from the ward-side discharge runway that follows
-  # (video-generator-plan task #8).
+  # Beat 4 evidence. 10a is the protagonist's fourth and final appearance. The
+  # payoff explains the honesty of a NON-FIFO queue — pain-points.md:46 names
+  # inaccurate countdown timers as part of the problem, so promising a
+  # countdown here would reintroduce the very defect the feature exists to fix.
   - id: 10a-tracker-milestone-capture
     type: capture
-    narration: Tan Ah Meng's tracker computes a real queue position within his ward class, sorted by acuity and request time, with an honest wait estimate.
+    narration: "Mr Tan Ah Meng once more, now from his family's phone. The position they see is real — it counts only the patients ahead of him in his own ward class, ordered by how sick they are and how long they have waited. Which is why it can move, and why the estimate is given as a range rather than a countdown that lies."
     url: /patient
     setupScript: scenes/role-patient.mjs
     roiSelector: main
@@ -506,14 +689,14 @@ entries:
       - action: waitForText
         value: Journey Milestones
       - action: wait
-        delayMs: 7026
+        delayMs: 24500
     assert:
       visible: ['Public Milestone Tracker', 'Journey Milestones', 'Queue']
       notVisible: ['Something went wrong', 'Failed to track']
 
   - id: 10b-tracker-delay-tag-capture
     type: capture
-    narration: When a room needs specialised cleaning, Mdm Wong Siew Kuan's tracker explains it in plain, kind language, with a hotline to call.
+    narration: "And when the news is bad, the tone changes instead of going quiet. Mdm Wong Siew Kuan's room needs a deep clean before anyone can enter it. Her tracker says exactly that, in plain words, with a number she can call — because an explained wait is a different experience from an unexplained one, even when it is the same length."
     url: /patient
     setupScript: scenes/role-patient.mjs
     roiSelector: main
@@ -527,31 +710,33 @@ entries:
       - action: waitForText
         value: Operational Care Update
       - action: wait
-        delayMs: 6912
+        delayMs: 23300
     assert:
       visible: ['Public Milestone Tracker']
       notVisible: ['Something went wrong', 'Failed to track']
 
-  # Beat 4 continues on the ward, split into the discharge runway, bedside
-  # medication hand-off, and housekeeping turnover clock as three distinct
-  # moments across both ward personas (video-generator-plan task #9).
+  # Beat 4 continues on the ward. 10c opens with deixis (Rule #27) because this
+  # is a hard cut from a patient's phone to a nursing station.
   - id: 10c-discharge-runway-capture
     type: capture
-    narration: Nurses set an estimated discharge date two to three days out, with a confidence rating and the clinical rationale behind it.
+    narration: "Up on the ward now. Every occupied bed carries an expected discharge date, set two to three days ahead, with how confident the nurse is and the clinical reason for it — so bed management can see a bed coming before it exists."
     url: /ward
     setupScript: scenes/role-ward.mjs
     roiSelector: '.grid.grid-cols-1.md\\:grid-cols-2'
     overlay: none
     steps:
       - action: wait
-        delayMs: 7981
+        delayMs: 17600
     assert:
       visible: ['Inpatient Ward Reception & Bed Control', 'EDD']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # The prior narration said "before eleven" without ever saying why eleven
+  # matters. It matters because it is the difference between the queue clearing
+  # today and tomorrow — now stated.
   - id: 10d-bedside-meds-capture
     type: capture
-    narration: A morning sign-off auto-queues discharge medicines, and confirming bedside delivery is one button — the patient is ready to vacate before eleven.
+    narration: "Medicines are the single biggest delay on discharge day. So the morning sign-off does two jobs at once: it clears the patient to leave, and it queues the take-home prescription for delivery to the bedside. One button confirms it arrived, and the bed frees before eleven instead of after lunch — the difference between this queue clearing today and tomorrow."
     url: /ward
     setupScript: scenes/role-ward.mjs
     roiSelector: 'text=Meds Delivered — Ready to Vacate'
@@ -565,29 +750,32 @@ entries:
       - action: waitForText
         value: Meds Delivered — Ready to Vacate
       - action: wait
-        delayMs: 8372
+        delayMs: 23700
     assert:
       visible: ['Inpatient Ward Reception & Bed Control']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # 10e closes the loop opened by 01b: this is the fifth of the five handoffs,
+  # and it is the one that no longer needs a human to carry the message.
   - id: 10e-housekeeping-turnover-capture
     type: capture
-    narration: Housekeeping works its own thirty-minute countdown queue, and signing off a clean bed sends it straight back into the allocation engine.
+    narration: "And this is the last of those four handoffs — the one from the ward to housekeeping. Housekeeping runs its own thirty-minute countdown, and signing a bed off returns it to the matching engine automatically. Nobody phones bed management — the loop closes without anyone carrying the message."
     url: /ward
     setupScript: scenes/role-housekeeping.mjs
     roiSelector: 'text=Housekeeping (EVS) 30-Minute Turnover Queue'
     overlay: none
     steps:
       - action: wait
-        delayMs: 8181
+        delayMs: 19600
     assert:
       visible: ['Housekeeping (EVS) Rapid Bed Turnover', '30-Minute Turnover Queue']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # ---- Beat 5: measurable outcome — the control tower.
-  # The one place numbers live (Decision #17). Instrumentation proof, not
-  # outcome magnitude (Decision #9): every metric is computed on a synthetic
-  # seed and extractable by two independent pathways.
+  # The one place outcome magnitude lives (Decision #17 as reinterpreted in
+  # Rule #25). Instrumentation proof, not outcome magnitude (Decision #9):
+  # every metric is computed on a synthetic seed and extractable two ways.
+  # The two pathways are now NAMED rather than merely counted.
   - id: 11-control-tower
     type: slide
     role: resolution
@@ -606,56 +794,56 @@ entries:
         title: A control tower view
         text: Diversions, holding-ward adoption, turnover time and discharge timing all read live.
         detail: Instrumented end to end
-    narration: Every step you have seen leaves a measurable trace. Twenty-one bed requests, all digital, and a control tower where each metric is extractable through two independent pathways.
+    narration: "The fifth fix is the one that makes the other four accountable. Every step you have seen writes a record — twenty-one bed requests in this dataset, every one of them digital, not one placed by phone. And each figure can be produced two independent ways: a database query for the dashboards, and the audit log for alerting. A number nobody can reproduce is not a measurement."
 
-  # Control-tower evidence, split across the dashboard's own epic sections so
-  # each KPI cluster gets a beat, plus the live refresh interaction
-  # (video-generator-plan task #10).
+  # Control-tower evidence. "Concordance" is gone from the voice (Rule #22),
+  # replaced by what it measures — and by what the remainder means, which is
+  # the safety mechanism from beat 1 firing.
   - id: 12a-intake-kpis-capture
     type: capture
-    narration: Twenty-one digital bed requests, an ED turnaround measured in minutes, and specialist concordance — the intake numbers, reading live.
+    narration: "Intake first. Twenty-one bed requests, all digital. Emergency department turnaround measured in minutes rather than hours. And how often the specialist agreed with the emergency doctor — the remainder are the cases where the system escalated to the safer tier."
     url: /analytics
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=ED Clinical Intake & Specialist Collaboration'
     overlay: none
     steps:
       - action: wait
-        delayMs: 8500
+        delayMs: 16400
     assert:
       visible: ['Hospital Operational KPI', 'Digital Bed Requests', 'Avg ED Turnaround']
       notVisible: ['Something went wrong', 'No static resource']
 
   - id: 12b-bmu-kpis-capture
     type: capture
-    narration: Suggestion acceptance, diversions and holding-ward adoption — the same mechanisms from the earlier beats, now as a measured trend.
+    narration: "Then allocation — the same mechanisms you just watched, counted. How often coordinators took the recommended bed rather than overriding it. How many patients were diverted away from an acute bed. And how often a whole cubicle was opened for a group instead of one patient at a time."
     url: /analytics
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=BMU Capacity Orchestration & Diversions'
     overlay: none
     steps:
       - action: wait
-        delayMs: 8856
+        delayMs: 20000
     assert:
       visible: ['Suggestion Acceptance', 'Total Diversions', 'Holding Ward Adoption']
       notVisible: ['Something went wrong', 'No static resource']
 
   - id: 12c-experience-discharge-kpis-capture
     type: capture
-    narration: Tracker access, bedside medication adoption and housekeeping turnover close the loop — every promise made earlier has a number behind it here.
+    narration: "And both ends of the stay. How many families actually opened the tracker. How many patients received their medicines at the bedside. And how long cleaning really takes, against the thirty-minute target. Every promise made earlier has a number here that could contradict it."
     url: /analytics
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=Inpatient Discharge Runway & Rapid Turnover'
     overlay: none
     steps:
       - action: wait
-        delayMs: 9223
+        delayMs: 18000
     assert:
       visible: ['Public Tracker Access', 'Bedside Meds Delivery', 'Housekeeping 30m SLA']
       notVisible: ['Something went wrong', 'No static resource']
 
   - id: 12d-refresh-capture
     type: capture
-    narration: Every card here is a live query, not a static export — refreshing pulls the current state of the hospital, on demand.
+    narration: "And none of this is a screenshot. Refreshing re-runs the queries against the live database — the difference between a dashboard and a report, and what makes it safe to act on at two in the morning."
     url: /analytics
     setupScript: scenes/role-bmu.mjs
     roiSelector: main
@@ -667,7 +855,7 @@ entries:
         target: Refresh Metrics button
         delayMs: 900
       - action: wait
-        delayMs: 6346
+        delayMs: 14300
     assert:
       visible: ['Hospital Operational KPI', 'Refresh Metrics']
       notVisible: ['Something went wrong', 'No static resource']
@@ -685,4 +873,4 @@ entries:
       - icon: external-link
         title: enhance-hospital-admissions.onrender.com
         text: The live prototype, the constraint engine, and the full documentation.
-    narration: Bed capacity is not fixed. When decisions are synthesised in real time, constraints are solved by mathematics rather than by phone, and discharge is pulled into the morning, we recover the capacity that was there all along. Explore the live prototype.
+    narration: "Bed capacity is not fixed. When the clinical decision is synthesised as the patient arrives, when beds are matched by arithmetic instead of by telephone, and when discharge is pulled into the morning, a hospital gets back the capacity it already had. The prototype is live — go and take it apart."

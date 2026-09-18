@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Terminal evidence</title>
+<!--
+  Renders a frozen run from pages/runs/<id>.json as a terminal.  ?run=<id>
+
+  Replaces the VHS path (see tools/record-runs.mjs for why VHS is unusable here).
+  The text is the real, unmodified stdout/stderr of a command that actually ran,
+  together with its true exit code. Only the presentation is ours.
+
+  TWO DELIBERATE DETAILS
+  ----------------------
+  1. Lines are revealed by animating OPACITY, never `visibility` or `display`.
+     capture.mjs asserts what should be on screen *before* recording starts, and
+     Playwright treats an opacity-0 element as visible (it checks box size and
+     visibility, not opacity). So a progressive reveal stays compatible with
+     assert.visible on output text. Hiding the lines properly would make every
+     assertion fail before a frame was recorded.
+  2. The footer states that this is recorded output and when it was captured.
+     A film that argues for naming your own limits should not hide its method in
+     a comment.
+-->
+<style>
+  :root {
+    --bg: #0F172A;
+    --chrome: #1E293B;
+    --fg: #E2E8F0;
+    --dim: #94A3B8;
+    --green: #34D399;
+    --red: #F87171;
+    --amber: #FBBF24;
+    --prompt: #60A5FA;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #F1F5F9; }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    font: 400 16px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  #term {
+    width: 1760px; height: 950px;
+    background: var(--bg);
+    border-radius: 16px;
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.28);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .chrome {
+    background: var(--chrome);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid #334155;
+    flex: none;
+  }
+  .dot { width: 13px; height: 13px; border-radius: 50%; }
+  .d1 { background: #F87171; } .d2 { background: #FBBF24; } .d3 { background: #34D399; }
+  .chrome h1 {
+    margin: 0 0 0 10px; color: var(--fg);
+    font-size: 17px; font-weight: 600; letter-spacing: 0.01em;
+  }
+  #body {
+    flex: 1; padding: 26px 30px; overflow: hidden;
+    font: 500 21px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--fg);
+  }
+  .line { white-space: pre-wrap; word-break: break-word; opacity: 0; }
+  .line.shown { opacity: 1; transition: opacity 90ms linear; }
+  /* A blinking cursor is period-correct terminal furniture AND load-bearing for
+     capture: Chrome's screencast only emits a frame when something changes, so a
+     completely static page records a clip of a few hundred milliseconds no matter
+     how long the scene is meant to run (measured: 200ms for a static report).
+     One element animating forever keeps frames flowing, and the clip's duration —
+     derived from frame timestamps — comes out correct. */
+  #cursor {
+    display: inline-block; width: 12px; height: 24px; margin-left: 2px;
+    background: var(--green); vertical-align: middle;
+    animation: blink 1.06s steps(1, end) infinite;
+  }
+  @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  .cmd { color: var(--fg); margin-top: 18px; }
+  .cmd:first-child { margin-top: 0; }
+  .cmd .sigil { color: var(--prompt); font-weight: 700; }
+  .out { color: var(--dim); }
+  .out.ok { color: var(--fg); }
+  .exit { font-size: 17px; margin-top: 4px; }
+  .exit.zero { color: var(--green); }
+  .exit.nonzero { color: var(--red); }
+  .hl-403, .hl-error { color: var(--red); font-weight: 700; }
+  .hl-200, .hl-pass { color: var(--green); font-weight: 700; }
+  footer {
+    flex: none; padding: 12px 30px; border-top: 1px solid #334155;
+    color: var(--dim); font-size: 15px; display: flex; justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+  <main id="term">
+    <div class="chrome">
+      <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <h1 id="title">…</h1>
+    </div>
+    <div id="body"></div>
+    <footer>
+      <span id="method">Recorded command output — not a re-enactment</span>
+      <span id="stamp"></span>
+    </footer>
+  </main>
+
+<script>
+(async () => {
+  const id = new URLSearchParams(location.search).get('run');
+  const res = await fetch(`runs/${id}.json`);
+  const data = await res.json();
+
+  document.getElementById('title').textContent = data.title;
+  document.getElementById('stamp').textContent =
+    `${data.id} · captured ${String(data.recordedAt).slice(0, 10)}`;
+
+  const body = document.getElementById('body');
+  const lines = [];
+
+  const add = (text, cls) => {
+    const el = document.createElement('div');
+    el.className = `line ${cls}`;
+    el.textContent = text;
+    body.appendChild(el);
+    lines.push(el);
+    return el;
+  };
+
+  for (const step of data.steps) {
+    const c = add('', 'cmd');
+    const sig = document.createElement('span');
+    sig.className = 'sigil';
+    sig.textContent = '$ ';
+    c.appendChild(sig);
+    c.appendChild(document.createTextNode(step.cmd));
+
+    for (const raw of String(step.output).split('\n')) {
+      const el = add(raw === '' ? ' ' : raw, 'out ok');
+      // Colour the few tokens the narration actually leans on. Nothing is
+      // rewritten — only painted.
+      if (/->\s*403|ERROR|does not meet/.test(raw)) el.classList.add('hl-error');
+      else if (/->\s*200|Failures: 0|BUILD SUCCESS/.test(raw)) el.classList.add('hl-pass');
+    }
+    if (step.exitCode !== 0) add(`exit ${step.exitCode}`, 'exit nonzero');
+  }
+
+  // Reveal on a fixed timeline so the same JSON always produces the same film.
+  const total = Math.min(4200, Math.max(1200, lines.length * 130));
+  const per = total / Math.max(1, lines.length);
+  lines.forEach((el, i) => setTimeout(() => el.classList.add('shown'), 250 + i * per));
+
+  // Trailing prompt with a blinking cursor: it reads as a shell waiting for the
+  // next command, and it is what keeps the screencast producing frames.
+  const tail = add('', 'cmd');
+  const sig = document.createElement('span');
+  sig.className = 'sigil';
+  sig.textContent = '$ ';
+  tail.appendChild(sig);
+  const cur = document.createElement('span');
+  cur.id = 'cursor';
+  tail.appendChild(cur);
+  setTimeout(() => tail.classList.add('shown'), 250 + lines.length * per);
+})();
+</script>
+</body>
+</html>

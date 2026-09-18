@@ -18,15 +18,21 @@
 #
 #   * `storyline.yml` cannot emit a `vhs_terminal` scene. compileStoryline maps
 #     type -> visualEngine with no passthrough (slide->html_slides,
-#     capture->playwright_web, footage->manual_footage). So every terminal take is
-#     a `footage` entry pointing at an mp4 that VHS produced from a committed
-#     `.tape` in tapes/ (D18). The tape is the source; the mp4 is the frozen input.
-#     Requires `brew install charmbracelet/tap/vhs ttyd` — bootstrap reports
-#     vhs: false and cannot fix it on macOS.
+#     capture->playwright_web, footage->manual_footage). The plan's answer (D18) was
+#     `footage` + VHS-recorded mp4s. **VHS does not work here** (0.12.0 + ttyd 1.7.7
+#     installed; it exits 0, prints "Creating <file>", never calls ffmpeg — verified
+#     with a shim — and writes nothing in any format, frames included).
+#     So terminal evidence is produced the same way as the seam diagram (D20):
+#       tools/record-runs.mjs runs each command for real and freezes stdout, stderr
+#       and the exit code into pages/runs/<id>.json (committed);
+#       pages/term.html renders that JSON as a terminal;
+#       the scene is an ordinary `capture` against :4173.
+#     The bytes on screen are real output. Only the reveal is presentation, and
+#     term.html says so in its own footer. There is no footage/ directory.
 #
 #   * An absolute `url` bypasses `baseUrl` (capture.mjs:155), which is how the
-#     coverage reports and the seam diagram are captured from :4173 without
-#     polluting the application (D17).
+#     coverage report, the seam diagram and every terminal take are captured from
+#     :4173 without polluting the application (D17).
 #
 # Evidence policy (D8): no number on screen unless the same shot produces it.
 # Slides carry only cardinalities countable in the adjacent capture. `<50ms` is
@@ -46,7 +52,13 @@ deck:
   voice:
     provider: auto          # resolves to local Kokoro
     gender: female          # same narrator as the product film
-  baseUrl: http://127.0.0.1:8080
+  # Captured against the VITE DEV SERVER, not the jar. Verified 18 Sep: the
+  # packaged jar serves `/` but 404s on every deep link (/ed, /bmu, /analytics) —
+  # there is no SPA fallback anywhere in the backend, so `url: /bmu` cannot work
+  # against :8080. Vite serves the deep links and proxies /api to :8080, so the
+  # app under capture is the same application talking to the same prototype JVM.
+  # Vite 8 binds IPv6 by default, hence `npx vite --host 127.0.0.1`.
+  baseUrl: http://127.0.0.1:3000
   fixedTime: '2026-01-15T09:00:00.000Z'
 
 entries:
@@ -161,7 +173,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 21400
+        delayMs: 18951
     assert:
       visible: ['Live Bed Inventory Matrix', 'Mustard Yellow (Cleaning)', 'White (Clean)']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -258,8 +270,10 @@ entries:
         selector: '#reveal-prod'
         target: Reveal the production adapters
         delayMs: 900
+      - action: waitForText
+        value: UnsupportedOperationException
       - action: wait
-        delayMs: 17600
+        delayMs: 14735
     assert:
       # Only initially-visible text: the production column starts hidden and is
       # revealed by the clicks below, so asserting on it here would fail before
@@ -267,44 +281,72 @@ entries:
       visible: ['One boundary, three seams', 'BedAllocationSolver', 'HospitalEhrGateway', 'SisterHospitalGateway']
       notVisible: ['Cannot GET', 'Not Found']
 
-  # The fence, on the no-profile JVM at :8081. A second process, never a restart of
+  # The fence, on a second JVM at :8081. A separate process, never a restart of
   # :8080 — H2 is create-drop and a restart would empty the data R5 reads.
   #
-  # 403 vs 401 is NOT asserted in the narration: the stubs throw on invocation
-  # rather than at startup, so this is a request being refused, and the exact code
-  # is read off the tape at record time.
-  - id: 05b-profile-fence-footage
-    type: footage
-    narration: "That refusal is not theoretical. This is the same jar with the prototype profile switched off. The health check answers, so the application is up. Every business endpoint is denied, because the only security configuration left is the one that authenticates everything, and no login mechanism exists yet. The fence is a running process, not a comment."
-    src: footage/05b-profile-fence.mp4
+  # VERIFIED 18 Sep, and it corrected the plan twice:
+  #   * omitting the profile flag proves NOTHING. application.yml:5 sets
+  #     `spring.profiles.active: prototype`, so a flagless JVM logs
+  #     'profile is active: "prototype"'. The tape must pass
+  #     `--spring.profiles.active=production` explicitly.
+  #   * the code is 403, not 401 (Http403ForbiddenEntryPoint), and even `/` is
+  #     refused — the production profile will not serve the page either.
+  # Measured: :8081 /actuator/health -> 200, /api/v1/bmu/queue -> 403.
+  - id: 05b-profile-fence-terminal
+    type: capture
+    narration: "That refusal is not theoretical. This is the same jar, started with the production profile. The health check answers, so the application is up — and every business endpoint comes back four-oh-three, because the only security configuration left authenticates everything and no login mechanism exists yet. Worth naming: the prototype profile is the default in configuration, so production is the profile you have to ask for. That is on the list of what is owed."
+    url: http://127.0.0.1:4173/term.html?run=05b-profile-fence
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 27935
+    assert:
+      visible: ['The following 1 profile is active', 'production', '403']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
-  - id: 05c-stub-contract-footage
-    type: footage
+  - id: 05c-stub-contract-terminal
+    type: capture
     narration: "And the stubs themselves are under test. Three production adapters, each asserted to throw the moment it is invoked. That is the part people skip — a placeholder nobody tests will eventually be called by accident, in a profile nobody checked."
-    src: footage/05c-stub-contract.mp4
+    url: http://127.0.0.1:4173/term.html?run=05c-stub-contract
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 16046
+    assert:
+      visible: ['UnsupportedOperationException', 'Tests run: 5', 'BUILD SUCCESS']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # D10: the only on-screen persona switch in the film. Every other capture seeds
   # the role invisibly via setupScript, which is why this entry has none.
+  #
+  # Selector verified live 18 Sep: the switcher is a native <select> labelled
+  # "Select role persona", with option values ED_ATTENDING, SPECIALIST,
+  # BMU_COORDINATOR, WARD_NURSE, HOUSEKEEPING, PATIENT — the same tokens the
+  # setupScripts seed. selectOption is used rather than click, because a real
+  # <select> popup is an OS-level window that CDP cannot record.
   - id: 05d-persona-fence-capture
     type: capture
-    narration: "One convenience was deliberately kept, and it is a security hole. Six personas, six seeded accounts, and a switch that changes role without a login. I built it because a reviewer has to walk five desks to see the argument, and five login flows would bury it. It is fenced behind the prototype profile, and the default configuration refuses that header outright."
+    narration: "One convenience was deliberately kept, and it is a security hole. Six personas, six seeded accounts, and a switch that changes role without a login. I built it because a reviewer has to walk five desks to see the argument, and five login flows would bury it. It is fenced behind the prototype profile, and the production configuration refuses that header outright."
     url: /ed
     roiSelector: 'header'
     overlay: none
     steps:
-      - action: click
-        selector: 'header select, header button:has-text("ED")'
-        target: Persona switcher in the header
-        delayMs: 1200
+      - action: selectOption
+        selector: 'select[aria-label="Select role persona"]'
+        value: BMU_COORDINATOR
+        target: Persona switcher — BMU coordinator
+        delayMs: 2200
+      - action: selectOption
+        selector: 'select[aria-label="Select role persona"]'
+        value: WARD_NURSE
+        target: Persona switcher — ward nurse
+        delayMs: 2200
       - action: wait
-        delayMs: 1200
-      - action: press
-        value: Escape
-        delayMs: 400
-      - action: wait
-        delayMs: 21800
+        delayMs: 17204
     assert:
-      visible: ['Emergency Department (ED) Clinical Intake']
+      visible: ['Persona:', 'Live Sync']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # ==========================================================================
@@ -327,26 +369,40 @@ entries:
         detail: Price — not globally optimal
     narration: "Second decision. The textbook answer for bed allocation is a constraint solver — Timefold. I know it, it fits, and I did not use it. It wants a licence, it wants a daemon solving continuously, and it answers a coordinator's question with a score I cannot decompose. So I wrote the heuristic, and I paid for it: this is not globally optimal, and at a large enough ward count it will be beaten."
 
-  # The upside of the trade, on screen: the score breakdown. bmu.tsx:1152 renders
-  # "Score: +N" and :1156 the per-rule breakdown lines.
+  # The upside of the trade, on screen: the score breakdown.
+  #
+  # Patient changed from Tan Ah Meng to Mr Goh Beng Kiat after measuring the live
+  # solver 18 Sep. Tan Ah Meng returns exactly ONE candidate (8A-03, +85), so
+  # "three beds come back" would have been false and there would be no rank-2 bed
+  # for R3's override take. Goh Beng Kiat (Q-P107, SURGERY) returns three:
+  #   10A-02 +70  = +40 Specialty (SURGERY) ; +30 Consolidation (Preserves Flex Wards)
+  #   8A-03  +30  = +30 Consolidation
+  #   9B-02  +30  = +30 Consolidation
+  # Narration therefore speaks 70/30/30 — numbers the shot itself produces (D8) —
+  # and does not recite a breakdown that differs per patient.
   - id: 06a-explainable-score-capture
     type: capture
-    narration: "Four hard rules filter the candidate set, then three weighted preferences rank what survives. Three beds come back with a score, and underneath each score, the reason it earned that score. That decomposition is the whole point of the trade — a coordinator can read why bed one beat bed two, which is exactly what the solver could not have given me."
+    narration: "Four hard rules filter the candidate set, then three weighted preferences rank what survives. Three beds come back for this patient — seventy, thirty and thirty — and under each score, the rules that produced it. That decomposition is the whole point of the trade: a coordinator can read why the first bed beat the other two, which is exactly what the solver could not have given me."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: '.lg\\:col-span-5'
     overlay: none
     steps:
       - action: click
-        selector: 'tr:has-text("Tan Ah Meng") >> role=button[name="Select"]'
-        target: Select button on the Tan Ah Meng row
+        selector: 'tr:has-text("Mr Goh Beng Kiat") >> role=button[name="Select"]'
+        target: Select button on the Mr Goh Beng Kiat row
         delayMs: 700
       - action: waitForText
         value: Top Algorithmic Matches
+      - action: waitForText
+        value: 'Score:'
       - action: wait
-        delayMs: 23700
+        delayMs: 21305
+    # assertSceneState runs immediately after goto and BEFORE any step
+    # (capture.mjs:157), so only landing-page text belongs here. The scored
+    # recommendation is a post-click state and is guarded by waitForText above.
     assert:
-      visible: ['Solver Recommendation', 'Tan Ah Meng', 'Score:']
+      visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Prioritized Admission Requests', 'Mr Goh Beng Kiat']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # Weights are real defaults read off the form: specialty 40, consolidation 30,
@@ -361,15 +417,23 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 18400
+        delayMs: 18234
     assert:
       visible: ['BMU Optimization Weight Configuration', 'Scoring Weights', 'Specialty Alignment Weight']
       notVisible: ['Something went wrong', 'No static resource']
 
-  - id: 06c-solver-pinned-footage
-    type: footage
+  - id: 06c-solver-pinned-terminal
+    type: capture
     narration: "The heuristic is pinned by tests, which is what makes it safe to throw away. Every rule has an assertion behind it — so the day Timefold goes in behind that interface, these are the tests it has to satisfy."
-    src: footage/06c-solver-pinned.mp4
+    url: http://127.0.0.1:4173/term.html?run=06c-solver-pinned
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 13411
+    assert:
+      visible: ['Tests run: 4', 'Failures: 0', 'BUILD SUCCESS']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # ==========================================================================
   # RESOLUTION 3 of 5 — Beat leads on: the invariant.
@@ -387,7 +451,7 @@ entries:
         detail: Price — no way through for a clinician who is right
       - icon: unlock
         title: Negotiable tier
-        text: Ward class and telemetry, overridable with a structured institutional code.
+        text: Any bed but the top-ranked one requires a structured institutional code.
       - icon: git-merge
         title: Discordance resolves upward
         text: The higher acuity wins and monitoring requirements are unioned.
@@ -402,14 +466,29 @@ entries:
   # the backend never populates. Capturing it would require mocking the API, which
   # is the exact demoware this film argues against. So absence is asserted, not
   # photographed: the test display names ARE the claim.
-  - id: 07a-absolute-tier-footage
-    type: footage
+  - id: 07a-absolute-tier-terminal
+    type: capture
     narration: "Notice how the absolute tier gets proved. There is no disabled button to photograph, because a bed that violates a hard constraint never becomes a recommendation at all — it is eliminated from the candidate set. Absence cannot be screenshotted, so it is asserted: gender, telemetry, infection, negative pressure, each with a test that fails if that bed survives."
-    src: footage/07a-absolute-tier.mp4
+    url: http://127.0.0.1:4173/term.html?run=07a-absolute-tier
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 23775
+    assert:
+      visible: ['eliminates wards without negative pressure', 'WardClass, Gender, Telemetry', 'Tests run: 4']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
-  # The negotiable tier IS live: bmu.tsx:1197 fires the modal for any bed that is
-  # not rank 1, and the modal will not resolve without a structured code
-  # (:1812-1826). Confirming writes an OVERRIDE_ALLOCATION audit record.
+  # The negotiable tier IS live. Verified 18 Sep on Mr Goh Beng Kiat: three
+  # candidates, and both non-top beds render "Override & Allocate Bed 8A-03" /
+  # "…9B-02", each opening the modal. Note precisely what triggers it —
+  # bmu.tsx:1197 gates on `rec.isOperationalOverride || idx > 0`, and the API never
+  # sets isOperationalOverride (it comes back undefined), so in practice the gate
+  # is POSITIONAL: any bed but the best one. The narration says exactly that
+  # rather than claiming a tier-derived override the backend does not compute.
+  #
+  # Confirming allocates a bed, which is deliberate: it exercises the workflow that
+  # R5's dashboard then reports on.
   - id: 07b-override-modal-capture
     type: capture
     narration: "The negotiable tier behaves differently. Taking anything other than the top-ranked bed forces a modal, and the modal will not close without a structured institutional code — not free text, because free text cannot be queried later. Confirming writes an immutable override record. Overridable, but never silent."
@@ -419,25 +498,29 @@ entries:
     overlay: none
     steps:
       - action: click
-        selector: 'tr:has-text("Tan Ah Meng") >> role=button[name="Select"]'
-        target: Select button on the Tan Ah Meng row
+        selector: 'tr:has-text("Mr Goh Beng Kiat") >> role=button[name="Select"]'
+        target: Select button on the Mr Goh Beng Kiat row
         delayMs: 700
       - action: waitForText
         value: Top Algorithmic Matches
       - action: click
         selector: 'button:has-text("Override & Allocate Bed") >> nth=0'
-        target: Override and allocate a lower-ranked bed
+        target: Override and allocate the second-ranked bed
         delayMs: 900
       - action: waitForText
         value: Operational Constraint Override
+      - action: waitForText
+        value: 'Structured Reason Code:'
       - action: click
         selector: 'button:has-text("Confirm Override & Allocate")'
         target: Confirm the override with its reason code
         delayMs: 900
       - action: wait
-        delayMs: 16900
+        delayMs: 15119
+    # The modal text is post-click, so it is guarded by waitForText, not asserted
+    # here — assertions run before the first frame is recorded.
     assert:
-      visible: ['Operational Constraint Override', 'Structured Reason Code:', 'GOVERNMENT_SUBSIDY_CLASS_UPGRADE']
+      visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Mr Goh Beng Kiat']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # ==========================================================================
@@ -473,10 +556,14 @@ entries:
         selector: 'button:has-text("Patient Vacated Bed") >> nth=0'
         target: Patient Vacated Bed on the first occupied bed
         delayMs: 900
+      - action: waitForText
+        value: MUSTARD YELLOW
       - action: wait
-        delayMs: 16500
+        delayMs: 15117
+    # 'MUSTARD YELLOW' is the notification raised by the click, so it is a
+    # waitForText and not a pre-flight assertion.
     assert:
-      visible: ['Inpatient Ward Reception & Bed Control', 'MUSTARD YELLOW']
+      visible: ['Inpatient Ward Reception & Bed Control', 'Ward Nursing Station Bed Control']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   - id: 08a2-sanitise-capture
@@ -492,15 +579,23 @@ entries:
         target: Sign-Off Clean on the first bed pending cleaning
         delayMs: 900
       - action: wait
-        delayMs: 11500
+        delayMs: 10886
     assert:
       visible: ['Housekeeping (EVS) Rapid Bed Turnover', '30-Minute Turnover Queue']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
-  - id: 08b-conflict-409-footage
-    type: footage
+  - id: 08b-conflict-409-terminal
+    type: capture
     narration: "The concurrency claim is the one I cannot show you honestly in a browser. Two specialists claiming the same broadcast is a race, and a race staged in a single tab is a lie. So it is a test: two versions, one write, 409 Conflict, and a problem-detail body the client can actually act on."
-    src: footage/08b-conflict-409.mp4
+    url: http://127.0.0.1:4173/term.html?run=08b-conflict-409
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 19549
+    assert:
+      visible: ['409 Conflict ProblemDetail', 'Tests run: 12', 'BUILD SUCCESS']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # ==========================================================================
   # RESOLUTION 5 of 5 — Beat leads on: the mechanism.
@@ -523,9 +618,9 @@ entries:
         text: A reconciliation test fails when the two pathways disagree.
       - icon: gauge
         title: Coverage is measured
-        text: On the code that actually executes under the prototype profile.
-        detail: Price — measured, not enforced. No pipeline.
-    narration: "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit: coverage here is measured, not enforced. There is no continuous integration wired up yet."
+        text: 214 backend tests over the whole bundle; the frontend counts four paths.
+        detail: Price — thresholds exist, nothing runs them
+    narration: "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit on all of this: the backend has no coverage threshold at all, the frontend declares four, and nothing runs either of them automatically."
 
   # RUNBOOK DEPENDENCY: a dashboard of zeros satisfies a naive assertion. This must
   # run AFTER the workflows above have executed against the same JVM, and the
@@ -540,35 +635,80 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 17400
+        delayMs: 17106
+    # 'Target Met' only renders once a metric has been evaluated against its
+    # benchmark, so it is a stronger assertion than a bare label. The real
+    # guarantee against a zeroed dashboard is scene ORDER: 07b, 08a and 08a2 mutate
+    # state earlier in the same capture run, against the same JVM.
     assert:
-      visible: ['Hospital Operational KPI', 'Avg ED Turnaround', 'Benchmark:', 'Target: 100% phone-free']
+      visible: ['Hospital Operational KPI', 'Avg ED Turnaround', 'Benchmark:', 'Target Met']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
-  - id: 09b-audit-log-footage
-    type: footage
-    narration: "Pathway B is this. The same events, in the log, with the acting user carried in the mapped diagnostic context on every line. That format does not change between profiles — only the destination does. Today it is standard output. In production it is a SIEM, and nothing above the appender needs to know."
-    src: footage/09b-audit-log.mp4
-
-  - id: 09c-parity-footage
-    type: footage
-    narration: "And parity is asserted, not eyeballed. The reconciliation test computes each metric down both pathways and fails when they disagree, which is the only thing that makes a second pathway worth having."
-    src: footage/09c-parity.mp4
-
-  # Absolute url: the reports are served from :4173, so the application is left
-  # untouched rather than serving coverage HTML from its static resources.
-  - id: 09d-coverage-capture
+  - id: 09b-audit-log-terminal
     type: capture
-    narration: "Coverage, measured against the code that actually executes. Take the number for what it is — evidence the domain layer is tested, not a quality gate. Nothing fails a build at a threshold today, because there is no build to fail."
-    url: http://127.0.0.1:4173/jacoco/index.html
-    roiSelector: 'body'
+    narration: "Pathway B is this. The same events, in the log, with the acting user carried in the mapped diagnostic context on every line. That format does not change between profiles — only the destination does. Today it is standard output. In production it is a SIEM, and nothing above the appender needs to know."
+    url: http://127.0.0.1:4173/term.html?run=09b-audit-log
+    roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 17400
+        delayMs: 20101
     assert:
-      visible: ['Missed Instructions', 'com.hospital.admissions']
+      visible: ['AUDIT', 'action=']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
+
+  - id: 09c-parity-terminal
+    type: capture
+    narration: "And parity is asserted, not eyeballed. The reconciliation test computes each metric down both pathways and fails when they disagree, which is the only thing that makes a second pathway worth having."
+    url: http://127.0.0.1:4173/term.html?run=09c-parity
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 12901
+    assert:
+      visible: ['Tests run: 1', 'Failures: 0', 'BUILD SUCCESS']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
+
+  # Absolute url: the reports are served from :4173, so the application is left
+  # untouched rather than serving coverage HTML from its static resources.
+  #
+  # Numbers MEASURED 18 Sep (D8: measure first, then write the line). JaCoCo over
+  # the whole 50-class bundle: 94% instructions, 78 of 2,832 lines missed (97%),
+  # 315 of 1,021 branches missed (69%). The branch figure is the weak one and is
+  # therefore the one spoken.
+  - id: 09d-coverage-capture
+    type: capture
+    narration: "Measured, on the whole backend bundle: ninety-four percent of instructions, ninety-seven percent of lines — and sixty-nine percent of branches. That last number is the one worth saying out loud, because it is where the untested paths actually live. It is evidence the domain layer is exercised. It is not a quality gate."
+    url: http://127.0.0.1:4173/jacoco/index.html
+    roiSelector: 'body'
+    overlay: none
+    # stills, not screencast: this is a third-party static report we cannot animate,
+    # and a static page starves Chrome's change-driven screencast (measured: 200ms
+    # for a 21s scene). captureStills renders exactly sceneMs from one screenshot.
+    captureMode: stills
+    assert:
+      visible: ['Missed Instructions', 'com.hospital.admissions', 'Total']
       notVisible: ['Cannot GET', 'Not Found']
+
+  # The single most on-thesis take in the film, and the one most likely to be cut:
+  # the frontend declares four 90% thresholds (vitest.config.ts) and MEASURED on
+  # 18 Sep it fails one of them — branches 74.84%. It fails because nothing runs
+  # it: no CI, and the committed frontend/coverage/ HTML is from 10 Sep and still
+  # claims 100%. A gate nobody runs is not a gate, and this is that sentence with
+  # evidence under it.
+  - id: 09e-gate-red-terminal
+    type: capture
+    narration: "And here is what that costs, right now. The frontend declares four coverage thresholds at ninety percent. Run them and one is red — branches at seventy-five. Nothing caught that, because nothing runs it. A gate no pipeline executes is not a gate; it is a comment with a number in it."
+    url: http://127.0.0.1:4173/term.html?run=09e-gate-red
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 18450
+    assert:
+      visible: ['branches: 90', 'does not meet global threshold', '74.84%']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # ==========================================================================
   # Close and CTA — unroled (the remaining two of the four permitted jobs).
@@ -598,17 +738,25 @@ entries:
         detail: 3 interfaces, 3 fail-fast adapters
       - icon: test-tube
         title: Enforcement
-        text: A test suite no pipeline runs, and a coverage number nothing gates.
+        text: Four declared thresholds, no pipeline to run them, and one currently red.
         detail: The suite is the foundation; the gate is the adapter
-    narration: "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. Logs that go to a file. A test suite no pipeline enforces. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine."
+    narration: "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. A prototype profile that is the configuration default. And a coverage threshold that is failing right now because nothing runs it. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine."
 
   # Countable artifacts, because "the specs came first" is exactly the claim a
   # skeptic doubts, and it is countable rather than assertable. Chooses
   # transparency about the agent tooling over polish.
-  - id: 10a-artifacts-footage
-    type: footage
+  - id: 10a-artifacts-terminal
+    type: capture
     narration: "One last count, because sequence is the part people doubt. Eleven decision tickets, twenty-eight implementation issues, five specifications, four decision records — written before the code they describe."
-    src: footage/10a-artifacts.mp4
+    url: http://127.0.0.1:4173/term.html?run=10a-artifacts
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 13453
+    assert:
+      visible: ['wayfinder tickets : 11', 'scratch issues    : 28', 'decision records  : 4']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   - id: 11-cta
     type: slide

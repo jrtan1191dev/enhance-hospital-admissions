@@ -2,19 +2,19 @@
   "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
   "id": "08b-conflict-409",
   "title": "Optimistic locking, proved where the UI cannot honestly stage it",
-  "recordedAt": "2026-09-18T05:30:40.175Z",
+  "recordedAt": "2026-09-18T08:08:30.832Z",
   "steps": [
     {
-      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/controller/ClinicianControllerTest.java backend/src/test/java/com/hospital/admissions/controller/GlobalExceptionHandlerTest.java | grep -i 'conflict' | sed 's/.*(\"/  - /; s/\")//'",
+      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/controller/ClinicianControllerTest.java backend/src/test/java/com/hospital/admissions/controller/GlobalExceptionHandlerTest.java | grep -i 'conflict\\|409' | sed 's/.*(\"/  - /; s/\")//'",
       "output": "  - POST /api/v1/clinicians/specialist/broadcasts/{id}/claim conflict returns 409 Conflict ProblemDetail\n  - IllegalStateException returns 409 Conflict ProblemDetail\n  - ObjectOptimisticLockingFailureException returns 409 Conflict ProblemDetail",
       "exitCode": 0,
-      "durationMs": 36
+      "durationMs": 33
     },
     {
-      "cmd": "cd backend && ./mvnw test -Dtest='ClinicianControllerTest#testClaimBroadcast_ConflictReturns409,GlobalExceptionHandlerTest' 2>&1 | grep -E 'Tests run:|BUILD'",
-      "output": "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.113 s -- in com.hospital.admissions.controller.ClinicianControllerTest\n[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.176 s -- in com.hospital.admissions.controller.GlobalExceptionHandlerTest\n[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "cmd": "cd backend && ./mvnw test -Dtest='ClinicianControllerTest#testClaimBroadcast_ConflictReturns409,GlobalExceptionHandlerTest' 2>&1 | grep -E '409|Tests run:|BUILD'",
+      "output": "16:08:30.551 [main] WARN com.hospital.admissions.controller.GlobalExceptionHandler -- [CLIENT_ERROR] who=\"ANONYMOUS\" where=\"POST /api/v1/clinicians/specialist/broadcasts/26dcdb61-58e2-4561-8739-f4b3138c442d/claim\" what=\"409 Conflict (IllegalStateException): Broadcast has already been claimed or is no longer open: 26dcdb61-58e2-4561-8739-f4b3138c442d\"\n[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.086 s -- in com.hospital.admissions.controller.ClinicianControllerTest\n16:08:30.700 [main] WARN com.hospital.admissions.controller.GlobalExceptionHandler -- [CLIENT_ERROR] who=\"ANONYMOUS\" where=\"GET /test/conflict\" what=\"409 Conflict (IllegalStateException): Bed 8A-01 is not EMPTY_CLEANED\"\n16:08:30.792 [main] WARN com.hospital.admissions.controller.GlobalExceptionHandler -- [CLIENT_ERROR] who=\"ANONYMOUS\" where=\"GET /test/optimistic-lock\" what=\"409 Conflict (ObjectOptimisticLockingFailureException): Object of class [com.hospital.admissions.entity.AssessmentBroadcast] with identifier [941e8fda-c684-403b-8dd4-777fcb425308]: optimistic locking failed\"\n[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.182 s -- in com.hospital.admissions.controller.GlobalExceptionHandlerTest\n[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
       "exitCode": 0,
-      "durationMs": 2927
+      "durationMs": 2819
     }
   ]
 }

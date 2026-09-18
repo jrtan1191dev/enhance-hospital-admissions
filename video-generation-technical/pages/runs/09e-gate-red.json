@@ -2,19 +2,19 @@
   "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
   "id": "09e-gate-red",
   "title": "A coverage gate that nothing runs, and that is currently red",
-  "recordedAt": "2026-09-18T05:26:24.998Z",
+  "recordedAt": "2026-09-18T08:08:39.335Z",
   "steps": [
     {
       "cmd": "grep -A6 thresholds frontend/vitest.config.ts",
       "output": "        thresholds: {\n          lines: 90,\n          functions: 90,\n          branches: 90,\n          statements: 90,\n        },\n      },",
       "exitCode": 0,
-      "durationMs": 32
+      "durationMs": 33
     },
     {
       "cmd": "cd frontend && npm run test:coverage 2>&1 | tail -9",
       "output": "  toast.ts         |     100 |      100 |     100 |     100 |                            \n  utils.ts         |     100 |      100 |     100 |     100 |                            \n routes            |     100 |    85.93 |     100 |     100 |                            \n  patient.tsx      |     100 |    85.93 |     100 |     100 | 60,157-204,251,296,320,419 \n services          |   97.06 |       64 |   96.61 |   96.62 |                            \n  api.ts           |   95.53 |    52.63 |    96.7 |   93.05 | 65-68,193-200              \n  queries.ts       |   97.94 |      100 |   96.55 |   97.94 | 544,567,588,609            \n-------------------|---------|----------|---------|---------|----------------------------\nERROR: Coverage for branches (74.84%) does not meet global threshold (90%)",
       "exitCode": 0,
-      "durationMs": 3577
+      "durationMs": 1349
     }
   ]
 }

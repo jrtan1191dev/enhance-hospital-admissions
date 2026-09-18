@@ -1,20 +1,20 @@
 {
   "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
-  "id": "05c-stub-contract",
+  "id": "09c-stub-contract",
   "title": "The three production adapters are asserted to fail fast",
-  "recordedAt": "2026-09-18T05:26:48.007Z",
+  "recordedAt": "2026-09-18T08:08:37.953Z",
   "steps": [
     {
       "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/gateway/GatewaysAndSolversTest.java | sed 's/.*(\"/  - /; s/\")//'",
       "output": "  - MockHospitalEhrGateway returns synthetic EHR summary\n  - MockSisterHospitalGateway generates referral response with target or default facility\n  - HttpSisterHospitalGateway throws UnsupportedOperationException in non-configured env\n  - FhirHospitalEhrGateway throws UnsupportedOperationException in non-configured env\n  - TimefoldBedAllocationSolver throws UnsupportedOperationException in non-configured env",
       "exitCode": 0,
-      "durationMs": 39
+      "durationMs": 36
     },
     {
-      "cmd": "cd backend && ./mvnw test -Dtest=GatewaysAndSolversTest 2>&1 | grep -E 'Tests run:|BUILD'",
-      "output": "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in com.hospital.admissions.gateway.GatewaysAndSolversTest\n[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "cmd": "cd backend && ./mvnw test -Dtest=GatewaysAndSolversTest 2>&1 | grep -E 'UnsupportedOperationException|Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.106 s -- in com.hospital.admissions.gateway.GatewaysAndSolversTest\n[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
       "exitCode": 0,
-      "durationMs": 1996
+      "durationMs": 1639
     }
   ]
 }

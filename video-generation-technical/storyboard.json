@@ -2,10 +2,10 @@
   "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
     "file": "storyline.yml",
-    "checksum": "6c35070f0f7f28cab2c48b09d735c40c3529f0be7044c1666fb2ca2147ca20af"
+    "checksum": "5ebfd1ec9d4582d4b08c23d08d6613ea521c77759bc5282543f014b5b94cfa96"
   },
   "meta": {
-    "title": "Build the Foundations, Stub the Rest",
+    "title": "How This System Was Designed — Technical Considerations",
     "fps": 30,
     "captureAspect": "landscape",
     "outputs": [
@@ -36,142 +36,142 @@
   },
   "scenes": [
     {
-      "id": "01-purpose",
-      "title": "What a prototype is for",
-      "narration": "A prototype is not a small product. It is an instrument for retiring risk, and the only risk worth retiring is the kind you cannot undo. So the question this repository was built to answer is a narrow one: which decisions, taken wrongly, could not be walked back later — and were those the ones that got the engineering time.",
+      "id": "01-problem",
+      "title": "What kind of problem this is",
+      "narration": "This is an admissions system, and the thing that makes it hard isn't any one screen. One patient is handled by six roles in turn — the ED, the specialists, bed management, the ward nurse, housekeeping. No single one of them owns whether the outcome is correct. Correctness comes from how they hand off to each other. So that's what I designed for.",
       "role": "situation",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "stat-deepdive",
         "theme": "light",
-        "title": "What a prototype is for",
+        "title": "What kind of problem this is",
         "pill": null,
         "body": null,
         "cards": [
           {
-            "icon": "target",
-            "title": "Not a small product",
-            "text": "An instrument for retiring risk, judged on which risk it retired.",
-            "detail": "The yardstick"
+            "icon": "users",
+            "title": "A multi-actor process",
+            "text": "ED, specialists, bed management, ward nurse, housekeeping, patient.",
+            "detail": "Five desks and a patient"
           },
           {
-            "icon": "undo-2",
-            "title": "Reversibility is the filter",
-            "text": "A wrong reversible call costs a sprint. A wrong irreversible one costs the design.",
-            "detail": "The criterion"
+            "icon": "git-merge",
+            "title": "Correctness is a whole-system property",
+            "text": "Being right depends on how the parts hand off, not on any one part.",
+            "detail": "The design target"
           }
         ],
         "stat": {
-          "value": "1",
-          "unit": "question",
-          "label": "which decisions could not be walked back later"
+          "value": "6",
+          "unit": "roles",
+          "label": "act on one patient, and no single one owns the outcome"
         },
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "A prototype is not a small product. It is an instrument for retiring risk, and the only risk worth retiring is the kind you cannot undo. So the question this repository was built to answer is a narrow one: which decisions, taken wrongly, could not be walked back later — and were those the ones that got the engineering time."
+        "notes": "This is an admissions system, and the thing that makes it hard isn't any one screen. One patient is handled by six roles in turn — the ED, the specialists, bed management, the ward nurse, housekeeping. No single one of them owns whether the outcome is correct. Correctness comes from how they hand off to each other. So that's what I designed for."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/01-problem.mp4",
+        "durationMs": 21767,
+        "roi": null,
+        "hash": "a50fe49ad4c0"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/01-purpose.wav",
-        "durationMs": 20900,
+        "filePath": "assets/audio/01-problem.wav",
+        "durationMs": 21350,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "bb95725e3aa6"
+        "hash": "7e3b4ac83456"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 21300,
+        "sceneMs": 21750,
         "ratePct": 0,
-        "padVisualMs": 21300,
+        "padVisualMs": 21750,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/01-purpose.mp4",
-        "durationMs": 21300,
-        "roi": null,
-        "hash": "92ef2ea4379d"
-      }
+      "ratePct": 0
     },
     {
       "id": "02-domain-model",
-      "title": "The domain, as an engineering object",
-      "narration": "Bed allocation is a constraint problem wearing clinical clothes. Five entities, a strict containment hierarchy from level to ward to bed, and a bed that is always in exactly one of four states. Six roles act on it. And three external systems it has to integrate with, none of which exist here. That last line is the whole engineering problem.",
+      "title": "The domain, as a data model",
+      "narration": "Here's the model. Five entities in a tree: a level holds wards, a ward holds beds. A bed is always in exactly one of four states. Six roles act on it, each with its own view. And it needs to talk to three outside systems — patient records, sister hospitals, notifications — none of which I have access to. That last line is the constraint that shapes every decision after this.",
       "role": "situation",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "process-flow",
         "theme": "light",
-        "title": "The domain, as an engineering object",
+        "title": "The domain, as a data model",
         "pill": null,
         "body": null,
         "cards": [
           {
             "icon": "boxes",
             "title": "5 entities, one tree",
-            "text": "Level contains ward contains bed, so capacity is always a tree walk."
+            "text": "A level holds wards, a ward holds beds."
           },
           {
             "icon": "workflow",
             "title": "4 bed states",
-            "text": "A bed is in exactly one state, always."
+            "text": "A bed is in exactly one state at a time."
           },
           {
             "icon": "users",
             "title": "6 acting roles",
-            "text": "Five desks and a patient, each with a different view."
+            "text": "Each role sees a different view of the same data."
           },
           {
             "icon": "plug",
             "title": "3 external systems",
-            "text": "Records, transfers, notifications — none obtainable here.",
-            "detail": "The engineering problem"
+            "text": "Records, transfers, notifications — none available to me.",
+            "detail": "The prototype constraint"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Bed allocation is a constraint problem wearing clinical clothes. Five entities, a strict containment hierarchy from level to ward to bed, and a bed that is always in exactly one of four states. Six roles act on it. And three external systems it has to integrate with, none of which exist here. That last line is the whole engineering problem."
+        "notes": "Here's the model. Five entities in a tree: a level holds wards, a ward holds beds. A bed is always in exactly one of four states. Six roles act on it, each with its own view. And it needs to talk to three outside systems — patient records, sister hospitals, notifications — none of which I have access to. That last line is the constraint that shapes every decision after this."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02-domain-model.mp4",
+        "durationMs": 24734,
+        "roi": null,
+        "hash": "24553a67995d"
+      },
       "resolvedAudio": {
         "filePath": "assets/audio/02-domain-model.wav",
-        "durationMs": 21850,
+        "durationMs": 24325,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "bcd87231c270"
+        "hash": "02a5e0e08b87"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 22250,
+        "sceneMs": 24725,
         "ratePct": 0,
-        "padVisualMs": 22250,
+        "padVisualMs": 24725,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/02-domain-model.mp4",
-        "durationMs": 22267,
-        "roi": null,
-        "hash": "9f34811026fe"
-      }
+      "ratePct": 0
     },
     {
       "id": "02b-bed-board-capture",
       "title": "02b-bed-board-capture",
-      "narration": "This is the board those states drive. Not a dashboard — a state machine with a colour rendering. Every operation in the system is a legal transition between four states, and that is what makes the invariant checkable: a bed cannot leave one state without entering another, so it can never quietly go missing.",
+      "narration": "This is the bed board. It looks like a dashboard, but it's a state machine. Every action is a legal move from one state to the next, and a bed can't leave a state without entering another. That's the first correctness property: a bed can never quietly go missing.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -199,115 +199,115 @@
         ]
       },
       "roiSelector": "text=Live Bed Inventory Matrix",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02b-bed-board-capture.mp4",
+        "durationMs": 19531.51806640625,
+        "roi": null,
+        "hash": "3a84798b3000"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/02b-bed-board-capture.wav",
-        "durationMs": 19125,
+        "filePath": "assets/audio/02b-bed-board-capture.r.wav",
+        "durationMs": 16875,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "cc3aaf20905c"
+        "hash": "cef5f2d594fb"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 19525,
-        "ratePct": 0,
-        "padVisualMs": 19525,
-        "padAudioMs": 0,
+        "mode": "speech-fit-capped",
+        "sceneMs": 19532,
+        "ratePct": -7,
+        "padVisualMs": 0,
+        "padAudioMs": 1712,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/02b-bed-board-capture.mp4",
-        "durationMs": 19515.52587890625,
-        "roi": null,
-        "hash": "836d7a4032fa"
-      }
+      "ratePct": -7
     },
     {
       "id": "03-both-moves-fail",
-      "title": "Both default moves fail",
-      "narration": "The first option is to fake everything behind a beautiful interface. On camera that is indistinguishable from the genuine article, which means it demonstrates nothing. The second is to do the whole job for real — and that does not survive contact with what I actually had: no records endpoint, no identity tenant, no solver licence, no team, and nothing resembling production access.",
+      "title": "The two easy ways to build this both fail",
+      "narration": "There are two easy ways to build a prototype like this, and both fail. One: fake everything behind a nice UI. On camera, a real safety rule and a fake one look the same, so it proves nothing. Two: build all of it for real. That doesn't finish — no records endpoint, no identity provider, no solver licence, one engineer, no production access. So the real decision is where to spend the effort I did have.",
       "role": "complication",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "comparison",
         "theme": "light",
-        "title": "Both default moves fail",
+        "title": "The two easy ways to build this both fail",
         "pill": null,
         "body": null,
         "cards": [
           {
             "icon": "eye-off",
-            "title": "Mock it and polish it",
-            "text": "Nobody can tell a genuine invariant from a styled one.",
-            "detail": "Unfalsifiable"
+            "title": "Fake it and polish it",
+            "text": "On camera, a real rule and a styled one look identical.",
+            "detail": "Proves nothing"
           },
           {
             "icon": "ban",
-            "title": "Build it properly",
-            "text": "3 integrations no personal project can obtain. 1 engineer. 0 credentials.",
-            "detail": "Does not finish"
+            "title": "Build all of it for real",
+            "text": "3 integrations I can't get. 1 engineer. 0 production credentials.",
+            "detail": "Never finishes"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "The first option is to fake everything behind a beautiful interface. On camera that is indistinguishable from the genuine article, which means it demonstrates nothing. The second is to do the whole job for real — and that does not survive contact with what I actually had: no records endpoint, no identity tenant, no solver licence, no team, and nothing resembling production access."
+        "notes": "There are two easy ways to build a prototype like this, and both fail. One: fake everything behind a nice UI. On camera, a real safety rule and a fake one look the same, so it proves nothing. Two: build all of it for real. That doesn't finish — no records endpoint, no identity provider, no solver licence, one engineer, no production access. So the real decision is where to spend the effort I did have."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/03-both-moves-fail.mp4",
+        "durationMs": 24934,
+        "roi": null,
+        "hash": "514f7b45e4f3"
+      },
       "resolvedAudio": {
         "filePath": "assets/audio/03-both-moves-fail.wav",
-        "durationMs": 23825,
+        "durationMs": 24525,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "20f791200e60"
+        "hash": "321a8fd0d98b"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 24225,
+        "sceneMs": 24925,
         "ratePct": 0,
-        "padVisualMs": 24225,
+        "padVisualMs": 24925,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/03-both-moves-fail.mp4",
-        "durationMs": 24234,
-        "roi": null,
-        "hash": "bf0eb95c728f"
-      }
+      "ratePct": 0
     },
     {
       "id": "04-cannot-fake",
-      "title": "The part that cannot be faked",
-      "narration": "And this domain will not let you fake the part that matters. Put one man into an empty six-bed cubicle and the other five beds can now only take men. Get that wrong and the artifact is not unpolished, it is wrong — and any reviewer who knows the domain sees it in a second. So safety could not be a stub.",
+      "title": "The part you cannot fake",
+      "narration": "And the safety-critical part can't be faked. Put one man in an empty six-bed cubicle, and the other five beds can only take men. Get that wrong and it isn't rough — it's just wrong, and anyone who knows the domain sees it immediately. So the safety rules had to be real. That decides what got built to production standard and what got stubbed.",
       "role": "complication",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "stat-deepdive",
         "theme": "light",
-        "title": "The part that cannot be faked",
+        "title": "The part you cannot fake",
         "pill": null,
         "body": null,
         "cards": [
           {
             "icon": "triangle-alert",
             "title": "Wrong, not unpolished",
-            "text": "Mis-cohort two patients and a reviewer who knows the domain sees it instantly.",
-            "detail": "No demo licence here"
+            "text": "Mis-cohort two patients and it's just wrong. A domain reviewer sees it.",
+            "detail": "No prototype licence for this"
           },
           {
             "icon": "shield",
-            "title": "So safety could not be a stub",
-            "text": "The invariants had to be real before anything else was worth showing.",
-            "detail": "Forces the next decision"
+            "title": "Safety can't be a stub",
+            "text": "The rules had to be real before anything else was worth showing.",
+            "detail": "This is what forces the design"
           }
         ],
         "stat": {
@@ -318,260 +318,203 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "And this domain will not let you fake the part that matters. Put one man into an empty six-bed cubicle and the other five beds can now only take men. Get that wrong and the artifact is not unpolished, it is wrong — and any reviewer who knows the domain sees it in a second. So safety could not be a stub."
+        "notes": "And the safety-critical part can't be faked. Put one man in an empty six-bed cubicle, and the other five beds can only take men. Get that wrong and it isn't rough — it's just wrong, and anyone who knows the domain sees it immediately. So the safety rules had to be real. That decides what got built to production standard and what got stubbed."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04-cannot-fake.mp4",
+        "durationMs": 21667,
+        "roi": null,
+        "hash": "e17f0f157291"
+      },
       "resolvedAudio": {
         "filePath": "assets/audio/04-cannot-fake.wav",
-        "durationMs": 19150,
+        "durationMs": 21250,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "e677fffb3b2c"
+        "hash": "1fbec41f5532"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 19550,
+        "sceneMs": 21650,
         "ratePct": 0,
-        "padVisualMs": 19550,
+        "padVisualMs": 21650,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04-cannot-fake.mp4",
-        "durationMs": 19567,
-        "roi": null,
-        "hash": "4f1cffdfd979"
-      }
+      "ratePct": 0
     },
     {
-      "id": "05-seam",
-      "title": "The seam is the deliverable",
-      "narration": "Here is the rule I actually applied. Where a decision was reversible, I cut an interface first and put a mock behind it. Where it was not reversible, I built it. The seam is the deliverable; the adapter behind it is scheduling. And what that costs is real — only one side of the boundary is ever exercised, so the boundary is a promise, not a proof.",
+      "id": "05-consensus",
+      "title": "No bed until every consult is in",
+      "narration": "First decision. A patient who needs specialist input is not put in the bed queue right away. The request is held, hidden from bed management, until every consult comes back. Only when all of them are complete does it become eligible for a bed. The trade-off is that entry is slower. But the alternative — allocating a bed before the specialists agree — means placing a patient the assessment might still change. In this domain that's the wrong trade.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "process-flow",
         "theme": "light",
-        "title": "The seam is the deliverable",
+        "title": "No bed until every consult is in",
         "pill": null,
         "body": null,
         "cards": [
           {
+            "icon": "pause",
+            "title": "Held, not queued",
+            "text": "A consult-gated request sits in ASSESSMENT_PENDING, hidden from bed management."
+          },
+          {
+            "icon": "check-check",
+            "title": "Consensus gate",
+            "text": "It becomes eligible only when every broadcast reaches COMPLETED."
+          },
+          {
             "icon": "git-branch",
-            "title": "One boundary, 6 beans",
-            "text": "A Spring profile decides at startup. Nothing branches on a demo flag."
-          },
-          {
-            "icon": "puzzle",
-            "title": "3 interfaces",
-            "text": "Solver, records gateway, transfer gateway."
-          },
-          {
-            "icon": "ban",
-            "title": "3 production adapters",
-            "text": "They exist, they compile, and they throw the moment they are invoked."
-          },
-          {
-            "icon": "receipt",
-            "title": "What it costs",
-            "text": "Only one side of the boundary is ever exercised.",
-            "detail": "A promise, not a proof"
+            "title": "Chained consults",
+            "text": "A specialist can add another cluster; the request waits for all of them.",
+            "detail": "Trade-off — slower entry, no premature placement"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Here is the rule I actually applied. Where a decision was reversible, I cut an interface first and put a mock behind it. Where it was not reversible, I built it. The seam is the deliverable; the adapter behind it is scheduling. And what that costs is real — only one side of the boundary is ever exercised, so the boundary is a promise, not a proof."
+        "notes": "First decision. A patient who needs specialist input is not put in the bed queue right away. The request is held, hidden from bed management, until every consult comes back. Only when all of them are complete does it become eligible for a bed. The trade-off is that entry is slower. But the alternative — allocating a bed before the specialists agree — means placing a patient the assessment might still change. In this domain that's the wrong trade."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05-consensus.mp4",
+        "durationMs": 26767,
+        "roi": null,
+        "hash": "429876a84ba3"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/05-seam.wav",
-        "durationMs": 22500,
+        "filePath": "assets/audio/05-consensus.wav",
+        "durationMs": 26375,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "ab6fd1d66ce3"
+        "hash": "9bf8ee753a0f"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 22900,
+        "sceneMs": 26775,
         "ratePct": 0,
-        "padVisualMs": 22900,
+        "padVisualMs": 26775,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05-seam.mp4",
-        "durationMs": 22900,
-        "roi": null,
-        "hash": "b4f7d770d0ae"
-      }
+      "ratePct": 0
     },
     {
-      "id": "05a-seam-diagram-capture",
-      "title": "05a-seam-diagram-capture",
-      "narration": "Three seams, drawn the way the container wires them. One interface, two implementations: a mock that runs under the prototype profile, and a production adapter that exists, compiles, and refuses to do anything. The profile decides which one is loaded, once, at startup.",
+      "id": "05a-consult-hold-capture",
+      "title": "05a-consult-hold-capture",
+      "narration": "You can see the rule stated in the ED view. When the doctor picks a patient and sends the case to specialist clusters, the admission is held in ASSESSMENT_PENDING. It won't reach bed management until the consults resolve. This is the gate, in the UI, on the way in.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "url": "http://127.0.0.1:4173/seam.html",
-        "roiSelector": "#diagram",
+        "url": "/ed",
+        "setupScript": "scenes/role-ed.mjs",
+        "roiSelector": "main",
         "steps": [
           {
             "action": "click",
-            "selector": "#reveal-mock",
-            "target": "Reveal the prototype-profile implementations",
-            "delayMs": 900
+            "selector": "table tbody tr >> nth=0",
+            "target": "the first patient in the ED waiting queue",
+            "delayMs": 1200
+          },
+          {
+            "action": "waitForText",
+            "value": "Smart Assessment Dossier"
           },
           {
             "action": "click",
-            "selector": "#reveal-prod",
-            "target": "Reveal the production adapters",
+            "selector": "label:has-text(\"Request Specialist Consult Pool\")",
+            "target": "the Consult-Gated admission checkbox",
             "delayMs": 900
           },
           {
             "action": "waitForText",
-            "value": "UnsupportedOperationException"
+            "value": "ASSESSMENT_PENDING"
           },
           {
             "action": "wait",
-            "delayMs": 14735
+            "delayMs": 14900
           }
         ]
       },
       "assert": {
         "visible": [
-          "One boundary, three seams",
-          "BedAllocationSolver",
-          "HospitalEhrGateway",
-          "SisterHospitalGateway"
+          "Emergency Department (ED) Clinical Intake"
         ],
         "notVisible": [
-          "Cannot GET",
-          "Not Found"
+          "Something went wrong",
+          "No static resource",
+          "Sign in"
         ]
       },
-      "roiSelector": "#diagram",
-      "resolvedAudio": {
-        "filePath": "assets/audio/05a-seam-diagram-capture.wav",
-        "durationMs": 18000,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "df778cb45ae8"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 18400,
-        "ratePct": 0,
-        "padVisualMs": 18400,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
+      "roiSelector": "main",
       "resolvedVisual": {
-        "filePath": "assets/recordings/05a-seam-diagram-capture.mp4",
-        "durationMs": 18414.068115234375,
+        "filePath": "assets/recordings/05a-consult-hold-capture.mp4",
+        "durationMs": 18881.32421875,
         "roi": {
-          "x": 1889.875,
-          "y": 1051.8125,
-          "width": 22.125,
-          "height": 18
+          "x": 1091.328125,
+          "y": 985.71875,
+          "width": 460.671875,
+          "height": 69.40625
         },
-        "hash": "bf62a16d19d8"
+        "hash": "75750655a073"
       },
       "roi": {
-        "x": 1889.875,
-        "y": 1051.8125,
-        "width": 22.125,
-        "height": 18
-      }
-    },
-    {
-      "id": "05b-profile-fence-terminal",
-      "title": "05b-profile-fence-terminal",
-      "narration": "That refusal is not theoretical. This is the same jar, started with the production profile. The health check answers, so the application is up — and every business endpoint comes back four-oh-three, because the only security configuration left authenticates everything and no login mechanism exists yet. Worth naming: the prototype profile is the default in configuration, so production is the profile you have to ask for. That is on the list of what is owed.",
-      "role": null,
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "url": "http://127.0.0.1:4173/term.html?run=05b-profile-fence",
-        "roiSelector": "#term",
-        "steps": [
-          {
-            "action": "wait",
-            "delayMs": 27935
-          }
-        ]
+        "x": 1091.328125,
+        "y": 985.71875,
+        "width": 460.671875,
+        "height": 69.40625
       },
-      "assert": {
-        "visible": [
-          "The following 1 profile is active",
-          "production",
-          "403"
-        ],
-        "notVisible": [
-          "Cannot GET",
-          "Not Found",
-          "command not found"
-        ]
-      },
-      "roiSelector": "#term",
       "resolvedAudio": {
-        "filePath": "assets/audio/05b-profile-fence-terminal.wav",
-        "durationMs": 27875,
+        "filePath": "assets/audio/05a-consult-hold-capture.r.wav",
+        "durationMs": 17925,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "ea5998b7eb93"
+        "hash": "5051fcf7ea31"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 28275,
-        "ratePct": 0,
-        "padVisualMs": 28275,
+        "mode": "speech-fit",
+        "sceneMs": 18881,
+        "ratePct": -6.5,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05b-profile-fence-terminal.mp4",
-        "durationMs": 28057.863037109375,
-        "roi": null,
-        "hash": "e49565ad6abd"
-      }
+      "ratePct": -6.5
     },
     {
-      "id": "05c-stub-contract-terminal",
-      "title": "05c-stub-contract-terminal",
-      "narration": "And the stubs themselves are under test. Three production adapters, each asserted to throw the moment it is invoked. That is the part people skip — a placeholder nobody tests will eventually be called by accident, in a profile nobody checked.",
+      "id": "05b-consensus-gate-terminal",
+      "title": "05b-consensus-gate-terminal",
+      "narration": "And it holds even when the consults come back one at a time. This test completes some of the broadcasts but not all, and checks the request is still held. Partial agreement is not agreement. The bed queue only sees it once the last consult lands.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "url": "http://127.0.0.1:4173/term.html?run=05c-stub-contract",
+        "url": "http://127.0.0.1:4173/term.html?run=05b-consensus-gate",
         "roiSelector": "#term",
         "steps": [
           {
             "action": "wait",
-            "delayMs": 16046
+            "delayMs": 15300
           }
         ]
       },
       "assert": {
         "visible": [
-          "UnsupportedOperationException",
-          "Tests run: 5",
+          "ASSESSMENT_PENDING",
           "BUILD SUCCESS"
         ],
         "notVisible": [
@@ -581,323 +524,110 @@
         ]
       },
       "roiSelector": "#term",
-      "resolvedAudio": {
-        "filePath": "assets/audio/05c-stub-contract-terminal.wav",
-        "durationMs": 15825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "1ac52447d67f"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 16225,
-        "ratePct": 0,
-        "padVisualMs": 16225,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/05c-stub-contract-terminal.mp4",
-        "durationMs": 16407.06005859375,
+        "filePath": "assets/recordings/05b-consensus-gate-terminal.mp4",
+        "durationMs": 15883.14599609375,
         "roi": null,
-        "hash": "6c5fdb647abc"
-      }
-    },
-    {
-      "id": "05d-persona-fence-capture",
-      "title": "05d-persona-fence-capture",
-      "narration": "One convenience was deliberately kept, and it is a security hole. Six personas, six seeded accounts, and a switch that changes role without a login. I built it because a reviewer has to walk five desks to see the argument, and five login flows would bury it. It is fenced behind the prototype profile, and the production configuration refuses that header outright.",
-      "role": null,
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "url": "/ed",
-        "roiSelector": "header",
-        "steps": [
-          {
-            "action": "selectOption",
-            "selector": "select[aria-label=\"Select role persona\"]",
-            "value": "BMU_COORDINATOR",
-            "target": "Persona switcher — BMU coordinator",
-            "delayMs": 2200
-          },
-          {
-            "action": "selectOption",
-            "selector": "select[aria-label=\"Select role persona\"]",
-            "value": "WARD_NURSE",
-            "target": "Persona switcher — ward nurse",
-            "delayMs": 2200
-          },
-          {
-            "action": "wait",
-            "delayMs": 17204
-          }
-        ]
+        "hash": "ba52deb2a497"
       },
-      "assert": {
-        "visible": [
-          "Persona:",
-          "Live Sync"
-        ],
-        "notVisible": [
-          "Something went wrong",
-          "No static resource",
-          "Sign in"
-        ]
-      },
-      "roiSelector": "header",
       "resolvedAudio": {
-        "filePath": "assets/audio/05d-persona-fence-capture.wav",
-        "durationMs": 23025,
+        "filePath": "assets/audio/05b-consensus-gate-terminal.wav",
+        "durationMs": 15550,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "cc6513f1ed76"
+        "hash": "278c9f3a7466"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 23425,
-        "ratePct": 0,
-        "padVisualMs": 23425,
+        "mode": "speech-fit",
+        "sceneMs": 15883,
+        "ratePct": 0.4,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05d-persona-fence-capture.mp4",
-        "durationMs": 23429.944091796875,
-        "roi": {
-          "x": 1032.484375,
-          "y": 18,
-          "width": 272,
-          "height": 28
-        },
-        "hash": "ccae4c5e0681"
-      },
-      "roi": {
-        "x": 1032.484375,
-        "y": 18,
-        "width": 272,
-        "height": 28
-      }
+      "ratePct": 0.4
     },
     {
-      "id": "06-heuristic",
-      "title": "A heuristic, not a constraint engine",
-      "narration": "Second decision. The textbook answer for bed allocation is a constraint solver — Timefold. I know it, it fits, and I did not use it. It wants a licence, it wants a daemon solving continuously, and it answers a coordinator's question with a score I cannot decompose. So I wrote the heuristic, and I paid for it: this is not globally optimal, and at a large enough ward count it will be beaten.",
+      "id": "06-discordance",
+      "title": "When specialists disagree, the system takes the safe side",
+      "narration": "Second decision. Multiple specialists can review the same patient, and they can disagree — different acuity, different monitoring. The system doesn't ask a coordinator to settle it. It takes the highest acuity anyone assigned, and it turns on every monitoring requirement anyone flagged. The cost is that it sometimes provisions more than a patient strictly needs. In exchange, a disagreement can never resolve toward the less safe option. That's deliberate.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "comparison",
         "theme": "light",
-        "title": "A heuristic, not a constraint engine",
+        "title": "When specialists disagree, the system takes the safe side",
         "pill": null,
         "body": null,
         "cards": [
           {
-            "icon": "cpu",
-            "title": "Timefold, understood and declined",
-            "text": "A licence, a daemon that solves continuously, and a score that will not decompose.",
-            "detail": "The textbook answer"
+            "icon": "users",
+            "title": "The alternative",
+            "text": "Ask a human to reconcile the disagreement each time.",
+            "detail": "Slow, and it can go the unsafe way"
           },
           {
-            "icon": "split",
-            "title": "4 hard rules, then 3 weighted preferences",
-            "text": "Filter the candidate set, rank what survives, inside the request.",
-            "detail": "Price — not globally optimal"
+            "icon": "shield-check",
+            "title": "What it does instead",
+            "text": "Takes the highest acuity, and unions every monitoring requirement.",
+            "detail": "Trade-off — sometimes over-provisions"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Second decision. The textbook answer for bed allocation is a constraint solver — Timefold. I know it, it fits, and I did not use it. It wants a licence, it wants a daemon solving continuously, and it answers a coordinator's question with a score I cannot decompose. So I wrote the heuristic, and I paid for it: this is not globally optimal, and at a large enough ward count it will be beaten."
+        "notes": "Second decision. Multiple specialists can review the same patient, and they can disagree — different acuity, different monitoring. The system doesn't ask a coordinator to settle it. It takes the highest acuity anyone assigned, and it turns on every monitoring requirement anyone flagged. The cost is that it sometimes provisions more than a patient strictly needs. In exchange, a disagreement can never resolve toward the less safe option. That's deliberate."
       },
       "vertical": {
         "strategy": "native"
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/06-heuristic.wav",
-        "durationMs": 24025,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a033277d1f45"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 24425,
-        "ratePct": 0,
-        "padVisualMs": 24425,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
-        "filePath": "assets/recordings/06-heuristic.mp4",
-        "durationMs": 24434,
+        "filePath": "assets/recordings/06-discordance.mp4",
+        "durationMs": 27467,
         "roi": null,
-        "hash": "34e7d2cf39b9"
-      }
-    },
-    {
-      "id": "06a-explainable-score-capture",
-      "title": "06a-explainable-score-capture",
-      "narration": "Four hard rules filter the candidate set, then three weighted preferences rank what survives. Three beds come back for this patient — seventy, thirty and thirty — and under each score, the rules that produced it. That decomposition is the whole point of the trade: a coordinator can read why the first bed beat the other two, which is exactly what the solver could not have given me.",
-      "role": null,
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "url": "/bmu",
-        "setupScript": "scenes/role-bmu.mjs",
-        "roiSelector": ".lg\\\\:col-span-5",
-        "steps": [
-          {
-            "action": "click",
-            "selector": "tr:has-text(\"Mr Goh Beng Kiat\") >> role=button[name=\"Select\"]",
-            "target": "Select button on the Mr Goh Beng Kiat row",
-            "delayMs": 700
-          },
-          {
-            "action": "waitForText",
-            "value": "Top Algorithmic Matches"
-          },
-          {
-            "action": "waitForText",
-            "value": "Score:"
-          },
-          {
-            "action": "wait",
-            "delayMs": 21305
-          }
-        ]
+        "hash": "212981c0f126"
       },
-      "assert": {
-        "visible": [
-          "Bed Management Unit (BMU) Capacity & Allocation Hub",
-          "Prioritized Admission Requests",
-          "Mr Goh Beng Kiat"
-        ],
-        "notVisible": [
-          "Something went wrong",
-          "No static resource",
-          "Sign in"
-        ]
-      },
-      "roiSelector": ".lg\\\\:col-span-5",
       "resolvedAudio": {
-        "filePath": "assets/audio/06a-explainable-score-capture.wav",
-        "durationMs": 22900,
+        "filePath": "assets/audio/06-discordance.wav",
+        "durationMs": 27075,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "28d84a90077a"
+        "hash": "c1f77f9cb2c1"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 23300,
+        "sceneMs": 27475,
         "ratePct": 0,
-        "padVisualMs": 23300,
+        "padVisualMs": 27475,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06a-explainable-score-capture.mp4",
-        "durationMs": 23315.273193359375,
-        "roi": {
-          "x": 1422.265625,
-          "y": 1511.59375,
-          "width": 58.265625,
-          "height": 28
-        },
-        "hash": "6f4166609c0a"
-      },
-      "roi": {
-        "x": 1422.265625,
-        "y": 1511.59375,
-        "width": 58.265625,
-        "height": 28
-      }
+      "ratePct": 0
     },
     {
-      "id": "06b-weights-are-config-capture",
-      "title": "06b-weights-are-config-capture",
-      "narration": "And the weights are configuration, not code. Specialty alignment at forty points, cubicle consolidation at thirty, falls-risk proximity at fifteen — retunable while the hospital is running. When a dengue cluster changes what a good bed looks like, that should not need a software release.",
+      "id": "06a-discordance-terminal",
+      "title": "06a-discordance-terminal",
+      "narration": "This is that rule as code. When the consults are reconciled, the effective acuity is set to the highest one across all respondents, and the queue sorts on that effective tier — not on the ED's original number. The test pins it: give it a higher specialist tier, and the effective tier moves up.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "url": "/bmu/config",
-        "setupScript": "scenes/role-bmu.mjs",
-        "roiSelector": "main",
-        "steps": [
-          {
-            "action": "wait",
-            "delayMs": 18234
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "BMU Optimization Weight Configuration",
-          "Scoring Weights",
-          "Specialty Alignment Weight"
-        ],
-        "notVisible": [
-          "Something went wrong",
-          "No static resource"
-        ]
-      },
-      "roiSelector": "main",
-      "resolvedAudio": {
-        "filePath": "assets/audio/06b-weights-are-config-capture.wav",
-        "durationMs": 18400,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "8ad22a1e47c8"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 18800,
-        "ratePct": 0,
-        "padVisualMs": 18800,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06b-weights-are-config-capture.mp4",
-        "durationMs": 18814.303955078125,
-        "roi": null,
-        "hash": "a6e47ab3f708"
-      }
-    },
-    {
-      "id": "06c-solver-pinned-terminal",
-      "title": "06c-solver-pinned-terminal",
-      "narration": "The heuristic is pinned by tests, which is what makes it safe to throw away. Every rule has an assertion behind it — so the day Timefold goes in behind that interface, these are the tests it has to satisfy.",
-      "role": null,
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "url": "http://127.0.0.1:4173/term.html?run=06c-solver-pinned",
+        "url": "http://127.0.0.1:4173/term.html?run=06a-discordance",
         "roiSelector": "#term",
         "steps": [
           {
             "action": "wait",
-            "delayMs": 13411
+            "delayMs": 18600
           }
         ]
       },
       "assert": {
         "visible": [
-          "Tests run: 4",
-          "Failures: 0",
+          "effectiveAcuityTier",
           "BUILD SUCCESS"
         ],
         "notVisible": [
@@ -907,205 +637,115 @@
         ]
       },
       "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06a-discordance-terminal.mp4",
+        "durationMs": 19164.817138671875,
+        "roi": null,
+        "hash": "15928acedab2"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/06c-solver-pinned-terminal.wav",
-        "durationMs": 13475,
+        "filePath": "assets/audio/06a-discordance-terminal.r.wav",
+        "durationMs": 18750,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "d9fe730f3cac"
+        "hash": "90939e0ac33f"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13875,
-        "ratePct": 0,
-        "padVisualMs": 13875,
+        "mode": "speech-fit",
+        "sceneMs": 19165,
+        "ratePct": 0.5,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06c-solver-pinned-terminal.mp4",
-        "durationMs": 13772.880126953125,
-        "roi": null,
-        "hash": "4379ef83c1a0"
-      }
+      "ratePct": 0.5
     },
     {
-      "id": "07-two-tier",
-      "title": "Safety is not overridable. Operations are.",
-      "narration": "Third decision, and the one I would defend hardest. Constraints are not one list. Safety invariants are absolute; operational constraints are negotiable with a reason. The cost of that is deliberate — when a clinician is right and an invariant disagrees, the system offers no way through. I chose to make that a human conversation rather than a button.",
+      "id": "07-separation",
+      "title": "Who decides the clinical picture and who decides the bed are different people",
+      "narration": "Third decision, and it's about who decides what. Clinicians decide the clinical picture — acuity, monitoring, whether to divert. They don't touch the ward or the bed. That's bed management's call, after consensus. I split it because making doctors negotiate a ward in the middle of emergency triage creates friction between departments and pulls them off patient care. The cost is one more handoff. The benefit is that each call is made by the person who should own it, with the information they actually have.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "tiled",
         "theme": "light",
-        "title": "Safety is not overridable. Operations are.",
+        "title": "Who decides the clinical picture and who decides the bed are different people",
         "pill": null,
         "body": null,
         "cards": [
           {
-            "icon": "shield-check",
-            "title": "Absolute tier",
-            "text": "Gender cohorting and airborne isolation. No override path exists in the interface.",
-            "detail": "Price — no way through for a clinician who is right"
+            "icon": "stethoscope",
+            "title": "Clinicians decide clinical",
+            "text": "Acuity, telemetry, diversion. Not the ward, not the bed."
           },
           {
-            "icon": "unlock",
-            "title": "Negotiable tier",
-            "text": "Any bed but the top-ranked one requires a structured institutional code."
+            "icon": "bed",
+            "title": "BMU decides the bed",
+            "text": "After consensus, the coordinator sets the admitting cluster and allocates."
           },
           {
             "icon": "git-merge",
-            "title": "Discordance resolves upward",
-            "text": "The higher acuity wins and monitoring requirements are unioned."
-          },
-          {
-            "icon": "check-check",
-            "title": "Consensus gate",
-            "text": "Every chained consult resolves before the request reaches bed management."
+            "title": "Why split it",
+            "text": "Forcing doctors to pick a ward during triage creates friction and delays care.",
+            "detail": "Trade-off — one more handoff"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Third decision, and the one I would defend hardest. Constraints are not one list. Safety invariants are absolute; operational constraints are negotiable with a reason. The cost of that is deliberate — when a clinician is right and an invariant disagrees, the system offers no way through. I chose to make that a human conversation rather than a button."
+        "notes": "Third decision, and it's about who decides what. Clinicians decide the clinical picture — acuity, monitoring, whether to divert. They don't touch the ward or the bed. That's bed management's call, after consensus. I split it because making doctors negotiate a ward in the middle of emergency triage creates friction between departments and pulls them off patient care. The cost is one more handoff. The benefit is that each call is made by the person who should own it, with the information they actually have."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07-separation.mp4",
+        "durationMs": 32167,
+        "roi": null,
+        "hash": "3c6bf3aea9bd"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/07-two-tier.wav",
-        "durationMs": 22625,
+        "filePath": "assets/audio/07-separation.wav",
+        "durationMs": 31750,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "62f225b337e4"
+        "hash": "4500f67364c7"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 23025,
+        "sceneMs": 32150,
         "ratePct": 0,
-        "padVisualMs": 23025,
+        "padVisualMs": 32150,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07-two-tier.mp4",
-        "durationMs": 23034,
-        "roi": null,
-        "hash": "be6c34e11ebf"
-      }
+      "ratePct": 0
     },
     {
-      "id": "07a-absolute-tier-terminal",
-      "title": "07a-absolute-tier-terminal",
-      "narration": "Notice how the absolute tier gets proved. There is no disabled button to photograph, because a bed that violates a hard constraint never becomes a recommendation at all — it is eliminated from the candidate set. Absence cannot be screenshotted, so it is asserted: gender, telemetry, infection, negative pressure, each with a test that fails if that bed survives.",
-      "role": null,
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "url": "http://127.0.0.1:4173/term.html?run=07a-absolute-tier",
-        "roiSelector": "#term",
-        "steps": [
-          {
-            "action": "wait",
-            "delayMs": 23775
-          }
-        ]
-      },
-      "assert": {
-        "visible": [
-          "eliminates wards without negative pressure",
-          "WardClass, Gender, Telemetry",
-          "Tests run: 4"
-        ],
-        "notVisible": [
-          "Cannot GET",
-          "Not Found",
-          "command not found"
-        ]
-      },
-      "roiSelector": "#term",
-      "resolvedAudio": {
-        "filePath": "assets/audio/07a-absolute-tier-terminal.wav",
-        "durationMs": 23375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "bfd0c45f8ec1"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 23775,
-        "ratePct": 0,
-        "padVisualMs": 23775,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07a-absolute-tier-terminal.mp4",
-        "durationMs": 24357.94580078125,
-        "roi": null,
-        "hash": "4de0c0b8001b"
-      }
-    },
-    {
-      "id": "07b-override-modal-capture",
-      "title": "07b-override-modal-capture",
-      "narration": "The negotiable tier behaves differently. Taking anything other than the top-ranked bed forces a modal, and the modal will not close without a structured institutional code — not free text, because free text cannot be queried later. Confirming writes an immutable override record. Overridable, but never silent.",
+      "id": "07a-admitting-authority-capture",
+      "title": "07a-admitting-authority-capture",
+      "narration": "You can see the split on the queue. The blue badge is the admitting cluster the coordinator set — that's the authoritative one. The plain badge is the ED's suspected service. The allocation engine scores against the coordinator's choice, not the ED's guess. Two different decisions, two different owners, and the system knows which one is authoritative.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
         "url": "/bmu",
         "setupScript": "scenes/role-bmu.mjs",
-        "roiSelector": ".lg\\\\:col-span-5",
+        "roiSelector": "main",
         "steps": [
           {
-            "action": "click",
-            "selector": "tr:has-text(\"Mr Goh Beng Kiat\") >> role=button[name=\"Select\"]",
-            "target": "Select button on the Mr Goh Beng Kiat row",
-            "delayMs": 700
-          },
-          {
-            "action": "waitForText",
-            "value": "Top Algorithmic Matches"
-          },
-          {
-            "action": "click",
-            "selector": "button:has-text(\"Override & Allocate Bed\") >> nth=0",
-            "target": "Override and allocate the second-ranked bed",
-            "delayMs": 900
-          },
-          {
-            "action": "waitForText",
-            "value": "Operational Constraint Override"
-          },
-          {
-            "action": "waitForText",
-            "value": "Structured Reason Code:"
-          },
-          {
-            "action": "click",
-            "selector": "button:has-text(\"Confirm Override & Allocate\")",
-            "target": "Confirm the override with its reason code",
-            "delayMs": 900
-          },
-          {
             "action": "wait",
-            "delayMs": 15119
+            "delayMs": 21200
           }
         ]
       },
       "assert": {
         "visible": [
-          "Bed Management Unit (BMU) Capacity & Allocation Hub",
-          "Mr Goh Beng Kiat"
+          "(Admitting)"
         ],
         "notVisible": [
           "Something went wrong",
@@ -1113,106 +753,95 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5",
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07a-admitting-authority-capture.mp4",
+        "durationMs": 21765.68603515625,
+        "roi": null,
+        "hash": "f61ce1aa0690"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/07b-override-modal-capture.wav",
-        "durationMs": 19925,
+        "filePath": "assets/audio/07a-admitting-authority-capture.r.wav",
+        "durationMs": 21150,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "89b87b8119e7"
+        "hash": "5e0ee6696115"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 20325,
-        "ratePct": 0,
-        "padVisualMs": 20325,
+        "mode": "speech-fit",
+        "sceneMs": 21766,
+        "ratePct": -1.4,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07b-override-modal-capture.mp4",
-        "durationMs": 20298.412109375,
-        "roi": {
-          "x": 980.5625,
-          "y": 630.5,
-          "width": 187.4375,
-          "height": 28
-        },
-        "hash": "26183f410e27"
-      },
-      "roi": {
-        "x": 980.5625,
-        "y": 630.5,
-        "width": 187.4375,
-        "height": 28
-      }
+      "ratePct": -1.4
     },
     {
-      "id": "08-locking",
-      "title": "Direct mutation, with locking where it races",
-      "narration": "Fourth decision, and I will lead with what it cost. I gave up the audit trail, the temporal queries and the replay that event sourcing hands you for free — in a domain where audit is a regulatory requirement. What I got back was a prototype one person can read: direct state mutation, version columns on the three entities two people actually race for, and conflicts surfaced as a 409.",
+      "id": "08-concurrency",
+      "title": "Two people can race for the same thing; only one wins",
+      "narration": "Fourth decision, about concurrency. Two specialists can try to claim the same case, and two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column — not pessimistic locking. The reason is the cost of losing the race. Here, the loser just gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and fixes itself, and it adds deadlock risk and pool pressure. So optimistic is the correct trade, not just the cheaper one.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "comparison",
         "theme": "light",
-        "title": "Direct mutation, with locking where it races",
+        "title": "Two people can race for the same thing; only one wins",
         "pill": null,
         "body": null,
         "cards": [
           {
-            "icon": "archive",
-            "title": "Event sourcing and CQRS, bypassed",
-            "text": "Documented as the production target. Its cost lands on comprehension, not features.",
-            "detail": "Price — no free audit trail, no replay"
+            "icon": "lock",
+            "title": "The alternative",
+            "text": "Pessimistic locking — hold a database lock so a second writer waits.",
+            "detail": "Deadlock risk, connection-pool pressure"
           },
           {
-            "icon": "lock",
-            "title": "Optimistic locking on 3 entities",
-            "text": "Versioned where two people genuinely race. Conflicts surface as 409.",
-            "detail": "The compensating control is the audit log"
+            "icon": "git-compare",
+            "title": "What it does instead",
+            "text": "Version columns on 3 entities. The losing write gets a 409.",
+            "detail": "Trade-off — the loser retries, which is free"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Fourth decision, and I will lead with what it cost. I gave up the audit trail, the temporal queries and the replay that event sourcing hands you for free — in a domain where audit is a regulatory requirement. What I got back was a prototype one person can read: direct state mutation, version columns on the three entities two people actually race for, and conflicts surfaced as a 409."
+        "notes": "Fourth decision, about concurrency. Two specialists can try to claim the same case, and two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column — not pessimistic locking. The reason is the cost of losing the race. Here, the loser just gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and fixes itself, and it adds deadlock risk and pool pressure. So optimistic is the correct trade, not just the cheaper one."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08-concurrency.mp4",
+        "durationMs": 38900,
+        "roi": null,
+        "hash": "4ab896107049"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/08-locking.wav",
-        "durationMs": 23925,
+        "filePath": "assets/audio/08-concurrency.wav",
+        "durationMs": 38500,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "3379d9bbe1e1"
+        "hash": "16f5894ffee0"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 24325,
+        "sceneMs": 38900,
         "ratePct": 0,
-        "padVisualMs": 24325,
+        "padVisualMs": 38900,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08-locking.mp4",
-        "durationMs": 24334,
-        "roi": null,
-        "hash": "000a90e48676"
-      }
+      "ratePct": 0
     },
     {
       "id": "08a-vacate-capture",
       "title": "08a-vacate-capture",
-      "narration": "The lifecycle, running. A nurse releases a patient and the bed does not become available — it becomes pending cleaning, with a thirty-minute clock on it. There is no transition from occupied straight to clean, because in a real hospital there is no such transition.",
+      "narration": "First, the state machine itself. A nurse discharges a patient, and the bed doesn't go straight to available — it goes to pending cleaning, with a thirty-minute clock. There's no jump from occupied to clean, because in a real hospital there isn't one.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1249,45 +878,45 @@
         ]
       },
       "roiSelector": "main",
-      "resolvedAudio": {
-        "filePath": "assets/audio/08a-vacate-capture.wav",
-        "durationMs": 16825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a6ac58eaaa95"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 17225,
-        "ratePct": 0,
-        "padVisualMs": 17225,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
         "filePath": "assets/recordings/08a-vacate-capture.mp4",
-        "durationMs": 17249.105712890625,
+        "durationMs": 17232.4990234375,
         "roi": {
           "x": 385,
           "y": 800.921875,
           "width": 350,
           "height": 28
         },
-        "hash": "940b3019bfe9"
+        "hash": "24260b8e4b11"
       },
       "roi": {
         "x": 385,
         "y": 800.921875,
         "width": 350,
         "height": 28
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a-vacate-capture.r.wav",
+        "durationMs": 16475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f939f816d6af"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 17232,
+        "ratePct": -6.7,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -6.7
     },
     {
       "id": "08a2-sanitise-capture",
       "title": "08a2-sanitise-capture",
-      "narration": "Housekeeping closes it. Terminal sanitisation is signed off, and only then does the bed come back into the pool as clean and allocatable. Four states, three gates, one owner per transition.",
+      "narration": "Housekeeping signs off the cleaning, and only then does the bed return to the pool as clean. Four states, three gates, one owner for each move. Every transition goes through one service method, so there's a single place the write happens — which is what makes the version check enough.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1304,7 +933,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 10886
+            "delayMs": 16600
           }
         ]
       },
@@ -1320,45 +949,45 @@
         ]
       },
       "roiSelector": "main",
-      "resolvedAudio": {
-        "filePath": "assets/audio/08a2-sanitise-capture.wav",
-        "durationMs": 12600,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "b91e050dea30"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13000,
-        "ratePct": 0,
-        "padVisualMs": 13000,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
         "filePath": "assets/recordings/08a2-sanitise-capture.mp4",
-        "durationMs": 13015.927001953125,
+        "durationMs": 18732.033935546875,
         "roi": {
           "x": 614.375,
           "y": 334.65625,
           "width": 127.28125,
           "height": 32
         },
-        "hash": "8af3eaf91ad7"
+        "hash": "eacf25ffcd0f"
       },
       "roi": {
         "x": 614.375,
         "y": 334.65625,
         "width": 127.28125,
         "height": 32
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a2-sanitise-capture.r.wav",
+        "durationMs": 17725,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f82cb0f4cc48"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 18732,
+        "ratePct": -5.6,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -5.6
     },
     {
       "id": "08b-conflict-409-terminal",
       "title": "08b-conflict-409-terminal",
-      "narration": "The concurrency claim is the one I cannot show you honestly in a browser. Two specialists claiming the same broadcast is a race, and a race staged in a single tab is a lie. So it is a test: two versions, one write, 409 Conflict, and a problem-detail body the client can actually act on.",
+      "narration": "The race itself I can't show honestly in a browser — a real race needs two clients at once, and faking it in one tab would be a lie. So it's a test. Two specialists claim the same broadcast: the first write wins, the second comes back as a 409 Conflict with a problem-detail body the client can act on. That's the loser retrying, which costs nothing.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1368,14 +997,13 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 19549
+            "delayMs": 22200
           }
         ]
       },
       "assert": {
         "visible": [
-          "409 Conflict ProblemDetail",
-          "Tests run: 12",
+          "409",
           "BUILD SUCCESS"
         ],
         "notVisible": [
@@ -1385,103 +1013,98 @@
         ]
       },
       "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08b-conflict-409-terminal.mp4",
+        "durationMs": 22765.40087890625,
+        "roi": null,
+        "hash": "d4b3fcfa2024"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/08b-conflict-409-terminal.wav",
-        "durationMs": 19725,
+        "filePath": "assets/audio/08b-conflict-409-terminal.r.wav",
+        "durationMs": 22425,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "b65466a4c5be"
+        "hash": "c4d30df03dfe"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 20125,
-        "ratePct": 0,
-        "padVisualMs": 20125,
+        "mode": "speech-fit",
+        "sceneMs": 22765,
+        "ratePct": 0.5,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08b-conflict-409-terminal.mp4",
-        "durationMs": 20124.72705078125,
-        "roi": null,
-        "hash": "dbbffe716687"
-      }
+      "ratePct": 0.5
     },
     {
       "id": "09-provable",
-      "title": "Correctness had to be provable",
-      "narration": "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit on all of this: the backend has no coverage threshold at all, the frontend declares four, and nothing runs either of them automatically.",
+      "title": "Provable where built, loud where not",
+      "narration": "Fifth decision, about proof. Every operational metric can be computed two ways — from the database and from the audit log — and a test fails if the two disagree. And for the parts I didn't build: they sit behind interfaces chosen by a Spring profile, and the production versions throw the moment they're called instead of returning fake data. The honest cost is that only the prototype side of each boundary is actually tested. But an unbuilt piece that fails loudly is safer than one that quietly pretends.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "process-flow",
         "theme": "light",
-        "title": "Correctness had to be provable",
+        "title": "Provable where built, loud where not",
         "pill": null,
         "body": null,
         "cards": [
           {
             "icon": "database",
-            "title": "Pathway A — relational",
-            "text": "Metrics computed from state at request time, for reporting."
+            "title": "Two pathways, checked",
+            "text": "Every metric from the database and from the audit log; a test asserts they match."
           },
           {
-            "icon": "terminal",
-            "title": "Pathway B — structured log",
-            "text": "The same events with the acting user in every line, for alerting."
+            "icon": "git-branch",
+            "title": "One profile boundary",
+            "text": "A Spring profile picks mocks or production adapters at startup. No demo flags."
           },
           {
-            "icon": "scale",
-            "title": "Parity is asserted",
-            "text": "A reconciliation test fails when the two pathways disagree."
-          },
-          {
-            "icon": "gauge",
-            "title": "Coverage is measured",
-            "text": "214 backend tests over the whole bundle; the frontend counts four paths.",
-            "detail": "Price — thresholds exist, nothing runs them"
+            "icon": "ban",
+            "title": "Stubs that refuse to run",
+            "text": "The 3 unbuilt adapters throw on invocation instead of returning fake data.",
+            "detail": "Trade-off — only the prototype path is tested"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit on all of this: the backend has no coverage threshold at all, the frontend declares four, and nothing runs either of them automatically."
+        "notes": "Fifth decision, about proof. Every operational metric can be computed two ways — from the database and from the audit log — and a test fails if the two disagree. And for the parts I didn't build: they sit behind interfaces chosen by a Spring profile, and the production versions throw the moment they're called instead of returning fake data. The honest cost is that only the prototype side of each boundary is actually tested. But an unbuilt piece that fails loudly is safer than one that quietly pretends."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09-provable.mp4",
+        "durationMs": 32034,
+        "roi": null,
+        "hash": "0c809c3c2b35"
+      },
       "resolvedAudio": {
         "filePath": "assets/audio/09-provable.wav",
-        "durationMs": 24125,
+        "durationMs": 31625,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "f064e456999a"
+        "hash": "6ff0bd8f32ab"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 24525,
+        "sceneMs": 32025,
         "ratePct": 0,
-        "padVisualMs": 24525,
+        "padVisualMs": 32025,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09-provable.mp4",
-        "durationMs": 24534,
-        "roi": null,
-        "hash": "98ee273b3f55"
-      }
+      "ratePct": 0
     },
     {
       "id": "09a-analytics-capture",
       "title": "09a-analytics-capture",
-      "narration": "Pathway A. Twenty metrics across four epic sections, each with its benchmark and an evaluation against it, computed from relational state at request time. These are numbers the running system produced from the workflows in this film — not figures typed into a slide.",
+      "narration": "This is the database pathway. Twenty metrics across four sections, each with a benchmark and how it scored. These are numbers the running system produced from the workflows in this walkthrough — not figures on a slide.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1510,97 +1133,44 @@
         ]
       },
       "roiSelector": "main",
-      "resolvedAudio": {
-        "filePath": "assets/audio/09a-analytics-capture.wav",
-        "durationMs": 17275,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "32ac942ab63a"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 17675,
-        "ratePct": 0,
-        "padVisualMs": 17675,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
         "filePath": "assets/recordings/09a-analytics-capture.mp4",
-        "durationMs": 17665.3369140625,
+        "durationMs": 17681.61376953125,
         "roi": null,
-        "hash": "4a17beb398e5"
-      }
-    },
-    {
-      "id": "09b-audit-log-terminal",
-      "title": "09b-audit-log-terminal",
-      "narration": "Pathway B is this. The same events, in the log, with the acting user carried in the mapped diagnostic context on every line. That format does not change between profiles — only the destination does. Today it is standard output. In production it is a SIEM, and nothing above the appender needs to know.",
-      "role": null,
-      "visualEngine": "playwright_web",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "url": "http://127.0.0.1:4173/term.html?run=09b-audit-log",
-        "roiSelector": "#term",
-        "steps": [
-          {
-            "action": "wait",
-            "delayMs": 20101
-          }
-        ]
+        "hash": "f3de960d5ee8"
       },
-      "assert": {
-        "visible": [
-          "AUDIT",
-          "action="
-        ],
-        "notVisible": [
-          "Cannot GET",
-          "Not Found",
-          "command not found"
-        ]
-      },
-      "roiSelector": "#term",
       "resolvedAudio": {
-        "filePath": "assets/audio/09b-audit-log-terminal.wav",
-        "durationMs": 20000,
+        "filePath": "assets/audio/09a-analytics-capture.r.wav",
+        "durationMs": 14500,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "f870860c6402"
+        "hash": "3589b3e983e9"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 20400,
-        "ratePct": 0,
-        "padVisualMs": 20400,
-        "padAudioMs": 0,
+        "mode": "speech-fit-capped",
+        "sceneMs": 17682,
+        "ratePct": -7,
+        "padVisualMs": 0,
+        "padAudioMs": 2389,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09b-audit-log-terminal.mp4",
-        "durationMs": 20656.10595703125,
-        "roi": null,
-        "hash": "5e5af61da333"
-      }
+      "ratePct": -7
     },
     {
-      "id": "09c-parity-terminal",
-      "title": "09c-parity-terminal",
-      "narration": "And parity is asserted, not eyeballed. The reconciliation test computes each metric down both pathways and fails when they disagree, which is the only thing that makes a second pathway worth having.",
+      "id": "09b-parity-terminal",
+      "title": "09b-parity-terminal",
+      "narration": "And the two pathways are checked against each other, not eyeballed. The reconciliation test computes each metric both ways and fails if they disagree. That's the only thing that makes a second pathway worth maintaining.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "url": "http://127.0.0.1:4173/term.html?run=09c-parity",
+        "url": "http://127.0.0.1:4173/term.html?run=09b-parity",
         "roiSelector": "#term",
         "steps": [
           {
             "action": "wait",
-            "delayMs": 12901
+            "delayMs": 12770
           }
         ]
       },
@@ -1617,34 +1187,87 @@
         ]
       },
       "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09b-parity-terminal.mp4",
+        "durationMs": 13346.8662109375,
+        "roi": null,
+        "hash": "d2564ed88b46"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/09c-parity-terminal.wav",
-        "durationMs": 12950,
+        "filePath": "assets/audio/09b-parity-terminal.r.wav",
+        "durationMs": 13600,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "bb6b127d115f"
+        "hash": "2a2fb0a43894"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13350,
-        "ratePct": 0,
-        "padVisualMs": 13350,
+        "mode": "speech-fit-capped",
+        "sceneMs": 13414,
+        "ratePct": 7,
+        "padVisualMs": 67,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
+      "ratePct": 7
+    },
+    {
+      "id": "09c-stub-contract-terminal",
+      "title": "09c-stub-contract-terminal",
+      "narration": "And the stubs are tested to fail. The three production adapters — the solver, the records gateway, the transfer gateway — each throw the moment they're invoked. A placeholder nobody tests eventually gets called by accident, in a profile nobody checked. These can't.",
+      "role": null,
+      "visualEngine": "playwright_web",
+      "captureMode": "screencast",
+      "actionSpec": {
+        "url": "http://127.0.0.1:4173/term.html?run=09c-stub-contract",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 16950
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "UnsupportedOperationException",
+          "BUILD SUCCESS"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
       "resolvedVisual": {
-        "filePath": "assets/recordings/09c-parity-terminal.mp4",
-        "durationMs": 13237.576904296875,
+        "filePath": "assets/recordings/09c-stub-contract-terminal.mp4",
+        "durationMs": 17531.48779296875,
         "roi": null,
-        "hash": "e295a46166ed"
-      }
+        "hash": "c97fcc9610bd"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09c-stub-contract-terminal.r.wav",
+        "durationMs": 17175,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "70c31ecf7212"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 17531,
+        "ratePct": 0.5,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.5
     },
     {
       "id": "09d-coverage-capture",
       "title": "09d-coverage-capture",
-      "narration": "Measured, on the whole backend bundle: ninety-four percent of instructions, ninety-seven percent of lines — and sixty-nine percent of branches. That last number is the one worth saying out loud, because it is where the untested paths actually live. It is evidence the domain layer is exercised. It is not a quality gate.",
+      "narration": "Measured across the whole backend: ninety-four percent of instructions, ninety-seven percent of lines, sixty-nine percent of branches. The branch number is the one worth saying out loud, because that's where the untested paths are. It shows the domain layer is well exercised. It is not a quality gate.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "stills",
@@ -1664,45 +1287,45 @@
         ]
       },
       "roiSelector": "body",
-      "resolvedAudio": {
-        "filePath": "assets/audio/09d-coverage-capture.wav",
-        "durationMs": 20825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "5a0b3971cbce"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 21225,
-        "ratePct": 0,
-        "padVisualMs": 21225,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
         "filePath": "assets/recordings/09d-coverage-capture.mp4",
-        "durationMs": 21225,
+        "durationMs": 19825,
         "roi": {
           "x": 8,
           "y": 8,
           "width": 1904,
           "height": 381.15625
         },
-        "hash": "e72e955fbff3"
+        "hash": "0ff6c5742733"
       },
       "roi": {
         "x": 8,
         "y": 8,
         "width": 1904,
         "height": 381.15625
-      }
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09d-coverage-capture.wav",
+        "durationMs": 19425,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f681b6c315b9"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 19825,
+        "ratePct": 0,
+        "padVisualMs": 19825,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "09e-gate-red-terminal",
       "title": "09e-gate-red-terminal",
-      "narration": "And here is what that costs, right now. The frontend declares four coverage thresholds at ninety percent. Run them and one is red — branches at seventy-five. Nothing caught that, because nothing runs it. A gate no pipeline executes is not a gate; it is a comment with a number in it.",
+      "narration": "And here's the most honest thing I can show you. The frontend declares four coverage thresholds at ninety percent. Run them and one comes back red — branches at seventy-five. Nothing caught it, because nothing runs it automatically. A threshold no pipeline runs isn't a safeguard; it's a number in a config file. That's on the list of what's owed.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1712,7 +1335,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 18450
+            "delayMs": 21300
           }
         ]
       },
@@ -1729,49 +1352,49 @@
         ]
       },
       "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09e-gate-red-terminal.mp4",
+        "durationMs": 21882.27294921875,
+        "roi": null,
+        "hash": "189f7ef1abb5"
+      },
       "resolvedAudio": {
-        "filePath": "assets/audio/09e-gate-red-terminal.wav",
-        "durationMs": 18050,
+        "filePath": "assets/audio/09e-gate-red-terminal.r.wav",
+        "durationMs": 21375,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "d7ca952d2a47"
+        "hash": "c0d10d3513c7"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 18450,
-        "ratePct": 0,
-        "padVisualMs": 18450,
+        "mode": "speech-fit",
+        "sceneMs": 21882,
+        "ratePct": 0.5,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09e-gate-red-terminal.mp4",
-        "durationMs": 18523.255859375,
-        "roi": null,
-        "hash": "03b3d0497a89"
-      }
+      "ratePct": 0.5
     },
     {
       "id": "10-ledger",
-      "title": "What is owed, and the seam it is owed against",
-      "narration": "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. A prototype profile that is the configuration default. And a coverage threshold that is failing right now because nothing runs it. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine.",
+      "title": "What's stubbed, and the boundary it's stubbed behind",
+      "narration": "So here's what's stubbed, and it's stubbed on purpose. In-memory data a restart wipes. Polling instead of push. A heuristic instead of a real solver. Header personas instead of real authentication. And no CI to run the coverage gates. Every one of these sits behind an interface or a profile that's already in place, so the production version is added, not retrofitted. On method: AI wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the code — those decisions were mine.",
       "role": null,
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "tiled",
         "theme": "light",
-        "title": "What is owed, and the seam it is owed against",
+        "title": "What's stubbed, and the boundary it's stubbed behind",
         "pill": null,
-        "body": "Every line here is a decision I would make the same way again, and none of them are finished.",
+        "body": "Each of these is a deliberate prototype choice with a clear path to production.",
         "cards": [
           {
             "icon": "database",
             "title": "State and transport",
-            "text": "In-memory data a restart erases, and polling that will not scale.",
-            "detail": "Driver present; ticket 003 holds the push design"
+            "text": "In-memory data a restart erases; polling that won't scale.",
+            "detail": "Postgres driver present; STOMP push designed in ticket 003"
           },
           {
             "icon": "user-check",
@@ -1782,53 +1405,53 @@
           {
             "icon": "cpu",
             "title": "Optimality and integration",
-            "text": "A heuristic that can be beaten, and two gateways with nothing real behind them.",
+            "text": "A heuristic that can be beaten; two gateways with nothing real behind them.",
             "detail": "3 interfaces, 3 fail-fast adapters"
           },
           {
             "icon": "test-tube",
             "title": "Enforcement",
-            "text": "Four declared thresholds, no pipeline to run them, and one currently red.",
-            "detail": "The suite is the foundation; the gate is the adapter"
+            "text": "Four declared thresholds, no pipeline to run them, one currently red.",
+            "detail": "The suite exists; the CI wiring doesn't"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. A prototype profile that is the configuration default. And a coverage threshold that is failing right now because nothing runs it. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine."
+        "notes": "So here's what's stubbed, and it's stubbed on purpose. In-memory data a restart wipes. Polling instead of push. A heuristic instead of a real solver. Header personas instead of real authentication. And no CI to run the coverage gates. Every one of these sits behind an interface or a profile that's already in place, so the production version is added, not retrofitted. On method: AI wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the code — those decisions were mine."
       },
       "vertical": {
         "strategy": "native"
       },
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10-ledger.mp4",
+        "durationMs": 32366.999999999996,
+        "roi": null,
+        "hash": "a32cdfef4e66"
+      },
       "resolvedAudio": {
         "filePath": "assets/audio/10-ledger.wav",
-        "durationMs": 32275,
+        "durationMs": 31975,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "af5415dce05a"
+        "hash": "b70feb9f7592"
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 32675,
+        "sceneMs": 32375,
         "ratePct": 0,
-        "padVisualMs": 32675,
+        "padVisualMs": 32375,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10-ledger.mp4",
-        "durationMs": 32667,
-        "roi": null,
-        "hash": "9deb62a2111f"
-      }
+      "ratePct": 0
     },
     {
       "id": "10a-artifacts-terminal",
       "title": "10a-artifacts-terminal",
-      "narration": "One last count, because sequence is the part people doubt. Eleven decision tickets, twenty-eight implementation issues, five specifications, four decision records — written before the code they describe.",
+      "narration": "One last count, because the order is the part people doubt. Eleven decision tickets, twenty-eight implementation issues, five specs, four decision records — all written before the code they describe.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1838,7 +1461,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 13453
+            "delayMs": 13046
           }
         ]
       },
@@ -1855,83 +1478,29 @@
         ]
       },
       "roiSelector": "#term",
-      "resolvedAudio": {
-        "filePath": "assets/audio/10a-artifacts-terminal.wav",
-        "durationMs": 13225,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "68a325d0afa8"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13625,
-        "ratePct": 0,
-        "padVisualMs": 13625,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
       "resolvedVisual": {
         "filePath": "assets/recordings/10a-artifacts-terminal.mp4",
-        "durationMs": 13766.73193359375,
+        "durationMs": 13616.123046875,
         "roi": null,
-        "hash": "1a1f8cc8d847"
-      }
-    },
-    {
-      "id": "11-cta",
-      "title": "If you would have traded differently, that is the conversation I want",
-      "narration": "Five decisions, five prices, and you have heard what each one cost. If you would have traded differently on any of them, that is the conversation I want. The readme is the map, the decision records and the tickets are the reasoning, and the prototype is live — give it about fifty seconds to wake up.",
-      "role": null,
-      "visualEngine": "html_slides",
-      "captureMode": "stills",
-      "slide": {
-        "layout": "hero",
-        "theme": "light",
-        "title": "If you would have traded differently, that is the conversation I want",
-        "pill": "Where to argue with me",
-        "body": "The readme is the map. The decision records and tickets are the reasoning. The prototype is live.",
-        "cards": [
-          {
-            "icon": "route",
-            "title": "Five decisions, five prices",
-            "text": "Every one of them is written down, including the ones I got wrong.",
-            "detail": "Cold start takes about fifty seconds"
-          }
-        ],
-        "stat": null,
-        "image": null,
-        "htmlPath": null,
-        "portraitHtmlPath": null,
-        "notes": "Five decisions, five prices, and you have heard what each one cost. If you would have traded differently on any of them, that is the conversation I want. The readme is the map, the decision records and the tickets are the reasoning, and the prototype is live — give it about fifty seconds to wake up."
-      },
-      "vertical": {
-        "strategy": "native"
+        "hash": "8887835b3253"
       },
       "resolvedAudio": {
-        "filePath": "assets/audio/11-cta.wav",
-        "durationMs": 17975,
+        "filePath": "assets/audio/10a-artifacts-terminal.r.wav",
+        "durationMs": 13075,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
-        "hash": "efa69700a5ad"
+        "hash": "7599f49ae4d6"
       },
       "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 18375,
-        "ratePct": 0,
-        "padVisualMs": 18375,
+        "mode": "speech-fit",
+        "sceneMs": 13616,
+        "ratePct": -2.6,
+        "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/11-cta.mp4",
-        "durationMs": 18367,
-        "roi": null,
-        "hash": "f92b42ea1b79"
-      }
+      "ratePct": -2.6
     }
   ]
 }

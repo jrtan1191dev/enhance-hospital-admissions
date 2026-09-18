@@ -1,0 +1,20 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "05b-consensus-gate",
+  "title": "The consensus gate stays closed until every consult is in",
+  "recordedAt": "2026-09-18T08:08:25.553Z",
+  "steps": [
+    {
+      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/service/ClinicianServiceTest.java | grep -i 'consensus' | sed 's/.*(\"/  - /; s/\")//'",
+      "output": "  - Consensus Completion Gate: Partial broadcast completion leaves AdmissionRequest in ASSESSMENT_PENDING\n  - Consensus Completion Gate: All broadcasts completed advances AdmissionRequest to BED_REQUESTED with highest acuity and telemetry union",
+      "exitCode": 0,
+      "durationMs": 41
+    },
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest='ClinicianServiceTest#testSubmitConsult_ConsensusGate_PartialCompletion_RemainsAssessmentPending+testSubmitConsult_ConsensusGate_AllCompleted_AdvancesToBedRequested_AndElevatesAcuityAndTelemetry' 2>&1 | grep -E 'ASSESSMENT_PENDING|Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.712 s -- in com.hospital.admissions.service.ClinicianServiceTest\n[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 2314
+    }
+  ]
+}

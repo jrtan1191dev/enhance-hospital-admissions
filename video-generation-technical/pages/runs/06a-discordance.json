@@ -1,0 +1,26 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "06a-discordance",
+  "title": "Disagreement resolves to the higher acuity, and the queue sorts on it",
+  "recordedAt": "2026-09-18T08:08:27.980Z",
+  "steps": [
+    {
+      "cmd": "grep -n 'effectiveAcuityTier' backend/src/main/java/com/hospital/admissions/entity/AdmissionRequest.java",
+      "output": "42:    private AcuityTier effectiveAcuityTier;",
+      "exitCode": 0,
+      "durationMs": 35
+    },
+    {
+      "cmd": "grep -n 'setEffectiveAcuityTier\\|highestAcuity' backend/src/main/java/com/hospital/admissions/service/ClinicianService.java | head -4",
+      "output": "245:        AcuityTier highestAcuity = request.getPrimaryAcuityTier();\n256:                if (highestAcuity == null || b.getSecondaryAcuityTier().ordinal() < highestAcuity.ordinal()) {\n257:                    highestAcuity = b.getSecondaryAcuityTier();\n271:        request.setEffectiveAcuityTier(highestAcuity);",
+      "exitCode": 0,
+      "durationMs": 33
+    },
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest='ClinicianServiceTest#testSubmitConsult_ConsensusGate_AllCompleted_AdvancesToBedRequested_AndElevatesAcuityAndTelemetry,BmuServiceTest#testGetPrioritizedQueue_SortsByEffectiveAcuityTierOverPrimaryAcuityTier' 2>&1 | grep -E 'Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.693 s -- in com.hospital.admissions.service.ClinicianServiceTest\n[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in com.hospital.admissions.service.BmuServiceTest\n[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 2357
+    }
+  ]
+}

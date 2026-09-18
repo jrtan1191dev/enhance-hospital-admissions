@@ -75,7 +75,21 @@
   }
   .badge.mock { background: #D1FAE5; color: #065F46; }
   .badge.prod { background: #FEE2E2; color: #991B1B; }
-  .arrow { color: var(--line); font-size: 26px; text-align: center; }
+  /* The arrows pulse forever. Chrome's screencast only emits a frame when the page
+     changes, so a static diagram records a fraction of a second regardless of the
+     scene length (measured: 2.2s for an 18s scene, i.e. only the click frames).
+     One perpetual animation keeps frames flowing and the clip duration honest. */
+  .arrow {
+    color: var(--line); font-size: 26px; text-align: center;
+    animation: drift 1.4s ease-in-out infinite;
+  }
+  @keyframes drift { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+  /* Dense-frame ticker, for the same timing reason as term.html. */
+  #ticker {
+    position: fixed; width: 2px; height: 2px; right: 6px; bottom: 6px;
+    background: var(--line); animation: tick 120ms linear infinite;
+  }
+  @keyframes tick { 0% { opacity: 0.86; } 50% { opacity: 1; } 100% { opacity: 0.86; } }
 
   /* Hidden by default; the capture reveals each column in turn. */
   .hidden { visibility: hidden; }
@@ -168,6 +182,7 @@
     </div>
   </main>
 
+  <div id="ticker"></div>
   <div id="controls">
     <button id="reveal-mock" type="button">1</button>
     <button id="reveal-prod" type="button">2</button>

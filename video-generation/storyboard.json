@@ -1,8 +1,8 @@
 {
-  "$generated": "GENERATED FILE — do not edit. Source: deck.yaml. Regenerate with: node scripts/compile.mjs",
+  "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
     "file": "deck.yaml",
-    "checksum": "1a4a8df12728181a2af85487c354a9efc779a268ccc5c1cda4b0c9a22124b8ec"
+    "checksum": "80c0c2ae8c07e3f13f3685a447bbd33c9e3fe37f36211d86813cbc3ee0e6fa3c"
   },
   "meta": {
     "title": "Recovering Hospital Beds Without Building More",
@@ -41,7 +41,7 @@
     {
       "id": "01-situation",
       "title": "The wait every family knows",
-      "narration": "If you have ever waited with a parent for a hospital bed, you know the quiet despair of a long, silent queue that crosses many hands before it ends.",
+      "narration": "If you have waited with a parent for a hospital bed, you know the quiet despair of it. Eight to fourteen hours from arrival to a ward — and for most of it, nobody can tell you why.",
       "role": "situation",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -73,39 +73,61 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "If you have ever waited with a parent for a hospital bed, you know the quiet despair of a long, silent queue that crosses many hands before it ends."
+        "notes": "If you have waited with a parent for a hospital bed, you know the quiet despair of it. Eight to fourteen hours from arrival to a ward — and for most of it, nobody can tell you why."
       },
       "vertical": {
         "strategy": "native"
+      }
+    },
+    {
+      "id": "01b-handoffs",
+      "title": "Five desks, four handoffs, every one a phone call",
+      "narration": "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, a phone call.",
+      "role": "situation",
+      "visualEngine": "html_slides",
+      "captureMode": "stills",
+      "slide": {
+        "layout": "lifecycle",
+        "theme": "light",
+        "title": "Five desks, four handoffs, every one a phone call",
+        "pill": null,
+        "body": null,
+        "cards": [
+          {
+            "icon": "brain",
+            "title": "Doctor to specialist",
+            "text": "A page, then a wait for the callback."
+          },
+          {
+            "icon": "users-round",
+            "title": "Specialist to bed management",
+            "text": "The decision, phoned or re-keyed across."
+          },
+          {
+            "icon": "gauge",
+            "title": "Bed management to ward",
+            "text": "A bed offered, then confirmed by phone."
+          },
+          {
+            "icon": "refresh-cw",
+            "title": "Ward to housekeeping",
+            "text": "A vacated bed, reported by phone."
+          }
+        ],
+        "stat": null,
+        "image": null,
+        "htmlPath": null,
+        "portraitHtmlPath": null,
+        "notes": "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, a phone call."
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/01-situation.wav",
-        "durationMs": 9500,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "8028004a0dc7"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 9900,
-        "ratePct": 0,
-        "padVisualMs": 9900,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/01-situation.mp4",
-        "durationMs": 9900,
-        "roi": null,
-        "hash": "dd9c6efc2438"
+      "vertical": {
+        "strategy": "native"
       }
     },
     {
       "id": "02-complication",
       "title": "The beds exist; the coordination does not",
-      "narration": "You cannot build your way out of a flow bottleneck. Phone calls between departments, cubicles frozen by cohort locks, and afternoon discharge delays cost a hospital the capacity it already has.",
+      "narration": "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed at breakfast.",
       "role": "complication",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -133,39 +155,57 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "You cannot build your way out of a flow bottleneck. Phone calls between departments, cubicles frozen by cohort locks, and afternoon discharge delays cost a hospital the capacity it already has."
+        "notes": "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed at breakfast."
       },
       "vertical": {
         "strategy": "native"
+      }
+    },
+    {
+      "id": "02b-frozen",
+      "title": "One patient can freeze five beds",
+      "narration": "Here is that cost at its sharpest. Put one man in an empty six-bed cubicle, and the other five beds can now only take men — same ward class, same infection status. Five beds, empty on the board, unavailable in practice. That is the capacity we set out to recover.",
+      "role": "complication",
+      "visualEngine": "html_slides",
+      "captureMode": "stills",
+      "slide": {
+        "layout": "stat-deepdive",
+        "theme": "light",
+        "title": "One patient can freeze five beds",
+        "pill": null,
+        "body": null,
+        "cards": [
+          {
+            "icon": "lock",
+            "title": "The first patient sets the rules",
+            "text": "Gender, ward class and infection status are absolute — the cubicle inherits all three.",
+            "detail": "A safety rule, not a bug"
+          },
+          {
+            "icon": "bed",
+            "title": "Empty on the board, unusable in practice",
+            "text": "If nobody matching is waiting, those beds cannot be offered to anyone at all.",
+            "detail": "The capacity to recover"
+          }
+        ],
+        "stat": {
+          "value": "5",
+          "unit": "beds",
+          "label": "in a six-bed cubicle, reserved to whoever occupies the first one"
+        },
+        "image": null,
+        "htmlPath": null,
+        "portraitHtmlPath": null,
+        "notes": "Here is that cost at its sharpest. Put one man in an empty six-bed cubicle, and the other five beds can now only take men — same ward class, same infection status. Five beds, empty on the board, unavailable in practice. That is the capacity we set out to recover."
       },
-      "resolvedAudio": {
-        "filePath": "assets/audio/02-complication.wav",
-        "durationMs": 12850,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "8522e9a20aa0"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 13250,
-        "ratePct": 0,
-        "padVisualMs": 13250,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/02-complication.mp4",
-        "durationMs": 13267,
-        "roi": null,
-        "hash": "c967045c9312"
+      "vertical": {
+        "strategy": "native"
       }
     },
     {
       "id": "03-synthesis",
       "title": "The decision, synthesised — then dispatched without a call",
-      "narration": "The first fix is the decision itself. Findings are synthesised on arrival, disagreement resolves toward the safer tier, and the moment consensus is reached the admission lands in the queue as data — no call placed.",
+      "narration": "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data, not as a phone call.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -196,39 +236,16 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "The first fix is the decision itself. Findings are synthesised on arrival, disagreement resolves toward the safer tier, and the moment consensus is reached the admission lands in the queue as data — no call placed."
+        "notes": "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data, not as a phone call."
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/03-synthesis.wav",
-        "durationMs": 14275,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "fa3dad7c1173"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 14675,
-        "ratePct": 0,
-        "padVisualMs": 14675,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/03-synthesis.mp4",
-        "durationMs": 14667,
-        "roi": null,
-        "hash": "a752784b30f1"
       }
     },
     {
       "id": "04a-ed-synthesis-capture",
       "title": "04a-ed-synthesis-capture",
-      "narration": "Chua Wee Kiat's vitals and labs already drive the smart assessment — Tier 2, Cardiology, continuous telemetry — and the attending confirms it in one click.",
+      "narration": "Here it is for real. Chua Wee Kiat: chest pain, blood pressure ninety-eight over sixty-two and falling, troponin one-eighty — the protein that leaks into the blood when heart muscle is dying. The dossier has read all three and filled itself in: Tier 2, Cardiology, continuous telemetry — heart rhythm watched without a break. The attending's job here is to agree, or not — to review rather than retype.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -249,7 +266,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 9124
+            "delayMs": 27300
           }
         ]
       },
@@ -265,46 +282,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04a-ed-synthesis-capture.mp4",
-        "durationMs": 11080.35498046875,
-        "roi": {
-          "x": 1185.5,
-          "y": 798.859375,
-          "width": 64.890625,
-          "height": 28
-        },
-        "hash": "aa51457f6219"
-      },
-      "roi": {
-        "x": 1185.5,
-        "y": 798.859375,
-        "width": 64.890625,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04a-ed-synthesis-capture.r.wav",
-        "durationMs": 10700,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "6d43816798ca"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 11080,
-        "ratePct": 0.7,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0.7
+      "roiSelector": ".lg\\\\:col-span-5"
     },
     {
       "id": "04a2-tier-framework-capture",
       "title": "04a2-tier-framework-capture",
-      "narration": "The same dropdown holds the full five-tier framework, from critical resuscitation down to extended observation — and for a stable case like Nurul Huda's pneumonia, it defaults to Tier 3, General Medicine, no telemetry at all.",
+      "narration": "The same field spans five tiers, from critical resuscitation down to extended observation. And it does not lean toward admitting: Nurul Huda's pneumonia, normal troponin and stable blood pressure come up as Tier 3, General Medicine, with no monitoring at all.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -350,7 +333,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 8747
+            "delayMs": 12600
           }
         ]
       },
@@ -366,46 +349,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04a2-tier-framework-capture.mp4",
-        "durationMs": 16098.368896484375,
-        "roi": {
-          "x": 978.5,
-          "y": 857.859375,
-          "width": 64.890625,
-          "height": 28
-        },
-        "hash": "f50dd8cc7ded"
-      },
-      "roi": {
-        "x": 978.5,
-        "y": 857.859375,
-        "width": 64.890625,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04a2-tier-framework-capture.r.wav",
-        "durationMs": 15800,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "adad771a26ec"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 16098,
-        "ratePct": 2.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.2
+      "roiSelector": ".lg\\\\:col-span-5"
     },
     {
       "id": "04b-specialist-discordance-capture",
       "title": "04b-specialist-discordance-capture",
-      "narration": "Mr Fernandez shows the discordance itself — the ED attending's tier beside the specialist's escalation to a safer, higher tier with telemetry endorsed.",
+      "narration": "Now the disagreement. Mr Fernandez came up as acute but stable; the cardiologist reads a rising troponin and changing ECG segments, and pushes him to Tier 2 with monitoring made mandatory. Both opinions stay visible — and the higher one is what the rest of the system acts on.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -416,7 +365,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 10514
+            "delayMs": 20000
           }
         ]
       },
@@ -433,35 +382,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04b-specialist-discordance-capture.mp4",
-        "durationMs": 11080.891845703125,
-        "roi": null,
-        "hash": "5c9dc2b25f24"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04b-specialist-discordance-capture.r.wav",
-        "durationMs": 10800,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "02077c85315f"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 11081,
-        "ratePct": 1.8,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 1.8
+      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2"
     },
     {
       "id": "04b2-chain-consult-capture",
       "title": "04b2-chain-consult-capture",
-      "narration": "Fernandez's case doesn't stop at Cardiology either — chaining a concurrent Surgery consult keeps both specialties working in parallel, not a queue of callbacks.",
+      "narration": "He does not only need Cardiology. The same note flags abdominal pain, so a surgical review is chained on from here and runs alongside it — two specialties at once, rather than one after the other.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -482,7 +408,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 8625
+            "delayMs": 14100
           }
         ]
       },
@@ -497,46 +423,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04b2-chain-consult-capture.mp4",
-        "durationMs": 10587.17919921875,
-        "roi": {
-          "x": 1291.390625,
-          "y": 1190.71875,
-          "width": 122.75,
-          "height": 28
-        },
-        "hash": "6590437d2132"
-      },
-      "roi": {
-        "x": 1291.390625,
-        "y": 1190.71875,
-        "width": 122.75,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04b2-chain-consult-capture.r.wav",
-        "durationMs": 10275,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "20f9643138e4"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 10587,
-        "ratePct": 1.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 1.4
+      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2"
     },
     {
       "id": "04c-bmu-dispatch-capture",
       "title": "04c-bmu-dispatch-capture",
-      "narration": "The moment consensus is reached, the packet is already sitting in the bed management queue as structured data — no phone call placed.",
+      "narration": "Once the consults are back, the request appears here in bed management on its own: tier, specialty, ward class and monitoring needs, all attached. Nobody rang anyone. This is Mr Tan Ah Meng — follow him from here.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -547,7 +439,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 8454
+            "delayMs": 15600
           }
         ]
       },
@@ -563,35 +455,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-7",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04c-bmu-dispatch-capture.mp4",
-        "durationMs": 9032.173095703125,
-        "roi": null,
-        "hash": "ff33e185ac0f"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04c-bmu-dispatch-capture.r.wav",
-        "durationMs": 8675,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "427c4b1206b6"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9032,
-        "ratePct": 1.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 1.4
+      "roiSelector": ".lg\\\\:col-span-7"
     },
     {
       "id": "04c2-reconcile-notes-capture",
       "title": "04c2-reconcile-notes-capture",
-      "narration": "The coordinator isn't locked out of the clinical picture either — comparative notes lay the ED and specialist assessments side by side, so clinical judgement stays visible even after the safety-first tier has already been adopted.",
+      "narration": "Escalating automatically could have buried the disagreement, so it does not. Opening Mr Tan Ah Meng's comparative notes lays the emergency and specialist assessments side by side, and the coordinator can still ask the two to reconcile — while the safer bed search carries on regardless.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -612,7 +481,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 13216
+            "delayMs": 18100
           }
         ]
       },
@@ -627,46 +496,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-7",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04c2-reconcile-notes-capture.mp4",
-        "durationMs": 15188.002197265625,
-        "roi": {
-          "x": 1486.53125,
-          "y": 1285.609375,
-          "width": 32,
-          "height": 28
-        },
-        "hash": "c8474ce06c4f"
-      },
-      "roi": {
-        "x": 1486.53125,
-        "y": 1285.609375,
-        "width": 32,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04c2-reconcile-notes-capture.r.wav",
-        "durationMs": 14825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "15f75dd5b96a"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 15188,
-        "ratePct": 2.3,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.3
+      "roiSelector": ".lg\\\\:col-span-7"
     },
     {
       "id": "05-diversion",
       "title": "Not every admission needs a scarce acute bed",
-      "narration": "Not every admission needs a scarce acute bed. Stable patients go to a monitored virtual ward, and subacute recovery is referred to a community hospital digitally, each diversion preserving a bed.",
+      "narration": "The second fix is admitting fewer people at all. Diversion was always possible — it was just buried under enough paperwork that clinicians took the acute bed instead. So the alternatives became the easy path: a patient stable enough gets hospital-level monitoring at home with a daily visit, and a patient who mainly needs weeks of rehabilitation goes to a community hospital as a digital referral, with a thirty-minute clock on the reply.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -697,39 +532,16 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Not every admission needs a scarce acute bed. Stable patients go to a monitored virtual ward, and subacute recovery is referred to a community hospital digitally, each diversion preserving a bed."
+        "notes": "The second fix is admitting fewer people at all. Diversion was always possible — it was just buried under enough paperwork that clinicians took the acute bed instead. So the alternatives became the easy path: a patient stable enough gets hospital-level monitoring at home with a daily visit, and a patient who mainly needs weeks of rehabilitation goes to a community hospital as a digital referral, with a thirty-minute clock on the reply."
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/05-diversion.wav",
-        "durationMs": 13675,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a2beeae0e0d9"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 14075,
-        "ratePct": 0,
-        "padVisualMs": 14075,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05-diversion.mp4",
-        "durationMs": 14067,
-        "roi": null,
-        "hash": "58380f27207f"
       }
     },
     {
       "id": "06a-mic-at-home-capture",
       "title": "06a-mic-at-home-capture",
-      "narration": "Mrs Tan Boon Hwa's tracker explains her step-down pathway to hospital-level care at home — a virtual bed, not a physical one.",
+      "narration": "On the patient's own screen now — and a different patient, Mrs Tan Boon Hwa. She is not queuing for a bed at all: she is on hospital-at-home care, visited daily by a monitoring team. Her tracker says exactly that, so a diversion reads as a decision made for her, not a bed she was refused.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -751,7 +563,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 7123
+            "delayMs": 21300
           }
         ]
       },
@@ -764,46 +576,12 @@
           "Failed to track"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06a-mic-at-home-capture.mp4",
-        "durationMs": 9814.332763671875,
-        "roi": {
-          "x": 1173.390625,
-          "y": 127,
-          "width": 271,
-          "height": 32
-        },
-        "hash": "8a0a06e680c9"
-      },
-      "roi": {
-        "x": 1173.390625,
-        "y": 127,
-        "width": 271,
-        "height": 32
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/06a-mic-at-home-capture.r.wav",
-        "durationMs": 9375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "52c2b222469d"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9814,
-        "ratePct": -0.7,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.7
+      "roiSelector": "main"
     },
     {
       "id": "06b-sister-hospital-capture",
       "title": "06b-sister-hospital-capture",
-      "narration": "Mr Ahmad Ibrahim is on a thirty-minute bilateral referral to Outram Community Hospital, tracked on the coordinator's own screen.",
+      "narration": "Back in bed management, the other kind of diversion. Mr Ahmad Ibrahim needs stroke rehabilitation rather than an acute ward, so a referral now sits with Outram Community Hospital under a thirty-minute reply window that both hospitals can see.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -824,7 +602,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 7350
+            "delayMs": 15300
           }
         ]
       },
@@ -839,46 +617,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-7",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06b-sister-hospital-capture.mp4",
-        "durationMs": 9365.0419921875,
-        "roi": {
-          "x": 1422.265625,
-          "y": 1645.59375,
-          "width": 58.265625,
-          "height": 28
-        },
-        "hash": "da582674986e"
-      },
-      "roi": {
-        "x": 1422.265625,
-        "y": 1645.59375,
-        "width": 58.265625,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/06b-sister-hospital-capture.wav",
-        "durationMs": 8950,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "1471c8305c9d"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9365,
-        "ratePct": -0.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.2
+      "roiSelector": ".lg\\\\:col-span-7"
     },
     {
       "id": "07-ghost",
       "title": "The insight that recovers ghost capacity is the ordering",
-      "narration": "Beds sit empty on paper yet locked in practice. The solver packs waiting patients into matching cubicles first, then batches a clean cubicle for a surge, and swaps a single blocker out to liberate an entire ward.",
+      "narration": "The third fix recovers those five frozen beds, and it comes down to ordering. Fill the part-used cubicles first, with patients who already match the people in them. Only then open a clean cubicle — and open it for a whole group at once. And when a single patient is the only reason a room is unusable, move that patient, not the room. Same beds, same safety rules, a different order of operations.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -909,39 +653,16 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Beds sit empty on paper yet locked in practice. The solver packs waiting patients into matching cubicles first, then batches a clean cubicle for a surge, and swaps a single blocker out to liberate an entire ward."
+        "notes": "The third fix recovers those five frozen beds, and it comes down to ordering. Fill the part-used cubicles first, with patients who already match the people in them. Only then open a clean cubicle — and open it for a whole group at once. And when a single patient is the only reason a room is unusable, move that patient, not the room. Same beds, same safety rules, a different order of operations."
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07-ghost.wav",
-        "durationMs": 14200,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "1caa3813724b"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 14600,
-        "ratePct": 0,
-        "padVisualMs": 14600,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07-ghost.mp4",
-        "durationMs": 14600,
-        "roi": null,
-        "hash": "fc8481f71f55"
       }
     },
     {
       "id": "07a-bed-lifecycle-capture",
       "title": "07a-bed-lifecycle-capture",
-      "narration": "Every bed here moves through the same four states — mustard yellow while it's cleaned, white once it's ready, green the moment it's reserved, grey when a patient is in it. Everything that follows is a decision made on top of this lifecycle.",
+      "narration": "First the board itself. Every bed in the hospital is in exactly one of four states — being cleaned, ready, promised to someone, or occupied — and the colours are simply how a coordinator reads a whole level at a glance. Every decision that follows is a move between those four, which is why a bed can never quietly go missing.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -952,7 +673,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 14474
+            "delayMs": 24800
           }
         ]
       },
@@ -968,35 +689,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Live Bed Inventory Matrix",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07a-bed-lifecycle-capture.mp4",
-        "durationMs": 15047.593017578125,
-        "roi": null,
-        "hash": "4bcaddde65b9"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07a-bed-lifecycle-capture.r.wav",
-        "durationMs": 14825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "5bb520230268"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 15048,
-        "ratePct": 1.6,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 1.6
+      "roiSelector": "text=Live Bed Inventory Matrix"
     },
     {
       "id": "08a-solver-recommendation-capture",
       "title": "08a-solver-recommendation-capture",
-      "narration": "Selecting Tan Ah Meng's request returns the top three beds in under fifty milliseconds, with the scoring reasoning attached to each.",
+      "narration": "Mr Tan Ah Meng again — the request we watched arrive without a call. He needs heart monitoring, and he is a falls risk. Every bed in the hospital is scored against four rules the system will never break — among them, never mixing genders in a cubicle, and never placing a patient where the monitoring is not installed — and then three softer preferences it weighs, like keeping a specialty together on one ward. Three beds come back in under fifty milliseconds, each showing why it scored where it did.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1017,7 +715,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 7015
+            "delayMs": 36100
           }
         ]
       },
@@ -1032,46 +730,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08a-solver-recommendation-capture.mp4",
-        "durationMs": 9014.820068359375,
-        "roi": {
-          "x": 1422.265625,
-          "y": 1285.609375,
-          "width": 58.265625,
-          "height": 28
-        },
-        "hash": "711c4d396ae7"
-      },
-      "roi": {
-        "x": 1422.265625,
-        "y": 1285.609375,
-        "width": 58.265625,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08a-solver-recommendation-capture.wav",
-        "durationMs": 8600,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "28eadb790129"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9015,
-        "ratePct": -0.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.2
+      "roiSelector": ".lg\\\\:col-span-5"
     },
     {
       "id": "08b-batch-holding-capture",
       "title": "08b-batch-holding-capture",
-      "narration": "Three matching patients waiting at once trip a batch suggestion — a whole holding ward, offered as one approval instead of three separate placements.",
+      "narration": "Now the batching step. Three waiting patients share a ward class, a gender and an infection status — enough to fill a clean cubicle completely — so the whole room is offered as a single decision. One approval instead of three placements, and no half-used cubicle left behind to freeze later.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1082,7 +746,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 9240
+            "delayMs": 20800
           }
         ]
       },
@@ -1096,35 +760,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=Surge Cluster Detected",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08b-batch-holding-capture.mp4",
-        "durationMs": 9814.901123046875,
-        "roi": null,
-        "hash": "1e28128022bf"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08b-batch-holding-capture.r.wav",
-        "durationMs": 9450,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "27034fecedeb"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9815,
-        "ratePct": 0.6,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0.6
+      "roiSelector": "text=Surge Cluster Detected"
     },
     {
       "id": "08c-cohort-swap-capture",
       "title": "08c-cohort-swap-capture",
-      "narration": "One patient still in the ED is blocking a whole ward from a Green reservation. The swap proposal moves him to an equal bed and frees the room.",
+      "narration": "And this is the unlock. One patient, still down in the emergency department, is the only reason an entire ward cannot be released to the group waiting for it. The system offers him an equal bed — same class, same monitoring — and one approval frees the room. He loses nothing; the ward becomes usable.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1135,7 +776,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 9690
+            "delayMs": 22400
           }
         ]
       },
@@ -1149,35 +790,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=Dynamic Cohort-Swap Proposal",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08c-cohort-swap-capture.mp4",
-        "durationMs": 10264.23291015625,
-        "roi": null,
-        "hash": "12d2cfe7c5fd"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08c-cohort-swap-capture.wav",
-        "durationMs": 9825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "72f28079d822"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 10264,
-        "ratePct": -0.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.4
+      "roiSelector": "text=Dynamic Cohort-Swap Proposal"
     },
     {
       "id": "08d-solver-config-capture",
       "title": "08d-solver-config-capture",
-      "narration": "The weights behind that scoring are not hard-coded — a coordinator can retune specialty, consolidation and fall-risk priority live.",
+      "narration": "None of that scoring is hard-coded. A coordinator can retune how much specialty grouping, cubicle packing or falls-risk proximity counts, and save it while the hospital is running. A dengue cluster changes what a good bed looks like — and that should never need a software release.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1188,7 +806,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 8762
+            "delayMs": 19200
           }
         ]
       },
@@ -1202,35 +820,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08d-solver-config-capture.mp4",
-        "durationMs": 9330.96484375,
-        "roi": null,
-        "hash": "064de1f44c70"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08d-solver-config-capture.wav",
-        "durationMs": 8950,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "44ffe18b5c70"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9331,
-        "ratePct": 0.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0.2
+      "roiSelector": "main"
     },
     {
       "id": "09-experience",
       "title": "The same journey without the anxiety — and an exit that starts early",
-      "narration": "The family sees the same journey without the anxiety, and the last bottleneck opens early. Discharge starts two days ahead, medicines reach the bedside before eleven, and a cleaned bed rejoins the allocation engine on its own.",
+      "narration": "The fourth fix sits at both ends of the stay. At the front, the family stops asking the triage nurse: they see their position among the patients in their own ward class, and an honest reason when it slips. At the back, discharge starts two or three days early, the medicines are packed overnight instead of chased at noon, and the cleaning clock starts the moment a bed empties.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -1261,39 +856,16 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "The family sees the same journey without the anxiety, and the last bottleneck opens early. Discharge starts two days ahead, medicines reach the bedside before eleven, and a cleaned bed rejoins the allocation engine on its own."
+        "notes": "The fourth fix sits at both ends of the stay. At the front, the family stops asking the triage nurse: they see their position among the patients in their own ward class, and an honest reason when it slips. At the back, discharge starts two or three days early, the medicines are packed overnight instead of chased at noon, and the cleaning clock starts the moment a bed empties."
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09-experience.wav",
-        "durationMs": 14975,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "796af317d715"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 15375,
-        "ratePct": 0,
-        "padVisualMs": 15375,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09-experience.mp4",
-        "durationMs": 15367,
-        "roi": null,
-        "hash": "94f245bee668"
       }
     },
     {
       "id": "10a-tracker-milestone-capture",
       "title": "10a-tracker-milestone-capture",
-      "narration": "Tan Ah Meng's tracker computes a real queue position within his ward class, sorted by acuity and request time, with an honest wait estimate.",
+      "narration": "Mr Tan Ah Meng once more, now from his family's phone. The position they see is real — it counts only the patients ahead of him in his own ward class, ordered by how sick they are and how long they have waited. Which is why it can move, and why the estimate is given as a range rather than a countdown that lies.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1315,7 +887,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 7026
+            "delayMs": 24500
           }
         ]
       },
@@ -1330,46 +902,12 @@
           "Failed to track"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10a-tracker-milestone-capture.mp4",
-        "durationMs": 9731.479248046875,
-        "roi": {
-          "x": 1173.390625,
-          "y": 127,
-          "width": 271,
-          "height": 32
-        },
-        "hash": "5d23e9cb69fb"
-      },
-      "roi": {
-        "x": 1173.390625,
-        "y": 127,
-        "width": 271,
-        "height": 32
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10a-tracker-milestone-capture.r.wav",
-        "durationMs": 9375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "441007f1e935"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9731,
-        "ratePct": 0.5,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0.5
+      "roiSelector": "main"
     },
     {
       "id": "10b-tracker-delay-tag-capture",
       "title": "10b-tracker-delay-tag-capture",
-      "narration": "When a room needs specialised cleaning, Mdm Wong Siew Kuan's tracker explains it in plain, kind language, with a hotline to call.",
+      "narration": "And when the news is bad, the tone changes instead of going quiet. Mdm Wong Siew Kuan's room needs a deep clean before anyone can enter it. Her tracker says exactly that, in plain words, with a number she can call — because an explained wait is a different experience from an unexplained one, even when it is the same length.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1391,7 +929,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 6912
+            "delayMs": 23300
           }
         ]
       },
@@ -1404,46 +942,12 @@
           "Failed to track"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10b-tracker-delay-tag-capture.mp4",
-        "durationMs": 9598.489990234375,
-        "roi": {
-          "x": 1173.390625,
-          "y": 127,
-          "width": 271,
-          "height": 32
-        },
-        "hash": "c44757d4a5dd"
-      },
-      "roi": {
-        "x": 1173.390625,
-        "y": 127,
-        "width": 271,
-        "height": 32
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10b-tracker-delay-tag-capture.wav",
-        "durationMs": 9225,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "c09a422e5600"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9598,
-        "ratePct": 0.3,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0.3
+      "roiSelector": "main"
     },
     {
       "id": "10c-discharge-runway-capture",
       "title": "10c-discharge-runway-capture",
-      "narration": "Nurses set an estimated discharge date two to three days out, with a confidence rating and the clinical rationale behind it.",
+      "narration": "Up on the ward now. Every occupied bed carries an expected discharge date, set two to three days ahead, with how confident the nurse is and the clinical reason for it — so bed management can see a bed coming before it exists.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1454,7 +958,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 7981
+            "delayMs": 17600
           }
         ]
       },
@@ -1469,35 +973,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10c-discharge-runway-capture.mp4",
-        "durationMs": 8565.016845703125,
-        "roi": null,
-        "hash": "f05ca54f67a5"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10c-discharge-runway-capture.r.wav",
-        "durationMs": 8150,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "047ce4de063e"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 8565,
-        "ratePct": -0.5,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.5
+      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2"
     },
     {
       "id": "10d-bedside-meds-capture",
       "title": "10d-bedside-meds-capture",
-      "narration": "A morning sign-off auto-queues discharge medicines, and confirming bedside delivery is one button — the patient is ready to vacate before eleven.",
+      "narration": "Medicines are the single biggest delay on discharge day. So the morning sign-off does two jobs at once: it clears the patient to leave, and it queues the take-home prescription for delivery to the bedside. One button confirms it arrived, and the bed frees before eleven instead of after lunch — the difference between this queue clearing today and tomorrow.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1519,7 +1000,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 8372
+            "delayMs": 23700
           }
         ]
       },
@@ -1533,46 +1014,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Meds Delivered — Ready to Vacate",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10d-bedside-meds-capture.mp4",
-        "durationMs": 10279.868896484375,
-        "roi": {
-          "x": 1225.015625,
-          "y": 276,
-          "width": 216.359375,
-          "height": 28
-        },
-        "hash": "aba30b8ffe64"
-      },
-      "roi": {
-        "x": 1225.015625,
-        "y": 276,
-        "width": 216.359375,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10d-bedside-meds-capture.wav",
-        "durationMs": 9900,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "d9c82a5f4d0c"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 10280,
-        "ratePct": 0.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0.2
+      "roiSelector": "text=Meds Delivered — Ready to Vacate"
     },
     {
       "id": "10e-housekeeping-turnover-capture",
       "title": "10e-housekeeping-turnover-capture",
-      "narration": "Housekeeping works its own thirty-minute countdown queue, and signing off a clean bed sends it straight back into the allocation engine.",
+      "narration": "And this is the last of those four handoffs — the one from the ward to housekeeping. Housekeeping runs its own thirty-minute countdown, and signing a bed off returns it to the matching engine automatically. Nobody phones bed management — the loop closes without anyone carrying the message.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1583,7 +1030,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 8181
+            "delayMs": 19600
           }
         ]
       },
@@ -1598,35 +1045,12 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Housekeeping (EVS) 30-Minute Turnover Queue",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10e-housekeeping-turnover-capture.mp4",
-        "durationMs": 8747.692138671875,
-        "roi": null,
-        "hash": "331f908b07bc"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10e-housekeeping-turnover-capture.r.wav",
-        "durationMs": 8300,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "b1d8de282ab2"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 8748,
-        "ratePct": -0.6,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.6
+      "roiSelector": "text=Housekeeping (EVS) 30-Minute Turnover Queue"
     },
     {
       "id": "11-control-tower",
       "title": "Every decision is measured",
-      "narration": "Every step you have seen leaves a measurable trace. Twenty-one bed requests, all digital, and a control tower where each metric is extractable through two independent pathways.",
+      "narration": "The fifth fix is the one that makes the other four accountable. Every step you have seen writes a record — twenty-one bed requests in this dataset, every one of them digital, not one placed by phone. And each figure can be produced two independent ways: a database query for the dashboards, and the audit log for alerting. A number nobody can reproduce is not a measurement.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -1658,39 +1082,16 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Every step you have seen leaves a measurable trace. Twenty-one bed requests, all digital, and a control tower where each metric is extractable through two independent pathways."
+        "notes": "The fifth fix is the one that makes the other four accountable. Every step you have seen writes a record — twenty-one bed requests in this dataset, every one of them digital, not one placed by phone. And each figure can be produced two independent ways: a database query for the dashboards, and the audit log for alerting. A number nobody can reproduce is not a measurement."
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/11-control-tower.wav",
-        "durationMs": 11375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "e5545800c92b"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 11775,
-        "ratePct": 0,
-        "padVisualMs": 11775,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/11-control-tower.mp4",
-        "durationMs": 11767,
-        "roi": null,
-        "hash": "e56460f527a9"
       }
     },
     {
       "id": "12a-intake-kpis-capture",
       "title": "12a-intake-kpis-capture",
-      "narration": "Twenty-one digital bed requests, an ED turnaround measured in minutes, and specialist concordance — the intake numbers, reading live.",
+      "narration": "Intake first. Twenty-one bed requests, all digital. Emergency department turnaround measured in minutes rather than hours. And how often the specialist agreed with the emergency doctor — the remainder are the cases where the system escalated to the safer tier.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1701,7 +1102,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 8500
+            "delayMs": 16400
           }
         ]
       },
@@ -1716,35 +1117,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=ED Clinical Intake & Specialist Collaboration",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/12a-intake-kpis-capture.mp4",
-        "durationMs": 9064.02685546875,
-        "roi": null,
-        "hash": "1243933b96dd"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/12a-intake-kpis-capture.wav",
-        "durationMs": 8650,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "2c40547aae40"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9064,
-        "ratePct": -0.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.2
+      "roiSelector": "text=ED Clinical Intake & Specialist Collaboration"
     },
     {
       "id": "12b-bmu-kpis-capture",
       "title": "12b-bmu-kpis-capture",
-      "narration": "Suggestion acceptance, diversions and holding-ward adoption — the same mechanisms from the earlier beats, now as a measured trend.",
+      "narration": "Then allocation — the same mechanisms you just watched, counted. How often coordinators took the recommended bed rather than overriding it. How many patients were diverted away from an acute bed. And how often a whole cubicle was opened for a group instead of one patient at a time.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1755,7 +1133,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 8856
+            "delayMs": 20000
           }
         ]
       },
@@ -1770,35 +1148,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=BMU Capacity Orchestration & Diversions",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/12b-bmu-kpis-capture.mp4",
-        "durationMs": 9430.900146484375,
-        "roi": null,
-        "hash": "7394eedd8655"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/12b-bmu-kpis-capture.wav",
-        "durationMs": 9025,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "12e552708e24"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9431,
-        "ratePct": -0.1,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.1
+      "roiSelector": "text=BMU Capacity Orchestration & Diversions"
     },
     {
       "id": "12c-experience-discharge-kpis-capture",
       "title": "12c-experience-discharge-kpis-capture",
-      "narration": "Tracker access, bedside medication adoption and housekeeping turnover close the loop — every promise made earlier has a number behind it here.",
+      "narration": "And both ends of the stay. How many families actually opened the tracker. How many patients received their medicines at the bedside. And how long cleaning really takes, against the thirty-minute target. Every promise made earlier has a number here that could contradict it.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1809,7 +1164,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 9223
+            "delayMs": 18000
           }
         ]
       },
@@ -1824,35 +1179,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=Inpatient Discharge Runway & Rapid Turnover",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/12c-experience-discharge-kpis-capture.mp4",
-        "durationMs": 9797.954833984375,
-        "roi": null,
-        "hash": "896efb04d344"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/12c-experience-discharge-kpis-capture.r.wav",
-        "durationMs": 9375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "6e11d7879b7e"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 9798,
-        "ratePct": -0.5,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -0.5
+      "roiSelector": "text=Inpatient Discharge Runway & Rapid Turnover"
     },
     {
       "id": "12d-refresh-capture",
       "title": "12d-refresh-capture",
-      "narration": "Every card here is a live query, not a static export — refreshing pulls the current state of the hospital, on demand.",
+      "narration": "And none of this is a screenshot. Refreshing re-runs the queries against the live database — the difference between a dashboard and a report, and what makes it safe to act on at two in the morning.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -1870,7 +1202,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 6346
+            "delayMs": 14300
           }
         ]
       },
@@ -1884,46 +1216,12 @@
           "No static resource"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/12d-refresh-capture.mp4",
-        "durationMs": 8463.7861328125,
-        "roi": {
-          "x": 1410.015625,
-          "y": 128,
-          "width": 136.984375,
-          "height": 28
-        },
-        "hash": "fa15e91058ab"
-      },
-      "roi": {
-        "x": 1410.015625,
-        "y": 128,
-        "width": 136.984375,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/12d-refresh-capture.r.wav",
-        "durationMs": 8000,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "195baac4e539"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 8464,
-        "ratePct": -1.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": -1.4
+      "roiSelector": "main"
     },
     {
       "id": "13-cta",
       "title": "Capacity that was there all along",
-      "narration": "Bed capacity is not fixed. When decisions are synthesised in real time, constraints are solved by mathematics rather than by phone, and discharge is pulled into the morning, we recover the capacity that was there all along. Explore the live prototype.",
+      "narration": "Bed capacity is not fixed. When the clinical decision is synthesised as the patient arrives, when beds are matched by arithmetic instead of by telephone, and when discharge is pulled into the morning, a hospital gets back the capacity it already had. The prototype is live — go and take it apart.",
       "role": null,
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -1944,33 +1242,10 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Bed capacity is not fixed. When decisions are synthesised in real time, constraints are solved by mathematics rather than by phone, and discharge is pulled into the morning, we recover the capacity that was there all along. Explore the live prototype."
+        "notes": "Bed capacity is not fixed. When the clinical decision is synthesised as the patient arrives, when beds are matched by arithmetic instead of by telephone, and when discharge is pulled into the morning, a hospital gets back the capacity it already had. The prototype is live — go and take it apart."
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/13-cta.wav",
-        "durationMs": 16550,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "49c7f17ee366"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 16950,
-        "ratePct": 0,
-        "padVisualMs": 16950,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/13-cta.mp4",
-        "durationMs": 16967,
-        "roi": null,
-        "hash": "fbeb6a008ef3"
       }
     }
   ]

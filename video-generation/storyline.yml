@@ -1,8 +1,15 @@
 # Hospital Admissions — SCR pitch deck and video spine.
 #
-# deck.yaml is the authored source. `node scripts/compile.mjs` turns it into
+# storyline.yml is the authored source. `node scripts/compile.mjs` turns it into
 # storyboard.json (generated, committed, never hand-edited). `node scripts/deck.mjs`
 # renders the slides to PNG/PDF/HTML with no TTS, no running app and no cost.
+#
+# THE FILENAME IS LOAD-BEARING — do not rename it back to deck.yaml. compile.mjs:38
+# and deck.mjs:305 default to `<workDir>/storyline.yml`, and generate.mjs:83 HARDCODES
+# it with no override flag. Under any other name generate.mjs silently skips
+# compilation (it gates on existsSync, so there is no error) and deck.mjs renders with
+# storylineSource = null, which drops every `in: [deck]` entry — the two answer-first
+# slides — from the deck without warning.
 #
 # Structure follows narration-video-plan.md §7 (nested SCR), reconciled to the
 # SCR archetype's hard cap of five resolution beats:
@@ -202,7 +209,7 @@ entries:
   # SITUATION beat 2 of 2 — the situation-evidence slot the archetype defines
   # (archetypes.md:105) and the previous draft left unused. It exists to make
   # the handoff chain countable: scene 01 asserts "many roles" but never shows
-  # them, so the film's central claim (five desks, five phone calls) had no
+  # them, so the film's central claim (five desks, four handoffs) had no
   # anchor. Runs short deliberately — a second situation beat delays the first
   # mechanism, and audience D drops off in that window.
   # ======================================================================
@@ -755,8 +762,10 @@ entries:
       visible: ['Inpatient Ward Reception & Bed Control']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
-  # 10e closes the loop opened by 01b: this is the fifth of the five handoffs,
+  # 10e closes the loop opened by 01b: this is the last of the four handoffs,
   # and it is the one that no longer needs a human to carry the message.
+  # (Five desks means four handoffs between them — the arithmetic 01b now states,
+  # after a 5-card process-flow was found to overflow its container.)
   - id: 10e-housekeeping-turnover-capture
     type: capture
     narration: "And this is the last of those four handoffs — the one from the ward to housekeeping. Housekeeping runs its own thirty-minute countdown, and signing a bed off returns it to the matching engine automatically. Nobody phones bed management — the loop closes without anyone carrying the message."

@@ -600,7 +600,7 @@ entries:
       - action: waitForText
         value: Top Algorithmic Matches
       - action: wait
-        delayMs: 24650
+        delayMs: 29350
     assert:
       visible: ['Solver Recommendation', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']

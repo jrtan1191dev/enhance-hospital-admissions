@@ -2,7 +2,7 @@
   "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
     "file": "storyline.yml",
-    "checksum": "64ae357a3c25af1775d13d5e5122d2e7e541177df9889724f28b6a33c9e6215f"
+    "checksum": "375f15feaa4f69dc0ba586d7a8cd826cea29b1c8189c00c4e0941d2ca55deda5"
   },
   "meta": {
     "title": "Recovering Hospital Beds Without Building More",
@@ -96,7 +96,7 @@
         "filePath": "assets/recordings/01-situation.mp4",
         "durationMs": 11700,
         "roi": null,
-        "hash": "f3eec5df3a67"
+        "hash": "ed8977bab2f6"
       }
     },
     {
@@ -164,7 +164,7 @@
         "filePath": "assets/recordings/01b-handoffs.mp4",
         "durationMs": 16867,
         "roi": null,
-        "hash": "4f9343ed50f3"
+        "hash": "c8da3aff39e0"
       }
     },
     {
@@ -224,7 +224,7 @@
         "filePath": "assets/recordings/02-complication.mp4",
         "durationMs": 15900,
         "roi": null,
-        "hash": "33d067d6e8ac"
+        "hash": "c4c8ed41e4df"
       }
     },
     {
@@ -288,7 +288,7 @@
         "filePath": "assets/recordings/02b-frozen.mp4",
         "durationMs": 18567,
         "roi": null,
-        "hash": "18656661baaf"
+        "hash": "7940fd65753a"
       }
     },
     {
@@ -332,7 +332,7 @@
       },
       "resolvedAudio": {
         "filePath": "assets/audio/03-synthesis.wav",
-        "durationMs": 26800,
+        "durationMs": 32475,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
@@ -340,18 +340,18 @@
       },
       "resolvedTiming": {
         "mode": "audio-dictates",
-        "sceneMs": 27200,
+        "sceneMs": 32875,
         "ratePct": 0,
-        "padVisualMs": 27200,
+        "padVisualMs": 32875,
         "padAudioMs": 0,
         "warnings": []
       },
       "ratePct": 0,
       "resolvedVisual": {
         "filePath": "assets/recordings/03-synthesis.mp4",
-        "durationMs": 27200,
+        "durationMs": 32867,
         "roi": null,
-        "hash": "6ee12334bfa4"
+        "hash": "d30b89b36da9"
       }
     },
     {
@@ -397,18 +397,18 @@
       "roiSelector": ".lg\\\\:col-span-5",
       "resolvedVisual": {
         "filePath": "assets/recordings/04a-ed-synthesis-capture.mp4",
-        "durationMs": 26281.356201171875,
+        "durationMs": 26281.93896484375,
         "roi": {
           "x": 1185.5,
-          "y": 712.203125,
+          "y": 798.859375,
           "width": 64.890625,
           "height": 28
         },
-        "hash": "a619659811ae"
+        "hash": "b31b921242a1"
       },
       "roi": {
         "x": 1185.5,
-        "y": 712.203125,
+        "y": 798.859375,
         "width": 64.890625,
         "height": 28
       },
@@ -422,7 +422,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 26281,
+        "sceneMs": 26282,
         "ratePct": -4.9,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -498,18 +498,18 @@
       "roiSelector": ".lg\\\\:col-span-5",
       "resolvedVisual": {
         "filePath": "assets/recordings/04a2-tier-framework-capture.mp4",
-        "durationMs": 21031.7958984375,
+        "durationMs": 21045.831787109375,
         "roi": {
           "x": 978.5,
-          "y": 771.203125,
+          "y": 857.859375,
           "width": 64.890625,
           "height": 28
         },
-        "hash": "6331a7d8cc91"
+        "hash": "72db08ab1946"
       },
       "roi": {
         "x": 978.5,
-        "y": 771.203125,
+        "y": 857.859375,
         "width": 64.890625,
         "height": 28
       },
@@ -523,10 +523,10 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit-capped",
-        "sceneMs": 21032,
+        "sceneMs": 21046,
         "ratePct": -7,
         "padVisualMs": 0,
-        "padAudioMs": 1788,
+        "padAudioMs": 1802,
         "warnings": []
       },
       "ratePct": -7
@@ -565,9 +565,9 @@
       "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
       "resolvedVisual": {
         "filePath": "assets/recordings/04b-specialist-discordance-capture.mp4",
-        "durationMs": 20165.94677734375,
+        "durationMs": 20165.31005859375,
         "roi": null,
-        "hash": "960db7cfb687"
+        "hash": "2b314281940c"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/04b-specialist-discordance-capture.r.wav",
@@ -579,7 +579,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 20166,
+        "sceneMs": 20165,
         "ratePct": -2.9,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -629,18 +629,18 @@
       "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
       "resolvedVisual": {
         "filePath": "assets/recordings/04b2-chain-consult-capture.mp4",
-        "durationMs": 15102.19775390625,
+        "durationMs": 15112.785888671875,
         "roi": {
           "x": 1291.390625,
-          "y": 1000.0625,
+          "y": 1190.71875,
           "width": 122.75,
           "height": 28
         },
-        "hash": "b07f562e9893"
+        "hash": "5099d3debd64"
       },
       "roi": {
         "x": 1291.390625,
-        "y": 1000.0625,
+        "y": 1190.71875,
         "width": 122.75,
         "height": 28
       },
@@ -654,10 +654,10 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit-capped",
-        "sceneMs": 15102,
+        "sceneMs": 15113,
         "ratePct": -7,
         "padVisualMs": 0,
-        "padAudioMs": 213,
+        "padAudioMs": 224,
         "warnings": []
       },
       "ratePct": -7
@@ -695,9 +695,9 @@
       "roiSelector": ".lg\\\\:col-span-7",
       "resolvedVisual": {
         "filePath": "assets/recordings/04c-bmu-dispatch-capture.mp4",
-        "durationMs": 15416.81787109375,
+        "durationMs": 15416.395751953125,
         "roi": null,
-        "hash": "38b76670b001"
+        "hash": "92060e92a101"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/04c-bmu-dispatch-capture.r.wav",
@@ -709,7 +709,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 15417,
+        "sceneMs": 15416,
         "ratePct": -3.8,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -759,14 +759,14 @@
       "roiSelector": ".lg\\\\:col-span-7",
       "resolvedVisual": {
         "filePath": "assets/recordings/04c2-reconcile-notes-capture.mp4",
-        "durationMs": 20431.85205078125,
+        "durationMs": 20436.0869140625,
         "roi": {
           "x": 1486.53125,
           "y": 1285.609375,
           "width": 32,
           "height": 28
         },
-        "hash": "9f6f64118005"
+        "hash": "743a7d798baa"
       },
       "roi": {
         "x": 1486.53125,
@@ -784,7 +784,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 20432,
+        "sceneMs": 20436,
         "ratePct": -6.3,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -852,7 +852,7 @@
         "filePath": "assets/recordings/05-diversion.mp4",
         "durationMs": 27034,
         "roi": null,
-        "hash": "f6a76eb8a836"
+        "hash": "ae7d0c6a1a2b"
       }
     },
     {
@@ -896,14 +896,14 @@
       "roiSelector": "main",
       "resolvedVisual": {
         "filePath": "assets/recordings/06a-mic-at-home-capture.mp4",
-        "durationMs": 20865.093017578125,
+        "durationMs": 20862.4599609375,
         "roi": {
           "x": 1173.390625,
           "y": 127,
           "width": 271,
           "height": 32
         },
-        "hash": "5b42b774b01e"
+        "hash": "7baa7b488ba2"
       },
       "roi": {
         "x": 1173.390625,
@@ -921,7 +921,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 20865,
+        "sceneMs": 20862,
         "ratePct": -5.8,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -971,14 +971,14 @@
       "roiSelector": ".lg\\\\:col-span-7",
       "resolvedVisual": {
         "filePath": "assets/recordings/06b-sister-hospital-capture.mp4",
-        "durationMs": 18282.635009765625,
+        "durationMs": 18282.7529296875,
         "roi": {
           "x": 1422.265625,
           "y": 1645.59375,
           "width": 58.265625,
           "height": 28
         },
-        "hash": "6d643036a1fd"
+        "hash": "03f846e51948"
       },
       "roi": {
         "x": 1422.265625,
@@ -1064,7 +1064,7 @@
         "filePath": "assets/recordings/07-ghost.mp4",
         "durationMs": 24767,
         "roi": null,
-        "hash": "7848ac34be22"
+        "hash": "22a893fb2f7e"
       }
     },
     {
@@ -1100,9 +1100,9 @@
       "roiSelector": "text=Live Bed Inventory Matrix",
       "resolvedVisual": {
         "filePath": "assets/recordings/07a-bed-lifecycle-capture.mp4",
-        "durationMs": 21849.598876953125,
+        "durationMs": 21848.56689453125,
         "roi": null,
-        "hash": "190c5ff5d98b"
+        "hash": "ca70cce68d43"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/07a-bed-lifecycle-capture.r.wav",
@@ -1114,7 +1114,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 21850,
+        "sceneMs": 21849,
         "ratePct": -2.7,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -1146,7 +1146,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 24650
+            "delayMs": 29350
           }
         ]
       },
@@ -1164,14 +1164,14 @@
       "roiSelector": ".lg\\\\:col-span-5",
       "resolvedVisual": {
         "filePath": "assets/recordings/08a-solver-recommendation-capture.mp4",
-        "durationMs": 26583.427978515625,
+        "durationMs": 31282.173095703125,
         "roi": {
           "x": 1422.265625,
           "y": 1285.609375,
           "width": 58.265625,
           "height": 28
         },
-        "hash": "b3ec35272fb0"
+        "hash": "aa0be7953a26"
       },
       "roi": {
         "x": 1422.265625,
@@ -1181,7 +1181,7 @@
       },
       "resolvedAudio": {
         "filePath": "assets/audio/08a-solver-recommendation-capture.r.wav",
-        "durationMs": 25525,
+        "durationMs": 30325,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
@@ -1189,13 +1189,13 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 26583,
-        "ratePct": -4.7,
+        "sceneMs": 31282,
+        "ratePct": -4,
         "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -4.7
+      "ratePct": -4
     },
     {
       "id": "08b-batch-holding-capture",
@@ -1228,9 +1228,9 @@
       "roiSelector": "text=Surge Cluster Detected",
       "resolvedVisual": {
         "filePath": "assets/recordings/08b-batch-holding-capture.mp4",
-        "durationMs": 19831.99169921875,
+        "durationMs": 19830.883056640625,
         "roi": null,
-        "hash": "c554750cb65a"
+        "hash": "ec01ee0deed2"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/08b-batch-holding-capture.r.wav",
@@ -1242,7 +1242,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 19832,
+        "sceneMs": 19831,
         "ratePct": -3,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -1281,13 +1281,13 @@
       "roiSelector": "text=Dynamic Cohort-Swap Proposal",
       "resolvedVisual": {
         "filePath": "assets/recordings/08c-cohort-swap-capture.mp4",
-        "durationMs": 20950.317138671875,
+        "durationMs": 20931.889892578125,
         "roi": null,
-        "hash": "31247a36c447"
+        "hash": "5f73ccfcc415"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/08c-cohort-swap-capture.r.wav",
-        "durationMs": 20400,
+        "durationMs": 20350,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
@@ -1295,13 +1295,13 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 20950,
-        "ratePct": -2.8,
+        "sceneMs": 20932,
+        "ratePct": -2.7,
         "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -2.8
+      "ratePct": -2.7
     },
     {
       "id": "08d-solver-config-capture",
@@ -1334,9 +1334,9 @@
       "roiSelector": "main",
       "resolvedVisual": {
         "filePath": "assets/recordings/08d-solver-config-capture.mp4",
-        "durationMs": 18832.68701171875,
+        "durationMs": 18848.2490234375,
         "roi": null,
-        "hash": "1dc491ead236"
+        "hash": "d8784c2f7804"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/08d-solver-config-capture.r.wav",
@@ -1348,13 +1348,13 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 18833,
-        "ratePct": -3,
+        "sceneMs": 18848,
+        "ratePct": -3.1,
         "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -3
+      "ratePct": -3.1
     },
     {
       "id": "09-experience",
@@ -1416,7 +1416,7 @@
         "filePath": "assets/recordings/09-experience.mp4",
         "durationMs": 22767,
         "roi": null,
-        "hash": "60df8d174856"
+        "hash": "6eecb1f63a26"
       }
     },
     {
@@ -1462,14 +1462,14 @@
       "roiSelector": "main",
       "resolvedVisual": {
         "filePath": "assets/recordings/10a-tracker-milestone-capture.mp4",
-        "durationMs": 21266.031005859375,
+        "durationMs": 21264.161865234375,
         "roi": {
           "x": 1173.390625,
           "y": 127,
           "width": 271,
           "height": 32
         },
-        "hash": "9ea034446de9"
+        "hash": "6f75dbe34b83"
       },
       "roi": {
         "x": 1173.390625,
@@ -1487,7 +1487,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 21266,
+        "sceneMs": 21264,
         "ratePct": -5.7,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -1536,14 +1536,14 @@
       "roiSelector": "main",
       "resolvedVisual": {
         "filePath": "assets/recordings/10b-tracker-delay-tag-capture.mp4",
-        "durationMs": 22262.8427734375,
+        "durationMs": 22265.06494140625,
         "roi": {
           "x": 1173.390625,
           "y": 127,
           "width": 271,
           "height": 32
         },
-        "hash": "564d2a74f617"
+        "hash": "7b9db95343f0"
       },
       "roi": {
         "x": 1173.390625,
@@ -1561,7 +1561,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 22263,
+        "sceneMs": 22265,
         "ratePct": -5.4,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -1601,9 +1601,9 @@
       "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
       "resolvedVisual": {
         "filePath": "assets/recordings/10c-discharge-runway-capture.mp4",
-        "durationMs": 15731.408203125,
+        "durationMs": 15748.731201171875,
         "roi": null,
-        "hash": "ec5b8c25913e"
+        "hash": "3b1624dd8a07"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/10c-discharge-runway-capture.r.wav",
@@ -1615,13 +1615,13 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 15731,
-        "ratePct": -3.6,
+        "sceneMs": 15749,
+        "ratePct": -3.7,
         "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -3.6
+      "ratePct": -3.7
     },
     {
       "id": "10d-bedside-meds-capture",
@@ -1665,14 +1665,14 @@
       "roiSelector": "text=Meds Delivered — Ready to Vacate",
       "resolvedVisual": {
         "filePath": "assets/recordings/10d-bedside-meds-capture.mp4",
-        "durationMs": 23282.26806640625,
+        "durationMs": 23282.244873046875,
         "roi": {
           "x": 1225.015625,
           "y": 276,
           "width": 216.359375,
           "height": 28
         },
-        "hash": "c58960daac37"
+        "hash": "6ddc8cb7b269"
       },
       "roi": {
         "x": 1225.015625,
@@ -1730,9 +1730,9 @@
       "roiSelector": "text=Housekeeping (EVS) 30-Minute Turnover Queue",
       "resolvedVisual": {
         "filePath": "assets/recordings/10e-housekeeping-turnover-capture.mp4",
-        "durationMs": 19600.06201171875,
+        "durationMs": 19598.81103515625,
         "roi": null,
-        "hash": "6de637f6839e"
+        "hash": "f0ed5f260772"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/10e-housekeeping-turnover-capture.r.wav",
@@ -1744,7 +1744,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 19600,
+        "sceneMs": 19599,
         "ratePct": -3,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -1813,7 +1813,7 @@
         "filePath": "assets/recordings/11-control-tower.mp4",
         "durationMs": 23100,
         "roi": null,
-        "hash": "8e7d41269ed3"
+        "hash": "bd48c3f373f6"
       }
     },
     {
@@ -1848,13 +1848,13 @@
       "roiSelector": "text=ED Clinical Intake & Specialist Collaboration",
       "resolvedVisual": {
         "filePath": "assets/recordings/12a-intake-kpis-capture.mp4",
-        "durationMs": 18581.557861328125,
+        "durationMs": 18565.34521484375,
         "roi": null,
-        "hash": "44e1557ffd9d"
+        "hash": "b242a4b92fea"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/12a-intake-kpis-capture.r.wav",
-        "durationMs": 17825,
+        "durationMs": 17800,
         "subtitleSource": "synthesised",
         "providerSrt": null,
         "hasNativeSrt": false,
@@ -1862,13 +1862,13 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 18582,
-        "ratePct": -3.2,
+        "sceneMs": 18565,
+        "ratePct": -3.1,
         "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -3.2
+      "ratePct": -3.1
     },
     {
       "id": "12b-bmu-kpis-capture",
@@ -1902,9 +1902,9 @@
       "roiSelector": "text=BMU Capacity Orchestration & Diversions",
       "resolvedVisual": {
         "filePath": "assets/recordings/12b-bmu-kpis-capture.mp4",
-        "durationMs": 19449.785888671875,
+        "durationMs": 19433.35205078125,
         "roi": null,
-        "hash": "ec8aa1cce09f"
+        "hash": "9f1684029feb"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/12b-bmu-kpis-capture.r.wav",
@@ -1916,13 +1916,13 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 19450,
-        "ratePct": -3,
+        "sceneMs": 19433,
+        "ratePct": -2.9,
         "padVisualMs": 0,
         "padAudioMs": 0,
         "warnings": []
       },
-      "ratePct": -3
+      "ratePct": -2.9
     },
     {
       "id": "12c-experience-discharge-kpis-capture",
@@ -1956,9 +1956,9 @@
       "roiSelector": "text=Inpatient Discharge Runway & Rapid Turnover",
       "resolvedVisual": {
         "filePath": "assets/recordings/12c-experience-discharge-kpis-capture.mp4",
-        "durationMs": 17533.2392578125,
+        "durationMs": 17532.12109375,
         "roi": null,
-        "hash": "c9ae155f0322"
+        "hash": "7c7224d0fdd5"
       },
       "resolvedAudio": {
         "filePath": "assets/audio/12c-experience-discharge-kpis-capture.r.wav",
@@ -1970,7 +1970,7 @@
       },
       "resolvedTiming": {
         "mode": "speech-fit",
-        "sceneMs": 17533,
+        "sceneMs": 17532,
         "ratePct": -3.4,
         "padVisualMs": 0,
         "padAudioMs": 0,
@@ -2016,14 +2016,14 @@
       "roiSelector": "main",
       "resolvedVisual": {
         "filePath": "assets/recordings/12d-refresh-capture.mp4",
-        "durationMs": 13599.14599609375,
+        "durationMs": 13598.60498046875,
         "roi": {
           "x": 1410.015625,
           "y": 128,
           "width": 136.984375,
           "height": 28
         },
-        "hash": "0cf3e5ec1dba"
+        "hash": "358fd07ab8b6"
       },
       "roi": {
         "x": 1410.015625,
@@ -2044,7 +2044,7 @@
         "sceneMs": 13599,
         "ratePct": -7,
         "padVisualMs": 0,
-        "padAudioMs": 323,
+        "padAudioMs": 322,
         "warnings": []
       },
       "ratePct": -7
@@ -2099,7 +2099,7 @@
         "filePath": "assets/recordings/13-cta.mp4",
         "durationMs": 19634,
         "roi": null,
-        "hash": "d13e679df75b"
+        "hash": "e7014042b4e7"
       }
     }
   ]

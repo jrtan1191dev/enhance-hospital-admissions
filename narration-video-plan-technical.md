@@ -9,10 +9,13 @@
 > a house style and a seed dataset. They share no beats, and this one does **not** re-sell the
 > product.
 
-> **Status:** plan approved through Decision D13; authoring added D17–D19. `storyline.yml`,
-> `storyboard.json`, `pages/seam.html` and the six persona setup scripts are written; 13 slides render
-> clean at 1920×1080 with PDF + HTML exports. **Stopped at the outline gate** — no TTS, no capture, no
-> compose. Eight `.tape` files and the runbook prerequisites are the next step.
+> **Status (18 Sep, verified):** plan approved through D13; authoring and rig
+> verification added D17–D25. `storyline.yml` compiles to 30 scenes; 13 slides render
+> clean with PDF + HTML exports; the seam page, the terminal renderer and 9 frozen
+> command runs are in place; **19/19 capture scenes pass `preflight.mjs` against the
+> live rig**. VHS was installed and proved unusable, so terminal evidence no longer
+> depends on it and there is no `footage/`. **Still stopped at the outline gate** — no
+> TTS, no capture, no compose.
 
 ---
 
@@ -630,9 +633,112 @@ unreachable frontend branch are a genuine small defect, now logged as a repo sid
 put on screen — it is an unwired field, not a design trade-off, and the ledger is for debts with
 seams.
 
----
+**D20 — Terminal evidence is recorded output rendered by a page we own, because VHS
+does not work. This supersedes D18.**
+VHS 0.12.0 and ttyd 1.7.7 were installed via brew (the plan's step 1). VHS then
+**silently produces nothing**: it exits 0, prints `Creating <file>…`, and writes no
+file in any format — mp4, gif, webm or raw frames. An `ffmpeg` shim on `PATH`
+recorded **zero** invocations, so it never reaches encoding; its browser phase fails
+and the error is swallowed. Two configurations were tried (default, and
+`ROD_BROWSER_PATH` pointed at the installed Chrome). ttyd itself is healthy (serves
+HTTP 200 standalone).
 
-## 7. Build & Pipeline
+Rather than keep tuning a broken renderer, terminal takes now use the mechanism
+already proven for the seam diagram:
+
+1. `tools/record-runs.mjs` executes each command **for real** and freezes `stdout`,
+   `stderr`, the true exit code and the duration into `pages/runs/<id>.json`
+   (committed — the frozen input, exactly as a footage file would have been).
+2. `pages/term.html?run=<id>` renders that JSON as a terminal.
+3. The scene is an ordinary `capture` against `:4173`.
+
+What is real: every byte of output, and every exit code. A failing command stays
+failing — 09e is red because it *is* red. What is synthetic: only the reveal, which
+animates `opacity` rather than typing. This is **weaker than a screen recording of a
+live shell**, and the honest mitigations are that the page's own footer says
+*"Recorded command output — not a re-enactment"* with the capture date, and the
+command line and exit code are on screen next to their output.
+
+Bonus consequences: no VHS dependency, no `footage/` directory, no committed mp4s,
+and `assert.visible` now works on terminal output (the opacity reveal keeps text
+visible to Playwright, which checks box size and `visibility`, not opacity — and
+assertions run *before* recording).
+
+**D21 — Captures run against the Vite dev server, not the packaged jar.**
+Verified: the jar serves `/` but returns **404 for every deep link** (`/ed`, `/bmu`,
+`/analytics`). There is no SPA fallback anywhere in the backend — no
+`WebMvcConfigurer`, no forward controller, no error-page mapping — so `url: /bmu`
+cannot work against `:8080`. Vite serves the deep links and proxies `/api` to the
+prototype JVM, so the application under capture is the same app talking to the same
+data. `baseUrl` is therefore `http://127.0.0.1:3000`, and Vite 8 needs
+`--host 127.0.0.1` because it binds IPv6 by default.
+
+This is a **real product defect, not just a capture inconvenience**: refreshing
+`/bmu` on the live Render demo will 404 for a reviewer. Logged as a repo side task.
+If it is fixed, `baseUrl` can go back to `:8080` and this decision reverses.
+
+**D22 — R1's fence take must pass `--spring.profiles.active=production` explicitly, and
+the code is 403.**
+The plan assumed a "no-profile JVM". There is no such thing here:
+`application.yml:5` sets `spring.profiles.active: prototype`, so a flagless JVM logs
+`The following 1 profile is active: "prototype"` and would have filmed the prototype
+app while the narration claimed the profile was off — the most damaging error this
+film could ship. Measured with the override in place: `/actuator/health` → 200,
+`/api/v1/bmu/queue` → **403**, `/` → 403 (the production profile will not even serve
+the page).
+
+That the prototype profile is the *configuration default* is itself a debt — a
+deployment that forgets to set a profile boots the prototype — so it is named in R1's
+narration and carried on the ledger.
+
+**D23 — The coverage claim changed after measuring, and it changed for the better.**
+Backend JaCoCo over the whole 50-class bundle: **94% instructions, 97% lines** (78 of
+2,832 missed), **69% branches** (315 of 1,021 missed), 214 tests passing. The branch
+figure is the weak one, so it is the one the narration speaks.
+
+The frontend is more interesting. `vitest.config.ts` scopes coverage to `src/lib`,
+`src/services`, `src/components` and **only `routes/patient.tsx`** — so `bmu.tsx`,
+`ed.tsx`, `ward.tsx`, `specialist.tsx` and `analytics.tsx`, the largest files in the
+app, are excluded from the denominator. That is why the committed report reads 100%.
+It also declares **four 90% thresholds**, so "measured, not enforced" was only ever
+true of the backend. And running it now **fails**: branches 74.84% against 90%, while
+the committed `frontend/coverage/` HTML is from 10 Sep and still claims 100%.
+
+This produced a better beat than the plan had. The ledger line is no longer an
+abstract "no CI" — it is `09e`, showing the declared thresholds beside the red
+failure, narrated as *"a gate no pipeline executes is not a gate; it is a comment with
+a number in it."* Volunteering a currently-failing gate is the strongest available
+evidence for the film's own thesis, and it is the beat most likely to be cut by a
+nervous author. Recommended to keep.
+
+**D24 — `preflight.mjs` exists, because the most expensive failure mode was
+discoverable for free.**
+`capture.mjs` calls `assertSceneState` immediately after `goto` and **before any
+step** (`:157`), and a failed assertion aborts the run. Four entries as first authored
+asserted post-click text (06a's `Score:`, all three of 07b's modal strings, 08a's
+`MUSTARD YELLOW`) and would have aborted capture *after* TTS was paid for.
+`tools/preflight.mjs` reproduces that exact check for every capture — same
+`setupScript`, same URL resolution, same `getByText` semantics — reports every scene
+instead of stopping at the first, and deliberately does **not** run the steps, because
+a preflight that mutates the data it validates is worse than none. Post-click
+expectations moved to `waitForText`, where the pipeline enforces them during the take.
+
+Result: **19/19 capture scenes pass preflight** against the live rig.
+
+**D25 — Two beats were re-grounded against the live solver.**
+`06a` and `07b` originally used Tan Ah Meng, who returns **exactly one** candidate
+(8A-03, +85) — so "three beds come back" was false and there was no rank-2 bed to
+override. Both now use **Mr Goh Beng Kiat** (Q-P107, SURGERY), who returns three:
+10A-02 +70 (`+40 Specialty` + `+30 Consolidation`), 8A-03 +30, 9B-02 +30. The
+narration speaks 70/30/30, which the shot itself produces.
+
+R3's Tier-2 wording also changed. `bmu.tsx:1197` gates the modal on
+`rec.isOperationalOverride || idx > 0`, and the API returns `isOperationalOverride`
+**undefined**, so in practice the gate is *positional*: any bed but the best one. The
+slide now says exactly that instead of claiming a tier-derived override the backend
+does not compute.
+
+
 
 ### 7.1 Rig
 
@@ -653,21 +759,34 @@ seam-diagram page (D17) free to capture from a second origin, and the app is lef
 *Rejected:* copying those assets into the Spring Boot static resources, which would pollute the
 application to serve a video.
 
-### 7.2 Runbook — every prerequisite, in order
+### 7.2 Runbook — every prerequisite, in order (all steps executed and verified 18 Sep)
 
-1. **You (one time, manual, non-hermetic):** `brew install charmbracelet/tap/vhs ttyd`. macOS has no
-   usable upstream `ttyd` binary, so terminal capture cannot be made hermetic here. If skipped,
-   `vhs_terminal` scenes **degrade to monospaced syntax-coloured slides** — nothing breaks, but four
-   of the strongest takes lose their live output, and the degradation must be reported.
-2. `cd backend && ./mvnw clean test` then `jacoco:report` — **the backend coverage HTML does not
-   exist yet** (`backend/target/site/jacoco/` is absent). Frontend `coverage/index.html` is present.
-3. `./mvnw clean package`; launch the prototype JAR on `:8080` with
-   `-Dspring.profiles.active=prototype` **and stdout redirected to `logs/app.log`** (required by
-   R5's `tail` take). **This JVM must survive the entire capture run.**
-4. Launch a **second JVM with no profile** on `:8081` for R1's fence demo.
-5. Serve `backend/target/site/jacoco/`, `frontend/coverage/` **and the seam-diagram page (D17)** on
-   `:4173`.
-6. **Exercise the workflows before R5 is captured** — the R1–R4 captures already do most of this.
+Order matters more than the plan originally admitted. `clean package` **deletes** the
+JaCoCo report, so packaging must come first; and the terminal evidence for pathway B
+depends on workflows having run.
+
+1. ~~`brew install charmbracelet/tap/vhs ttyd`~~ — **no longer required.** VHS was
+   installed and does not work (D20); terminal evidence needs nothing beyond Node.
+2. `cd backend && ./mvnw clean package -DskipTests` — build the jar **first**.
+3. `cd backend && ./mvnw test jacoco:report` — **without `clean`**, which would delete
+   the report just generated. Produces `backend/target/site/jacoco/index.html`
+   (measured: 214 tests, 94% instructions, 69% branches).
+4. Launch the prototype JVM on `:8080` with stdout redirected:
+   `java -Dspring.profiles.active=prototype -jar backend/target/admissions-0.0.1-SNAPSHOT.jar > logs/app.log 2>&1 &`
+   **This JVM must survive the whole run** (H2 is `create-drop`).
+5. Launch the production-profile JVM on `:8081`:
+   `java -jar …jar --spring.profiles.active=production --server.port=8081 > logs/app-production.log 2>&1 &`
+   The explicit profile is mandatory (D22).
+6. `cd frontend && npx vite --host 127.0.0.1 --port 3000` — captures target this
+   (D21); the IPv4 host flag is required.
+7. `bash video-generation-technical/tools/serve-evidence.sh` — symlinks the seam page,
+   the terminal renderer, the run JSONs and both coverage reports under one `:4173`
+   origin and verifies all five URLs return 200.
+8. `node video-generation-technical/tools/record-runs.mjs` — freeze the terminal
+   evidence. **Re-run `09b-audit-log` last**, after `capture.mjs`, because audit lines
+   are written by the workflows the captures drive (a fresh JVM has zero).
+9. `node video-generation-technical/tools/preflight.mjs` — must report
+   **19/19 capture scenes ready** before any spend.
 
 ### 7.3 Two ordering constraints that are correctness issues, not preferences
 
@@ -700,52 +819,56 @@ application to serve a video.
 
 ---
 
-## 8. Open Items — resolve before or during authoring
+## 8. Open Items
 
-**Resolved during authoring (18 Sep):**
+**Closed 18 Sep by measurement, not by argument:**
 
-- ~~Mermaid path unverified.~~ **D17.** The seam diagram is a captured web page at
-  `http://127.0.0.1:4173/seam.html`, authored at `video-generation-technical/pages/seam.html` and
-  verified at 1920×1080 with its two-step reveal working. It uses no mermaid, no CDN and no webfont,
-  so it renders identically anywhere.
-- ~~Which test class holds the two-tier constraint assertions.~~ **`HeuristicBedAllocationSolverTest`**
-  — four methods, whose display names are themselves the on-screen claim (D19).
-- ~~`/bmu/config` path.~~ Correct as written: `router.tsx:62` declares `/bmu/config` explicitly, even
-  though the route file is `bmu-config.tsx`.
-- **Soft weights are now exact:** specialty alignment **40**, cubicle consolidation **30**, falls-risk
-  proximity **15**, rendered by the form as `+40 pts` (`bmu-config.tsx:89-91`). Narration says points,
-  matching the screen, not percentages.
-- **Remotion is not installed and is not needed.** `bootstrap.mjs` pins `@remotion/cli@4.0.360`, which
-  no longer resolves from the registry, and it defaults `withRemotion` to **true** (`:286`), so the
-  bootstrap must be run with `--with-remotion=false`. Nothing in this film needs it: landscape only,
-  no PIP, no kinetic captions, so FFmpeg is sufficient by the engine-derivation rule. Unpinning a
-  dependency to install software we do not use would be the wrong trade.
-- **`process-flow` overflows at five cards** with text of this density. Both five-card slides were cut
-  to four (hub plus three nodes), which is also a better read.
+| Was open | Outcome |
+| --- | --- |
+| Mermaid path | Seam diagram is a captured page on `:4173`, verified at 1920×1080 with its reveal (D17) |
+| Which test class holds the tier assertions | `HeuristicBedAllocationSolverTest`, 4 methods (D19) |
+| 403 vs 401 | **403**, and only with an explicit production profile (D22) |
+| Actual coverage numbers | 94% instr / 97% lines / 69% branches backend; frontend gate **red** at 74.84% (D23) |
+| `09a` would pass on a zeroed dashboard | Asserts `Target Met`; and scene order mutates state first. All 22 KPI scalars now non-zero |
+| `05d` persona selector unverified | It is a `<select aria-label="Select role persona">`; uses `selectOption` with real option values |
+| 8 `.tape` files unwritten | Superseded — VHS is unusable; 9 runs frozen as JSON instead (D20) |
+| VHS prerequisite | Removed entirely |
 
-**Still open:**
+**Still open, and none of them block the gate:**
 
-- **403 vs 401** from `SecurityConfig` on the no-profile JVM: an explicit `SecurityFilterChain` with no
-  declared authentication mechanism most likely yields **403** via `Http403ForbiddenEntryPoint`, but
-  this must be **observed at record time** and the narration written to what the tape shows. The
-  narration is currently written to say "denied", which is true either way.
-- **Actual coverage numbers** are unknown until runbook step 2 runs. `09d-coverage-capture` asserts
-  only on structural text (`Missed Instructions`, `com.hospital.admissions`), and the narration
-  deliberately quotes no figure — per D8, the number gets spoken only after it is measured.
-- **`09a-analytics-capture` non-zero risk.** It asserts `Target: 100% phone-free`, a benchmark string
-  that renders alongside a metric, but a **zeroed dashboard would still satisfy it**. Either exercise
-  the workflows first (runbook step 6, which the R1–R4 captures largely do) or tighten the assertion
-  to a value-bearing string once the real dashboard has been seen.
-- **`05d-persona-fence-capture` selector is a guess.** `header select, header button:has-text("ED")`
-  needs confirming against the running header; the switcher's DOM shape was read from `Header.tsx` but
-  not exercised.
-- **Eight `.tape` files are not yet written** — deliberately, since a beat cut at this gate would waste
-  them. They are the first task after approval.
-- **README reconciliation** (side task, outside this film): "18 operational KPI metrics" → 20 + 2, and
-  the "quality gates" wording against the absence of CI.
-- **Dead code side task** (from D19): `BedRecommendation.safetyViolationReason` /
-  `isOperationalOverride` are never populated, and `bmu.tsx:1173` is unreachable. Either wire the
-  solver to return flagged-but-forbidden beds, or delete the branch and the fields.
+- **The film has not been captured, synthesised or composed.** Everything above the
+  gate is verified; nothing below it has been run.
+- **`delayMs` values are still 150-wpm estimates.** They must be re-derived from
+  measured audio after the first `synthesize.mjs`, per §7.4.
+- **`09b` currently shows only 3 audit lines** (one override, one vacate, one clean —
+  three different acting users, which is the point). Re-record it after `capture.mjs`
+  so it reflects the workflows the viewer just watched.
+- **Runtime is now ~11m00s estimated**, above the 9:00–10:30 target and inside the
+  15:00 ceiling. `09e` is the newest 24 seconds; cutting it would return the film to
+  ~10:35, at the cost of the strongest honesty beat (D23).
+
+**Repo side tasks, separate from the film — all discovered while verifying it:**
+
+1. **No SPA fallback.** The packaged jar 404s on `/ed`, `/bmu`, `/analytics`. A
+   reviewer who refreshes the live demo on any deep link gets a 404. One
+   `WebMvcConfigurer` forward fixes it (D21).
+2. **`bmu.tsx:1173` is dead code.** `safetyViolationReason` and
+   `isOperationalOverride` are never populated by the backend; the "Zero override
+   allowed" branch cannot render. Wire the solver to return flagged-but-forbidden
+   beds, or delete the branch and the DTO fields (D19).
+3. **The prototype profile is the configuration default** (`application.yml:5`). A
+   production deployment that forgets `--spring.profiles.active` boots the prototype,
+   with seeded patients and header-based auth. Consider making the default profile
+   inert (D22).
+4. **The frontend coverage gate is red** (branches 74.84% vs 90%) and the committed
+   `frontend/coverage/` HTML is 8 days stale and claims 100%. Either raise branch
+   coverage, widen the `include` list honestly, or lower the threshold deliberately —
+   but do not leave a gate nobody runs (D23).
+5. **README reconciliation:** "18 operational KPI metrics" → 20 metrics + 2 breakdown
+   maps (the DTO returns 22 scalars, two of which are period labels); and "quality
+   gates" against the absence of CI.
+6. **`bootstrap.mjs` pins `@remotion/cli@4.0.360`**, which no longer resolves, and
+   defaults Remotion to on. Anyone re-bootstrapping needs `--with-remotion=false`.
 
 ---
 

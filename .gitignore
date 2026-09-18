@@ -171,6 +171,11 @@ video-generation-product/*.log
 
 # video-generator: video-generation-technical
 video-generation-technical/.runtime/
+video-generation-technical/.serve/
 video-generation-technical/assets/
 video-generation-technical/output/
 video-generation-technical/*.log
+
+# video-generator: local serving root and app logs (regenerated, never committed)
+video-generation-technical/.serve/
+video-generation-technical/.DS_Store

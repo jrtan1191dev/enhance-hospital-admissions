@@ -21,6 +21,10 @@
 
 https://github.com/user-attachments/assets/aa8a8efe-915b-4d6e-b947-44cf05615cc1
 
+## Technical Design Considerations Video
+
+https://github.com/user-attachments/assets/6fe62e35-18f3-41f4-a4b3-42468f328ad1
+
 ---
 
 ## The Problem

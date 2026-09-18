@@ -107,9 +107,16 @@ system built to demonstrate it. **These are the exact names/tokens shown on scre
 
 ---
 
-## 5. Master Beat Sheet & Scene-by-Scene Script (est. 14–16+ Minutes, runtime ceiling lifted per
-Decision #20-e — timestamps below are pre-expansion and will shift once the 5 added capture scenes
-in Beats 1 and 3 are timed)
+## 5. Master Beat Sheet & Scene-by-Scene Script (measured ~11m30s, runtime ceiling raised to 12
+minutes per Decision #21 — superseding the earlier 14–16 minute estimate, which predated the
+narration clarity rewrite)
+
+> **Source of truth for narration:** the verbatim spoken lines now live **only** in
+> `video-generation/deck.yaml`, one `narration:` field per entry, and compile to
+> `video-generation/storyboard.json`. The voiceover text quoted in this section is a **mirror for
+> review**, not the source — when the two disagree, `deck.yaml` wins. This section's value is the
+> beat structure, routes, selectors and seeded-case grounding; do not edit narration here and expect
+> it to reach the film. See Decisions #21–#33 in §6 for the rules every line is written against.
 
 ```
 00:00      01:15      03:30      05:00      07:30      09:00      10:30      12:00
@@ -128,21 +135,36 @@ not change the linear film — Decision #7).*
 
 ### Act 1: The Origin & The Broken Status Quo (0:00 – 1:15)
 
-* **Visual:** Title card (Marp) + walled-off animated "Today, without the system" workflow sketch of
-  fragmented communication. No claim that the sketch is part of the product.
-* **Voiceover:**
-  > If you've ever accompanied an elderly parent to a public hospital emergency department, you know
-  > the quiet despair of waiting eight, ten, or fourteen hours for an inpatient bed. You watch doctors
-  > running between triage bays, nurses answering endless phone calls, and families demanding answers
-  > staff simply don't have.
+* **Visual:** Four bento slides — `01-situation` (stat-deepdive, 8–14h), `01b-handoffs`
+  (process-flow, five desks), `02-complication` (comparison), `02b-frozen` (stat-deepdive, 5 beds).
+  Act 1 is now **four** SCR beats, not one title card: situation and complication are each at the
+  archetype ceiling of 2 (`deck.mjs` SCR_SKELETON). No claim that any sketch is part of the product.
+* **Voiceover** *(mirror of `deck.yaml`; that file is the source — Decisions #21–#33):*
+  > **`01-situation`** — If you have waited with a parent for a hospital bed, you know the quiet
+  > despair of it. Eight to fourteen hours from arrival to a ward — and for most of it, nobody can
+  > tell you why.
   >
-  > When CNA's Talking Point documented this persistent crisis, it confirmed what healthcare leaders
-  > already know: the bed crunch is not just an infrastructure deficit — you cannot build your way out
-  > of a flow bottleneck. It is an **orchestration failure** — manual phone tag between doctors,
-  > multi-bed cubicles frozen by gender and infection locks, and discharge gridlocks that trap beds
-  > deep into the afternoon.
+  > **`01b-handoffs`** *(new — the archetype's situation-evidence slot, previously unused)* — Because
+  > no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management
+  > searches, the ward receives, housekeeping releases. Five desks — and today, every handoff between
+  > them is a phone call.
   >
-  > This prototype was built to attack those root causes. Let me walk you through how it works — live.
+  > **`02-complication`** — You cannot build your way out of this, because the beds already exist.
+  > They are lost to callbacks that run for hours, to cubicles that can only accept one kind of
+  > patient, and to discharges that clear in the afternoon when the queue formed at breakfast.
+  >
+  > **`02b-frozen`** *(new — the archetype's complication-consequence slot, previously unused)* — Here
+  > is that cost at its sharpest. Put one man in an empty six-bed cubicle, and the other five beds can
+  > now only take men — same ward class, same infection status. Five beds, empty on the board,
+  > unavailable in practice. That is the capacity we set out to recover.
+
+* **What changed and why:** the CNA reference and the phrase "orchestration failure" were **cut from
+  the voice**. The CNA citation is unverifiable inside the film and reads as borrowed authority; the
+  README carries it instead. "Multi-bed cubicles frozen by gender and infection locks" was the single
+  most opaque clause in the old script and was spoken ~15 seconds in — it is now paraphrased in `02`
+  and then *priced* in `02b`, which is the archetype's own remedy (`deck.mjs:215` warns when a
+  complication names no cost). The five-desk count in `01b` is what later lets `10e` close the loop
+  by referring back to "the last of those five handoffs".
 
 ---
 
@@ -556,8 +578,117 @@ changed from the original plan.)*
       previously-uncaptured, capturable moments, all re-verified live against current route source
       before being added to §5: the five-tier dropdown + Nurul Huda (`Q-P121`) stable-pathway
       contrast, Chain Consult, the Reconcile / "View Comparative Notes" side-by-side view, and the
-      four-state Live Bed Inventory Matrix. Total capture scenes: **18 → 23** (see updated Beat 1 and
-      Beat 3 walkthroughs above for exact placement and threading).
+      four-state Live Bed Inventory Matrix. Total capture scenes: **18 → 22** *(verified against the
+      compiled storyboard: 34 entries = 12 slides + 22 captures; the earlier figure of 23 was an
+      off-by-one)*.
+
+21. **Narration clarity rewrite — the diagnosis.** Review of the shipped narration found it *terse but
+    referentially incomplete*: the film named mechanisms without binding them. Four distinct gap
+    classes were identified, and every line was rewritten against them:
+    * **Unbound noun** — the noun is right but unqualified. *"Findings are synthesised on arrival"* —
+      which findings? Also *"the packet"* (`04c`), *"comparative notes"* (`04c2`).
+    * **Undefined jargon** — a term of art spoken before the viewer could know it. Worst case:
+      *"cubicles frozen by cohort locks"* ~15s in, carrying the entire Complication.
+    * **Unstated criterion** — a matching claim with no basis given. *"Three matching patients"*
+      (`08b`), *"matching cubicles"* (`07`), *"the top three beds"* (`08a`).
+    * **Missing payoff** — the feature described, the point never stated. Clearest case `08d`, which
+      described a config screen and never said why tunability matters.
+    A structural cause was also identified: the granular capture split (Decision #20-h) raised the
+    need for connective tissue between clips, and that transition debt was never paid. Runtime
+    ceiling set at **12 minutes**; measured result ~11m30s across 32 scenes.
+
+22. **Plain language in the voice; technical labels stay on the cards.** Jargon that is merely
+    shorthand for an idea survives paraphrase intact, so it is dropped from the voice entirely:
+    *cohort lock, discordance, bilateral, subacute, step-down, concordance, ghost capacity*. The
+    slide cards keep the precise labels — card = label, voice = meaning.
+
+23. **Arbitrary internal labels are paraphrased; professional vocabulary is kept.** The dividing line
+    is *does the listener already own this word?*, not *is it on screen?* The bed-state colours are
+    internal codes that mean nothing outside this codebase, so the voice says "being cleaned, ready,
+    promised, occupied" — and `bmu.tsx:1285-1297` already prints colour **and** meaning in the legend,
+    so the screen does the teaching for free. "Acuity tier", "telemetry" and "troponin" are real
+    clinical vocabulary and are kept, glossed once on first use.
+
+24. **Audience is A + B + D simultaneously** (technical reviewer, health executive, general public) —
+    explicitly *not* C (clinician-only). Since A and B lose nothing from a plain explanation but D
+    loses everything from a bare precise term, the resolution is ordering within the sentence:
+    the **no-orphan rule** — plain meaning first, precise term second in apposition, and a precise
+    term is never the sole carrier of an idea.
+
+25. **Decision #17 reinterpreted: it bars outcome magnitude, not numerals.** Read literally, "withhold
+    all quantified proof until the control tower" was the *direct cause* of the vagueness in #21 —
+    "four rules", "five beds", "three patients sharing a ward class" are all numbers. The distinction
+    that resolves it: *proof numbers* assert the system worked and must be auditable in one place;
+    *descriptive cardinalities* define what a mechanism is and withholding them merely leaves it
+    unspecified. This codifies existing practice rather than loosening a rule — `05`, `07a`, `08a` and
+    `09` already spoke numerals, while `stat` blocks appeared only on `01` and `11`.
+
+26. **Per-scene shape: contrast bridge → mechanism with bound nouns → payoff.** The bridge names the
+    old way in one clause, which is how the retired Marp deck's separate before/after slides are
+    recovered *without* new beats — resolution beats are hard-capped at 5 (`deck.mjs:92`, error not
+    warning) and all 5 are in use. The shape is a drafting checklist, not an audible template; which
+    part is explicit varies by scene.
+
+27. **Deixis at every screen or persona change** ("Up on the ward now", "Back in bed management"). With
+    22 hard cuts, each costs the viewer a "where am I?"; two words resolve it before the content
+    arrives. This is the cheapest available fix for the between-scenes gap.
+
+28. **Authorial "we" for design rationale only, rationed to ~5 uses.** Audience A is evaluating
+    judgement, not the hospital — and only an authorial voice can *defend a decision* (e.g. "we take
+    the higher tier … because averaging two clinical opinions is the one thing a system must never
+    do"). Impersonal for mechanism description; second person rejected as reading like marketing.
+
+29. **Protagonist: Mr Tan Ah Meng.** He already appeared in `04c` / `04c2` / `08a` / `10a` — dispatch →
+    comparative notes → solver match → tracker, a nearly complete journey the script never told the
+    viewer to follow. Each return is now signposted, which doubles as connective tissue and shows the
+    features are *one system* rather than seven independent screens. The other six named patients stay
+    as one-off exhibits; an audit confirmed **none is redundant** (each carries a mechanism he cannot).
+
+30. **Name collision handled linguistically, not by reselection.** Mr Tan Ah Meng and Mrs Tan Boon Hwa
+    share a surname four minutes apart in an audio-only channel. P106 is the **only** hospital-at-home
+    diversion in the seed (`DataInitializer.java:1245`), so no swap is possible; both are therefore
+    always spoken in full with honorifics, never as bare "Tan", and `06a` marks her explicitly as a
+    different patient.
+
+31. **Clinical specifics restored in full** from the seed, so the voice describes what is actually on
+    screen: Chua Wee Kiat BP 98/62, troponin 180 ng/L (`DataInitializer.java:922-935`); Nurul Huda BP
+    124/78, troponin Normal (`:946-959`); and the abdominal pain that justifies Fernandez's chained
+    surgical review (`:800`) — previously omitted from the voice **despite being printed on screen**.
+    Voice–screen agreement is itself a comprehension mechanism, and the specificity is what
+    distinguishes "built a form" from "modelled a clinical decision".
+
+32. **The priced complication (`02b`) uses no invented figure.** `product-idea/` contains no citable
+    status-quo cost, and fabricating one was rejected. The stat is derived from facts already in the
+    system: a Class B2 cubicle is 5–6 beds (`ed.tsx` ward-class options) and gender cohorting is an
+    absolute invariant, therefore five of six beds can only go to patients matching the first. True by
+    construction, and a cost of **today** — so it does not breach #25's reservation of proof for the
+    control tower.
+
+33. **Capture delays are derived, not guessed.** Slides are elastic (`core.mjs planTiming`:
+    `audio-dictates`, a still is held for any duration at zero cost), but captures are inelastic —
+    speech is rate-fitted, inaudible to ±7%, capped to 20%, then `reject`. Each capture's trailing
+    `wait delayMs` is therefore set to *(estimated narration ms + 400ms tail) − (sum of preceding step
+    delays)*, at ~150 wpm. **These must be re-derived from measured audio after the first
+    `synthesize.mjs` run** — guessing them is what would force a second, expensive capture pass.
+
+---
+
+## 6a. Open items carried forward
+
+* **"Troponin" gloss** — kept and glossed once ("the protein that leaks into the blood when heart
+  muscle is dying"). This is the one place the A+B+D audience cannot all be served optimally; the
+  alternative was speaking only the plain form and letting the number sit on screen unspoken.
+* **The printed deck loses the contrast.** Because #26 puts the before/after in the *voice*, the
+  PDF/PNG deck shows mechanism cards with no before/after columns. A `comparison`-layout variant on
+  the deck-only path would fix it.
+* **ROI vs spoken values.** `04a` is scoped to `.lg\:col-span-5`; any value narrated but rendered
+  outside that panel breaks the voice–screen match. Troponin survives via the on-panel
+  "troponin-positive chest pain" string, but this needs a visual check at capture time.
+* **The 9:16 output is format-mismatched** at ~11m30s (vertical norms are under ~90s). Accepted for
+  now by choosing a single cut; the `in:` field already used by `00-answer` is the mechanism if a short
+  cut is ever wanted.
+* **`08d` and `12d` remain the two weakest scenes** and survive only on the strength of their new
+  payoff clauses.
 
 ---
 
@@ -635,23 +766,49 @@ scenes):
 
 ### 7.4 Voice & proof rules
 
-* **Register:** warm/human for the Situation and CTA bookends; crisp analytical SCR for the 6
+* **Register:** warm/human for the Situation and CTA bookends; crisp analytical SCR for the
   pain-point setup slides. SCR structure present but **unlabelled** (prose, not "Issue:/Resolution:"
   tags).
-* **Proof placement:** setup slides are **mechanism-only** — qualitative resolution claim, at most one
-  LIVE architectural fact (e.g. "zero phone calls", "<50ms solver"). *All* quantified metrics (both
-  LIVE and PROJECTED/design-target) stay on the walkthrough footage and consolidate on the
-  control-tower slide. This preserves the claim-then-evidence order and the LIVE-vs-PROJECTED integrity
-  discipline (Decisions #6/#8/#9).
+* **Stance (Decision #28):** impersonal for mechanism description; **authorial "we" reserved for
+  design rationale**, ~5 uses across the film. Deixis at every screen or persona change
+  (Decision #27). Second person is not used.
+* **Vocabulary (Decisions #22–#24):** plain language in the voice, technical labels on the cards.
+  Arbitrary internal labels (bed-state colours) are paraphrased; real clinical vocabulary is kept and
+  glossed once. The **no-orphan rule** governs every precise term: plain meaning first, precise term
+  second in apposition.
+* **Every line binds its nouns (Decision #21):** to the scene's own input *and* output, never to a
+  downstream payload. The ED synthesis emits tier / specialty / ward class / monitoring — **not a
+  bed**; the bed is the solver's output two beats later.
+* **Proof placement — REVISED per Decision #25:** setup slides remain **mechanism-only** in the sense
+  that matters — no `stat` block, and no claim about how well the prototype performed. But
+  **descriptive cardinalities are now encouraged wherever they remove ambiguity** ("four rules it will
+  never break", "five beds", "a thirty-minute clock", "three patients sharing a ward class"). The
+  earlier blanket ban on numerals was found to be the direct cause of the film's vagueness, and it
+  never matched practice — `05`, `07a`, `08a` and `09` already spoke numerals. *Outcome magnitude*
+  (both LIVE and PROJECTED) still consolidates on the control-tower slide, preserving the
+  claim-then-evidence order and the LIVE-vs-PROJECTED integrity discipline (Decisions #6/#8/#9).
+* **No invented figures (Decision #32).** Where no citable number exists, price the status quo from
+  facts already true in the system, or stay qualitative. `02b`'s "five frozen beds" is derived, not
+  sourced.
 
 ### 7.5 Build & pipeline
 
-* Author in the existing Marp pipeline (`video-generation/scenes/*.md` → `render-marp.mjs` → PNG →
-  per-scene MP4). No new tooling; the deck and the film's slide layer remain one artifact.
-* Create an SCR **template system**: three shared layouts — *cinematic-bookend*, *sharp-SCR-body*,
-  *control-tower* — with a restrained 2-accent palette, a real type scale, and generous whitespace.
+* **Superseded:** the Marp pipeline (`video-generation/scenes/*.md` → `render-marp.mjs`) is retired.
+  Those `scenes/*.md` files and `storyboard.marp-old.json` are kept as historical grounding references
+  only (Decision #20-h) and are **not** read by the current build.
+* The live pipeline is the `video-generator` skill's: **`video-generation/deck.yaml` is the authored
+  source** (`engine: html`, bento templates, `theme: light`) → `compile.mjs` → `storyboard.json`
+  (generated lockfile, committed, **never hand-edited** — `compile.mjs` refuses a file without the
+  `$generated` marker) → `deck.mjs` (slides, free, no TTS) → **outline gate** → `synthesize.mjs` →
+  `capture.mjs` → `compose.mjs` → `verify.mjs`.
+* Stages are resumable and the cache is content-addressed per scene, so editing one sentence costs one
+  scene — **except** that capture keys include the app version (`ledger.mjs:96`), so a changed app
+  HEAD or a changed `delayMs` rebuilds that clip.
+* Regeneration order after a narration edit: `compile` → `deck` → review PNGs → `synthesize` →
+  **re-derive every capture's trailing `wait delayMs` from measured audio (Decision #33)** →
+  `capture` → `compose` → `verify`.
 * For the 1–2 diagram-heavy slides (the 6-part Resolution-overview map; the pack-then-batch visual),
-  author the diagram as an embedded SVG/image asset within the Marp slide.
+  author the diagram as an embedded SVG/image asset within the slide.
 
 ### 7.6 Narration workflow (order of operations)
 

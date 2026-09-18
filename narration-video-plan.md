@@ -112,9 +112,9 @@ minutes per Decision #21 — superseding the earlier 14–16 minute estimate, wh
 narration clarity rewrite)
 
 > **Source of truth for narration:** the verbatim spoken lines now live **only** in
-> `video-generation/deck.yaml`, one `narration:` field per entry, and compile to
+> `video-generation/storyline.yml`, one `narration:` field per entry, and compile to
 > `video-generation/storyboard.json`. The voiceover text quoted in this section is a **mirror for
-> review**, not the source — when the two disagree, `deck.yaml` wins. This section's value is the
+> review**, not the source — when the two disagree, `storyline.yml` wins. This section's value is the
 > beat structure, routes, selectors and seeded-case grounding; do not edit narration here and expect
 > it to reach the film. See Decisions #21–#33 in §6 for the rules every line is written against.
 
@@ -139,7 +139,7 @@ not change the linear film — Decision #7).*
   (process-flow, five desks), `02-complication` (comparison), `02b-frozen` (stat-deepdive, 5 beds).
   Act 1 is now **four** SCR beats, not one title card: situation and complication are each at the
   archetype ceiling of 2 (`deck.mjs` SCR_SKELETON). No claim that any sketch is part of the product.
-* **Voiceover** *(mirror of `deck.yaml`; that file is the source — Decisions #21–#33):*
+* **Voiceover** *(mirror of `storyline.yml`; that file is the source — Decisions #21–#33):*
   > **`01-situation`** — If you have waited with a parent for a hospital bed, you know the quiet
   > despair of it. Eight to fourteen hours from arrival to a ward — and for most of it, nobody can
   > tell you why.
@@ -571,7 +571,7 @@ changed from the original plan.)*
       credibility risk in exchange for full feature coverage. The originally-recommended verbal tell
       (e.g. "though you won't see it here...") was considered and explicitly rejected.
     * **20-h — Gap-fill against the retired Marp storyboard:** the pre-skill `storyboard.marp-old.json`
-      (34 scenes, superseded when the deck moved to the `video-generator` skill's `deck.yaml`/SCR
+      (34 scenes, superseded when the deck moved to the `video-generator` skill's `storyline.yml`/SCR
       pipeline) was mined as a **grounding reference only** — its narration was not reused (it predates
       every SCR/threading/hidden-depth rule above), but its Playwright selectors and `assert` blocks
       were, since they were previously proven against the running app. This surfaced 5 real,
@@ -692,7 +692,36 @@ changed from the original plan.)*
 
 ---
 
-## 7. SCR Pitch Deck — Narrative Spine & Slide Layer
+## 6b. Decision #34 — the source file must be named `storyline.yml`
+
+The authored source was originally `video-generation/deck.yaml`, which *appeared* to work because
+every command in this project was run with an explicit `--storyline=` override. It was renamed to
+`storyline.yml` after the override was found to be load-bearing in a way that fails silently.
+
+* `compile.mjs:38` — `storylineFile ?? path.join(workDir, 'storyline.yml')`: overridable.
+* `deck.mjs:305` — same fallback: overridable.
+* `generate.mjs:83` — **hardcodes** `path.join(workDir, 'storyline.yml')` with no flag. The documented
+  one-liner cannot be pointed at another filename at all.
+
+Under the old name the two failure modes were both silent, because each is guarded by `existsSync`
+rather than an error:
+
+1. `generate.mjs:90` gates compilation on the file existing, so it **skipped compiling entirely** and
+   ran against whatever `storyboard.json` was already committed. Narration edits would have been
+   dropped with no warning — defeating the skill's own reason for committing the lockfile.
+2. `deck.mjs` fell back to `storylineSource = null`, and `slidesFor` (`deck.mjs:63`) returns only
+   storyboard slides in that case. Since `in: [deck]` entries are **excluded** from the storyboard by
+   design, both answer-first slides (`00-answer`, `00b-resolution-map`) silently vanished from the
+   deck. This was caught by file mtimes: the two PNGs were 22 hours older than the other ten, i.e.
+   stale leftovers that had never been overflow-checked against the current source. After the rename
+   the render goes from 10+10 to **12 landscape + 12 vertical**.
+
+The fix is the rename, not a wrapper script: aligning with the tool's convention removes the failure
+mode, whereas documenting the override preserves it for whoever forgets. The header of
+`storyline.yml` now carries this warning inline, since that is where someone tempted to rename it
+will be looking.
+
+---
 
 This section specifies the **Situation–Complication–Resolution (SCR)** pitch deck that is authored as
 the *source of truth* for the film. The deck exists as a standalone, polished, non-wordy artifact
@@ -721,11 +750,11 @@ feature (each pain point gets its own crisp tension→release).
 
 > **Note:** the "Maps to film scenes" column below still reflects this section's original
 > 34-scene numbering scheme from the pre-`video-generator`-skill Marp era. The actual, current
-> implementation lives in `video-generation/deck.yaml` and uses its own scene IDs (e.g. `04a`,
+> implementation lives in `video-generation/storyline.yml` and uses its own scene IDs (e.g. `04a`,
 > `04a2`, `04b`, `04b2`, `04c`, `04c2` for PP1/PP2; `07a`, `08a`–`08d` for PP4) — see the updated
 > Beat 1 and Beat 3 walkthroughs in §5 above for the current, authoritative scene list and
 > threading order per Decision #20. This table is kept for historical SCR-role/register reference
-> only; treat `deck.yaml` as the source of truth for exact scene IDs and count.
+> only; treat `storyline.yml` as the source of truth for exact scene IDs and count.
 
 | # | Slide | SCR role | Register / template | Maps to film scenes |
 | :-- | :--- | :--- | :--- | :--- |
@@ -796,8 +825,9 @@ scenes):
 * **Superseded:** the Marp pipeline (`video-generation/scenes/*.md` → `render-marp.mjs`) is retired.
   Those `scenes/*.md` files and `storyboard.marp-old.json` are kept as historical grounding references
   only (Decision #20-h) and are **not** read by the current build.
-* The live pipeline is the `video-generator` skill's: **`video-generation/deck.yaml` is the authored
-  source** (`engine: html`, bento templates, `theme: light`) → `compile.mjs` → `storyboard.json`
+* The live pipeline is the `video-generator` skill's: **`video-generation/storyline.yml` is the
+  authored source** (`engine: html`, bento templates, `theme: light`) — the filename is fixed by the
+  tooling, see Decision #34 — → `compile.mjs` → `storyboard.json`
   (generated lockfile, committed, **never hand-edited** — `compile.mjs` refuses a file without the
   `$generated` marker) → `deck.mjs` (slides, free, no TTS) → **outline gate** → `synthesize.mjs` →
   `capture.mjs` → `compose.mjs` → `verify.mjs`.

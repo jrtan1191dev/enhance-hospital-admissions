@@ -34,7 +34,7 @@ else
 fi
 
 fail=0
-for u in /seam.html /term.html /jacoco/index.html /frontend-coverage/index.html /runs/05b-profile-fence.json; do
+for u in /seam.html /term.html /jacoco/index.html /frontend-coverage/index.html /runs/05b-consensus-gate.json; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:4173$u")
   printf '  %-40s %s\n' "$u" "$code"
   [[ "$code" == "200" ]] || fail=1

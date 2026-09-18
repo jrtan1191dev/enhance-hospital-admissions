@@ -49,62 +49,57 @@ const OUT = path.resolve(import.meta.dirname, '..', 'pages', 'runs');
  */
 const RUNS = [
   {
-    id: '05b-profile-fence',
-    title: 'The production profile refuses everything but the health check',
+    // Beat 1 — consensus before eligibility. The gate stays closed under PARTIAL
+    // completion: one consult back, one still open, request still ASSESSMENT_PENDING.
+    id: '05b-consensus-gate',
+    title: 'The consensus gate stays closed until every consult is in',
     steps: [
-      { cmd: "grep -m1 'profile is active' logs/app-production.log" },
-      { cmd: "curl -s -o /dev/null -w 'health          -> %{http_code}\\n' http://127.0.0.1:8081/actuator/health" },
-      { cmd: "curl -s -o /dev/null -w 'GET /api/v1/bmu/queue -> %{http_code}\\n' http://127.0.0.1:8081/api/v1/bmu/queue" },
-      { cmd: "curl -s -o /dev/null -w 'GET / (the app itself) -> %{http_code}\\n' http://127.0.0.1:8081/" },
+      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/service/ClinicianServiceTest.java | grep -i 'consensus' | sed 's/.*("/  - /; s/")//'` },
+      { cmd: "cd backend && ./mvnw test -Dtest='ClinicianServiceTest#testSubmitConsult_ConsensusGate_PartialCompletion_RemainsAssessmentPending+testSubmitConsult_ConsensusGate_AllCompleted_AdvancesToBedRequested_AndElevatesAcuityAndTelemetry' 2>&1 | grep -E 'ASSESSMENT_PENDING|Tests run:|BUILD'" },
     ],
   },
   {
-    id: '05c-stub-contract',
-    title: 'The three production adapters are asserted to fail fast',
+    // Beat 2 — disagreement resolves to safety. Highest acuity wins, telemetry
+    // unioned. Same test class asserts effectiveAcuityTier elevation + isDiscordant.
+    id: '06a-discordance',
+    title: 'Disagreement resolves to the higher acuity, and the queue sorts on it',
     steps: [
-      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/gateway/GatewaysAndSolversTest.java | sed 's/.*("/  - /; s/")//'` },
-      { cmd: "cd backend && ./mvnw test -Dtest=GatewaysAndSolversTest 2>&1 | grep -E 'Tests run:|BUILD'" },
+      { cmd: `grep -n 'effectiveAcuityTier' backend/src/main/java/com/hospital/admissions/entity/AdmissionRequest.java` },
+      { cmd: `grep -n 'setEffectiveAcuityTier\\|highestAcuity' backend/src/main/java/com/hospital/admissions/service/ClinicianService.java | head -4` },
+      { cmd: "cd backend && ./mvnw test -Dtest='ClinicianServiceTest#testSubmitConsult_ConsensusGate_AllCompleted_AdvancesToBedRequested_AndElevatesAcuityAndTelemetry,BmuServiceTest#testGetPrioritizedQueue_SortsByEffectiveAcuityTierOverPrimaryAcuityTier' 2>&1 | grep -E 'Tests run:|BUILD'" },
     ],
   },
   {
-    id: '06c-solver-pinned',
-    title: 'The heuristic is pinned by tests, which is what makes it replaceable',
-    steps: [
-      { cmd: "cd backend && ./mvnw test -Dtest=HeuristicBedAllocationSolverTest 2>&1 | grep -E 'Tests run:|BUILD'" },
-    ],
-  },
-  {
-    id: '07a-absolute-tier',
-    title: 'The absolute tier is proved by elimination, not by a screenshot',
-    steps: [
-      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/solver/HeuristicBedAllocationSolverTest.java | sed 's/.*("/  - /; s/")//'` },
-      { cmd: "cd backend && ./mvnw test -Dtest=HeuristicBedAllocationSolverTest 2>&1 | grep -E 'Tests run:'" },
-    ],
-  },
-  {
+    // Beat 4 — concurrency. Two writers, one winner; the loser gets a 409 with a
+    // problem-detail body. Proved in tests because a browser can't stage a real race.
     id: '08b-conflict-409',
     title: 'Optimistic locking, proved where the UI cannot honestly stage it',
     steps: [
-      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/controller/ClinicianControllerTest.java backend/src/test/java/com/hospital/admissions/controller/GlobalExceptionHandlerTest.java | grep -i 'conflict' | sed 's/.*("/  - /; s/")//'` },
-      { cmd: "cd backend && ./mvnw test -Dtest='ClinicianControllerTest#testClaimBroadcast_ConflictReturns409,GlobalExceptionHandlerTest' 2>&1 | grep -E 'Tests run:|BUILD'" },
+      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/controller/ClinicianControllerTest.java backend/src/test/java/com/hospital/admissions/controller/GlobalExceptionHandlerTest.java | grep -i 'conflict\\|409' | sed 's/.*("/  - /; s/")//'` },
+      { cmd: "cd backend && ./mvnw test -Dtest='ClinicianControllerTest#testClaimBroadcast_ConflictReturns409,GlobalExceptionHandlerTest' 2>&1 | grep -E '409|Tests run:|BUILD'" },
     ],
   },
   {
-    id: '09b-audit-log',
-    title: 'Pathway B: the structured audit log, with the acting user on every line',
-    steps: [
-      { cmd: "grep -c AUDIT logs/app.log" },
-      { cmd: "grep AUDIT logs/app.log | tail -6 | cut -c1-170" },
-    ],
-  },
-  {
-    id: '09c-parity',
+    // Beat 5 — provable. Both pathways computed, a test fails if they disagree.
+    id: '09b-parity',
     title: 'Parity between the two pathways is asserted, not eyeballed',
     steps: [
       { cmd: "cd backend && ./mvnw test -Dtest=PathBDualPathwayReconciliationIntegrationTest 2>&1 | grep -E 'Tests run:|BUILD'" },
     ],
   },
   {
+    // Beat 5 — fails loud where unbuilt. The three production adapters throw on
+    // invocation instead of returning fake data.
+    id: '09c-stub-contract',
+    title: 'The three production adapters are asserted to fail fast',
+    steps: [
+      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/gateway/GatewaysAndSolversTest.java | sed 's/.*("/  - /; s/")//'` },
+      { cmd: "cd backend && ./mvnw test -Dtest=GatewaysAndSolversTest 2>&1 | grep -E 'UnsupportedOperationException|Tests run:|BUILD'" },
+    ],
+  },
+  {
+    // Beat 5 — the honest red gate. Four thresholds declared at 90; branches come
+    // back at 74.84 because nothing runs them automatically.
     id: '09e-gate-red',
     title: 'A coverage gate that nothing runs, and that is currently red',
     steps: [
@@ -113,6 +108,7 @@ const RUNS = [
     ],
   },
   {
+    // Close — the specifications preceded the code, and it is countable.
     id: '10a-artifacts',
     title: 'The specifications preceded the code, and it is countable',
     steps: [

@@ -1,49 +1,64 @@
-# Video Production Plan: Build the Foundations, Stub the Rest
+# Video Production Plan: How This System Was Designed — Technical Considerations
 
 ## Technical design decisions and trade-offs — Patient Admission & Discharge Management Application
 
 > **Sibling artifact, not a sequel.** [`narration-video-plan-product.md`](narration-video-plan-product.md) plans the
 > *product* film (`video-generation-product/`), which sells what the system does to a health
 > executive. This plan is for a second, independent film and deck (`video-generation-technical/`)
-> that sells **how the system was decided** to a technical hiring audience. The two share a pipeline,
+> that shows **how the system was designed** to a technical hiring audience. The two share a pipeline,
 > a house style and a seed dataset. They share no beats, and this one does **not** re-sell the
 > product.
 
-> **Status (18 Sep, verified):** plan approved through D13; authoring and rig
-> verification added D17–D25. `storyline.yml` compiles to 30 scenes; 13 slides render
-> clean with PDF + HTML exports; the seam page, the terminal renderer and 9 frozen
-> command runs are in place; **19/19 capture scenes pass `preflight.mjs` against the
-> live rig**. VHS was installed and proved unusable, so terminal evidence no longer
-> depends on it and there is no `footage/`. **Still stopped at the outline gate** — no
-> TTS, no capture, no compose.
+> **Status (18 Sep — SHIPPED, re-spined):** the film is built and the quality gate **passes**.
+> `output/how-this-system-was-designed-technical-considerations.landscape.mp4` — 1920×1080,
+> ~29.96fps, **8m49s**, AAC audio, ~22 MB. 24 scenes (10 slides, 13 captures/terminal takes, 1
+> stills coverage report); SCR 2/2/5. Deck: 11 slides as PNG + PDF + HTML. **No CTA** — removed
+> from film and deck at the user's request. Plan decisions D17–D29 were forced by measurement
+> during authoring, rig verification and capture — read them before changing anything.
+> Standalone `verify.mjs` passes with two warnings only: total-duration drift ~124 ms over the
+> soft threshold, and 6 held-frame freezes over 6s (intended trailing holds on terminal/coverage
+> takes).
+
+> **Re-spine note (this revision).** An earlier cut shipped a film organised around **reversibility
+> and judgment** (title *"Build the Foundations, Stub the Rest"*). It was fully re-spined to organise
+> around **systems thinking / multi-actor correctness**, on the user's instruction to make the film
+> read as a clear, plain-spoken walkthrough of *how the system was designed and the technical
+> trade-offs behind it*, for technical + hiring managers. The thesis, title, beat structure and
+> most narration changed; the pipeline mechanics (D17–D29), the runbook and the seam/evidence
+> plumbing did not. Where a decision below still refers to the old spine's beats by their old IDs,
+> the mapping is given in §3.6.
 
 ---
 
 ## 1. Executive Summary & Strategic Intent
 
-**One conclusion the viewer must reach:** *this person makes defensible trade-offs under constraint,
-and can name what they rejected and why.*
+**One conclusion the viewer must reach:** *this person designs for correctness as a property of how
+the parts interact, and can name the trade-off behind each design choice — including where the
+prototype stops and why.*
 
-Not "this person ships fast" (delivery throughput is indistinguishable from having had more time),
-not "this person knows healthcare" (irrelevant to most panels), and not merely "this system is
-well-architected" (a property of the artifact, whereas panels hire the person). Engineering rigour —
-profile boundaries, gateway seams, safety invariants, provable observability — appears throughout,
-but strictly as **evidence for the judgment claim**, never as a claim of its own.
+This is a systems-design walkthrough, not a capability reel and not a judgment-under-constraint
+essay. The spine is five design decisions that each make one correctness property hold across a
+multi-actor, asynchronous process — and, at the end, an honest account of what is stubbed and the
+boundary it is stubbed behind. Engineering rigour appears throughout, but always as the *mechanism*
+behind a stated property, never as a claim of its own.
 
-The reason for that choice is that at principal level, coding ability is assumed by the time anyone
-is watching a video. The scarce, hard-to-fake signal is **decision quality under incomplete
-information**, and the only observable proxy for it is the counterfactual: which more-impressive
-option was declined, and can the candidate price the trade?
+The reason for that framing: at senior level, coding ability is assumed by the time anyone is
+watching a video. The scarce, hard-to-fake signal in an admissions system is whether the author
+reasons about **the whole system** — concurrency, disagreement between actors, separation of
+authority, and what is safe to fake — rather than about individual screens. Each beat states a
+property, shows the mechanism in running code or a test, and prices the prototype-vs-production
+trade-off out loud.
 
 It is also the defensive choice. The dominant risk with this audience is the reviewer who concludes
-*"impressive-looking prototype, but it is demoware."* A film built on polish invites that read. A
-film whose entire spine is the author naming his own limits — H2 not Postgres, heuristic not
-Timefold, polling not STOMP, header auth not OIDC, tests not CI — pre-empts it.
+*"impressive-looking prototype, but it is demoware."* A film that keeps naming its own limits — H2
+not Postgres, heuristic not Timefold, polling not STOMP, header auth not OIDC, tests not CI, and
+three integrations that fail loudly because they were never built — pre-empts that read.
 
-**Title:** *Build the Foundations, Stub the Rest* — chosen to be quotable, on the theory that the
-ideal outcome is a panel member repeating the rule to a colleague. Because "foundations" does not
-carry its own criterion the way "irreversible" does, the answer-first slide must **define** it:
-*foundations are the parts you cannot unwind later.*
+**Title (locked):** *How This System Was Designed — Technical Considerations.* Chosen to be plain
+and literal rather than quotable: it tells a queue-scanning reviewer exactly what the next nine
+minutes are, with no cleverness to decode. Narration voice is **plain, natural spoken English** —
+contractions, short sentences, no words chosen to sound smart, no decorative aphorisms. Technical
+terms are fine; the audience is technical.
 
 ---
 
@@ -51,7 +66,7 @@ carry its own criterion the way "irreversible" does, the answer-first slide must
 
 | | |
 | --- | --- |
-| **Primary audience** | Hiring managers and engineering managers assessing a **Principal / Staff+ software engineering** candidate. Assumed technical enough to know that "heuristic over Timefold" is a real decision and not laziness. |
+| **Primary audience** | Hiring managers and engineering managers assessing a **Principal / Staff+ software engineering** candidate. Assumed technical enough to know that "optimistic locking over pessimistic" or "heuristic over Timefold" is a real decision, not laziness. |
 | **Viewing context** | A queue of candidates. The viewer is looking for a reason to *stop* watching, because stopping is how they get through the queue. Every second past the point of judgment can only lose. |
 | **Secondary audience** | A panel interrogating the **deck** slide by slide in a system-design conversation. This is the audience the deck exists for, and the reason it is co-primary rather than a by-product: a film cannot be paused and cross-examined. |
 | **Explicitly not the audience** | Non-technical recruiters, health executives, clinicians, the public. The product film serves those. |
@@ -69,70 +84,83 @@ carry its own criterion the way "irreversible" does, the answer-first slide must
 
 ### 3.1 The organising principle
 
-> **Investment was allocated by reversibility.**
-> Decisions that are expensive to unwind — safety invariants, state machines, the constraint
-> hierarchy, the audit contract, the test suite — were built and tested to production standard.
-> Decisions that are cheap to unwind *because an interface was cut first* — EHR, sister hospital,
-> solver, auth, transport, persistence, CI wiring — were stubbed.
-> **The seam is the deliverable; the adapter behind it is scheduling.**
+> **Correctness in this system is a property of how the parts interact.**
+> It holds under concurrency and under disagreement between actors, and where a piece is not built
+> yet, the boundary is drawn so it fails loudly instead of pretending. Each beat states one such
+> property, shows the mechanism, and names the prototype-vs-production trade-off behind it.
 
-This rule does three jobs at once, which is why it earns the answer slide: it explains what was
-built, it explains what was *not* built without apologising, and it is falsifiable on screen — the
-interface, the mock and the fail-fast stub can be shown behaving differently under two profiles.
+This rule earns the spine because it is what makes the domain hard and what a senior reviewer is
+actually assessing: not "does each screen work" but "does the system stay correct when six roles act
+on one patient asynchronously." It is falsifiable on screen — every property is demonstrated in the
+running app or pinned by a test.
 
-### 3.2 The unit of the spine is a decision, not a feature
+**Rejected literal alternative:** an earlier draft phrased the thesis as *"correctness survives
+partial failure"* (circuit breakers, retries, resilience). Rejected because those mechanisms are
+`[DESIGNED]`/stubbed, not built — unprovable on screen, and claiming them would trigger the exact
+demoware verdict the film exists to pre-empt. The shipped thesis claims only what the code proves.
 
-A feature is a claim about the product; a decision is a claim about the author. Feature-per-beat was
-rejected on two grounds. Structurally it forces the narration into *"here is what it does, and here
-is how I built it,"* which demotes the trade-off to a footnote. Arithmetically, the 28 atomic issues
-in `.scratch/` at even 20 seconds each is 9m30s of list with zero room for argument.
+### 3.2 The unit of the spine is a design decision, not a feature
 
-Features still appear — as the *setting* in which a decision was exercised, and as the evidence that
-it was exercised at all.
+A feature is a claim about the product; a design decision is a claim about how the author thinks
+about the system. Feature-per-beat was rejected: structurally it demotes the trade-off to a
+footnote, and arithmetically the 28 atomic issues in `.scratch/` at even 20 seconds each is 9m30s of
+list with zero room for argument.
 
-**Hard rule: no decision beat without a live artifact behind it.** A decision with no on-screen
-artifact does not get a beat; it gets a clause.
+**Hard rule: no decision beat without a live artifact behind it** — a running-app capture or a real
+test/terminal take. A decision with no on-screen artifact gets a clause, not a beat.
 
 ### 3.3 SCR, with Situation and Complication relocated
 
 Archetype 7 (`archetype: scr`), declared so the compiler enforces it: `situation` 1–2,
-`complication` 1–2, `resolution` 2–5 (`.kiro/skills/video-generator/scripts/lib/deck.mjs:89-92`,
-validated at `:195-215`).
-
-The enforcement is wanted, not tolerated. The dominant failure mode of a technical portfolio film is
-not shallowness — it is being **unbounded**: every decision feels load-bearing to its author, so with
-no cap the film reaches 20 minutes and a viewer who stops at 4:00 has seen the two least interesting
-decisions. The cap forces the question *"which five arguments earn the viewer's time"* — the same
-editorial judgment the panel is assessing.
+`complication` 1–2, `resolution` 2–5 (`.kiro/skills/video-generator/scripts/lib/deck.mjs`,
+validated at compile). The cap is wanted: it forces the question *"which five design decisions earn
+the viewer's time,"* which is itself the editorial judgment the panel is assessing.
 
 In the product film, Situation and Complication belong to the hospital. Reusing that here would
 re-sell the product, which is forbidden. So both are **relocated to the engineering problem**:
 
-- **Situation** — a prototype's job is to de-risk architecture, and this domain is hostile to
-  prototyping.
-- **Complication** — therefore both default moves fail, *and* the domain refuses to let the important
-  part be faked.
-- **Resolution** — the reversibility rule, applied five times.
+- **Situation** — admission is a multi-actor asynchronous process; correctness is a whole-system
+  property, not a per-screen one.
+- **Complication** — the two easy ways to build a prototype like this both fail, *and* the
+  safety-critical part cannot be faked.
+- **Resolution** — the correctness principle, applied five times.
 
-### 3.4 The loophole we agreed not to use
+### 3.4 The unroled-slide loophole
 
-`SCR_SKELETON` binds only entries carrying `role:`. Unroled slides are uncapped — which is how the
-product film legally holds `00-answer`, `00b-resolution-map` and `13-cta`.
-
-**Unroled slides are reserved here for exactly four jobs: the answer-first slide, the decision-ledger
-map, the close, and the CTA.** Running eight mechanism beats with five roled and three unroled would
-compile cleanly and would be worse than opting out of the archetype entirely — it is beat-sprawl
-wearing the costume of discipline.
+`SCR_SKELETON` binds only entries carrying `role:`. Unroled slides are uncapped. Here they are
+reserved for exactly two jobs: the **deck-only opener** that names the decision surface once, and the
+**close** (debt ledger + method). There is **no CTA** (D27).
 
 ### 3.5 Runtime and shape
 
 | | |
 | --- | --- |
-| Target | **~9:00–10:30**, hard ceiling **15:00** |
-| Discipline | **the beat count, not the minutes.** Spare budget buys depth *inside* five beats — more evidence takes, longer inelastic terminal takes — never a sixth argument |
-| Aspect | **Landscape only.** A 9:16 reframe of a nine-minute trade-off argument is the worst of both formats (vertical norms are <90s). A short cut, if ever wanted, is a *separate* storyline — `--aspect=vertical` reframes, it never shortens |
-| Media | **Deck and film co-primary.** `formats: [png, pdf, html]`; two `in: [deck]` slides open answer-first while the film opens on the Situation |
-| Register | **Crisp throughout.** No warmth on the bookends — a deliberate divergence from the product film's warm/analytical split. This audience reads emotional framing inside a technical argument as padding, and worse, as evidence the author cannot tell the two apart. The only human stakes admitted are in C2, and only as a *correctness constraint* |
+| Actual runtime | **8m49s** (target was ~9:00–10:30, ceiling 15:00) |
+| Discipline | **the beat count, not the minutes.** Spare budget buys depth *inside* five beats, never a sixth argument |
+| Aspect | **Landscape only.** A 9:16 reframe of a nine-minute design argument is format-mismatched (vertical norms are <90s); `--aspect=vertical` reframes, it never shortens |
+| Media | **Deck and film co-primary.** `formats: [png, pdf, html]`; the deck opens on the decision-surface slide, the film opens on the Situation |
+| Register | **Plain and direct throughout.** No warmth on the bookends, no aphorisms, nothing chosen to sound clever. This audience reads emotional framing or wordplay inside a technical argument as padding |
+
+### 3.6 Old-spine → new-spine beat mapping
+
+The re-spine renamed and reordered beats. Decisions in §6 that predate the re-spine reference the old
+IDs; this maps them to what shipped.
+
+| Old spine (reversibility) | New spine (systems correctness) — shipped |
+| --- | --- |
+| `00-answer` (reversibility rule) | **removed** — no answer-first slide; walkthrough opens on Situation |
+| `00b-decision-ledger` | `00-decision-surface` (deck-only opener) |
+| S1 "de-risk what you can't undo" | `01-problem` — admission is a multi-actor process; correctness is whole-system |
+| S2 domain as a model | `02-domain-model` + `02b-bed-board-capture` |
+| C1 both moves fail | `03-both-moves-fail` |
+| C2 can't fake the safety part | `04-cannot-fake` |
+| R1 "the seam is the deliverable" | **demoted** — the seam/profile boundary is now one card inside R5 (`09-provable`) |
+| R2 heuristic over Timefold | **cut as a standalone beat** — Timefold/heuristic survives only as a ledger line and a stub-contract take |
+| R3 safety not overridable | folded into R1 (`05-consensus`) + R2 (`06-discordance`) |
+| R4 optimistic locking | **R4 concurrency** (`08-concurrency`) — sharpened to two races, one mechanism |
+| R5 provable observability | **R5 provable + fails loud** (`09-provable`) |
+| (none) | **R3 separation of authority** (`07-separation`) — net-new, ADR-0009 |
+| `13-cta` / CTA | **removed from film and deck** (D27) |
 
 ---
 
@@ -141,759 +169,406 @@ wearing the costume of discipline.
 - **Engine `html`** (bento templates), **`theme: light`** — matches the app UI so cuts to dashboards
   do not flash, and matches the product deck so the two read as one body of work.
 - **No bullets.** Content is cards in one of eight layouts; card text is one or two sentences,
-  enforced by the overflow invariant.
-- **Slide layouts are assigned per beat and then held** (see §5). Rigidity is deliberate: once the
-  viewer stops decoding layout, attention goes to content. Variation happens in *which of the five
-  narration parts leads*, never in the furniture.
-- **Voice:** Kokoro (local, Apache-2.0), **female** — the same narrator as the product film, so both
-  artifacts read as one body of work when watched back to back.
+  enforced by the overflow invariant. Each card that states a trade-off carries a `detail:` line
+  reading `Trade-off — …`.
+- **Slide layouts assigned per beat and then held.** Rigidity is deliberate: once the viewer stops
+  decoding layout, attention goes to content.
+- **Voice:** Kokoro (local, Apache-2.0), **female** — the same narrator as the product film.
 - **Subtitles:** burned ASS with explicit `PlayResX/PlayResY`, Arial, white on opaque `#0F172A`.
-- **No generated footage. No b-roll. No music.** Atmosphere adds nothing to a trade-off argument and
-  costs credibility.
-- **No code on screen** — see D6.
+- **No generated footage. No b-roll. No music. No code on screen** (D6).
 
 ---
 
-## 5. Master Beat Sheet
+## 5. Master Beat Sheet (as shipped)
 
-> **Source of truth for narration:** once authored, the verbatim lines live **only** in
+> **Source of truth for narration:** the verbatim lines live **only** in
 > `video-generation-technical/storyline.yml`, one `narration:` per entry, compiled to
-> `storyboard.json`. Lines below are **drafting intent for review** — when the two disagree,
-> `storyline.yml` wins. This section's durable value is the beat structure, the evidence manifest,
-> the routes and selectors, and the grounding references.
+> `storyboard.json`. Lines below are **structure and intent** — when the two disagree, `storyline.yml`
+> wins.
 
 ```
-00:00        00:45        01:30        03:00        04:30        06:00        07:45      ~09:30
-  │            │            │            │            │            │            │          │
-  ▼            ▼            ▼            ▼            ▼            ▼            ▼          ▼
-[S1 S2]      [C1 C2]      [R1]         [R2]         [R3]         [R4 R5]      [Ledger]  [CTA]
-purpose +    both moves   the seam     heuristic    safety vs    locking +    what is   "trade
-the domain   fail; the    is the       over         operations   provable     owed +    differently"
-as a model   domain       deliverable  Timefold                              method
-             won't fake
+00:00       00:45       01:45       03:15       04:45       06:00       07:20      08:49
+  │           │           │           │           │           │           │          │
+  ▼           ▼           ▼           ▼           ▼           ▼           ▼          ▼
+[S1 S2]     [C1 C2]     [R1]        [R2]        [R3]        [R4]        [R5]      [Ledger]
+problem +   both moves  consensus   disagree    separation  concurrency provable  what's owed
+the domain  fail; can't before      -> safety   of          two races,  + fails   + method +
+as a model  fake safety eligibility by design    authority   one lock    loud      artifacts
 ```
 
-### 5.0 Unroled openers (deck only)
+### 5.0 Deck-only opener
 
-**`00-answer`** — `hero`, `in: [deck]`. The reversibility rule as the recommendation, with
-"foundations" defined as *the parts you cannot unwind later*. An executive in a briefing cannot walk
-out, so answer-first costs nothing; a film viewer can leave at any second, so the film opens on the
-Situation and this slide never appears there.
+**`00-decision-surface`** — `tiled`, `in: [deck]`, no `role:`. Names the whole decision surface
+**once** — 11 `.wayfinder` tickets, 4 ADRs, 10 architectural dimensions, 5 specs — so the five beats
+read as a *selection* from a documented set. Not a beat; excluded from the video.
 
-**`00b-decision-ledger`** — `tiled`, `in: [deck]`. Names the whole decision surface **once** — 11
-`.wayfinder` tickets, 10 architectural dimensions, 4 ADRs — so the five beats that follow are
-understood as a *selection* from a documented set rather than as everything there was. Carries no
-`role:` and is not a beat.
-
-### 5.1 S1 — "A prototype's job is to de-risk what you cannot undo"
+### 5.1 S1 — `01-problem`: what kind of problem this is
 
 - **Layout:** `stat-deepdive`. **Role:** `situation`.
-- **Job:** the purpose frame, stated before any domain content, because a viewer must know what they
-  are watching before they can evaluate it — and because it pre-empts the wrong yardstick. This film
-  is not asking to be judged as a product, and says so inside the first fifteen seconds.
-- **Note:** the thesis proper is *not* here. It is on the deck-only answer slide, and it lands in the
-  film at R1.
-- **Draft intent:** a prototype is not a small product. It is an instrument for retiring risk, and
-  the only risk worth retiring is the kind you cannot undo later.
+- **Job:** frame the engineering problem before any domain content. Six roles act on one patient in
+  turn; no single one owns whether the outcome is correct; correctness comes from the handoffs.
+- **Stat:** 6 roles act on one patient.
 
-### 5.2 S2 — "The domain, as an engineering object"
+### 5.2 S2 — `02-domain-model` + `02b-bed-board-capture`: the domain as a data model
 
-- **Layout:** `process-flow` (or `lifecycle`). **Role:** `situation`.
-- **Content:** 5 entities under a strict `Level → Ward → Bed` hierarchy (`Ward`, `Bed`, `Patient`,
-  `AdmissionRequest`, `AssessmentBroadcast`); the bed's **4 states** named as a machine
-  (`EMPTY_CLEANED` / white → `EMPTY_ASSIGNED` / green → `OCCUPIED_TAKEN` / grey →
-  `EMPTY_PENDING_CLEANING` / mustard yellow → white); **6 actor roles**; **3 external systems** the
-  design depends on and cannot have.
-- **Why a model and not a story:** the audience has no model of gender cohorting, ward classes or
-  acuity tiers, and without *some* of it R3 is incomprehensible. Teaching the domain as a **data
-  model** rather than as a patient journey costs less time, keeps the register technical, and is
-  itself principal-signal (domain modelling as a competence). The same slide that supplies vocabulary
-  also establishes the constraint surface that makes the later decisions non-trivial.
-- **Evidence:** `/bmu` board with its bed-state legend (`bmu.tsx:1285-1297` prints state and colour),
-  narrated as a state machine rather than as capacity relief. First appearance of the persona
-  switcher, since "6 roles" is a claim the switcher makes visible.
+- **Layout:** `process-flow`. **Role:** `situation`.
+- **Content:** 5 entities in a `Level → Ward → Bed` tree; the bed's **4 states** as a machine; **6**
+  acting roles; **3** external systems the design depends on and cannot have (the prototype
+  constraint). Taught as a model, not a patient journey — cheaper, keeps the register technical, and
+  is itself principal-signal.
+- **Evidence (`02b`):** `/bmu` board narrated as a state machine — "a bed can never quietly go
+  missing" — not as capacity relief.
 
-### 5.3 C1 — "Both default moves fail"
+### 5.3 C1 — `03-both-moves-fail`: the two easy builds both fail
 
 - **Layout:** `comparison`. **Role:** `complication`.
-- **The two moves:** mock everything and polish the UI → proves nothing, because *on video, polish
-  and correctness are indistinguishable*. Build it all properly → does not finish.
-- **Priced** (the compiler warns when a complication names no cost — `deck.mjs:212-215`): **3**
-  integrations that cannot be obtained at any price by a personal project (no FHIR endpoint, no
-  Singpass tenant, no Timefold licence), **1** engineer, **0** production credentials.
-- **This is where the one-engineer constraint is stated**, because it is the load-bearing premise of
-  the entire thesis: a team of eight builds the FHIR adapter, and the reversibility rule would never
-  have been needed. See D9 for why AI leverage is named adjacent to this and nowhere near a
-  resolution beat.
+- **The two moves:** fake everything behind a nice UI (on camera a real rule and a fake one look the
+  same → proves nothing); build all of it for real (never finishes — 3 integrations unobtainable, 1
+  engineer, 0 production credentials). The load-bearing one-engineer/no-access constraint is stated
+  here.
 
-### 5.4 C2 — "This domain does not let you fake the part that matters"
+### 5.4 C2 — `04-cannot-fake`: the part you cannot fake
 
 - **Layout:** `stat-deepdive`. **Role:** `complication`.
-- **Argument:** clinical safety rules are not optional in a demo. Mis-cohort two patients and the
-  artifact is **wrong**, not merely unpolished — and a reviewer who knows the domain sees it
-  instantly. So the usual prototype licence ("it's only a demo") does not extend to the part that
-  matters.
-- **Priced by construction**, reusing the product film's derived figure rather than inventing one: a
-  Class B2 cubicle is 5–6 beds (`ed.tsx` ward-class options), gender cohorting is absolute, therefore
-  the first patient constrains up to five more beds.
-- **Why C2 is promoted to a complication rather than folded into R3:** it is what converts the film
-  from *"look how carefully I mocked things"* into an argument about **where correctness is mandatory
-  and where it is negotiable** — the exact axis the reversibility rule cuts along. Without C2, R3's
-  investment in safety invariants looks like gold-plating. With it, R3 is forced.
+- **Argument:** clinical safety rules are not optional in a demo. Put one man in an empty six-bed
+  cubicle and the other five beds can only take men; get it wrong and it is *wrong*, not unpolished,
+  and a domain reviewer sees it instantly. This is what forces the safety rules to be real, and
+  decides what got built to production standard vs stubbed.
 
-### 5.5 Beat anatomy — applied identically to R1–R5
+### 5.5 Beat anatomy — applied to R1–R5
 
-1. **Name the alternative a senior engineer would expect.**
-2. **The constraint that made it unwise** — concrete and checkable (licence, absent endpoint, absent
-   SIEM, one engineer).
-3. **What shipped, in bound nouns** — mechanism, not adjectives.
-4. **The price, stated out loud.** Non-negotiable, and surfaced as a `detail:` field so it is *on
-   screen*, not merely spoken.
-5. **The seam that makes the price recoverable.**
+Each resolution beat: **name the property**, **name the alternative a senior engineer would expect**,
+**show the mechanism in bound nouns** (running app or test), **state the prototype-vs-production
+trade-off out loud** (as a spoken line *and* a `detail:` card). The trade-off card is manual
+discipline — the compiler checks cost-words on `complication` only.
 
-Part 4 carries the weight. Naming a rejected alternative only proves consideration. Naming your own
-choice's cost proves you hold a model of the system's future — *"I am accepting a locally optimal
-placement, it holds at this ward count, and here is the interface that buys the optimal version when
-the ward count changes."* That is the hire.
+### 5.6 R1 — `05-consensus`: consensus before eligibility
 
-**Self-imposed invariant:** every resolution beat names a cost of its own choice. The compiler checks
-cost-words on `complication` only, so this one is **manual discipline** and must be verified by hand
-at review.
-
-**Anti-template measure:** slide furniture stays rigid; the leading narration part rotates — R2 opens
-on the alternative, R3 on the invariant, R4 on the price, R5 on the mechanism, R1 on the constraint.
-
-### 5.6 R1 — The seam is the deliverable
-
-- **Layout:** `process-flow`. **Rejected alternative:** feature flags / `if (isDemo)` branching, or
-  no seam at all.
-- **Mechanism:** one profile boundary; **3 interfaces** (`BedAllocationSolver`,
-  `HospitalEhrGateway`, `SisterHospitalGateway`); **6** `@Profile("prototype")` beans
-  (`DataInitializer`, `PrototypeSecurityFilter`, `PrototypeSecurityConfig`,
-  `HeuristicBedAllocationSolver`, `MockSisterHospitalGateway`, `MockHospitalEhrGateway`); **3**
-  `@Profile("!prototype")` production adapters that exist to fail loudly.
-- **Price:** two code paths mean the prototype path is the only one under test, and the production
-  adapters are unexercised by definition. The boundary is a promise, not a proof.
-- **Seam:** production work is *additive* — a new adapter behind an existing interface, each
-  independently implementable without touching domain logic.
-- **The persona switcher belongs here** (see D10): `Header.tsx` maps 6 personas to 6 seeded accounts
-  (`dr_tan_ed`, `dr_lim_cardio`, `bmu_coord_wong`, `nurse_sarah`, `evs_staff_kumar`, `patient_p101`),
-  writes `localStorage['admissions_role_persona']`, sends `X-User-Role`, invalidates every TanStack
-  query and routes to that persona's page. Framed **not** as convenience but as a decision about the
-  artifact's own **auditability** — a reviewer traverses five desks and four handoffs without five
-  login flows, which is what makes the cross-persona workflow demonstrable at all. And the
-  trade-off is already resolved in code: header-driven role assumption is a production security hole,
-  so it lives behind `@Profile("prototype")` and `SecurityConfig` (`@Profile("!prototype")`) refuses
-  it. **Convenience, deliberately fenced.**
+- **Layout:** `process-flow`. **Property:** a patient who needs specialist input is not put in the
+  bed queue until every consult resolves.
+- **Mechanism:** the request is held in `ASSESSMENT_PENDING`, hidden from bed management; it becomes
+  eligible only when every broadcast reaches `COMPLETED`; chained consults extend the wait. ADR-0007/
+  0008.
+- **Trade-off:** slower entry, in exchange for never placing a patient the assessment might still
+  change.
 
 | Take | Type | Proves |
 | --- | --- | --- |
-| The **seam diagram**, served on `:4173` and revealed progressively — one interface fanning out to a `@Profile("prototype")` mock and a fail-fast production adapter, three times over (D17) | Playwright | The shape of the boundary, before it is demonstrated behaving |
-| `curl /actuator/health` → UP, then `curl /api/...` → **denied**, on a no-profile JVM (`:8081`) | VHS | The default profile is not a stub of a system; it is a *locked* system. The fence is real, and the app is up — the denial is authorization, not a crash |
-| `./mvnw test -Dtest=GatewaysAndSolversTest` | VHS | The stubs' fail-fast is itself asserted |
-| Persona switcher, ED → BMU → Ward, no login | Playwright | Reviewability-by-design, and the fence around it |
+| `05a` `/ed` — select a patient, check the consult-gated box → "Admission is held in ASSESSMENT_PENDING" | Playwright | The gate, in the UI, on the way in |
+| `05b` `run=05b-consensus-gate` — `ClinicianServiceTest` partial-completion + all-completed | terminal | Holds even when consults arrive one at a time; partial agreement is not agreement |
 
-> **Grounding:** `SecurityConfig.java:20` is `@Profile("!prototype")` and permits only
-> `/actuator/health`, `anyRequest().authenticated()`, CSRF on. `TimefoldBedAllocationSolver` throws
-> `UnsupportedOperationException` **on invocation, not at startup** — so the fence demo is a
-> *request*, never a crash-on-boot. Exact status code (403 vs 401) must be **observed at capture
-> time**, not asserted in narration (see §8 open items).
+### 5.7 R2 — `06-discordance`: disagreement resolves to safety by construction
 
-### 5.7 R2 — Bed allocation by heuristic, not by constraint engine
-
-- **Layout:** `comparison` (old first, accent second, so the flip reads downward).
-- **Rejected alternative, named explicitly and respectfully:** **Timefold / OptaPlanner** — the
-  textbook answer, understood and available, and *declined*. It is named as a tool that can be
-  incorporated later, not as something unknown.
-- **Constraint:** commercial licensing, a continuous solving daemon, and an explainability gap for a
-  coordinator who must justify a placement.
-- **Mechanism:** `HeuristicBedAllocationSolver` — **4 hard constraints** filtered first, then **3
-  soft weights** scored (specialty alignment **40 points**, cohort consolidation **30**, fall-risk
-  proximity **15** — the form's own defaults, rendered as `+40 pts`), two-phase pack-then-batch,
-  **computed synchronously inside the request**.
-- **Price:** a heuristic is not globally optimal and can be beaten on a large enough ward set;
-  multi-hospital cluster optimisation is out of its reach.
-- **Seam:** `BedAllocationSolver` is an interface and `TimefoldBedAllocationSolver` is already the
-  default-profile bean. Swapping is configuration, not surgery.
+- **Layout:** `comparison`. **Property:** when specialists disagree, the system takes the safe side
+  with no human arbitration.
+- **Mechanism:** highest acuity anyone assigned wins; every monitoring requirement anyone flagged is
+  unioned; the queue sorts on the effective tier, not the ED's original number. ADR-0008.
+- **Trade-off:** sometimes over-provisions, in exchange for a disagreement never resolving toward the
+  less safe option.
 
 | Take | Type | Proves |
 | --- | --- | --- |
-| `/bmu` → select request → Top-3 with `Score: +N` **and the breakdown lines** (`bmu.tsx:1152-1156`) | Playwright | **Explainability** — a coordinator can read *why* this bed ranked first. This is the trade-off's upside, not decoration |
-| `/bmu/config` → change a weight → re-rank | Playwright | Policy lives in configuration, not in code |
-| `./mvnw test -Dtest=HeuristicBedAllocationSolverTest` | VHS | The heuristic is pinned by tests, so replacing it is safe |
+| `06a` `run=06a-discordance` — `ClinicianService.setEffectiveAcuityTier(highestAcuity)` + the elevation test + `BmuServiceTest` queue-sort | terminal | The rule as code, and the queue sorting on the effective tier |
 
-> **Narration constraint:** the `<50ms` figure in `docs/architecture.md`, `technical-architecture.md`
-> and ticket 010 is **prose only — nothing measures it**, so the numeral is dropped (D8). The film
-> claims what is architecturally true and visible instead: computed synchronously in the request, no
-> solver daemon, no job queue, no polling for a result.
+### 5.8 R3 — `07-separation`: separation of decision authority (net-new, ADR-0009)
 
-### 5.8 R3 — Safety is not overridable; operations are
-
-- **Layout:** `tiled` (two tiers × their override semantics — not a binary).
-- **Rejected alternative:** one flat rule set with an admin override; or "highest acuity wins" as a
-  convention in a runbook rather than as code.
-- **Mechanism:** **two-tier constraint hierarchy** (ADR-0010) — Tier 1 absolute safety invariants
-  (biological gender cohorting, airborne isolation) have **no override affordance in the UI at all**;
-  Tier 2 operational constraints (ward class, portable telemetry) permit override **only** with a
-  structured institutional reason code. Plus the **safety-first discordance engine** (highest acuity
-  wins, telemetry requirements unioned) and the **consensus completion gate** (ADR-0007/0008 — every
-  chained consult resolves before BMU dispatch).
-- **Price:** absolute invariants will occasionally block a placement a human knows is fine, and the
-  system offers that human no escape hatch. That is the intended cost, and it is a real one.
-- **Seam:** the tier assignment is data about a constraint, not a branch in a service — re-tiering is
-  a policy change.
+- **Layout:** `tiled`. **Property:** who decides the clinical picture and who decides the bed are
+  different people, on purpose.
+- **Mechanism:** clinicians decide acuity/telemetry/diversion, not the ward; after consensus the BMU
+  coordinator sets the admitting cluster and allocates; the solver scores against the coordinator's
+  authoritative choice, not the ED's suspected service.
+- **Trade-off:** one more handoff, in exchange for each decision being owned by the person who should
+  own it and pulling doctors off clinical work less.
 
 | Take | Type | Proves |
 | --- | --- | --- |
-| `HeuristicBedAllocationSolverTest` — display names read *"filters by WardClass, Gender, Telemetry and Infection constraints"*, *"eliminates multi-bed wards with occupants for infectious patients"*, *"eliminates wards without negative pressure for respiratory airborne isolation"* | VHS | Tier 1 is proved by **elimination**: a violating bed never becomes a recommendation. See D19 — there is no honest UI shot for this |
-| An operational override → mandatory structured reason-code modal → allocate (`bmu.tsx:1197` fires for any non-rank-1 bed; modal at `:1791-1860`, default `GOVERNMENT_SUBSIDY_CLASS_UPGRADE`, confirm is *"Confirm Override & Allocate"*, description promises an immutable `OVERRIDE_ALLOCATION` audit record) | Playwright | Tier 2 is overridable but never silent |
+| `07a` `/bmu` — the "(Admitting)" badge (authoritative) vs the ED's plain service badge | Playwright | Two decisions, two owners, and the system knows which is authoritative |
 
-### 5.9 R4 — Direct state mutation with optimistic locking
+### 5.9 R4 — `08-concurrency`: two races, one mechanism
 
-- **Layout:** `comparison`.
-- **Rejected alternative:** Event Sourcing + CQRS + WebSocket/STOMP — documented as the production
-  target in ticket 003 and **deliberately bypassed** in the prototype.
-- **Constraint:** the prototype must be readable and runnable by one person on a laptop; event
-  sourcing's cost lands entirely on comprehension and operations, not on features.
-- **Mechanism:** direct in-place relational mutation; the **4-state bed lifecycle** with strict
-  transition gates (`/ward` check-in → vacate → `MUSTARD YELLOW` + 30-minute cleaning SLA → sign-off
-  → `WHITE`); `@Version` optimistic locking on exactly **3** entities (`AdmissionRequest:117`,
-  `AssessmentBroadcast:26`, `Bed:52`); conflicts surface as **HTTP 409** RFC 7807 `ProblemDetail`.
-- **Price stated out loud (this beat leads on the price):** we gave up the free audit trail, the
-  temporal queries and the replayability that event sourcing hands you — in a domain where audit is a
-  regulatory requirement. The structured MDC audit log (R5) is the compensating control, and it is
-  strictly weaker than an event store.
-- **Seam:** state transitions are already funnelled through service methods rather than scattered
-  across controllers, so the write path is one place.
+- **Layout:** `comparison`. **Property:** two people racing for the same case or the same bed cannot
+  both win.
+- **Mechanism:** `@Version` optimistic locking on 3 entities; the losing write gets an HTTP 409
+  RFC 7807 `ProblemDetail`. Optimistic **not** pessimistic, because losing the race is cheap and
+  self-correcting — the loser sees the case is taken and picks the next one; a database lock would
+  prevent a conflict that costs nothing and adds deadlock risk and pool pressure.
+- **Trade-off:** the loser retries, which is free.
 
 | Take | Type | Proves |
 | --- | --- | --- |
-| `/ward` vacate → mustard yellow (30m SLA active) → housekeeping sign-off → white | Playwright | The state machine as plain mutation, with gates |
-| `ClinicianControllerTest#testClaimBroadcast_ConflictReturns409` (`:150-151`) and `GlobalExceptionHandlerTest#testOptimisticLockConflict` (`:155-159`) | VHS | Optimistic locking proven where the UI cannot honestly stage it |
+| `08a` `/ward` vacate → mustard yellow (30-min SLA) | Playwright | The state machine as gated mutation |
+| `08a2` `/ward` housekeeping sign-off → white | Playwright | One owner per transition; single write path is what makes the version check enough |
+| `08b` `run=08b-conflict-409` — `ClinicianControllerTest` 409 + `GlobalExceptionHandlerTest` | terminal | The race proven where the UI cannot honestly stage two clients at once |
 
-> **Why the UI does not prove the 409 (D11):** a genuine concurrent claim needs two browser contexts
-> racing; `capture.mjs` drives a single page, and a faked race is a lie on screen. So the test *is*
-> the evidence. This makes R4 the most test-heavy and least visual beat, which is exactly why it sits
-> fourth — appetite for a quieter beat is highest there — and why it holds only 2 takes.
+### 5.10 R5 — `09-provable`: provable where built, loud where not
 
-### 5.10 R5 — Correctness had to be provable
-
-- **Layout:** `process-flow` or `stat-deepdive`.
-- **Rejected alternative:** trusting a single extraction pathway; or offering coverage as the sole
-  quality claim.
-- **Mechanism:** **dual-pathway observability** — every operational KPI derivable *both* from
-  relational state (JPA/SQL, for BI) *and* from structured SLF4J/MDC audit logs (for SIEM/real-time
-  alerting), with mathematical parity between them. `HospitalKpiSummaryDto` carries **20 scalar
-  metrics across 4 epics + 2 categorical breakdown maps**.
-- **Price:** two pathways is two things to keep in step, and parity is only as good as the test that
-  asserts it. Coverage is **measured, not enforced** — see the ledger.
-- **Seam:** the log *format* is profile-independent; only the destination changes (stdout today,
-  SIEM + WORM later).
+- **Layout:** `process-flow`. **Property:** every metric is checkable two ways, and the unbuilt parts
+  refuse to run rather than lie. Reversibility/the profile boundary lives here as one supporting card.
+- **Mechanism:** dual-pathway observability (DB + audit log, a test fails if they disagree); one
+  Spring profile picks mocks or production adapters at startup; the 3 unbuilt adapters throw
+  `UnsupportedOperationException` on invocation.
+- **Trade-off:** only the prototype path is tested — but an unbuilt piece that fails loudly is safer
+  than one that quietly pretends.
 
 | Take | Type | Proves |
 | --- | --- | --- |
-| `/analytics` — 4 epic sections, 20 metrics, benchmark evaluations | Playwright | Pathway A (JPA/SQL) |
-| `tail logs/app.log` — real structured audit lines with MDC context (`activeUser` in the console pattern, `application.yml:17`) | VHS | The **log format** that makes pathway B possible — the raw material, not the tooling |
-| `./mvnw test -Dtest=PathBDualPathwayReconciliationIntegrationTest` | VHS | **Parity is asserted, not eyeballed** |
-| JaCoCo + Vitest coverage reports (absolute URLs on `:4173`) | Playwright | The measured number, whatever it turns out to be |
+| `09a` `/analytics` — 20 metrics, benchmarks, target-met | Playwright | Pathway A (DB), from the workflows just shown |
+| `09b` `run=09b-parity` — `PathBDualPathwayReconciliationIntegrationTest` | terminal | The two pathways are asserted equal, not eyeballed |
+| `09c` `run=09c-stub-contract` — `GatewaysAndSolversTest` | terminal | The 3 stubs throw on invocation |
+| `09d` JaCoCo report (`:4173`, stills) | Playwright | 94% instr / 97% lines / 69% branches — the branch number spoken |
+| `09e` `run=09e-gate-red` — frontend thresholds vs the red 74.84% | terminal | The most honest beat: a gate no pipeline runs, currently red |
 
-> **`scripts/` never appears on screen** (D12, user instruction). The KPI extraction CLI is therefore
-> not shown, and pathway B is proven by the reconciliation *test* plus the raw log format. This is
-> arguably stronger: a test that fails when the two pathways disagree beats a shell script whose
-> arithmetic a viewer cannot check.
+### 5.11 Close — `10-ledger` + `10a-artifacts-terminal` (unroled)
 
-### 5.11 Close — the ledger of what is owed (unroled)
-
-- **Layout:** `tiled`. Title borrows the runner-up film title: *"Eleven decisions and what they
-  cost."*
-- **Every debt paired with the seam already cut for it:**
-
-| Debt | Seam already in place |
-| --- | --- |
-| H2 `create-drop` — a restart loses everything | PostgreSQL driver present; JPA mappings unchanged by the swap |
-| Polling at 3s will not survive N clients | Ticket 003 documents the STOMP target; the UI already treats state as remote |
-| The heuristic is not globally optimal | `BedAllocationSolver` + Timefold bean already wired to the default profile |
-| Header-driven personas are **not authentication** | `SecurityConfig` already denies by default; OAuth2/JWT + Singpass is ticket 009 |
-| Logs go to stdout, not a SIEM | The MDC format is identical; only the destination changes |
-| **Coverage is measured, not enforced — there is no CI** | The suite is the foundation; `jacoco:check` and a workflow are the trivially-added adapter |
-| No FHIR, no sister-hospital HTTP, no SMS | Three gateway interfaces with fail-fast production beans |
-
-- **Why the ledger and not a stat wall:** the panel's unspoken question throughout is *"does he know
-  what is missing, or does he think this is done?"* The ledger answers it before it can be asked. The
-  risk is deflation — ending on absence can read as incompleteness — and the mitigation is that every
-  line is paired with its seam, so the register is *a roadmap under control*, not a confession.
-- **Method disclosure lives here** (D9), in the author's own division of labour: **AI writes the
-  code; the trade-offs, the technical approach, the final shape of the code and the design
-  considerations are the author's.** Stated with specificity, because a vague "I used AI" invites the
-  ownership question while a precise division of labour answers it pre-emptively.
-- **Take:** `ls .wayfinder/tickets` / `ls .scratch/*/issues` / `ls specs` → **11 / 28 / 5** (+ 4
-  ADRs), VHS. Proves specs *preceded* code — the exact thing a skeptic doubts — and it is countable
-  on screen rather than asserted. Chooses transparency about the agent tooling over polish.
-
-### 5.12 CTA (unroled)
-
-- **Layout:** `hero`.
-- **The line:** *every one of these five was a trade, and you have been told what each one cost — if
-  you would have traded differently, that is the conversation I want.*
-- **Three cards:** the **README** as the map; `docs/adr/` + `.wayfinder/tickets/` as the reasoning;
-  the **live Render demo** with its cold-start caveat.
-- **Why an invitation to interrogate:** after nine minutes of naming five prices and a ledger of
-  debts, the only close that does not undercut the argument is one that invites the counterargument.
-  It is a status move that has been *earned* rather than claimed, and it converts passive viewing
-  into the exact conversation the interview should be about. Tone must stay plain — no "prove me
-  wrong", no "I'd love your thoughts".
+- **`10-ledger`** (`tiled`): what is stubbed and the boundary it is stubbed behind — in-memory data,
+  polling, heuristic, header personas, no CI — each paired with the interface/profile already in
+  place. **Method disclosure lives here:** AI wrote much of the code; the trade-offs, the approach and
+  the final shape were the author's.
+- **`10a-artifacts-terminal`** (`run=10a-artifacts`): 11 tickets / 28 issues / 5 specs / 4 ADRs,
+  counted on screen, proving specs preceded code. **The film ends here** — no CTA (D27).
 
 ---
 
 ## 6. Decision Log
 
-Each entry records what was chosen, what was rejected, and the reasoning — in the order decided.
+Each entry records what was chosen, what was rejected, and the reasoning. **D1–D16 describe the
+original spine and are retained for provenance; the re-spine (§3.1, §3.6) supersedes the ones marked.
+D17–D29 are pipeline/mechanics facts that survived the re-spine unchanged unless noted.**
 
-**D1 — The conclusion is judgment, not delivery, domain or rigour.**
-*Rejected:* "ships fast" (indistinguishable from having had more time); "knows healthcare"
-(irrelevant to the panel); "well-architected system" (a property of the artifact, but panels hire
-people). Rigour is retained as the *proof mechanism*. Cost accepted: a less exciting watch than a
-capability reel, with no "wow" moment; underperforms if sent cold to non-technical recruiters.
+**D1 — The conclusion is systems-design reasoning, not delivery, domain or rigour.** *(re-spined —
+was "judgment under constraint")* The film now argues that correctness is a whole-system property and
+prices each design trade-off; rigour remains the proof mechanism, not the claim.
 
-**D2 — Timefold is named as available and declined, not as unknown.**
-Explicit user instruction. The film credits the tool and states it can be incorporated later, which
-is what distinguishes a decision from an omission.
+**D2 — Timefold is named as available and declined, not as unknown.** Retained. In the re-spine it
+survives only as a ledger line + the stub-contract take, not a standalone beat.
 
-**D3 — The unit of the spine is a decision; features are the setting.**
-*Rejected:* feature-per-beat (28 issues × 20s = 9m30s of list with no argument; forces trade-offs
-into footnotes). *Adopted alongside:* `docs/architecture.md`'s 10-dimension table as the **source
-inventory** for the reversible half of the spine. Cost accepted: harder to author, since each beat
-needs a named rejected alternative and a price, neither of which can be lifted verbatim from docs
-that record rationale but not the rejected option's cost.
+**D3 — The unit of the spine is a design decision; features are the setting.** Retained.
 
-**D4 — Investment allocated by reversibility is the organising principle.**
-*Rejected:* "safety invariants first" (does not explain the stubs) and chronological "how the design
-evolved" (a diary, not an argument). The rule simultaneously explains what was built, excuses nothing,
-and is falsifiable on screen.
+**D4 — Organising principle.** *(re-spined)* Was "investment allocated by reversibility"; now
+"correctness is a property of how the parts interact" (§3.1). Reversibility demoted to one card in R5.
 
-**D5 — `archetype: scr`, enforced; 12 candidate decisions grouped into 5 resolution beats.**
-*Rejected:* a free-text archetype with ~12 uncapped beats (nothing stops beat 9 from being as
-prominent as beat 1, and a flat list has no argument); and the unroled-slide loophole (compiles
-cleanly, defeats the discipline it appears to honour). Grouping does **not** drop decisions — a
-mechanism slide carries 3–4 cards, each a named decision, and narration may name a decision in a
-clause without granting it a beat. Ordering is **deductive** (R1's meta-decision first), because the
-deck's answer slide states the rule anyway and an inductive film would contradict the deck.
+**D5 — `archetype: scr`, enforced; decisions grouped into 5 resolution beats.** Retained; the five
+beats changed identity (§3.6).
 
-**D6 — Evidence tiers 1–4 accepted; tier 5, code on screen, refused.**
-Ranked by falsifiability: (1) executable terminal, (2) generated reports, (3) the running app as
-decision evidence, (4) one diagram. *Refused:* code screenshots — a viewer cannot compile them, see
-their callers, or tell whether that file is the one that runs, so a code shot proves nothing a slide
-could not also assert. **Behaviour under two configurations is strictly stronger than source under
-one.** Counter-argument acknowledged: some panels want to see code, and a code-free film could read
-as evasive to a reviewer suspecting AI generation; mitigated by pointing at code-derived artifacts
-(javadoc/tsdoc, coverage) and by sending viewers to the repo. Consequence: **no manual IDE footage,
-no `footage/` directory at all.**
+**D6 — Evidence tiers 1–4 accepted; code on screen refused.** Retained. Behaviour under two
+configurations is stronger than source under one.
 
-**D7 — E2E and Allure are out of scope for this film.**
-User instruction. `README.md` states E2E is deferred while `e2e/` and `artifacts/e2e/allure-report`
-exist with two dated campaigns; both cannot be true on screen, and the film simply never goes there.
+**D7 — E2E and Allure are out of scope.** Retained.
 
-**D8 — No number on screen unless the same shot produces it.**
-Numbers come from artifacts (surefire summaries, JaCoCo percentages, the dashboard, dropdowns), never
-from a slide asserting them. Slides may carry only **structural cardinalities countable in the
-adjacent capture**: 4 hard constraints, 3 soft rules, 4 bed states, 2 tiers, 3 seams, 6 personas, 11
-tickets. **Measure first, write narration to the measurement** — if JaCoCo returns 87%, the narration
-says 87%. Three specific calls:
+**D8 — No number on screen unless the same shot produces it.** Retained. Kept: the `<50ms` figure is
+still dropped (unmeasured); coverage numbers spoken are the measured 94/97/69 and 74.84.
 
-- **`<50ms` dropped.** Prose-only in three docs, unmeasured. Measuring it would mean changing the
-  product to serve the film, and a laptop micro-benchmark is not a latency claim — a technical panel
-  knows that, so the numeral costs more credibility than it buys. Replaced by the architectural claim
-  (synchronous, in-request, no daemon), which was all the number was ever a proxy for.
-- **KPI count = 20 scalars + 2 breakdowns**, code-derived from `HospitalKpiSummaryDto`. README says
-  18 and `.wayfinder/map.md` says 21; the README is to be reconciled as a side task rather than the
-  film matching a wrong number.
-- **Coverage is measured, not enforced.** JaCoCo has `prepare-agent` + `report` but **no `check`
-  goal**, and there is **no `.github/workflows`**. "Quality gates" is therefore not claimable. Framed
-  in the author's own terms: the suite is the foundation, CI wiring is the trivially-added adapter —
-  a *deferred* debt, not an absence. Counter-argument acknowledged: volunteering the CI gap invites a
-  mechanical mark-down; overruled because the ledger already names larger debts (no auth, no real
-  database) and inconsistency inside an honesty-based argument is worse than the weakness.
+**D9 — AI-augmented development placed by causal role: constraint in the complication, method in the
+close, never a reason the design is good.** Retained; method disclosure now lives in `10-ledger`.
 
-**D9 — AI-augmented development is placed by causal role: constraint in the complication, method in
-the close, never a reason the design is good.**
-*Rejected:* excluding it (the repo visibly contains `.kiro/skills/`, `.agents/`; undisclosed-then-
-discovered is the worst ordering) and giving it a mechanism beat (breaks the cap, and competes with
-the engineering argument — AI leverage is not *why the system is good*). The moment narration says
-"the AI helped me choose X," thesis D1 collapses. Division of labour stated in the author's words:
-AI writes the code; trade-offs, technical approach, final code shape and design considerations are
-his.
+**D10 — Persona switching is auditability-by-design, seeded invisibly per capture.** Retained. Each
+capture seeds its role via `setupScript` (`localStorage['admissions_role_persona']`) before SPA boot;
+the switcher is no longer operated on screen as its own beat (old R1 was demoted).
 
-**D10 — The persona switcher is reframed from ease-of-use to auditability-by-design, and shown
-exactly once.**
-Six personas → six seeded accounts, no login flows, which is what makes a five-desk workflow
-demonstrable at all. Paired with its already-resolved trade-off: the same design is a production
-security hole, hence `@Profile("prototype")` and a default `SecurityConfig` that refuses it —
-*convenience, deliberately fenced.* Operated on screen only in R1, where it is the subject; every
-other capture seeds the role invisibly via `setupScript` (`localStorage['admissions_role_persona']`
-before SPA boot), because on-screen switching everywhere would cost ~4s per take and turn the film
-into a tour of the topbar.
+**D11 — Where the UI cannot prove something honestly, the test is the evidence.** Retained; now
+applied to R4's 409 (`08b`).
 
-**D11 — Where the UI cannot prove something honestly, the test is the evidence.**
-Applied to R4's HTTP 409. A faked two-tab race would be a lie on screen; `capture.mjs` drives a
-single page.
+**D12 — `scripts/` never appears on screen.** Retained; pathway B proven by the reconciliation test
+(`09b`).
 
-**D12 — `scripts/` never appears on screen.**
-User instruction. Removes the SQL-vs-log parity shell take (originally the intended money shot).
-Pathway B is instead proven by `PathBDualPathwayReconciliationIntegrationTest` plus a `tail` of the
-running JVM's structured audit lines — which requires launching the JAR with **stdout redirected to
-`logs/app.log`**.
+**D13 — Deliverables staged: plan → `storyline.yml` → compile → slide PNGs → gate → spend.** Retained.
 
-**D13 — Deliverables staged: plan → `storyline.yml` → compile → slide PNGs → **gate** → spend.**
-Slides render free *before* the gate precisely so they can be fixed for nothing. No TTS and no
-capture until the PNGs have been reviewed and the runbook prerequisites are actually up.
+**D14 — Title and CTA.** *(re-spined)* Title is now *"How This System Was Designed — Technical
+Considerations"* (plain, literal). **The CTA is removed entirely from film and deck** (D27), not kept
+as a deck slide.
 
-**D14 — Title *"Build the Foundations, Stub the Rest"*; CTA invites disagreement.**
-*Rejected titles:* "Production-Architected, Prototype-Executed" (accurate, unquotable),
-"The Seam Is the Deliverable" (over-indexes on R1), "Eleven Decisions and What They Cost" (kept as
-the ledger slide's title). Because "foundations" lacks its own criterion, the answer slide must
-define it. Role, company and seniority are never named on screen.
+**D15 — Plain register throughout; the domain taught as a data model.** *(sharpened)* The re-spine
+tightened this to **plain natural spoken English, no aphorisms, nothing chosen to sound clever** —
+the user's explicit instruction.
 
-**D15 — Crisp register throughout; the domain taught as a data model.**
-*Rejected:* warm bookends (this audience reads pathos in a technical argument as padding), a story-
-based domain intro (costs 60–90s and drags toward the pitch), and lazy per-beat domain drip (five
-mini-tutorials, never a whole model).
+**D16 — Runtime ~9–10:30 target, ceiling 15:00; landscape only; deck co-primary.** Retained; actual
+shipped runtime **8m49s**.
 
-**D16 — Runtime target ~9:00–10:30, ceiling 15:00; landscape only; deck co-primary.**
-The binding discipline is the **beat count**, not minutes. Vertical is not declared: a 9:16 reframe
-of a nine-minute argument is format-mismatched, and `--aspect` reframes without shortening — a short
-cut would be a separate storyline.
+**D17 — The architecture/seam diagram enters as a captured web page on `:4173`, not a slide or
+footage.** Retained. (In the re-spine the seam material is one R5 card; the diagram page still exists
+under `:4173` for the deck.)
 
-**D17 — The architecture diagram enters as a captured web page on `:4173`, not as a slide and not as
-footage.**
-The original problem: `@mermaid-js/mermaid-cli` renders a PNG into `assets/slides/`, but how that PNG
-becomes a *scene* is not established, and `footage` validation rejects a generated `src` under
-`assets/` because that directory is gitignored. A `marp` slide is also unavailable — `engine` is
-chosen **per deck**, and this deck is `html`; mixing renderers inside one deck is what the
-one-renderer rule exists to prevent, since it is what keeps deck and film pixel-identical by
-construction rather than by inspection.
+**D18 — Terminal takes originally planned as VHS `footage`.** Superseded by D20.
 
-The resolution avoids all three problems: author the diagram as a **local page served on the `:4173`
-origin** (the same origin already carrying the coverage reports) and capture it with Playwright via an
-absolute `url`, exactly like any other capture. Consequences, all of them favourable:
+**D19 — R3's absolute-tier evidence is a test, not a screenshot, because the UI branch is dead
+code.** Retained as a repo side task; the re-spine no longer leans on that shot.
 
-- it is an ordinary `capture` entry, so it inherits `assert.visible` / `assert.notVisible` and the
-  content-addressed cache with no new machinery;
-- it may embed a pre-rendered **mermaid** SVG *if* mermaid suits the shape — mermaid becomes an
-  optional authoring convenience rather than a load-bearing pipeline dependency;
-- it can **reveal progressively** under Playwright `click` steps, which the reference material
-  recommends for anything past ~six nodes, since a full diagram appearing at once is rarely read;
-- the deck stays a single `html` renderer, so nothing about pixel-parity changes.
+**D20 — Terminal evidence is recorded output rendered by a page we own, because VHS does not work.**
+Retained and load-bearing. `tools/record-runs.mjs` executes each command for real and freezes
+`stdout`/`stderr`/exit code/duration into `pages/runs/<id>.json` (committed); `pages/term.html?run=<id>`
+renders it; the scene is an ordinary `capture` against `:4173`. A failing command stays failing
+(`09e` is red because it *is* red). **Re-spine update:** the run set changed to
+`05b-consensus-gate`, `06a-discordance`, `08b-conflict-409`, `09b-parity`, `09c-stub-contract`,
+`09e-gate-red`, `10a-artifacts`; the old-spine runs (`05b-profile-fence`, `05c-stub-contract`,
+`06c-solver-pinned`, `07a-absolute-tier`, `09b-audit-log`, `09c-parity`) were deleted. All 18 asserted
+strings were verified present in the frozen output before any spend.
 
-*Rejected:* a native `process-flow` bento slide as the diagram (was the fallback — it survives as the
-R1 mechanism slide, but a bento layout cannot express a two-profile fan-out of one interface into two
-adapters); a mermaid PNG smuggled in as `footage` (rejected by validation, and would need committing
-outside `assets/`).
+**D21 — Captures run against the Vite dev server, not the packaged jar.** Retained.
+`baseUrl: http://127.0.0.1:3000`; the jar 404s on deep links (no SPA fallback). Vite 8 needs
+`--host 127.0.0.1` because it binds IPv6 (`::1`) by default — confirmed again this run: the flagless
+server was unreachable on `127.0.0.1`, and the flag fixed it. Still a real product defect (repo side
+task 1).
 
-**D18 — Terminal takes enter as `footage`, because the storyline cannot express a terminal scene.**
-Discovered while authoring. `ENTRY_TYPES` is `slide | capture | footage` (`deck.mjs:79`) and
-`compileStoryline` hard-maps type → `visualEngine` with **no passthrough** (`deck.mjs:384-430`), so
-`vhs_terminal` — a legal *storyboard* engine (`storyboard-schema.md:71`) — is unreachable from
-`storyline.yml`. Three ways out were considered:
+**D22 — R1's fence take must pass `--spring.profiles.active=production` explicitly, and the code is
+403.** Retained as a fact about the app; in the re-spine the fence is not its own beat, but the
+profile-boundary claim in R5 depends on the same truth. The prototype profile being the config
+default is still a ledger-worthy debt.
 
-1. **Hand-author `storyboard.json`.** Rejected: it is the generated lockfile, `compile.mjs` refuses a
-   file with no `$generated` marker, and abandoning the storyline would forfeit `in: [deck]`, the SCR
-   checks and every bento slide. The deck is co-primary, so this is not a trade worth making.
-2. **Render captured terminal output into an HTML page and screenshot it.** Rejected: it looks like a
-   terminal but is a re-render of text, which is precisely the "polish indistinguishable from
-   correctness" failure C1 accuses others of.
-3. **Adopted:** run VHS ourselves against a committed `.tape`, and reference the resulting mp4 as a
-   `footage` entry. The tape is the source, the mp4 is the frozen input — the same pattern the skill
-   already mandates for generated footage, and legitimate here because non-negotiable #8 constrains
-   *generated* footage, while this is *recorded* output of a real command.
+**D23 — The coverage claim changed after measuring, and for the better.** Retained and shipped.
+Backend: 94% instr / 97% lines / **69% branches** (the branch number is spoken). Frontend: declares
+four 90% thresholds and currently **fails** — branches **74.84%** — while the committed report is
+stale at 100%. `09e` shows the thresholds beside the red failure; kept as the strongest honesty beat.
 
-Consequence: **`footage/` now exists in this work dir**, superseding §9's "no `footage/`" line. The
-directory is deliberately not gitignored, so the mp4s are committed and the film stays re-renderable
-on a fresh clone. Note this makes VHS a hard prerequisite rather than a degradable one — without the
-binary there is no mp4 to reference, and the pipeline's own "terminal scenes degrade to styled code
-slides" fallback does not apply, because from the storyline's point of view these are footage scenes,
-not terminal scenes.
+**D24 — `preflight.mjs` exists, because the most expensive failure mode was discoverable for free.**
+Retained and used. **Re-spine result:** preflight caught the `05a` `/ed` capture asserting
+`ASSESSMENT_PENDING` on load, which is click-gated; the capture was rewritten to select a patient →
+check the consult-gated box → `waitForText ASSESSMENT_PENDING`, landing assertion changed to
+"Emergency Department (ED) Clinical Intake". Then **14/14 capture scenes passed preflight**.
 
-**D19 — R3's absolute-tier evidence is a test, not a screenshot, because the UI branch is dead code.**
-Discovered while authoring, and it invalidated the plan's original money shot. `bmu.tsx:1173` renders
-*"Biological gender or airborne isolation safety violation. Zero override allowed."* — but
-`safetyViolationReason` and `isOperationalOverride` are declared on `BedRecommendation` and in the
-frontend types and **never populated by any backend code path**. The solver *filters* violating beds
-out of the candidate set, so no disabled card is ever produced from real solver output.
+**D25 — Beats re-grounded against the live solver.** Retained as historical; the re-spined beats use
+their own verified data (partial-completion consensus test, effective-acuity elevation test, the
+"(Admitting)" badge on a seeded consult-gated request).
 
-Capturing that card would therefore have required stubbing the API to force a state the system cannot
-reach — staging dead UI, which is the exact demoware this film argues against. So Tier 1 is proved by
-**absence**, and absence is only assertable: `HeuristicBedAllocationSolverTest`'s display names
-(*"eliminates wards without negative pressure…"*) are the claim, verbatim, on screen. The narration
-says so out loud — *"there is no disabled button to photograph"* — which converts a limitation into an
-argument about what constitutes proof.
+**D26 — Static pages starve Chrome's screencast, so every static page needs one perpetual
+animation.** Retained and load-bearing. `term.html`/`seam.html` carry an imperceptible `#ticker`
+animation to restore compositor frame rate; the JaCoCo report is third-party and cannot be animated,
+so `09d` uses `captureMode: stills` (exactly `sceneMs` from one screenshot).
 
-Side effects: this resolves §8's open item about which test class holds the tier assertions
-(`HeuristicBedAllocationSolverTest`, four test methods); and the unpopulated DTO fields plus the
-unreachable frontend branch are a genuine small defect, now logged as a repo side task. It is **not**
-put on screen — it is an unwired field, not a design trade-off, and the ledger is for debts with
-seams.
+**D27 — The CTA is removed from the film and the deck** *(re-spine change — was "kept as a deck
+slide")*. User instruction: "no need for a final CTA, remove that from the plan." The `11-cta` entry
+was deleted; the film ends on `10a-artifacts-terminal`, and the deck ends on the ledger.
 
-**D20 — Terminal evidence is recorded output rendered by a page we own, because VHS
-does not work. This supersedes D18.**
-VHS 0.12.0 and ttyd 1.7.7 were installed via brew (the plan's step 1). VHS then
-**silently produces nothing**: it exits 0, prints `Creating <file>…`, and writes no
-file in any format — mp4, gif, webm or raw frames. An `ffmpeg` shim on `PATH`
-recorded **zero** invocations, so it never reaches encoding; its browser phase fails
-and the error is swallowed. Two configurations were tried (default, and
-`ROD_BROWSER_PATH` pointed at the installed Chrome). ttyd itself is healthy (serves
-HTTP 200 standalone).
+**D28 — `VIDEO_GEN_APP_VERSION` and the fresh-JVM rule.** Retained and re-confirmed this run: captures
+mutate H2 state (`08a`/`08a2` vacate and clean beds), so a re-capture pass against a mutated tree
+aborts on a missing button. `:8080` is restarted before each full capture pass.
 
-Rather than keep tuning a broken renderer, terminal takes now use the mechanism
-already proven for the seam diagram:
-
-1. `tools/record-runs.mjs` executes each command **for real** and freezes `stdout`,
-   `stderr`, the true exit code and the duration into `pages/runs/<id>.json`
-   (committed — the frozen input, exactly as a footage file would have been).
-2. `pages/term.html?run=<id>` renders that JSON as a terminal.
-3. The scene is an ordinary `capture` against `:4173`.
-
-What is real: every byte of output, and every exit code. A failing command stays
-failing — 09e is red because it *is* red. What is synthetic: only the reveal, which
-animates `opacity` rather than typing. This is **weaker than a screen recording of a
-live shell**, and the honest mitigations are that the page's own footer says
-*"Recorded command output — not a re-enactment"* with the capture date, and the
-command line and exit code are on screen next to their output.
-
-Bonus consequences: no VHS dependency, no `footage/` directory, no committed mp4s,
-and `assert.visible` now works on terminal output (the opacity reveal keeps text
-visible to Playwright, which checks box size and `visibility`, not opacity — and
-assertions run *before* recording).
-
-**D21 — Captures run against the Vite dev server, not the packaged jar.**
-Verified: the jar serves `/` but returns **404 for every deep link** (`/ed`, `/bmu`,
-`/analytics`). There is no SPA fallback anywhere in the backend — no
-`WebMvcConfigurer`, no forward controller, no error-page mapping — so `url: /bmu`
-cannot work against `:8080`. Vite serves the deep links and proxies `/api` to the
-prototype JVM, so the application under capture is the same app talking to the same
-data. `baseUrl` is therefore `http://127.0.0.1:3000`, and Vite 8 needs
-`--host 127.0.0.1` because it binds IPv6 by default.
-
-This is a **real product defect, not just a capture inconvenience**: refreshing
-`/bmu` on the live Render demo will 404 for a reviewer. Logged as a repo side task.
-If it is fixed, `baseUrl` can go back to `:8080` and this decision reverses.
-
-**D22 — R1's fence take must pass `--spring.profiles.active=production` explicitly, and
-the code is 403.**
-The plan assumed a "no-profile JVM". There is no such thing here:
-`application.yml:5` sets `spring.profiles.active: prototype`, so a flagless JVM logs
-`The following 1 profile is active: "prototype"` and would have filmed the prototype
-app while the narration claimed the profile was off — the most damaging error this
-film could ship. Measured with the override in place: `/actuator/health` → 200,
-`/api/v1/bmu/queue` → **403**, `/` → 403 (the production profile will not even serve
-the page).
-
-That the prototype profile is the *configuration default* is itself a debt — a
-deployment that forgets to set a profile boots the prototype — so it is named in R1's
-narration and carried on the ledger.
-
-**D23 — The coverage claim changed after measuring, and it changed for the better.**
-Backend JaCoCo over the whole 50-class bundle: **94% instructions, 97% lines** (78 of
-2,832 missed), **69% branches** (315 of 1,021 missed), 214 tests passing. The branch
-figure is the weak one, so it is the one the narration speaks.
-
-The frontend is more interesting. `vitest.config.ts` scopes coverage to `src/lib`,
-`src/services`, `src/components` and **only `routes/patient.tsx`** — so `bmu.tsx`,
-`ed.tsx`, `ward.tsx`, `specialist.tsx` and `analytics.tsx`, the largest files in the
-app, are excluded from the denominator. That is why the committed report reads 100%.
-It also declares **four 90% thresholds**, so "measured, not enforced" was only ever
-true of the backend. And running it now **fails**: branches 74.84% against 90%, while
-the committed `frontend/coverage/` HTML is from 10 Sep and still claims 100%.
-
-This produced a better beat than the plan had. The ledger line is no longer an
-abstract "no CI" — it is `09e`, showing the declared thresholds beside the red
-failure, narrated as *"a gate no pipeline executes is not a gate; it is a comment with
-a number in it."* Volunteering a currently-failing gate is the strongest available
-evidence for the film's own thesis, and it is the beat most likely to be cut by a
-nervous author. Recommended to keep.
-
-**D24 — `preflight.mjs` exists, because the most expensive failure mode was
-discoverable for free.**
-`capture.mjs` calls `assertSceneState` immediately after `goto` and **before any
-step** (`:157`), and a failed assertion aborts the run. Four entries as first authored
-asserted post-click text (06a's `Score:`, all three of 07b's modal strings, 08a's
-`MUSTARD YELLOW`) and would have aborted capture *after* TTS was paid for.
-`tools/preflight.mjs` reproduces that exact check for every capture — same
-`setupScript`, same URL resolution, same `getByText` semantics — reports every scene
-instead of stopping at the first, and deliberately does **not** run the steps, because
-a preflight that mutates the data it validates is worse than none. Post-click
-expectations moved to `waitForText`, where the pipeline enforces them during the take.
-
-Result: **19/19 capture scenes pass preflight** against the live rig.
-
-**D25 — Two beats were re-grounded against the live solver.**
-`06a` and `07b` originally used Tan Ah Meng, who returns **exactly one** candidate
-(8A-03, +85) — so "three beds come back" was false and there was no rank-2 bed to
-override. Both now use **Mr Goh Beng Kiat** (Q-P107, SURGERY), who returns three:
-10A-02 +70 (`+40 Specialty` + `+30 Consolidation`), 8A-03 +30, 9B-02 +30. The
-narration speaks 70/30/30, which the shot itself produces.
-
-R3's Tier-2 wording also changed. `bmu.tsx:1197` gates the modal on
-`rec.isOperationalOverride || idx > 0`, and the API returns `isOperationalOverride`
-**undefined**, so in practice the gate is *positional*: any bed but the best one. The
-slide now says exactly that instead of claiming a tier-derived override the backend
-does not compute.
-
-
+**D29 — Timing converged by measurement.** Retained and re-confirmed, with a sharper rule learned
+this run: **the correct stage order for a clean standalone-`verify` is capture screencasts →
+synthesize → capture again (rebuilds slides + stills at the now-known `sceneMs`) → synthesize →
+compose → verify.** Running the stages in the wrong order (slides captured before synthesize set
+`sceneMs`) produced drift on every slide, and the coverage-stills scene built at the 5000 ms default
+until a second capture pass. Setting each terminal/capture `delayMs` to ≈ its natural rate-0 audio so
+scenes land `audio-dictates` (drift ~0) is more robust than relying on speech-fit stretching. Two
+captures whose narration was 30–37% longer than the visual (`07-separation`/`07a`, `08a2`) were
+lengthened so the narration fits at a natural rate rather than being sped up to the cap.
 
 ### 7.1 Rig
 
 | | |
 | --- | --- |
-| Skill copy | **`.kiro/skills/video-generator`** — the newer copy (has `references/storyline-authoring.md`, `templates/storyline/`). The `.agents/` copy is stale (`deck-authoring.md`, `templates/deck/`) and must not be used |
-| Work dir | `video-generation-technical/` — its own `.runtime/`; nothing carries over from `video-generation-product/` |
-| Bootstrap | `node .kiro/skills/video-generator/scripts/bootstrap.mjs --workDir=video-generation-technical --with-remotion=false --with-vhs` — Remotion defaults to *on* and its pinned version no longer resolves; nothing here needs it |
-| Source / lockfile | `storyline.yml` authored (**filename is load-bearing** — `generate.mjs` hardcodes it and silently skips compilation if absent); `storyboard.json` generated, committed, never hand-edited |
+| Skill copy | **`.kiro/skills/video-generator`** — the newer copy. The `.agents/` copy is stale and must not be used |
+| Work dir | `video-generation-technical/` — its own `.runtime/` |
+| Source / lockfile | `storyline.yml` authored (filename load-bearing); `storyboard.json` generated, committed, never hand-edited |
 | Deck | `engine: html`, `theme: light`, `aspect: landscape`, `outputs: [landscape]`, `formats: [png, pdf, html]` |
-| Determinism | `baseUrl: http://127.0.0.1:8080`; `fixedTime: '2026-01-15T09:00:00.000Z'` (same as the product film) |
+| Determinism | `baseUrl: http://127.0.0.1:3000` (D21); `fixedTime: '2026-01-15T09:00:00.000Z'` |
 | Voice | Kokoro, `gender: female` |
-| Ignored / committed | `assets/` gitignored; `storyline.yml`, `storyboard.json`, `scenes/`, `pages/` and **`footage/`** committed (D18 makes `footage/` load-bearing, and it is deliberately not gitignored) |
+| Committed | `storyline.yml`, `storyboard.json`, `scenes/`, `pages/` (incl. `pages/runs/*.json`), `tools/`; `assets/` gitignored |
 
-**Multi-origin capture:** `capture.mjs:155` resolves `new URL(spec.url ?? '/', options.baseUrl)`, so
-an **absolute** `url` bypasses `baseUrl` entirely. That makes the coverage reports and the
-seam-diagram page (D17) free to capture from a second origin, and the app is left untouched.
-*Rejected:* copying those assets into the Spring Boot static resources, which would pollute the
-application to serve a video.
+**Multi-origin capture:** an **absolute** `url` bypasses `baseUrl` (`capture.mjs`), so the coverage
+reports, the seam diagram and the terminal takes are all captured from the `:4173` origin, leaving the
+application untouched.
 
-### 7.2 Runbook — every prerequisite, in order (all steps executed and verified 18 Sep)
+### 7.2 Runbook — every prerequisite, in order (all executed and verified this run)
 
-Order matters more than the plan originally admitted. `clean package` **deletes** the
-JaCoCo report, so packaging must come first; and the terminal evidence for pathway B
-depends on workflows having run.
-
-1. ~~`brew install charmbracelet/tap/vhs ttyd`~~ — **no longer required.** VHS was
-   installed and does not work (D20); terminal evidence needs nothing beyond Node.
-2. `cd backend && ./mvnw clean package -DskipTests` — build the jar **first**.
-3. `cd backend && ./mvnw test jacoco:report` — **without `clean`**, which would delete
-   the report just generated. Produces `backend/target/site/jacoco/index.html`
-   (measured: 214 tests, 94% instructions, 69% branches).
-4. Launch the prototype JVM on `:8080` with stdout redirected:
-   `java -Dspring.profiles.active=prototype -jar backend/target/admissions-0.0.1-SNAPSHOT.jar > logs/app.log 2>&1 &`
-   **This JVM must survive the whole run** (H2 is `create-drop`).
-5. Launch the production-profile JVM on `:8081`:
-   `java -jar …jar --spring.profiles.active=production --server.port=8081 > logs/app-production.log 2>&1 &`
-   The explicit profile is mandatory (D22).
-6. `cd frontend && npx vite --host 127.0.0.1 --port 3000` — captures target this
-   (D21); the IPv4 host flag is required.
-7. `bash video-generation-technical/tools/serve-evidence.sh` — symlinks the seam page,
-   the terminal renderer, the run JSONs and both coverage reports under one `:4173`
-   origin and verifies all five URLs return 200.
-8. `node video-generation-technical/tools/record-runs.mjs` — freeze the terminal
-   evidence. **Re-run `09b-audit-log` last**, after `capture.mjs`, because audit lines
-   are written by the workflows the captures drive (a fresh JVM has zero).
-9. `node video-generation-technical/tools/preflight.mjs` — must report
-   **19/19 capture scenes ready** before any spend.
+1. VHS **not required** (D20); terminal evidence needs nothing beyond Node.
+2. `cd backend && ./mvnw test jacoco:report` — **without `clean`** (which deletes the report).
+   Produces `backend/target/site/jacoco/index.html` (measured: 214 tests, 94% instr, 69% branches).
+3. `cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=prototype` (or the jar) on
+   `:8080`. **This JVM must survive each capture pass** (H2 is `create-drop`); restart it before each
+   full pass (D28).
+4. `cd frontend && npm run test:coverage` — generates `frontend/coverage/` (exits non-zero: the
+   branch gate is red at 74.84%, which is the point).
+5. `cd frontend && npm run dev -- --host 127.0.0.1` — captures target `:3000`; the IPv4 host flag is
+   required (D21).
+6. `bash video-generation-technical/tools/serve-evidence.sh` — symlinks the seam page, the terminal
+   renderer, the run JSONs and both coverage reports under `:4173` and verifies all URLs return 200.
+   (Healthcheck references `runs/05b-consensus-gate.json`.)
+7. `node video-generation-technical/tools/record-runs.mjs` — freeze the terminal evidence (7 runs).
+8. `node video-generation-technical/tools/preflight.mjs` — must report **14/14 capture scenes ready**
+   before any spend.
+9. `compile` → `deck` → `synthesize` → `capture` → `synthesize` → `capture` → `compose` → `verify`,
+   or run `generate.mjs --yes` which orchestrates the converged order. Restart `:8080` before each
+   full capture pass.
 
 ### 7.3 Two ordering constraints that are correctness issues, not preferences
 
-- **Nothing may restart the `:8080` JVM after R1.** H2 is `create-drop`
-  (`application-prototype.yml`), so a restart empties the data R5's dashboard reads, and the film
-  ships with a dashboard that contradicts the workflows the viewer just watched. This is precisely
-  why R1's no-profile demo runs as a **separate process on `:8081`** rather than as a restart.
-- **A dashboard of zeros satisfies every assertion we would naturally write.**
-  `assert.visible: ['Avg ED Turnaround']` passes on a freshly-seeded, unexercised system. R5's
-  captures must therefore assert on a **non-zero rendered value**, or on text that only renders once
-  a benchmark evaluates — otherwise the invariant does not bind where it matters most.
+- **A capture pass mutates H2 state, so each full pass needs a fresh `:8080`.** `08a`/`08a2` vacate
+  and clean beds; a second pass against the mutated tree aborts on a missing button (D28).
+- **A dashboard of zeros satisfies every assertion we would naturally write.** `09a`'s captures
+  assert on `Target Met` / a non-zero rendered value, and the scene order exercises the workflows
+  first, so the dashboard reflects real activity.
 
 ### 7.4 Stage order and regeneration
 
-`compile.mjs` → `deck.mjs` (slides, free, no TTS) → **outline gate** → `synthesize.mjs` →
-**re-derive every capture's trailing `wait delayMs` from measured audio** → `capture.mjs` →
-`compose.mjs` → `verify.mjs`.
+`compile.mjs` → `deck.mjs` (slides, free, no TTS) → gate → **capture screencasts** → `synthesize.mjs`
+(fits speech to the real captured visuals) → **capture again** (rebuilds slides + stills at the final
+`sceneMs`) → `synthesize.mjs` → `compose.mjs` → `verify.mjs`. `generate.mjs` performs this converged
+order automatically; running stages by hand requires it explicitly (D29).
 
-- Initial `delayMs` values are derived at ~150 wpm + a 400 ms tail, then **re-derived from measured
-  audio after the first `synthesize.mjs`** to keep `ratePct` inside the inaudible band
-  (`core.mjs RATE_FIT.INAUDIBLE`). This is the only way to avoid a second, expensive capture pass.
-- **Terminal takes are inelastic** — a test suite takes as long as it takes — so narration is fitted
-  to them, never the reverse. Budget `sleep` generously; an under-slept tape truncates the output
-  being narrated.
-- The cache is content-addressed per scene, so editing one sentence costs one scene — **except** that
-  capture keys include the app version, so a changed app HEAD or a changed `delayMs` rebuilds that
-  clip.
-- Assertions are mandatory on every capture: `assert.visible` for the content that must be there,
-  `assert.notVisible` for `['Something went wrong', 'No static resource', 'Sign in']`.
+- Set each capture's trailing `wait delayMs` to ≈ its natural rate-0 audio so the scene lands
+  `audio-dictates` with ~0 drift; this is more robust than leaning on ±7% speech-fit.
+- Terminal takes are **inelastic** — a test suite takes as long as it takes — so narration is fitted
+  to them, never the reverse.
+- Assertions are mandatory on every capture: `assert.visible` for required content, `assert.notVisible`
+  for `['Something went wrong', 'No static resource', 'Sign in']` (or the terminal equivalents).
 
 ---
 
 ## 8. Open Items
 
-**Closed 18 Sep by measurement, not by argument:**
+**Closed by measurement this run:**
 
 | Was open | Outcome |
 | --- | --- |
-| Mermaid path | Seam diagram is a captured page on `:4173`, verified at 1920×1080 with its reveal (D17) |
-| Which test class holds the tier assertions | `HeuristicBedAllocationSolverTest`, 4 methods (D19) |
-| 403 vs 401 | **403**, and only with an explicit production profile (D22) |
 | Actual coverage numbers | 94% instr / 97% lines / 69% branches backend; frontend gate **red** at 74.84% (D23) |
-| `09a` would pass on a zeroed dashboard | Asserts `Target Met`; and scene order mutates state first. All 22 KPI scalars now non-zero |
-| `05d` persona selector unverified | It is a `<select aria-label="Select role persona">`; uses `selectOption` with real option values |
-| 8 `.tape` files unwritten | Superseded — VHS is unusable; 9 runs frozen as JSON instead (D20) |
-| VHS prerequisite | Removed entirely |
+| `05a` ED capture asserted click-gated text on load | Rewritten to click the patient + consult box, `waitForText ASSESSMENT_PENDING`; 14/14 preflight (D24) |
+| New terminal-run evidence | 7 runs recorded; all 18 asserted strings verified present (D20) |
+| Timing convergence | Standalone `verify.mjs` PASS; converged via the capture→synthesize→capture→synthesize order (D29) |
 
-**Still open, and none of them block the gate:**
+**Remaining, none of which block the gate:**
 
-- **The film has not been captured, synthesised or composed.** Everything above the
-  gate is verified; nothing below it has been run.
-- **`delayMs` values are still 150-wpm estimates.** They must be re-derived from
-  measured audio after the first `synthesize.mjs`, per §7.4.
-- **`09b` currently shows only 3 audit lines** (one override, one vacate, one clean —
-  three different acting users, which is the point). Re-record it after `capture.mjs`
-  so it reflects the workflows the viewer just watched.
-- **Runtime is now ~11m00s estimated**, above the 9:00–10:30 target and inside the
-  15:00 ceiling. `09e` is the newest 24 seconds; cutting it would return the film to
-  ~10:35, at the cost of the strongest honesty beat (D23).
+- Two non-fatal `verify.mjs` warnings: total-duration drift ~124 ms over the soft threshold, and 6
+  held-frame freezes >6s (intended trailing holds on terminal/coverage takes).
+- On `05a`, `ASSESSMENT_PENDING` renders low in the ED form and can sit below the frame in the final
+  still; the `waitForText` gate confirms it rendered during capture. A scroll-into-view step + a
+  single-scene re-capture would frame it more prominently if desired.
 
-**Repo side tasks, separate from the film — all discovered while verifying it:**
+**Repo side tasks, separate from the film:**
 
-1. **No SPA fallback.** The packaged jar 404s on `/ed`, `/bmu`, `/analytics`. A
-   reviewer who refreshes the live demo on any deep link gets a 404. One
-   `WebMvcConfigurer` forward fixes it (D21).
-2. **`bmu.tsx:1173` is dead code.** `safetyViolationReason` and
-   `isOperationalOverride` are never populated by the backend; the "Zero override
-   allowed" branch cannot render. Wire the solver to return flagged-but-forbidden
-   beds, or delete the branch and the DTO fields (D19).
-3. **The prototype profile is the configuration default** (`application.yml:5`). A
-   production deployment that forgets `--spring.profiles.active` boots the prototype,
-   with seeded patients and header-based auth. Consider making the default profile
-   inert (D22).
-4. **The frontend coverage gate is red** (branches 74.84% vs 90%) and the committed
-   `frontend/coverage/` HTML is 8 days stale and claims 100%. Either raise branch
-   coverage, widen the `include` list honestly, or lower the threshold deliberately —
-   but do not leave a gate nobody runs (D23).
-5. **README reconciliation:** "18 operational KPI metrics" → 20 metrics + 2 breakdown
-   maps (the DTO returns 22 scalars, two of which are period labels); and "quality
-   gates" against the absence of CI.
-6. **`bootstrap.mjs` pins `@remotion/cli@4.0.360`**, which no longer resolves, and
-   defaults Remotion to on. Anyone re-bootstrapping needs `--with-remotion=false`.
+1. **No SPA fallback.** The packaged jar 404s on `/ed`, `/bmu`, `/analytics`; a reviewer refreshing
+   the live demo on a deep link gets a 404. One `WebMvcConfigurer` forward fixes it (D21).
+2. **`bmu.tsx` dead code.** `safetyViolationReason` / `isOperationalOverride` are never populated by
+   the backend (D19).
+3. **The prototype profile is the configuration default** (`application.yml`). A production deploy
+   that forgets the profile boots the prototype (D22).
+4. **The frontend coverage gate is red** (branches 74.84% vs 90%) and the committed report is stale
+   at 100% (D23).
+5. **README reconciliation:** "18 operational KPI metrics" → 20 metrics + 2 breakdown maps.
+6. **`bootstrap.mjs` pins `@remotion/cli@4.0.360`**, which no longer resolves; use
+   `--with-remotion=false`.
 
 ---
 
 ## 9. Non-Goals
 
 - Re-selling the product, re-explaining the six pain points, or reusing the product film's beats.
-- Any patient-journey narrative, emotional framing, or "the wait every family knows" register.
-- Code on screen, IDE footage, generated b-roll, background music. (`footage/` does exist, but it holds
-  only VHS recordings of real commands — see D18.)
-- `scripts/`, `/h2-console` (a third view of the pathway we are least challenged on), E2E/Allure.
-- Vertical (9:16) output, PPTX emission, any claim about future pricing or performance that no shot
-  produces.
+- Any patient-journey narrative, emotional framing, or aphoristic/"quotable" phrasing.
+- Code on screen, IDE footage, generated b-roll, background music.
+- `scripts/`, `/h2-console`, E2E/Allure.
+- A final CTA (removed from film and deck — D27).
+- Vertical (9:16) output, PPTX emission, any claim about future pricing or performance no shot produces.
 - Naming a target role, company or seniority.
 
 ---
 
-## 10. Definition of Done
+## 10. Definition of Done (met)
 
-1. `storyline.yml` compiles clean — SCR skeleton satisfied (2/2/5), no overflow, no unknown icons,
-   every capture carries `assert.visible` **and** `assert.notVisible`.
-2. Every resolution beat names a **price** in narration *and* carries it as a `detail:` on a card —
-   verified by hand, because the compiler only enforces cost-words on complications.
-3. Every number spoken is produced by the shot it is spoken over.
-4. Slide PNGs reviewed at 1920×1080 **before** any TTS or capture spend.
-5. All six runbook prerequisites up, and both ordering constraints in §7.3 observed.
-6. `verify.mjs` reports `PASS`; the run report's degraded-feature list is read and accepted (VHS
-   absence, if any, appears there).
-7. Deck exports as PDF + HTML and reads standalone without the narration.
+1. `storyline.yml` compiles clean — SCR 2/2/5, no overflow, no unknown icons, every capture carries
+   `assert.visible` **and** `assert.notVisible`. ✔
+2. Every resolution beat names a **trade-off** in narration *and* carries it as a `detail:` card. ✔
+3. Every number spoken is produced by the shot it is spoken over. ✔
+4. Slide PNGs reviewed at 1920×1080 before TTS/capture spend. ✔
+5. All runbook prerequisites up; both §7.3 ordering constraints observed. ✔
+6. Standalone `verify.mjs` reports **PASS** (two non-fatal warnings, §8). ✔
+7. Deck exports as PDF + HTML and reads standalone without narration. ✔
+8. Film ends on the countable-artifacts take; **no CTA**. ✔

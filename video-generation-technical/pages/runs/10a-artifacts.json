@@ -1,0 +1,32 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "10a-artifacts",
+  "title": "The specifications preceded the code, and it is countable",
+  "recordedAt": "2026-09-18T05:26:25.143Z",
+  "steps": [
+    {
+      "cmd": "printf 'wayfinder tickets : %s\\n' $(ls .wayfinder/tickets | wc -l)",
+      "output": "wayfinder tickets : 11",
+      "exitCode": 0,
+      "durationMs": 41
+    },
+    {
+      "cmd": "printf 'scratch issues    : %s\\n' $(ls .scratch/*/issues/*.md | wc -l)",
+      "output": "scratch issues    : 28",
+      "exitCode": 0,
+      "durationMs": 36
+    },
+    {
+      "cmd": "printf 'specifications    : %s\\n' $(ls specs | wc -l)",
+      "output": "specifications    : 5",
+      "exitCode": 0,
+      "durationMs": 34
+    },
+    {
+      "cmd": "printf 'decision records  : %s\\n' $(ls docs/adr | wc -l)",
+      "output": "decision records  : 4",
+      "exitCode": 0,
+      "durationMs": 34
+    }
+  ]
+}

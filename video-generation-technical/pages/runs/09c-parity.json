@@ -1,0 +1,14 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "09c-parity",
+  "title": "Parity between the two pathways is asserted, not eyeballed",
+  "recordedAt": "2026-09-18T05:27:01.526Z",
+  "steps": [
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest=PathBDualPathwayReconciliationIntegrationTest 2>&1 | grep -E 'Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.230 s -- in com.hospital.admissions.PathBDualPathwayReconciliationIntegrationTest\n[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 5879
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "07a-absolute-tier",
+  "title": "The absolute tier is proved by elimination, not by a screenshot",
+  "recordedAt": "2026-09-18T05:26:52.622Z",
+  "steps": [
+    {
+      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/solver/HeuristicBedAllocationSolverTest.java | sed 's/.*(\"/  - /; s/\")//'",
+      "output": "  - recommendBeds filters by WardClass, Gender, Telemetry, and Infection constraints and scores candidates\n  - recommendBeds eliminates multi-bed wards with occupants for infectious patients\n  - recommendBeds eliminates wards without negative pressure for respiratory airborne infection patients\n  - recommendBeds prioritizes admittingSpecialtyCluster over suspectedDiagnosisService and prunes on effectiveTelemetry",
+      "exitCode": 0,
+      "durationMs": 37
+    },
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest=HeuristicBedAllocationSolverTest 2>&1 | grep -E 'Tests run:'",
+      "output": "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.622 s -- in com.hospital.admissions.solver.HeuristicBedAllocationSolverTest\n[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0",
+      "exitCode": 0,
+      "durationMs": 2272
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "06c-solver-pinned",
+  "title": "The heuristic is pinned by tests, which is what makes it replaceable",
+  "recordedAt": "2026-09-18T05:26:50.313Z",
+  "steps": [
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest=HeuristicBedAllocationSolverTest 2>&1 | grep -E 'Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.690 s -- in com.hospital.admissions.solver.HeuristicBedAllocationSolverTest\n[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 2305
+    }
+  ]
+}

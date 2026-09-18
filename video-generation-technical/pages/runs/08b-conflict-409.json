@@ -1,0 +1,20 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "id": "08b-conflict-409",
+  "title": "Optimistic locking, proved where the UI cannot honestly stage it",
+  "recordedAt": "2026-09-18T05:30:40.175Z",
+  "steps": [
+    {
+      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/controller/ClinicianControllerTest.java backend/src/test/java/com/hospital/admissions/controller/GlobalExceptionHandlerTest.java | grep -i 'conflict' | sed 's/.*(\"/  - /; s/\")//'",
+      "output": "  - POST /api/v1/clinicians/specialist/broadcasts/{id}/claim conflict returns 409 Conflict ProblemDetail\n  - IllegalStateException returns 409 Conflict ProblemDetail\n  - ObjectOptimisticLockingFailureException returns 409 Conflict ProblemDetail",
+      "exitCode": 0,
+      "durationMs": 36
+    },
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest='ClinicianControllerTest#testClaimBroadcast_ConflictReturns409,GlobalExceptionHandlerTest' 2>&1 | grep -E 'Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.113 s -- in com.hospital.admissions.controller.ClinicianControllerTest\n[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.176 s -- in com.hospital.admissions.controller.GlobalExceptionHandlerTest\n[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 2927
+    }
+  ]
+}

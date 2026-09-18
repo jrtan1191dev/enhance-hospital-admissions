@@ -1,8 +1,8 @@
 {
   "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
-    "file": "deck.yaml",
-    "checksum": "80c0c2ae8c07e3f13f3685a447bbd33c9e3fe37f36211d86813cbc3ee0e6fa3c"
+    "file": "storyline.yml",
+    "checksum": "6e00fd8f16d03156a33d725a05792be3524c3c42e75e0d24bba0509c14b2a601"
   },
   "meta": {
     "title": "Recovering Hospital Beds Without Building More",

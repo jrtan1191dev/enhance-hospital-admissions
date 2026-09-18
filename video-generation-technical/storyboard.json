@@ -2,7 +2,7 @@
   "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
     "file": "storyline.yml",
-    "checksum": "43afe6081877986eedb4453530cccaf07d780fe1ccdbaa7d419cf626d235f52a"
+    "checksum": "6c35070f0f7f28cab2c48b09d735c40c3529f0be7044c1666fb2ca2147ca20af"
   },
   "meta": {
     "title": "Build the Foundations, Stub the Rest",
@@ -21,7 +21,7 @@
       "enabled": true
     },
     "background": "#F1F5F9",
-    "baseUrl": "http://127.0.0.1:8080",
+    "baseUrl": "http://127.0.0.1:3000",
     "fixedTime": "2026-01-15T09:00:00.000Z",
     "deck": {
       "archetype": "scr",
@@ -74,6 +74,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/01-purpose.wav",
+        "durationMs": 20900,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "bb95725e3aa6"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 21300,
+        "ratePct": 0,
+        "padVisualMs": 21300,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/01-purpose.mp4",
+        "durationMs": 21300,
+        "roi": null,
+        "hash": "92ef2ea4379d"
       }
     },
     {
@@ -120,6 +143,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02-domain-model.wav",
+        "durationMs": 21850,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "bcd87231c270"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 22250,
+        "ratePct": 0,
+        "padVisualMs": 22250,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02-domain-model.mp4",
+        "durationMs": 22267,
+        "roi": null,
+        "hash": "9f34811026fe"
       }
     },
     {
@@ -136,7 +182,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 21400
+            "delayMs": 18951
           }
         ]
       },
@@ -152,7 +198,30 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Live Bed Inventory Matrix"
+      "roiSelector": "text=Live Bed Inventory Matrix",
+      "resolvedAudio": {
+        "filePath": "assets/audio/02b-bed-board-capture.wav",
+        "durationMs": 19125,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "cc3aaf20905c"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 19525,
+        "ratePct": 0,
+        "padVisualMs": 19525,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02b-bed-board-capture.mp4",
+        "durationMs": 19515.52587890625,
+        "roi": null,
+        "hash": "836d7a4032fa"
+      }
     },
     {
       "id": "03-both-moves-fail",
@@ -189,6 +258,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/03-both-moves-fail.wav",
+        "durationMs": 23825,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "20f791200e60"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 24225,
+        "ratePct": 0,
+        "padVisualMs": 24225,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/03-both-moves-fail.mp4",
+        "durationMs": 24234,
+        "roi": null,
+        "hash": "bf0eb95c728f"
       }
     },
     {
@@ -230,6 +322,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04-cannot-fake.wav",
+        "durationMs": 19150,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "e677fffb3b2c"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 19550,
+        "ratePct": 0,
+        "padVisualMs": 19550,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04-cannot-fake.mp4",
+        "durationMs": 19567,
+        "roi": null,
+        "hash": "4f1cffdfd979"
       }
     },
     {
@@ -276,6 +391,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05-seam.wav",
+        "durationMs": 22500,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "ab6fd1d66ce3"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 22900,
+        "ratePct": 0,
+        "padVisualMs": 22900,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05-seam.mp4",
+        "durationMs": 22900,
+        "roi": null,
+        "hash": "b4f7d770d0ae"
       }
     },
     {
@@ -302,8 +440,12 @@
             "delayMs": 900
           },
           {
+            "action": "waitForText",
+            "value": "UnsupportedOperationException"
+          },
+          {
             "action": "wait",
-            "delayMs": 17600
+            "delayMs": 14735
           }
         ]
       },
@@ -319,34 +461,154 @@
           "Not Found"
         ]
       },
-      "roiSelector": "#diagram"
-    },
-    {
-      "id": "05b-profile-fence-footage",
-      "title": "05b-profile-fence-footage",
-      "narration": "That refusal is not theoretical. This is the same jar with the prototype profile switched off. The health check answers, so the application is up. Every business endpoint is denied, because the only security configuration left is the one that authenticates everything, and no login mechanism exists yet. The fence is a running process, not a comment.",
-      "role": null,
-      "visualEngine": "manual_footage",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "src": "footage/05b-profile-fence.mp4"
+      "roiSelector": "#diagram",
+      "resolvedAudio": {
+        "filePath": "assets/audio/05a-seam-diagram-capture.wav",
+        "durationMs": 18000,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "df778cb45ae8"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 18400,
+        "ratePct": 0,
+        "padVisualMs": 18400,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05a-seam-diagram-capture.mp4",
+        "durationMs": 18414.068115234375,
+        "roi": {
+          "x": 1889.875,
+          "y": 1051.8125,
+          "width": 22.125,
+          "height": 18
+        },
+        "hash": "bf62a16d19d8"
+      },
+      "roi": {
+        "x": 1889.875,
+        "y": 1051.8125,
+        "width": 22.125,
+        "height": 18
       }
     },
     {
-      "id": "05c-stub-contract-footage",
-      "title": "05c-stub-contract-footage",
-      "narration": "And the stubs themselves are under test. Three production adapters, each asserted to throw the moment it is invoked. That is the part people skip — a placeholder nobody tests will eventually be called by accident, in a profile nobody checked.",
+      "id": "05b-profile-fence-terminal",
+      "title": "05b-profile-fence-terminal",
+      "narration": "That refusal is not theoretical. This is the same jar, started with the production profile. The health check answers, so the application is up — and every business endpoint comes back four-oh-three, because the only security configuration left authenticates everything and no login mechanism exists yet. Worth naming: the prototype profile is the default in configuration, so production is the profile you have to ask for. That is on the list of what is owed.",
       "role": null,
-      "visualEngine": "manual_footage",
+      "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "src": "footage/05c-stub-contract.mp4"
+        "url": "http://127.0.0.1:4173/term.html?run=05b-profile-fence",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 27935
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "The following 1 profile is active",
+          "production",
+          "403"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/05b-profile-fence-terminal.wav",
+        "durationMs": 27875,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "ea5998b7eb93"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 28275,
+        "ratePct": 0,
+        "padVisualMs": 28275,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05b-profile-fence-terminal.mp4",
+        "durationMs": 28057.863037109375,
+        "roi": null,
+        "hash": "e49565ad6abd"
+      }
+    },
+    {
+      "id": "05c-stub-contract-terminal",
+      "title": "05c-stub-contract-terminal",
+      "narration": "And the stubs themselves are under test. Three production adapters, each asserted to throw the moment it is invoked. That is the part people skip — a placeholder nobody tests will eventually be called by accident, in a profile nobody checked.",
+      "role": null,
+      "visualEngine": "playwright_web",
+      "captureMode": "screencast",
+      "actionSpec": {
+        "url": "http://127.0.0.1:4173/term.html?run=05c-stub-contract",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 16046
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "UnsupportedOperationException",
+          "Tests run: 5",
+          "BUILD SUCCESS"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/05c-stub-contract-terminal.wav",
+        "durationMs": 15825,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "1ac52447d67f"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 16225,
+        "ratePct": 0,
+        "padVisualMs": 16225,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05c-stub-contract-terminal.mp4",
+        "durationMs": 16407.06005859375,
+        "roi": null,
+        "hash": "6c5fdb647abc"
       }
     },
     {
       "id": "05d-persona-fence-capture",
       "title": "05d-persona-fence-capture",
-      "narration": "One convenience was deliberately kept, and it is a security hole. Six personas, six seeded accounts, and a switch that changes role without a login. I built it because a reviewer has to walk five desks to see the argument, and five login flows would bury it. It is fenced behind the prototype profile, and the default configuration refuses that header outright.",
+      "narration": "One convenience was deliberately kept, and it is a security hole. Six personas, six seeded accounts, and a switch that changes role without a login. I built it because a reviewer has to walk five desks to see the argument, and five login flows would bury it. It is fenced behind the prototype profile, and the production configuration refuses that header outright.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -355,29 +617,29 @@
         "roiSelector": "header",
         "steps": [
           {
-            "action": "click",
-            "selector": "header select, header button:has-text(\"ED\")",
-            "target": "Persona switcher in the header",
-            "delayMs": 1200
+            "action": "selectOption",
+            "selector": "select[aria-label=\"Select role persona\"]",
+            "value": "BMU_COORDINATOR",
+            "target": "Persona switcher — BMU coordinator",
+            "delayMs": 2200
+          },
+          {
+            "action": "selectOption",
+            "selector": "select[aria-label=\"Select role persona\"]",
+            "value": "WARD_NURSE",
+            "target": "Persona switcher — ward nurse",
+            "delayMs": 2200
           },
           {
             "action": "wait",
-            "delayMs": 1200
-          },
-          {
-            "action": "press",
-            "value": "Escape",
-            "delayMs": 400
-          },
-          {
-            "action": "wait",
-            "delayMs": 21800
+            "delayMs": 17204
           }
         ]
       },
       "assert": {
         "visible": [
-          "Emergency Department (ED) Clinical Intake"
+          "Persona:",
+          "Live Sync"
         ],
         "notVisible": [
           "Something went wrong",
@@ -385,7 +647,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": "header"
+      "roiSelector": "header",
+      "resolvedAudio": {
+        "filePath": "assets/audio/05d-persona-fence-capture.wav",
+        "durationMs": 23025,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "cc6513f1ed76"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 23425,
+        "ratePct": 0,
+        "padVisualMs": 23425,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05d-persona-fence-capture.mp4",
+        "durationMs": 23429.944091796875,
+        "roi": {
+          "x": 1032.484375,
+          "y": 18,
+          "width": 272,
+          "height": 28
+        },
+        "hash": "ccae4c5e0681"
+      },
+      "roi": {
+        "x": 1032.484375,
+        "y": 18,
+        "width": 272,
+        "height": 28
+      }
     },
     {
       "id": "06-heuristic",
@@ -422,12 +718,35 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06-heuristic.wav",
+        "durationMs": 24025,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "a033277d1f45"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 24425,
+        "ratePct": 0,
+        "padVisualMs": 24425,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06-heuristic.mp4",
+        "durationMs": 24434,
+        "roi": null,
+        "hash": "34e7d2cf39b9"
       }
     },
     {
       "id": "06a-explainable-score-capture",
       "title": "06a-explainable-score-capture",
-      "narration": "Four hard rules filter the candidate set, then three weighted preferences rank what survives. Three beds come back with a score, and underneath each score, the reason it earned that score. That decomposition is the whole point of the trade — a coordinator can read why bed one beat bed two, which is exactly what the solver could not have given me.",
+      "narration": "Four hard rules filter the candidate set, then three weighted preferences rank what survives. Three beds come back for this patient — seventy, thirty and thirty — and under each score, the rules that produced it. That decomposition is the whole point of the trade: a coordinator can read why the first bed beat the other two, which is exactly what the solver could not have given me.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
@@ -438,8 +757,8 @@
         "steps": [
           {
             "action": "click",
-            "selector": "tr:has-text(\"Tan Ah Meng\") >> role=button[name=\"Select\"]",
-            "target": "Select button on the Tan Ah Meng row",
+            "selector": "tr:has-text(\"Mr Goh Beng Kiat\") >> role=button[name=\"Select\"]",
+            "target": "Select button on the Mr Goh Beng Kiat row",
             "delayMs": 700
           },
           {
@@ -447,16 +766,20 @@
             "value": "Top Algorithmic Matches"
           },
           {
+            "action": "waitForText",
+            "value": "Score:"
+          },
+          {
             "action": "wait",
-            "delayMs": 23700
+            "delayMs": 21305
           }
         ]
       },
       "assert": {
         "visible": [
-          "Solver Recommendation",
-          "Tan Ah Meng",
-          "Score:"
+          "Bed Management Unit (BMU) Capacity & Allocation Hub",
+          "Prioritized Admission Requests",
+          "Mr Goh Beng Kiat"
         ],
         "notVisible": [
           "Something went wrong",
@@ -464,7 +787,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5"
+      "roiSelector": ".lg\\\\:col-span-5",
+      "resolvedAudio": {
+        "filePath": "assets/audio/06a-explainable-score-capture.wav",
+        "durationMs": 22900,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "28d84a90077a"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 23300,
+        "ratePct": 0,
+        "padVisualMs": 23300,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06a-explainable-score-capture.mp4",
+        "durationMs": 23315.273193359375,
+        "roi": {
+          "x": 1422.265625,
+          "y": 1511.59375,
+          "width": 58.265625,
+          "height": 28
+        },
+        "hash": "6f4166609c0a"
+      },
+      "roi": {
+        "x": 1422.265625,
+        "y": 1511.59375,
+        "width": 58.265625,
+        "height": 28
+      }
     },
     {
       "id": "06b-weights-are-config-capture",
@@ -480,7 +837,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 18400
+            "delayMs": 18234
           }
         ]
       },
@@ -495,17 +852,83 @@
           "No static resource"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedAudio": {
+        "filePath": "assets/audio/06b-weights-are-config-capture.wav",
+        "durationMs": 18400,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "8ad22a1e47c8"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 18800,
+        "ratePct": 0,
+        "padVisualMs": 18800,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06b-weights-are-config-capture.mp4",
+        "durationMs": 18814.303955078125,
+        "roi": null,
+        "hash": "a6e47ab3f708"
+      }
     },
     {
-      "id": "06c-solver-pinned-footage",
-      "title": "06c-solver-pinned-footage",
+      "id": "06c-solver-pinned-terminal",
+      "title": "06c-solver-pinned-terminal",
       "narration": "The heuristic is pinned by tests, which is what makes it safe to throw away. Every rule has an assertion behind it — so the day Timefold goes in behind that interface, these are the tests it has to satisfy.",
       "role": null,
-      "visualEngine": "manual_footage",
+      "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "src": "footage/06c-solver-pinned.mp4"
+        "url": "http://127.0.0.1:4173/term.html?run=06c-solver-pinned",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 13411
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "Tests run: 4",
+          "Failures: 0",
+          "BUILD SUCCESS"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/06c-solver-pinned-terminal.wav",
+        "durationMs": 13475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d9fe730f3cac"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13875,
+        "ratePct": 0,
+        "padVisualMs": 13875,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06c-solver-pinned-terminal.mp4",
+        "durationMs": 13772.880126953125,
+        "roi": null,
+        "hash": "4379ef83c1a0"
       }
     },
     {
@@ -531,7 +954,7 @@
           {
             "icon": "unlock",
             "title": "Negotiable tier",
-            "text": "Ward class and telemetry, overridable with a structured institutional code."
+            "text": "Any bed but the top-ranked one requires a structured institutional code."
           },
           {
             "icon": "git-merge",
@@ -552,17 +975,83 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07-two-tier.wav",
+        "durationMs": 22625,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "62f225b337e4"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 23025,
+        "ratePct": 0,
+        "padVisualMs": 23025,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07-two-tier.mp4",
+        "durationMs": 23034,
+        "roi": null,
+        "hash": "be6c34e11ebf"
       }
     },
     {
-      "id": "07a-absolute-tier-footage",
-      "title": "07a-absolute-tier-footage",
+      "id": "07a-absolute-tier-terminal",
+      "title": "07a-absolute-tier-terminal",
       "narration": "Notice how the absolute tier gets proved. There is no disabled button to photograph, because a bed that violates a hard constraint never becomes a recommendation at all — it is eliminated from the candidate set. Absence cannot be screenshotted, so it is asserted: gender, telemetry, infection, negative pressure, each with a test that fails if that bed survives.",
       "role": null,
-      "visualEngine": "manual_footage",
+      "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "src": "footage/07a-absolute-tier.mp4"
+        "url": "http://127.0.0.1:4173/term.html?run=07a-absolute-tier",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 23775
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "eliminates wards without negative pressure",
+          "WardClass, Gender, Telemetry",
+          "Tests run: 4"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/07a-absolute-tier-terminal.wav",
+        "durationMs": 23375,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "bfd0c45f8ec1"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 23775,
+        "ratePct": 0,
+        "padVisualMs": 23775,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07a-absolute-tier-terminal.mp4",
+        "durationMs": 24357.94580078125,
+        "roi": null,
+        "hash": "4de0c0b8001b"
       }
     },
     {
@@ -579,8 +1068,8 @@
         "steps": [
           {
             "action": "click",
-            "selector": "tr:has-text(\"Tan Ah Meng\") >> role=button[name=\"Select\"]",
-            "target": "Select button on the Tan Ah Meng row",
+            "selector": "tr:has-text(\"Mr Goh Beng Kiat\") >> role=button[name=\"Select\"]",
+            "target": "Select button on the Mr Goh Beng Kiat row",
             "delayMs": 700
           },
           {
@@ -590,12 +1079,16 @@
           {
             "action": "click",
             "selector": "button:has-text(\"Override & Allocate Bed\") >> nth=0",
-            "target": "Override and allocate a lower-ranked bed",
+            "target": "Override and allocate the second-ranked bed",
             "delayMs": 900
           },
           {
             "action": "waitForText",
             "value": "Operational Constraint Override"
+          },
+          {
+            "action": "waitForText",
+            "value": "Structured Reason Code:"
           },
           {
             "action": "click",
@@ -605,15 +1098,14 @@
           },
           {
             "action": "wait",
-            "delayMs": 16900
+            "delayMs": 15119
           }
         ]
       },
       "assert": {
         "visible": [
-          "Operational Constraint Override",
-          "Structured Reason Code:",
-          "GOVERNMENT_SUBSIDY_CLASS_UPGRADE"
+          "Bed Management Unit (BMU) Capacity & Allocation Hub",
+          "Mr Goh Beng Kiat"
         ],
         "notVisible": [
           "Something went wrong",
@@ -621,7 +1113,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5"
+      "roiSelector": ".lg\\\\:col-span-5",
+      "resolvedAudio": {
+        "filePath": "assets/audio/07b-override-modal-capture.wav",
+        "durationMs": 19925,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "89b87b8119e7"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 20325,
+        "ratePct": 0,
+        "padVisualMs": 20325,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07b-override-modal-capture.mp4",
+        "durationMs": 20298.412109375,
+        "roi": {
+          "x": 980.5625,
+          "y": 630.5,
+          "width": 187.4375,
+          "height": 28
+        },
+        "hash": "26183f410e27"
+      },
+      "roi": {
+        "x": 980.5625,
+        "y": 630.5,
+        "width": 187.4375,
+        "height": 28
+      }
     },
     {
       "id": "08-locking",
@@ -658,6 +1184,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08-locking.wav",
+        "durationMs": 23925,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3379d9bbe1e1"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 24325,
+        "ratePct": 0,
+        "padVisualMs": 24325,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08-locking.mp4",
+        "durationMs": 24334,
+        "roi": null,
+        "hash": "000a90e48676"
       }
     },
     {
@@ -679,15 +1228,19 @@
             "delayMs": 900
           },
           {
+            "action": "waitForText",
+            "value": "MUSTARD YELLOW"
+          },
+          {
             "action": "wait",
-            "delayMs": 16500
+            "delayMs": 15117
           }
         ]
       },
       "assert": {
         "visible": [
           "Inpatient Ward Reception & Bed Control",
-          "MUSTARD YELLOW"
+          "Ward Nursing Station Bed Control"
         ],
         "notVisible": [
           "Something went wrong",
@@ -695,7 +1248,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a-vacate-capture.wav",
+        "durationMs": 16825,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "a6ac58eaaa95"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 17225,
+        "ratePct": 0,
+        "padVisualMs": 17225,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08a-vacate-capture.mp4",
+        "durationMs": 17249.105712890625,
+        "roi": {
+          "x": 385,
+          "y": 800.921875,
+          "width": 350,
+          "height": 28
+        },
+        "hash": "940b3019bfe9"
+      },
+      "roi": {
+        "x": 385,
+        "y": 800.921875,
+        "width": 350,
+        "height": 28
+      }
     },
     {
       "id": "08a2-sanitise-capture",
@@ -717,7 +1304,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 11500
+            "delayMs": 10886
           }
         ]
       },
@@ -732,23 +1319,100 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a2-sanitise-capture.wav",
+        "durationMs": 12600,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b91e050dea30"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13000,
+        "ratePct": 0,
+        "padVisualMs": 13000,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08a2-sanitise-capture.mp4",
+        "durationMs": 13015.927001953125,
+        "roi": {
+          "x": 614.375,
+          "y": 334.65625,
+          "width": 127.28125,
+          "height": 32
+        },
+        "hash": "8af3eaf91ad7"
+      },
+      "roi": {
+        "x": 614.375,
+        "y": 334.65625,
+        "width": 127.28125,
+        "height": 32
+      }
     },
     {
-      "id": "08b-conflict-409-footage",
-      "title": "08b-conflict-409-footage",
+      "id": "08b-conflict-409-terminal",
+      "title": "08b-conflict-409-terminal",
       "narration": "The concurrency claim is the one I cannot show you honestly in a browser. Two specialists claiming the same broadcast is a race, and a race staged in a single tab is a lie. So it is a test: two versions, one write, 409 Conflict, and a problem-detail body the client can actually act on.",
       "role": null,
-      "visualEngine": "manual_footage",
+      "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "src": "footage/08b-conflict-409.mp4"
+        "url": "http://127.0.0.1:4173/term.html?run=08b-conflict-409",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 19549
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "409 Conflict ProblemDetail",
+          "Tests run: 12",
+          "BUILD SUCCESS"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/08b-conflict-409-terminal.wav",
+        "durationMs": 19725,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b65466a4c5be"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 20125,
+        "ratePct": 0,
+        "padVisualMs": 20125,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08b-conflict-409-terminal.mp4",
+        "durationMs": 20124.72705078125,
+        "roi": null,
+        "hash": "dbbffe716687"
       }
     },
     {
       "id": "09-provable",
       "title": "Correctness had to be provable",
-      "narration": "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit: coverage here is measured, not enforced. There is no continuous integration wired up yet.",
+      "narration": "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit on all of this: the backend has no coverage threshold at all, the frontend declares four, and nothing runs either of them automatically.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -777,18 +1441,41 @@
           {
             "icon": "gauge",
             "title": "Coverage is measured",
-            "text": "On the code that actually executes under the prototype profile.",
-            "detail": "Price — measured, not enforced. No pipeline."
+            "text": "214 backend tests over the whole bundle; the frontend counts four paths.",
+            "detail": "Price — thresholds exist, nothing runs them"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit: coverage here is measured, not enforced. There is no continuous integration wired up yet."
+        "notes": "Fifth decision. Every operational metric is derivable twice — once from relational state for reporting, once from the structured audit log for alerting — and a test asserts that the two agree. The cost is two things to keep in step. And the honest limit on all of this: the backend has no coverage threshold at all, the frontend declares four, and nothing runs either of them automatically."
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09-provable.wav",
+        "durationMs": 24125,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f064e456999a"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 24525,
+        "ratePct": 0,
+        "padVisualMs": 24525,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09-provable.mp4",
+        "durationMs": 24534,
+        "roi": null,
+        "hash": "98ee273b3f55"
       }
     },
     {
@@ -805,7 +1492,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 17400
+            "delayMs": 17106
           }
         ]
       },
@@ -814,7 +1501,7 @@
           "Hospital Operational KPI",
           "Avg ED Turnaround",
           "Benchmark:",
-          "Target: 100% phone-free"
+          "Target Met"
         ],
         "notVisible": [
           "Something went wrong",
@@ -822,63 +1509,254 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedAudio": {
+        "filePath": "assets/audio/09a-analytics-capture.wav",
+        "durationMs": 17275,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "32ac942ab63a"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 17675,
+        "ratePct": 0,
+        "padVisualMs": 17675,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09a-analytics-capture.mp4",
+        "durationMs": 17665.3369140625,
+        "roi": null,
+        "hash": "4a17beb398e5"
+      }
     },
     {
-      "id": "09b-audit-log-footage",
-      "title": "09b-audit-log-footage",
+      "id": "09b-audit-log-terminal",
+      "title": "09b-audit-log-terminal",
       "narration": "Pathway B is this. The same events, in the log, with the acting user carried in the mapped diagnostic context on every line. That format does not change between profiles — only the destination does. Today it is standard output. In production it is a SIEM, and nothing above the appender needs to know.",
-      "role": null,
-      "visualEngine": "manual_footage",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "src": "footage/09b-audit-log.mp4"
-      }
-    },
-    {
-      "id": "09c-parity-footage",
-      "title": "09c-parity-footage",
-      "narration": "And parity is asserted, not eyeballed. The reconciliation test computes each metric down both pathways and fails when they disagree, which is the only thing that makes a second pathway worth having.",
-      "role": null,
-      "visualEngine": "manual_footage",
-      "captureMode": "screencast",
-      "actionSpec": {
-        "src": "footage/09c-parity.mp4"
-      }
-    },
-    {
-      "id": "09d-coverage-capture",
-      "title": "09d-coverage-capture",
-      "narration": "Coverage, measured against the code that actually executes. Take the number for what it is — evidence the domain layer is tested, not a quality gate. Nothing fails a build at a threshold today, because there is no build to fail.",
       "role": null,
       "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "url": "http://127.0.0.1:4173/jacoco/index.html",
-        "roiSelector": "body",
+        "url": "http://127.0.0.1:4173/term.html?run=09b-audit-log",
+        "roiSelector": "#term",
         "steps": [
           {
             "action": "wait",
-            "delayMs": 17400
+            "delayMs": 20101
           }
         ]
       },
       "assert": {
         "visible": [
+          "AUDIT",
+          "action="
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/09b-audit-log-terminal.wav",
+        "durationMs": 20000,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f870860c6402"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 20400,
+        "ratePct": 0,
+        "padVisualMs": 20400,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09b-audit-log-terminal.mp4",
+        "durationMs": 20656.10595703125,
+        "roi": null,
+        "hash": "5e5af61da333"
+      }
+    },
+    {
+      "id": "09c-parity-terminal",
+      "title": "09c-parity-terminal",
+      "narration": "And parity is asserted, not eyeballed. The reconciliation test computes each metric down both pathways and fails when they disagree, which is the only thing that makes a second pathway worth having.",
+      "role": null,
+      "visualEngine": "playwright_web",
+      "captureMode": "screencast",
+      "actionSpec": {
+        "url": "http://127.0.0.1:4173/term.html?run=09c-parity",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 12901
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "Tests run: 1",
+          "Failures: 0",
+          "BUILD SUCCESS"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/09c-parity-terminal.wav",
+        "durationMs": 12950,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "bb6b127d115f"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13350,
+        "ratePct": 0,
+        "padVisualMs": 13350,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09c-parity-terminal.mp4",
+        "durationMs": 13237.576904296875,
+        "roi": null,
+        "hash": "e295a46166ed"
+      }
+    },
+    {
+      "id": "09d-coverage-capture",
+      "title": "09d-coverage-capture",
+      "narration": "Measured, on the whole backend bundle: ninety-four percent of instructions, ninety-seven percent of lines — and sixty-nine percent of branches. That last number is the one worth saying out loud, because it is where the untested paths actually live. It is evidence the domain layer is exercised. It is not a quality gate.",
+      "role": null,
+      "visualEngine": "playwright_web",
+      "captureMode": "stills",
+      "actionSpec": {
+        "url": "http://127.0.0.1:4173/jacoco/index.html",
+        "roiSelector": "body"
+      },
+      "assert": {
+        "visible": [
           "Missed Instructions",
-          "com.hospital.admissions"
+          "com.hospital.admissions",
+          "Total"
         ],
         "notVisible": [
           "Cannot GET",
           "Not Found"
         ]
       },
-      "roiSelector": "body"
+      "roiSelector": "body",
+      "resolvedAudio": {
+        "filePath": "assets/audio/09d-coverage-capture.wav",
+        "durationMs": 20825,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "5a0b3971cbce"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 21225,
+        "ratePct": 0,
+        "padVisualMs": 21225,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09d-coverage-capture.mp4",
+        "durationMs": 21225,
+        "roi": {
+          "x": 8,
+          "y": 8,
+          "width": 1904,
+          "height": 381.15625
+        },
+        "hash": "e72e955fbff3"
+      },
+      "roi": {
+        "x": 8,
+        "y": 8,
+        "width": 1904,
+        "height": 381.15625
+      }
+    },
+    {
+      "id": "09e-gate-red-terminal",
+      "title": "09e-gate-red-terminal",
+      "narration": "And here is what that costs, right now. The frontend declares four coverage thresholds at ninety percent. Run them and one is red — branches at seventy-five. Nothing caught that, because nothing runs it. A gate no pipeline executes is not a gate; it is a comment with a number in it.",
+      "role": null,
+      "visualEngine": "playwright_web",
+      "captureMode": "screencast",
+      "actionSpec": {
+        "url": "http://127.0.0.1:4173/term.html?run=09e-gate-red",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 18450
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "branches: 90",
+          "does not meet global threshold",
+          "74.84%"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/09e-gate-red-terminal.wav",
+        "durationMs": 18050,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d7ca952d2a47"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 18450,
+        "ratePct": 0,
+        "padVisualMs": 18450,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09e-gate-red-terminal.mp4",
+        "durationMs": 18523.255859375,
+        "roi": null,
+        "hash": "03b3d0497a89"
+      }
     },
     {
       "id": "10-ledger",
       "title": "What is owed, and the seam it is owed against",
-      "narration": "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. Logs that go to a file. A test suite no pipeline enforces. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine.",
+      "narration": "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. A prototype profile that is the configuration default. And a coverage threshold that is failing right now because nothing runs it. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine.",
       "role": null,
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -910,7 +1788,7 @@
           {
             "icon": "test-tube",
             "title": "Enforcement",
-            "text": "A test suite no pipeline runs, and a coverage number nothing gates.",
+            "text": "Four declared thresholds, no pipeline to run them, and one currently red.",
             "detail": "The suite is the foundation; the gate is the adapter"
           }
         ],
@@ -918,21 +1796,87 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. Logs that go to a file. A test suite no pipeline enforces. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine."
+        "notes": "So here is what is owed. In-memory data that a restart erases. Polling that will not scale. A heuristic that is not optimal. Personas that are not authentication. A prototype profile that is the configuration default. And a coverage threshold that is failing right now because nothing runs it. Each one has its seam already cut, and that is the only reason I can list them this calmly. On method: AI wrote a great deal of this code. Which trade-off to take, which approach was better, and what the final code looks like — those were mine."
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10-ledger.wav",
+        "durationMs": 32275,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "af5415dce05a"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 32675,
+        "ratePct": 0,
+        "padVisualMs": 32675,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10-ledger.mp4",
+        "durationMs": 32667,
+        "roi": null,
+        "hash": "9deb62a2111f"
       }
     },
     {
-      "id": "10a-artifacts-footage",
-      "title": "10a-artifacts-footage",
+      "id": "10a-artifacts-terminal",
+      "title": "10a-artifacts-terminal",
       "narration": "One last count, because sequence is the part people doubt. Eleven decision tickets, twenty-eight implementation issues, five specifications, four decision records — written before the code they describe.",
       "role": null,
-      "visualEngine": "manual_footage",
+      "visualEngine": "playwright_web",
       "captureMode": "screencast",
       "actionSpec": {
-        "src": "footage/10a-artifacts.mp4"
+        "url": "http://127.0.0.1:4173/term.html?run=10a-artifacts",
+        "roiSelector": "#term",
+        "steps": [
+          {
+            "action": "wait",
+            "delayMs": 13453
+          }
+        ]
+      },
+      "assert": {
+        "visible": [
+          "wayfinder tickets : 11",
+          "scratch issues    : 28",
+          "decision records  : 4"
+        ],
+        "notVisible": [
+          "Cannot GET",
+          "Not Found",
+          "command not found"
+        ]
+      },
+      "roiSelector": "#term",
+      "resolvedAudio": {
+        "filePath": "assets/audio/10a-artifacts-terminal.wav",
+        "durationMs": 13225,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "68a325d0afa8"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 13625,
+        "ratePct": 0,
+        "padVisualMs": 13625,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10a-artifacts-terminal.mp4",
+        "durationMs": 13766.73193359375,
+        "roi": null,
+        "hash": "1a1f8cc8d847"
       }
     },
     {
@@ -964,6 +1908,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/11-cta.wav",
+        "durationMs": 17975,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "efa69700a5ad"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 18375,
+        "ratePct": 0,
+        "padVisualMs": 18375,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/11-cta.mp4",
+        "durationMs": 18367,
+        "roi": null,
+        "hash": "f92b42ea1b79"
       }
     }
   ]

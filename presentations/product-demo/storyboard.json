@@ -2,7 +2,7 @@
   "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
     "file": "storyline.yml",
-    "checksum": "cbe6c6730415ab682a04ace79bb5fe6b4cd06cf2a10f1ac21f6c1dc35a1b9080"
+    "checksum": "56ebb6c7c16390daa8e9739df02269398b2be798c7e9e2d950f3299da52029a3"
   },
   "meta": {
     "title": "Recovering Hospital Beds Without Building More",
@@ -75,19 +75,42 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/01-situation.wav",
+        "durationMs": 11300,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d07c27bf7c2b"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 11700,
+        "ratePct": 0,
+        "padVisualMs": 11700,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/01-situation.mp4",
+        "durationMs": 11700,
+        "roi": null,
+        "hash": "2637ce19f8a1"
       }
     },
     {
       "id": "01b-handoffs",
-      "title": "Five desks, four handoffs, every one a phone call",
-      "narration": "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, a phone call.",
+      "title": "Five desks, four handoffs, every one an alert for attention",
+      "narration": "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, an alert away. This leads to cognitive loads increasing for the various roles",
       "role": "situation",
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
         "layout": "lifecycle",
         "theme": "light",
-        "title": "Five desks, four handoffs, every one a phone call",
+        "title": "Five desks, four handoffs, every one an alert for attention",
         "pill": null,
         "body": null,
         "cards": [
@@ -99,33 +122,56 @@
           {
             "icon": "users-round",
             "title": "Specialist to bed management",
-            "text": "The decision, phoned or re-keyed across."
+            "text": "The decision, carried or re-keyed across."
           },
           {
             "icon": "gauge",
             "title": "Bed management to ward",
-            "text": "A bed offered, then confirmed by phone."
+            "text": "A bed offered, then confirmed by coordination."
           },
           {
             "icon": "refresh-cw",
             "title": "Ward to housekeeping",
-            "text": "A vacated bed, reported by phone."
+            "text": "A vacated bed, reported by manual coordination."
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, a phone call."
+        "notes": "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, an alert away. This leads to cognitive loads increasing for the various roles"
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/01b-handoffs.wav",
+        "durationMs": 20725,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f3291e6951cf"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 21125,
+        "ratePct": 0,
+        "padVisualMs": 21125,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/01b-handoffs.mp4",
+        "durationMs": 21134,
+        "roi": null,
+        "hash": "20b0868ff2a4"
       }
     },
     {
       "id": "02-complication",
       "title": "The beds exist; the coordination does not",
-      "narration": "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed at breakfast.",
+      "narration": "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed throughout the night.",
       "role": "complication",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -153,10 +199,33 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed at breakfast."
+        "notes": "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed throughout the night."
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02-complication.wav",
+        "durationMs": 15475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "ab3eb3fbfdb2"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 15875,
+        "ratePct": 0,
+        "padVisualMs": 15875,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02-complication.mp4",
+        "durationMs": 15867,
+        "roi": null,
+        "hash": "38d6f13e610f"
       }
     },
     {
@@ -198,12 +267,35 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02b-frozen.wav",
+        "durationMs": 18175,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "61724fac205c"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 18575,
+        "ratePct": 0,
+        "padVisualMs": 18575,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02b-frozen.mp4",
+        "durationMs": 18567,
+        "roi": null,
+        "hash": "c833215622ef"
       }
     },
     {
       "id": "03-synthesis",
       "title": "The decision, synthesised — then dispatched without a call",
-      "narration": "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data, not as a phone call.",
+      "narration": "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data.",
       "role": "resolution",
       "visualEngine": "html_slides",
       "captureMode": "stills",
@@ -217,27 +309,53 @@
           {
             "icon": "brain",
             "title": "Findings, pre-read",
+            "weight": "primary",
             "text": "Vitals and labs drive a proposed tier, service and telemetry the attending confirms in one click."
           },
           {
             "icon": "shield-check",
             "title": "The safer tier wins",
+            "weight": "secondary",
             "text": "When two clinicians disagree, the higher acuity is adopted and telemetry is unioned."
           },
           {
             "icon": "send",
             "title": "A structured packet",
-            "text": "Consensus lands in bed management as data, ranked by acuity, with no phone call."
+            "weight": "secondary",
+            "text": "Consensus lands in bed management as data, ranked by acuity, with no extra cognitive load to the BMU Orchestrator."
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data, not as a phone call."
+        "notes": "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data."
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/03-synthesis.wav",
+        "durationMs": 31275,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "4f95542486fa"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 31675,
+        "ratePct": 0,
+        "padVisualMs": 31675,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/03-synthesis.mp4",
+        "durationMs": 31667,
+        "roi": null,
+        "hash": "757e9b39b83f"
       }
     },
     {
@@ -264,7 +382,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 24325
+            "delayMs": 23053
           }
         ]
       },
@@ -280,7 +398,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5"
+      "roiSelector": ".lg\\\\:col-span-5",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04a-ed-synthesis-capture.mp4",
+        "durationMs": 25011.51806640625,
+        "roi": {
+          "x": 1185.5,
+          "y": 712.203125,
+          "width": 64.890625,
+          "height": 28
+        },
+        "hash": "4b15ef962d37"
+      },
+      "roi": {
+        "x": 1185.5,
+        "y": 712.203125,
+        "width": 64.890625,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04a-ed-synthesis-capture.wav",
+        "durationMs": 24625,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3d7579eb3757"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 25012,
+        "ratePct": 0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.1
     },
     {
       "id": "04a2-tier-framework-capture",
@@ -331,7 +483,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 13725
+            "delayMs": 10584
           }
         ]
       },
@@ -347,7 +499,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5"
+      "roiSelector": ".lg\\\\:col-span-5",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04a2-tier-framework-capture.mp4",
+        "durationMs": 17947.951904296875,
+        "roi": {
+          "x": 978.5,
+          "y": 771.203125,
+          "width": 64.890625,
+          "height": 28
+        },
+        "hash": "51772847ae24"
+      },
+      "roi": {
+        "x": 978.5,
+        "y": 771.203125,
+        "width": 64.890625,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04a2-tier-framework-capture.wav",
+        "durationMs": 17525,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "f8863fb97b69"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 17948,
+        "ratePct": -0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -0.1
     },
     {
       "id": "04b-specialist-discordance-capture",
@@ -363,7 +549,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 19600
+            "delayMs": 19036
           }
         ]
       },
@@ -380,7 +566,30 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2"
+      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04b-specialist-discordance-capture.mp4",
+        "durationMs": 19615.27490234375,
+        "roi": null,
+        "hash": "ce3c702e4227"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04b-specialist-discordance-capture.wav",
+        "durationMs": 19200,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3a7237009b41"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 19615,
+        "ratePct": -0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -0.1
     },
     {
       "id": "04b2-chain-consult-capture",
@@ -406,7 +615,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 13175
+            "delayMs": 11905
           }
         ]
       },
@@ -421,7 +630,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2"
+      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04b2-chain-consult-capture.mp4",
+        "durationMs": 13857.28369140625,
+        "roi": {
+          "x": 1291.390625,
+          "y": 1000.0625,
+          "width": 122.75,
+          "height": 28
+        },
+        "hash": "8c0b3e5f9570"
+      },
+      "roi": {
+        "x": 1291.390625,
+        "y": 1000.0625,
+        "width": 122.75,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04b2-chain-consult-capture.wav",
+        "durationMs": 13475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3db9edc42cd7"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 13857,
+        "ratePct": 0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.1
     },
     {
       "id": "04c-bmu-dispatch-capture",
@@ -437,7 +680,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 14850
+            "delayMs": 14284
           }
         ]
       },
@@ -453,7 +696,30 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-7"
+      "roiSelector": ".lg\\\\:col-span-7",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04c-bmu-dispatch-capture.mp4",
+        "durationMs": 14847.823974609375,
+        "roi": null,
+        "hash": "d884e00db046"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04c-bmu-dispatch-capture.wav",
+        "durationMs": 14450,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d9b4ab3d85cd"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 14848,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "04c2-reconcile-notes-capture",
@@ -479,7 +745,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 18475
+            "delayMs": 17216
           }
         ]
       },
@@ -494,7 +760,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-7"
+      "roiSelector": ".lg\\\\:col-span-7",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04c2-reconcile-notes-capture.mp4",
+        "durationMs": 19198.442138671875,
+        "roi": {
+          "x": 1486.53125,
+          "y": 1285.609375,
+          "width": 32,
+          "height": 28
+        },
+        "hash": "28b02253104a"
+      },
+      "roi": {
+        "x": 1486.53125,
+        "y": 1285.609375,
+        "width": 32,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04c2-reconcile-notes-capture.wav",
+        "durationMs": 18775,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "690b98ebf9df"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 19198,
+        "ratePct": -0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -0.1
     },
     {
       "id": "05-diversion",
@@ -518,7 +818,7 @@
           {
             "icon": "hospital",
             "title": "Sister community hospital",
-            "text": "Subacute recovery is referred with a thirty-minute timer, not a phone negotiation."
+            "text": "Subacute recovery is referred with a thirty-minute timer, not a manual negotiation."
           },
           {
             "icon": "bed",
@@ -534,6 +834,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05-diversion.wav",
+        "durationMs": 26625,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b2931077b359"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 27025,
+        "ratePct": 0,
+        "padVisualMs": 27025,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05-diversion.mp4",
+        "durationMs": 27034,
+        "roi": null,
+        "hash": "a1ff2cd49039"
       }
     },
     {
@@ -561,7 +884,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 18175
+            "delayMs": 16985
           }
         ]
       },
@@ -574,7 +897,41 @@
           "Failed to track"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06a-mic-at-home-capture.mp4",
+        "durationMs": 19679.329345703125,
+        "roi": {
+          "x": 1173.390625,
+          "y": 127,
+          "width": 271,
+          "height": 32
+        },
+        "hash": "13c850badf9a"
+      },
+      "roi": {
+        "x": 1173.390625,
+        "y": 127,
+        "width": 271,
+        "height": 32
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06a-mic-at-home-capture.wav",
+        "durationMs": 19275,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "2db40a190fa3"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 19679,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "06b-sister-hospital-capture",
@@ -600,7 +957,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 16350
+            "delayMs": 15070
           }
         ]
       },
@@ -615,7 +972,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-7"
+      "roiSelector": ".lg\\\\:col-span-7",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06b-sister-hospital-capture.mp4",
+        "durationMs": 17063.436767578125,
+        "roi": {
+          "x": 1422.265625,
+          "y": 1645.59375,
+          "width": 58.265625,
+          "height": 28
+        },
+        "hash": "860ceb9535b2"
+      },
+      "roi": {
+        "x": 1422.265625,
+        "y": 1645.59375,
+        "width": 58.265625,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06b-sister-hospital-capture.wav",
+        "durationMs": 16650,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "8de7b298b024"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 17063,
+        "ratePct": -0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -0.1
     },
     {
       "id": "07-ghost",
@@ -634,16 +1025,19 @@
           {
             "icon": "package",
             "title": "Pack first",
+            "weight": "primary",
             "text": "Waiting patients fill partly-used cubicles that already match their cohort."
           },
           {
             "icon": "layers",
             "title": "Then batch",
+            "weight": "secondary",
             "text": "Only then is a whole clean cubicle designated for a surge cluster."
           },
           {
             "icon": "arrow-left-right",
             "title": "Swap to unlock",
+            "weight": "secondary",
             "text": "One patient blocking a ward is moved to an equal bed, freeing the whole room."
           }
         ],
@@ -655,6 +1049,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07-ghost.wav",
+        "durationMs": 24375,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "393de57019f5"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 24775,
+        "ratePct": 0,
+        "padVisualMs": 24775,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07-ghost.mp4",
+        "durationMs": 24767,
+        "roi": null,
+        "hash": "10893a81132c"
       }
     },
     {
@@ -671,7 +1088,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 21275
+            "delayMs": 20702
           }
         ]
       },
@@ -687,7 +1104,30 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Live Bed Inventory Matrix"
+      "roiSelector": "text=Live Bed Inventory Matrix",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07a-bed-lifecycle-capture.mp4",
+        "durationMs": 21263.13623046875,
+        "roi": null,
+        "hash": "594d57fbfc92"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07a-bed-lifecycle-capture.wav",
+        "durationMs": 20875,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "342c2357e27d"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 21263,
+        "ratePct": 0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.1
     },
     {
       "id": "08a-solver-recommendation-capture",
@@ -713,7 +1153,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 29350
+            "delayMs": 28053
           }
         ]
       },
@@ -728,7 +1168,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".lg\\\\:col-span-5"
+      "roiSelector": ".lg\\\\:col-span-5",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08a-solver-recommendation-capture.mp4",
+        "durationMs": 30046.8671875,
+        "roi": {
+          "x": 1422.265625,
+          "y": 1285.609375,
+          "width": 58.265625,
+          "height": 28
+        },
+        "hash": "087cc6b84ca5"
+      },
+      "roi": {
+        "x": 1422.265625,
+        "y": 1285.609375,
+        "width": 58.265625,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a-solver-recommendation-capture.wav",
+        "durationMs": 29650,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "8e43ec64fb48"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 30047,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "08b-batch-holding-capture",
@@ -744,7 +1218,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 19250
+            "delayMs": 18685
           }
         ]
       },
@@ -758,7 +1232,30 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=Surge Cluster Detected"
+      "roiSelector": "text=Surge Cluster Detected",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08b-batch-holding-capture.mp4",
+        "durationMs": 19266.60791015625,
+        "roi": null,
+        "hash": "d7f3380722e3"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08b-batch-holding-capture.wav",
+        "durationMs": 18850,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "94f0badfb61d"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 19267,
+        "ratePct": -0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -0.1
     },
     {
       "id": "08c-cohort-swap-capture",
@@ -774,7 +1271,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 20375
+            "delayMs": 19707
           }
         ]
       },
@@ -788,7 +1285,30 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=Dynamic Cohort-Swap Proposal"
+      "roiSelector": "text=Dynamic Cohort-Swap Proposal",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08c-cohort-swap-capture.mp4",
+        "durationMs": 20282.27685546875,
+        "roi": null,
+        "hash": "50156bafbb21"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08c-cohort-swap-capture.r.wav",
+        "durationMs": 19925,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "90ac09897d42"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 20282,
+        "ratePct": 0.5,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.5
     },
     {
       "id": "08d-solver-config-capture",
@@ -804,7 +1324,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 18275
+            "delayMs": 17701
           }
         ]
       },
@@ -818,11 +1338,34 @@
           "No static resource"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08d-solver-config-capture.mp4",
+        "durationMs": 18281.611328125,
+        "roi": null,
+        "hash": "08e56346f4b2"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08d-solver-config-capture.wav",
+        "durationMs": 17875,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "7bb45b8b17db"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 18282,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "09-experience",
-      "title": "The same journey without the anxiety — and an exit that starts early",
+      "title": "The anxiety removed at the front, the exit begun at the back",
       "narration": "The fourth fix sits at both ends of the stay. At the front, the family stops asking the triage nurse: they see their position among the patients in their own ward class, and an honest reason when it slips. At the back, discharge starts two or three days early, the medicines are packed overnight instead of chased at noon, and the cleaning clock starts the moment a bed empties.",
       "role": "resolution",
       "visualEngine": "html_slides",
@@ -830,7 +1373,7 @@
       "slide": {
         "layout": "lifecycle",
         "theme": "light",
-        "title": "The same journey without the anxiety — and an exit that starts early",
+        "title": "The anxiety removed at the front, the exit begun at the back",
         "pill": null,
         "body": null,
         "cards": [
@@ -858,6 +1401,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09-experience.wav",
+        "durationMs": 22350,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "4e38ca96b1d9"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 22750,
+        "ratePct": 0,
+        "padVisualMs": 22750,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09-experience.mp4",
+        "durationMs": 22767,
+        "roi": null,
+        "hash": "41dfbe7721c2"
       }
     },
     {
@@ -885,7 +1451,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 18575
+            "delayMs": 17386
           }
         ]
       },
@@ -900,7 +1466,41 @@
           "Failed to track"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10a-tracker-milestone-capture.mp4",
+        "durationMs": 20080.760986328125,
+        "roi": {
+          "x": 1173.390625,
+          "y": 127,
+          "width": 271,
+          "height": 32
+        },
+        "hash": "8d17522946de"
+      },
+      "roi": {
+        "x": 1173.390625,
+        "y": 127,
+        "width": 271,
+        "height": 32
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10a-tracker-milestone-capture.wav",
+        "durationMs": 19675,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "54005a9199ca"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 20081,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "10b-tracker-delay-tag-capture",
@@ -927,7 +1527,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 19575
+            "delayMs": 18385
           }
         ]
       },
@@ -940,7 +1540,41 @@
           "Failed to track"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10b-tracker-delay-tag-capture.mp4",
+        "durationMs": 21080.127197265625,
+        "roi": {
+          "x": 1173.390625,
+          "y": 127,
+          "width": 271,
+          "height": 32
+        },
+        "hash": "02a5433cb4b2"
+      },
+      "roi": {
+        "x": 1173.390625,
+        "y": 127,
+        "width": 271,
+        "height": 32
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10b-tracker-delay-tag-capture.wav",
+        "durationMs": 20675,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d9ed140ff838"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 21080,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "10c-discharge-runway-capture",
@@ -956,7 +1590,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 15175
+            "delayMs": 14601
           }
         ]
       },
@@ -971,7 +1605,30 @@
           "Sign in"
         ]
       },
-      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2"
+      "roiSelector": ".grid.grid-cols-1.md\\\\:grid-cols-2",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10c-discharge-runway-capture.mp4",
+        "durationMs": 15181.7451171875,
+        "roi": null,
+        "hash": "8b440af0acf6"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10c-discharge-runway-capture.wav",
+        "durationMs": 14775,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "6d361b0ba099"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 15182,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "10d-bedside-meds-capture",
@@ -998,7 +1655,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 21350
+            "delayMs": 20118
           }
         ]
       },
@@ -1012,7 +1669,41 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Meds Delivered — Ready to Vacate"
+      "roiSelector": "text=Meds Delivered — Ready to Vacate",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10d-bedside-meds-capture.mp4",
+        "durationMs": 22032.5693359375,
+        "roi": {
+          "x": 1225.015625,
+          "y": 276,
+          "width": 216.359375,
+          "height": 28
+        },
+        "hash": "736d913ae40d"
+      },
+      "roi": {
+        "x": 1225.015625,
+        "y": 276,
+        "width": 216.359375,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10d-bedside-meds-capture.wav",
+        "durationMs": 21650,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "7196205761b7"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 22033,
+        "ratePct": 0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.1
     },
     {
       "id": "10e-housekeeping-turnover-capture",
@@ -1028,7 +1719,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 19025
+            "delayMs": 18451
           }
         ]
       },
@@ -1043,7 +1734,30 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Housekeeping (EVS) 30-Minute Turnover Queue"
+      "roiSelector": "text=Housekeeping (EVS) 30-Minute Turnover Queue",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10e-housekeeping-turnover-capture.mp4",
+        "durationMs": 19030.129150390625,
+        "roi": null,
+        "hash": "13ab76829a66"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10e-housekeeping-turnover-capture.wav",
+        "durationMs": 18625,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "62e1016a4145"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 19030,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "11-control-tower",
@@ -1084,6 +1798,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/11-control-tower.wav",
+        "durationMs": 22700,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "7da2c48dab3e"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 23100,
+        "ratePct": 0,
+        "padVisualMs": 23100,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/11-control-tower.mp4",
+        "durationMs": 23100,
+        "roi": null,
+        "hash": "e242199ec805"
       }
     },
     {
@@ -1100,7 +1837,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 18000
+            "delayMs": 17418
           }
         ]
       },
@@ -1115,7 +1852,30 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=ED Clinical Intake & Specialist Collaboration"
+      "roiSelector": "text=ED Clinical Intake & Specialist Collaboration",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/12a-intake-kpis-capture.mp4",
+        "durationMs": 17982.48779296875,
+        "roi": null,
+        "hash": "b04129cf5fcc"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/12a-intake-kpis-capture.wav",
+        "durationMs": 17600,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "ad71d21969f4"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 17982,
+        "ratePct": 0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.1
     },
     {
       "id": "12b-bmu-kpis-capture",
@@ -1131,7 +1891,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 18875
+            "delayMs": 18302
           }
         ]
       },
@@ -1146,7 +1906,30 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=BMU Capacity Orchestration & Diversions"
+      "roiSelector": "text=BMU Capacity Orchestration & Diversions",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/12b-bmu-kpis-capture.mp4",
+        "durationMs": 18863.421142578125,
+        "roi": null,
+        "hash": "291bc920b648"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/12b-bmu-kpis-capture.wav",
+        "durationMs": 18475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "5ff56ae9aec0"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 18863,
+        "ratePct": 0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0.1
     },
     {
       "id": "12c-experience-discharge-kpis-capture",
@@ -1162,7 +1945,7 @@
         "steps": [
           {
             "action": "wait",
-            "delayMs": 16950
+            "delayMs": 16384
           }
         ]
       },
@@ -1177,7 +1960,30 @@
           "No static resource"
         ]
       },
-      "roiSelector": "text=Inpatient Discharge Runway & Rapid Turnover"
+      "roiSelector": "text=Inpatient Discharge Runway & Rapid Turnover",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/12c-experience-discharge-kpis-capture.mp4",
+        "durationMs": 16946.783935546875,
+        "roi": null,
+        "hash": "07c06c014b00"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/12c-experience-discharge-kpis-capture.wav",
+        "durationMs": 16550,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "6f8fd88e5f32"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 16947,
+        "ratePct": 0,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "12d-refresh-capture",
@@ -1200,7 +2006,7 @@
           },
           {
             "action": "wait",
-            "delayMs": 11475
+            "delayMs": 10253
           }
         ]
       },
@@ -1214,7 +2020,41 @@
           "No static resource"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/12d-refresh-capture.mp4",
+        "durationMs": 12381.952880859375,
+        "roi": {
+          "x": 1410.015625,
+          "y": 128,
+          "width": 136.984375,
+          "height": 28
+        },
+        "hash": "8d2332e4c52d"
+      },
+      "roi": {
+        "x": 1410.015625,
+        "y": 128,
+        "width": 136.984375,
+        "height": 28
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/12d-refresh-capture.wav",
+        "durationMs": 11975,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "c03e1aa89f93"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 12382,
+        "ratePct": -0.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": -0.1
     },
     {
       "id": "13-cta",
@@ -1244,6 +2084,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/13-cta.wav",
+        "durationMs": 19225,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "d3d4785d7090"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 19625,
+        "ratePct": 0,
+        "padVisualMs": 19625,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/13-cta.mp4",
+        "durationMs": 19634,
+        "roi": null,
+        "hash": "7d7a87cb14c7"
       }
     }
   ]

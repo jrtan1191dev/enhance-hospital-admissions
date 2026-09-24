@@ -28,6 +28,9 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<!-- Spring Boot 4.1.1 manages Lombok 1.18.46, which fails on JDK 27 javac
+		     (ExceptionInInitializerError: com.sun.tools.javac.tree.EndPosTable). -->
+		<lombok.version>1.18.48</lombok.version>
 		<frontend.skip>false</frontend.skip>
 	</properties>
 	<dependencies>

@@ -159,7 +159,7 @@ entries:
     layout: hero
     pill: Recommendation
     title: The bed crunch is an orchestration failure, not a construction problem
-    body: Synthesise clinical decisions in real time, solve bed constraints by mathematics instead of by phone, and pull discharge into the morning — the capacity is already there.
+    body: Synthesise clinical decisions in real time, solve bed constraints by automation instead of by manual coordination, and enable faster discharges into the morning — the capacity is already there.
     cards:
       - icon: activity
         title: Orchestrate, do not build
@@ -229,21 +229,21 @@ entries:
     type: slide
     role: situation
     layout: lifecycle
-    title: Five desks, four handoffs, every one a phone call
+    title: Five desks, four handoffs, every one an alert for attention
     cards:
       - icon: brain
         title: Doctor to specialist
         text: A page, then a wait for the callback.
       - icon: users-round
         title: Specialist to bed management
-        text: The decision, phoned or re-keyed across.
+        text: The decision, carried or re-keyed across.
       - icon: gauge
         title: Bed management to ward
-        text: A bed offered, then confirmed by phone.
+        text: A bed offered, then confirmed by coordination.
       - icon: refresh-cw
         title: Ward to housekeeping
-        text: A vacated bed, reported by phone.
-    narration: "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, a phone call."
+        text: A vacated bed, reported by manual coordination.
+    narration: "Because no one person owns that wait. An emergency doctor decides, a specialist confirms, bed management searches, the ward receives, housekeeping releases. Five desks — and four handoffs between them, every one of which is, today, an alert away. This leads to cognitive loads increasing for the various roles"
 
   # ======================================================================
   # COMPLICATION beat 1 of 2 — the tension. "Cohort locks" is deliberately gone
@@ -265,7 +265,7 @@ entries:
         title: Frozen capacity
         text: One patient locks a whole cubicle, and discharge delays trap beds into the afternoon.
         detail: Empty beds nobody can use
-    narration: "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed at breakfast."
+    narration: "You cannot build your way out of this, because the beds already exist. They are lost to callbacks that run for hours, to cubicles that can only accept one kind of patient, and to discharges that clear in the afternoon when the queue formed throughout the night."
 
   # ======================================================================
   # COMPLICATION beat 2 of 2 — the complication-consequence slot
@@ -312,14 +312,17 @@ entries:
     cards:
       - icon: brain
         title: Findings, pre-read
+        weight: primary
         text: Vitals and labs drive a proposed tier, service and telemetry the attending confirms in one click.
       - icon: shield-check
         title: The safer tier wins
+        weight: secondary
         text: When two clinicians disagree, the higher acuity is adopted and telemetry is unioned.
       - icon: send
         title: A structured packet
-        text: Consensus lands in bed management as data, ranked by acuity, with no phone call.
-    narration: "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data, not as a phone call."
+        weight: secondary
+        text: Consensus lands in bed management as data, ranked by acuity, with no extra cognitive load to the BMU Orchestrator.
+    narration: "The first fix is the decision itself. Today a doctor writes notes, pages a specialist, then waits for a callback. Instead, vitals and lab results are read on arrival and become a proposed acuity tier, admitting specialty and level of monitoring — reviewed, not retyped. And where two doctors disagree, we take the higher tier and combine both monitoring orders, because averaging two clinical opinions is the one thing a system must never do. From there the admission reaches bed management as data."
 
   # Beat 1 evidence, split into granular capture scenes so each moment of the
   # mechanism gets its own clip. Captures carry no `role`, so none of these
@@ -343,7 +346,7 @@ entries:
       - action: waitForText
         value: Smart Assessment Dossier
       - action: wait
-        delayMs: 24325
+        delayMs: 23053
     assert:
       visible: ['Emergency Department (ED) Clinical Intake', 'Waiting ED Patients', 'Chua Wee Kiat']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -385,7 +388,7 @@ entries:
       - action: waitForText
         value: Smart Assessment Dossier
       - action: wait
-        delayMs: 13725
+        delayMs: 10584
     assert:
       visible: ['Emergency Department (ED) Clinical Intake', 'Waiting ED Patients', 'Nurul Huda']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -402,7 +405,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 19600
+        delayMs: 19036
     assert:
       visible: ['Inpatient Specialist Consult Broadcast Pool', 'Mr Fernandez', 'ED Attending Priority', 'Consult Impression']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -426,7 +429,7 @@ entries:
       - action: waitForText
         value: Chain Secondary Specialist Consult
       - action: wait
-        delayMs: 13175
+        delayMs: 11905
     assert:
       visible: ['Inpatient Specialist Consult Broadcast Pool', 'Mr Fernandez']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -444,7 +447,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 14850
+        delayMs: 14284
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Prioritized Admission Requests', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -469,7 +472,7 @@ entries:
       - action: waitForText
         value: Clinical Consensus & Comparative Notes
       - action: wait
-        delayMs: 18475
+        delayMs: 17216
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -489,7 +492,7 @@ entries:
         text: Clinically stable patients are diverted to a monitored virtual ward.
       - icon: hospital
         title: Sister community hospital
-        text: Subacute recovery is referred with a thirty-minute timer, not a phone negotiation.
+        text: Subacute recovery is referred with a thirty-minute timer, not a manual negotiation.
       - icon: bed
         title: An acute bed preserved
         text: Each diversion returns a physical bed to the patients who need one.
@@ -516,7 +519,7 @@ entries:
       - action: waitForText
         value: Alternative Step-Down Care Recommended
       - action: wait
-        delayMs: 18175
+        delayMs: 16985
     assert:
       visible: ['Public Milestone Tracker']
       notVisible: ['Something went wrong', 'Failed to track']
@@ -538,7 +541,7 @@ entries:
       - action: waitForText
         value: REF-OCH-8812
       - action: wait
-        delayMs: 16350
+        delayMs: 15070
     assert:
       visible: ['Bed Management Unit (BMU) Capacity & Allocation Hub', 'Ahmad Ibrahim']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -555,12 +558,15 @@ entries:
     cards:
       - icon: package
         title: Pack first
+        weight: primary
         text: Waiting patients fill partly-used cubicles that already match their cohort.
       - icon: layers
         title: Then batch
+        weight: secondary
         text: Only then is a whole clean cubicle designated for a surge cluster.
       - icon: arrow-left-right
         title: Swap to unlock
+        weight: secondary
         text: One patient blocking a ward is moved to an equal bed, freeing the whole room.
     narration: "The third fix recovers those five frozen beds, and it comes down to ordering. Fill the part-used cubicles first, with patients who already match the people in them. Only then open a clean cubicle — and open it for a whole group at once. And when a single patient is the only reason a room is unusable, move that patient, not the room. Same beds, same safety rules, a different order of operations."
 
@@ -582,7 +588,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 21275
+        delayMs: 20702
     assert:
       visible: ['Live Bed Inventory Matrix', 'Mustard Yellow (Cleaning)', 'White (Clean)']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -609,7 +615,7 @@ entries:
       - action: waitForText
         value: Top Algorithmic Matches
       - action: wait
-        delayMs: 29350
+        delayMs: 28053
     assert:
       visible: ['Solver Recommendation', 'Tan Ah Meng']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -627,7 +633,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 19250
+        delayMs: 18685
     assert:
       visible: ['Surge Cluster Detected', 'Approve Batch Holding Ward']
       notVisible: ['Something went wrong', 'No static resource']
@@ -645,7 +651,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 20375
+        delayMs: 19707
     assert:
       visible: ['Dynamic Cohort-Swap Proposal', 'Approve Cohort Swap']
       notVisible: ['Something went wrong', 'No static resource']
@@ -663,7 +669,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 18275
+        delayMs: 17701
     assert:
       visible: ['BMU Optimization Weight Configuration', 'Scoring Weights']
       notVisible: ['Something went wrong', 'No static resource']
@@ -675,7 +681,7 @@ entries:
     type: slide
     role: resolution
     layout: lifecycle
-    title: The same journey without the anxiety — and an exit that starts early
+    title: The anxiety removed at the front, the exit begun at the back
     cards:
       - icon: smartphone
         title: A milestone, on a phone
@@ -708,7 +714,7 @@ entries:
       - action: waitForText
         value: Journey Milestones
       - action: wait
-        delayMs: 18575
+        delayMs: 17386
     assert:
       visible: ['Public Milestone Tracker', 'Journey Milestones', 'Queue']
       notVisible: ['Something went wrong', 'Failed to track']
@@ -729,7 +735,7 @@ entries:
       - action: waitForText
         value: Operational Care Update
       - action: wait
-        delayMs: 19575
+        delayMs: 18385
     assert:
       visible: ['Public Milestone Tracker']
       notVisible: ['Something went wrong', 'Failed to track']
@@ -745,7 +751,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 15175
+        delayMs: 14601
     assert:
       visible: ['Inpatient Ward Reception & Bed Control', 'EDD']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -769,7 +775,7 @@ entries:
       - action: waitForText
         value: Meds Delivered — Ready to Vacate
       - action: wait
-        delayMs: 21350
+        delayMs: 20118
     assert:
       visible: ['Inpatient Ward Reception & Bed Control']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -787,7 +793,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 19025
+        delayMs: 18451
     assert:
       visible: ['Housekeeping (EVS) Rapid Bed Turnover', '30-Minute Turnover Queue']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
@@ -829,7 +835,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 18000
+        delayMs: 17418
     assert:
       visible: ['Hospital Operational KPI', 'Digital Bed Requests', 'Avg ED Turnaround']
       notVisible: ['Something went wrong', 'No static resource']
@@ -843,7 +849,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 18875
+        delayMs: 18302
     assert:
       visible: ['Suggestion Acceptance', 'Total Diversions', 'Holding Ward Adoption']
       notVisible: ['Something went wrong', 'No static resource']
@@ -857,7 +863,7 @@ entries:
     overlay: none
     steps:
       - action: wait
-        delayMs: 16950
+        delayMs: 16384
     assert:
       visible: ['Public Tracker Access', 'Bedside Meds Delivery', 'Housekeeping 30m SLA']
       notVisible: ['Something went wrong', 'No static resource']
@@ -876,7 +882,7 @@ entries:
         target: Refresh Metrics button
         delayMs: 900
       - action: wait
-        delayMs: 11475
+        delayMs: 10253
     assert:
       visible: ['Hospital Operational KPI', 'Refresh Metrics']
       notVisible: ['Something went wrong', 'No static resource']

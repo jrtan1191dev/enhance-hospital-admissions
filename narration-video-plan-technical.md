@@ -9,15 +9,30 @@
 > a house style and a seed dataset. They share no beats, and this one does **not** re-sell the
 > product.
 
-> **Status (18 Sep — SHIPPED, re-spined):** the film is built and the quality gate **passes**.
-> `output/how-this-system-was-designed-technical-considerations.landscape.mp4` — 1920×1080,
-> ~29.96fps, **8m49s**, AAC audio, ~22 MB. 24 scenes (10 slides, 13 captures/terminal takes, 1
-> stills coverage report); SCR 2/2/5. Deck: 11 slides as PNG + PDF + HTML. **No CTA** — removed
-> from film and deck at the user's request. Plan decisions D17–D29 were forced by measurement
-> during authoring, rig verification and capture — read them before changing anything.
-> Standalone `verify.mjs` passes with two warnings only: total-duration drift ~124 ms over the
-> soft threshold, and 6 held-frame freezes over 6s (intended trailing holds on terminal/coverage
-> takes).
+> **Status (24 Sep — TEACHING RE-CUT):** the film was re-cut for comprehension. An earlier
+> shipped cut (18 Sep) was a tight screening reel — 24 scenes, ~8m49s, `verify.mjs` PASS. On the
+> user's instruction the goal function was **inverted**: the audience-model is no longer the
+> hostile, time-boxed queue-reviewer who wants a reason to stop, but a viewer who will watch as
+> long as it takes to **fully understand every technical consideration, including the hidden
+> design choices invisible in the UI**. Duration is explicitly *not* the constraint;
+> understanding is. See D30–D32.
+>
+> What changed: (1) the five resolution beats are the SAME five and in the SAME order — the order
+> already *was* the causal chain — but the narration now **voices the chain** instead of counting
+> ("First decision… Second decision…"), which was the sole cause of the reported "does not flow";
+> (2) a **container** is installed at the complication→resolution seam (end of `04-cannot-fake`)
+> so the five read as one argument; (3) each beat is **taught to the floor**, including the hidden,
+> UI-invisible mechanisms, in deepened narration; (4) beat 5 (`09-provable`) is explicitly marked
+> **different in kind** — a meta-property about the other four, not "item five"; (5) two new
+> terminal evidence takes were added at beat 3 (see §5.8, D31); (6) two narration accuracy
+> corrections were made against the source code (D32).
+>
+> **Scene count now 26** (was 24): 10 slides, 15 captures/terminal takes, 1 stills coverage report;
+> SCR still **2/2/5** (the two new takes are unroled captures, they do not touch the role budget).
+> Deck: 11 slides as PNG + PDF + HTML. **No CTA** (D27). Plan decisions D17–D29 are pipeline/rig
+> mechanics that survived the re-cut unchanged — read them before changing anything. Timing will be
+> re-converged on regeneration (D29); expect the same two non-fatal `verify.mjs` warnings class
+> (duration drift, intended trailing freezes).
 
 > **Re-spine note (this revision).** An earlier cut shipped a film organised around **reversibility
 > and judgment** (title *"Build the Foundations, Stub the Rest"*). It was fully re-spined to organise
@@ -36,18 +51,28 @@
 the parts interact, and can name the trade-off behind each design choice — including where the
 prototype stops and why.*
 
-This is a systems-design walkthrough, not a capability reel and not a judgment-under-constraint
-essay. The spine is five design decisions that each make one correctness property hold across a
-multi-actor, asynchronous process — and, at the end, an honest account of what is stubbed and the
-boundary it is stubbed behind. Engineering rigour appears throughout, but always as the *mechanism*
-behind a stated property, never as a claim of its own.
+This is a systems-design **teaching** walkthrough. The five design decisions are the SAME five
+correctness properties as the earlier screening cut, but the film is now built so a viewer *fully
+understands* each mechanism — including the hidden implementation choices that never surface in the
+UI — rather than being shown just enough to be convinced before moving on. Duration is not the
+constraint; comprehension is. Depth is spent *inside* the five beats, never on a sixth argument.
+
+The five properties are taught **as one chain, in the order the patient moves through them**, not as
+a numbered list: **eligibility → resolution of disagreement → ownership of the decision →
+contention over the decision → (meta) provability.** The first four are places in the patient's
+path; the fifth is different in kind — a property *about* the other four. A **container** is
+installed at the close of the Complication ("correctness has to hold in five specific places, in the
+order the patient moves through them — here is the first") so the set coheres, and every resolution
+opener names *its property and the link to the last beat* rather than an ordinal. This is the fix
+for the one defect the screening cut had: the narration read as a list because the openers were
+counters ("First decision…") carrying no semantic payload and no container to drop into.
 
 The reason for that framing: at senior level, coding ability is assumed by the time anyone is
 watching a video. The scarce, hard-to-fake signal in an admissions system is whether the author
 reasons about **the whole system** — concurrency, disagreement between actors, separation of
 authority, and what is safe to fake — rather than about individual screens. Each beat states a
-property, shows the mechanism in running code or a test, and prices the prototype-vs-production
-trade-off out loud.
+property, teaches the mechanism in running code or a test, exposes the hidden choices behind it, and
+prices the prototype-vs-production trade-off out loud.
 
 It is also the defensive choice. The dominant risk with this audience is the reviewer who concludes
 *"impressive-looking prototype, but it is demoware."* A film that keeps naming its own limits — H2
@@ -179,7 +204,7 @@ IDs; this maps them to what shipped.
 
 ---
 
-## 5. Master Beat Sheet (as shipped)
+## 5. Master Beat Sheet (teaching re-cut)
 
 > **Source of truth for narration:** the verbatim lines live **only** in
 > `presentations/technical-design/storyline.yml`, one `narration:` per entry, compiled to
@@ -205,9 +230,11 @@ read as a *selection* from a documented set. Not a beat; excluded from the video
 ### 5.1 S1 — `01-problem`: what kind of problem this is
 
 - **Layout:** `stat-deepdive`. **Role:** `situation`.
-- **Job:** frame the engineering problem before any domain content. Six roles act on one patient in
-  turn; no single one owns whether the outcome is correct; correctness comes from the handoffs.
-- **Stat:** 6 roles act on one patient.
+- **Job:** frame the engineering problem before any domain content. **Five** roles act on one
+  patient in turn — ED, specialists, bed management, ward nurse, housekeeping; no single one owns
+  whether the outcome is correct; correctness comes from the handoffs.
+- **Stat:** 5 roles act on one patient. (Was "6" in the screening cut; corrected to the five acting
+  roles the patient actually passes through — D32.)
 
 ### 5.2 S2 — `02-domain-model` + `02b-bed-board-capture`: the domain as a data model
 
@@ -283,21 +310,35 @@ discipline — the compiler checks cost-words on `complication` only.
 | Take | Type | Proves |
 | --- | --- | --- |
 | `07a` `/bmu` — the "(Admitting)" badge (authoritative) vs the ED's plain service badge | Playwright | Two decisions, two owners, and the system knows which is authoritative |
+| `07b` `run=07b-authority-enforced` — `BmuServiceTest` attachDelayTag success (BMU) + forbidden (non-BMU) | terminal | **(B, new)** Authority is enforced in the service method: an ED attending's operational write is refused with `AccessDeniedException`, not just hidden in the UI |
+| `07c` `run=07c-two-tier-safety` — `BmuServiceTest` gender/negative-pressure (422) + ward-class/telemetry (400) | terminal | **(B, new)** The two-tier constraint hierarchy: absolute invariants reject with 422 and no override path; operational rules reject with 400 unless a structured reason code is supplied. The payoff of the C2 "cannot fake safety" complication, proven |
+
+The two `07b`/`07c` takes are the depth policy in action (D30/D31): the two hidden mechanisms a
+Staff+ reviewer is most likely to *doubt* are converted from asserted narration into on-screen test
+evidence, both backed by tests that already existed. Everything else in the beat is taught as
+narration depth over the existing `07a` visual.
 
 ### 5.9 R4 — `08-concurrency`: two races, one mechanism
 
 - **Layout:** `comparison`. **Property:** two people racing for the same case or the same bed cannot
   both win.
-- **Mechanism:** `@Version` optimistic locking on 3 entities; the losing write gets an HTTP 409
-  RFC 7807 `ProblemDetail`. Optimistic **not** pessimistic, because losing the race is cheap and
-  self-correcting — the loser sees the case is taken and picks the next one; a database lock would
-  prevent a conflict that costs nothing and adds deadlock risk and pool pressure.
+- **Mechanism:** `@Version` optimistic locking on 3 entities (`AdmissionRequest`, `AssessmentBroadcast`,
+  `Bed` — verified in source); the losing write gets an HTTP 409 RFC 7807 `ProblemDetail`. Optimistic
+  **not** pessimistic, because losing the race is cheap and self-correcting — the loser sees the case
+  is taken and picks the next one; a database lock would prevent a conflict that costs nothing and
+  adds deadlock risk and pool pressure. **Correction (D32):** the earlier cut said "every transition
+  goes through one service method, a single write path." That is an overclaim — there is no single
+  method. The accurate mechanism is that **each transition is its own `@Transactional` method with a
+  state-guard precondition** (it checks the current bed/broadcast state and throws
+  `IllegalStateException` if it is wrong), and the `@Version` column resolves the case where two such
+  guarded transactions read the same starting state and both try to advance it. The guard defines the
+  legal moves; the version number decides who wins the race for one.
 - **Trade-off:** the loser retries, which is free.
 
 | Take | Type | Proves |
 | --- | --- | --- |
-| `08a` `/ward` vacate → mustard yellow (30-min SLA) | Playwright | The state machine as gated mutation |
-| `08a2` `/ward` housekeeping sign-off → white | Playwright | One owner per transition; single write path is what makes the version check enough |
+| `08a` `/ward` vacate → mustard yellow (30-min SLA) | Playwright | The state machine as gated mutation — each move checks the state it is leaving before it writes |
+| `08a2` `/ward` housekeeping sign-off → white | Playwright | Each transition is a guarded step in one transaction; the state guard plus the `@Version` column is what makes the concurrent write safe (corrected from "single write path" — D32) |
 | `08b` `run=08b-conflict-409` — `ClinicianControllerTest` 409 + `GlobalExceptionHandlerTest` | terminal | The race proven where the UI cannot honestly stage two clients at once |
 
 ### 5.10 R5 — `09-provable`: provable where built, loud where not
@@ -400,8 +441,9 @@ renders it; the scene is an ordinary `capture` against `:4173`. A failing comman
 (`09e` is red because it *is* red). **Re-spine update:** the run set changed to
 `05b-consensus-gate`, `06a-discordance`, `08b-conflict-409`, `09b-parity`, `09c-stub-contract`,
 `09e-gate-red`, `10a-artifacts`; the old-spine runs (`05b-profile-fence`, `05c-stub-contract`,
-`06c-solver-pinned`, `07a-absolute-tier`, `09b-audit-log`, `09c-parity`) were deleted. All 18 asserted
-strings were verified present in the frozen output before any spend.
+`06c-solver-pinned`, `07a-absolute-tier`, `09b-audit-log`, `09c-parity`) were deleted. **Teaching
+re-cut (D31):** two runs added — `07b-authority-enforced` and `07c-two-tier-safety` — bringing the
+frozen run set to nine. All asserted strings verified present in the frozen output before any spend.
 
 **D21 — Captures run against the Vite dev server, not the packaged jar.** Retained.
 `baseUrl: http://127.0.0.1:3000`; the jar 404s on deep links (no SPA fallback). Vite 8 needs
@@ -452,6 +494,40 @@ scenes land `audio-dictates` (drift ~0) is more robust than relying on speech-fi
 captures whose narration was 30–37% longer than the visual (`07-separation`/`07a`, `08a2`) were
 lengthened so the narration fits at a natural rate rather than being sped up to the cap.
 
+**D30 — The film was re-cut for comprehension, not screening.** *(24 Sep — supersedes the audience
+model in §2's "viewing context" for this cut.)* On the user's instruction the goal function
+inverted: understanding is the objective, duration is not a constraint. Structure decision recorded
+in the interview: **(A)** deepen the same five correctness beats to the floor — rejected **(B)** a
+comprehensive walk of the whole decision surface (would break SCR 2/2/5 and risk the feature-tour
+the archetype forbids). No re-sequence (Layer 3) because the shipped order already *is* the causal
+chain; no beat change (Layer 4). The reported "does not flow" was diagnosed to a single cause: the
+five resolution openers were content-free ordinals ("First decision…") with no *container* for the
+set to drop into. Fix: install the container at the close of `04-cannot-fake`, replace every ordinal
+with a property-named, causally-linked opener (eligibility → disagreement → ownership → contention →
+provability), and mark `09-provable` as **different in kind** (a meta-property about the other four).
+
+**D31 — Two new (B) evidence takes, backed by existing tests.** The depth policy is (A) narration
+depth over existing visuals by default, (B) new terminal evidence only for a hidden mechanism a
+skeptic would doubt *and* that a real command can honestly pin. Two qualified, both at beat 3:
+`07b-authority-enforced` (role-gated write: `attachDelayTag` throws `AccessDeniedException` for a
+non-BMU caller — `BmuServiceTest#testAttachDelayTag_Success+testAttachDelayTag_Forbidden_WhenNonBmu`)
+and `07c-two-tier-safety` (422 absolute invariants vs 400 overridable rules —
+`BmuServiceTest#testAllocateBed_SafetyInvariant_GenderCohorting+…_NegativePressureIsolation+…_OperationalConstraint_WardClassMismatchWithoutReason+…_TelemetryRequiredWithoutReason`).
+No new tests were written; both takes use tests that already existed. Recorded via `record-runs.mjs`,
+frozen to `pages/runs/07b-authority-enforced.json` and `pages/runs/07c-two-tier-safety.json`
+(committed). Everything else hidden is taught as (A) narration.
+
+**D32 — Two narration accuracy corrections against the source.** Reading `ClinicianService`,
+`BmuService`, and the entities before rewriting surfaced two claims the screening cut got loose:
+(1) `01-problem` said **6 roles**; the patient passes through **5** acting roles (ED, specialists,
+bed management, ward nurse, housekeeping) — corrected to 5 in stat, cards and narration. (The domain
+model at `02-domain-model` legitimately still says "6 acting roles" — that counts every role that
+*can* act on the tree, including the patient/tracker view, which is a different claim from "roles a
+patient passes through.") (2) `08a2` said "every transition goes through **one service method**, a
+single write path." There is no single method — each transition is its own `@Transactional` method
+with a **state-guard precondition**, and `@Version` resolves two guarded transactions racing from the
+same state. Narration corrected to that mechanism. `@Version` confirmed on exactly 3 entities.
+
 ### 7.1 Rig
 
 | | |
@@ -484,8 +560,9 @@ application untouched.
 6. `bash presentations/technical-design/tools/serve-evidence.sh` — symlinks the seam page, the terminal
    renderer, the run JSONs and both coverage reports under `:4173` and verifies all URLs return 200.
    (Healthcheck references `runs/05b-consensus-gate.json`.)
-7. `node presentations/technical-design/tools/record-runs.mjs` — freeze the terminal evidence (7 runs).
-8. `node presentations/technical-design/tools/preflight.mjs` — must report **14/14 capture scenes ready**
+7. `node presentations/technical-design/tools/record-runs.mjs` — freeze the terminal evidence (9 runs,
+   incl. the two teaching-cut takes `07b-authority-enforced`, `07c-two-tier-safety` — D31).
+8. `node presentations/technical-design/tools/preflight.mjs` — must report **16/16 capture scenes ready**
    before any spend.
 9. `compile` → `deck` → `synthesize` → `capture` → `synthesize` → `capture` → `compose` → `verify`,
    or run `generate.mjs --yes` which orchestrates the converged order. Restart `:8080` before each

@@ -1,5 +1,5 @@
 {
-  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
   "id": "09e-gate-red",
   "title": "A coverage gate that nothing runs, and that is currently red",
   "recordedAt": "2026-09-18T08:08:39.335Z",

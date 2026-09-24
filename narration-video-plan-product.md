@@ -112,8 +112,8 @@ minutes per Decision #21 — superseding the earlier 14–16 minute estimate, wh
 narration clarity rewrite)
 
 > **Source of truth for narration:** the verbatim spoken lines now live **only** in
-> `video-generation/storyline.yml`, one `narration:` field per entry, and compile to
-> `video-generation/storyboard.json`. The voiceover text quoted in this section is a **mirror for
+> `presentations/product-demo/storyline.yml`, one `narration:` field per entry, and compile to
+> `presentations/product-demo/storyboard.json`. The voiceover text quoted in this section is a **mirror for
 > review**, not the source — when the two disagree, `storyline.yml` wins. This section's value is the
 > beat structure, routes, selectors and seeded-case grounding; do not edit narration here and expect
 > it to reach the film. See Decisions #21–#33 in §6 for the rules every line is written against.
@@ -750,7 +750,7 @@ feature (each pain point gets its own crisp tension→release).
 
 > **Note:** the "Maps to film scenes" column below still reflects this section's original
 > 34-scene numbering scheme from the pre-`video-generator`-skill Marp era. The actual, current
-> implementation lives in `video-generation/storyline.yml` and uses its own scene IDs (e.g. `04a`,
+> implementation lives in `presentations/product-demo/storyline.yml` and uses its own scene IDs (e.g. `04a`,
 > `04a2`, `04b`, `04b2`, `04c`, `04c2` for PP1/PP2; `07a`, `08a`–`08d` for PP4) — see the updated
 > Beat 1 and Beat 3 walkthroughs in §5 above for the current, authoritative scene list and
 > threading order per Decision #20. This table is kept for historical SCR-role/register reference
@@ -822,10 +822,11 @@ scenes):
 
 ### 7.5 Build & pipeline
 
-* **Superseded:** the Marp pipeline (`video-generation/scenes/*.md` → `render-marp.mjs`) is retired.
+* **Superseded:** the Marp pipeline (`scenes/*.md` → `render-marp.mjs`, now under
+  `presentations/product-demo/`) is retired.
   Those `scenes/*.md` files and `storyboard.marp-old.json` are kept as historical grounding references
   only (Decision #20-h) and are **not** read by the current build.
-* The live pipeline is the `video-generator` skill's: **`video-generation/storyline.yml` is the
+* The live pipeline is the `presentation-producer` skill's: **`presentations/product-demo/storyline.yml` is the
   authored source** (`engine: html`, bento templates, `theme: light`) — the filename is fixed by the
   tooling, see Decision #34 — → `compile.mjs` → `storyboard.json`
   (generated lockfile, committed, **never hand-edited** — `compile.mjs` refuses a file without the

@@ -1,5 +1,5 @@
 {
-  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
   "id": "05b-consensus-gate",
   "title": "The consensus gate stays closed until every consult is in",
   "recordedAt": "2026-09-18T08:08:25.553Z",

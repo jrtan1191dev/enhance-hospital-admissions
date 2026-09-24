@@ -1,5 +1,5 @@
 {
-  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
   "id": "09b-parity",
   "title": "Parity between the two pathways is asserted, not eyeballed",
   "recordedAt": "2026-09-18T08:08:36.278Z",

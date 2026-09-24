@@ -16,7 +16,7 @@
  * enforces during the take.
  *
  * Usage (from the repository root, with the rig up):
- *   node video-generation-technical/tools/preflight.mjs
+ *   node presentations/technical-design/tools/preflight.mjs
  */
 
 import { readFileSync } from 'node:fs';

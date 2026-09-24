@@ -118,11 +118,21 @@
 # Capture entries carry NO `role`: they are evidence, not SCR beats, so they
 # must not count toward the beat totals.
 
-deck:
+# What this presentation IS, independently of any one run. `mode` is the guard:
+# the word on the command line must agree with it, which is what catches "I meant
+# the other deck". Note the absence of `orientations:` — a video presentation's
+# deck follows video.outputs, and two sources for one fact is how they disagree.
+presentation:
+  mode: video               # this is a film WITH a companion deck, not a standalone deck
   title: Recovering Hospital Beds Without Building More
   archetype: scr            # situation -> complication -> resolution beat checks
   engine: html              # bento templates — the polished, non-wordy look
   theme: light              # matches the light app UI, so cuts to the dashboards do not flash
+  formats: [png, pdf, html] # png feeds the video, pdf presents, html converts to PPTX externally
+
+# Film-only settings. Everything here is meaningless to a `mode: slides`
+# presentation, which is precisely why it is a separate block.
+video:
   aspect: landscape
   outputs:
     - aspect: landscape     # 16:9 for the briefing and the film
@@ -130,7 +140,6 @@ deck:
     # Remotion (bootstrap.mjs --with-remotion), which is not installed here, and
     # an ~10-minute film is format-mismatched for vertical (norms are <90s).
     # Restore `- aspect: vertical` once Remotion is present AND a short cut exists.
-  formats: [png, pdf, html] # png feeds the video, pdf presents, html converts to PPTX externally
   voice:
     provider: auto
     gender: female

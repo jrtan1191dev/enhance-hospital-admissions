@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Serve every non-application artifact the film captures, on one origin: :4173.
 #
-# An absolute `url` in storyline.yml bypasses deck.baseUrl (capture.mjs:155), so the
+# An absolute `url` in storyline.yml bypasses video.baseUrl (capture.mjs:155), so the
 # coverage report, the seam diagram and the terminal takes all come from here and the
 # application is left untouched — nothing is copied into Spring Boot's static
 # resources to serve a video.
 #
-# Run from the repository root:  bash video-generation-technical/tools/serve-evidence.sh
+# Run from the repository root:  bash presentations/technical-design/tools/serve-evidence.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-WORK="$ROOT/video-generation-technical"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+WORK="$ROOT/presentations/technical-design"
 SERVE="$WORK/.serve"
 
 if [[ ! -f "$ROOT/backend/target/site/jacoco/index.html" ]]; then

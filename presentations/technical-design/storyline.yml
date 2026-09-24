@@ -1,11 +1,11 @@
 # How This System Was Designed — Technical Considerations
 #
-# Authored source. `node .kiro/skills/video-generator/scripts/compile.mjs
-# --workDir=video-generation-technical` turns this into storyboard.json, which is
+# Authored source. `node <skill-root>/scripts/compile.mjs --root=presentations
+# --presentation=technical-design` turns this into storyboard.json, which is
 # generated, committed and never hand-edited.
 #
-# Plan: ../narration-video-plan-technical.md. Sibling: the product film in
-# ../video-generation-product/. This one shares the pipeline, theme, narrator and
+# Plan: ../../narration-video-plan-technical.md. Sibling: the product film in
+# ../product-demo/. This one shares the pipeline, theme, narrator and
 # seed data — and no beats.
 #
 # THESIS (re-spined): correctness in this system is a property of how the parts
@@ -39,15 +39,21 @@
 #   * An absolute `url` bypasses `baseUrl` (capture.mjs:155), which is how the
 #     coverage report and every terminal take are captured from :4173.
 
-deck:
+# What this presentation IS. `mode: video` is the guard the CLI word must match.
+# No `orientations:` here on purpose — a video presentation's deck follows
+# video.outputs.
+presentation:
+  mode: video
   title: How This System Was Designed — Technical Considerations
   archetype: scr            # situation 1-2, complication 1-2, resolution 2-5, enforced
   engine: html
   theme: light              # matches the app UI, so cuts to dashboards do not flash
+  formats: [png, pdf, html]
+
+video:
   aspect: landscape
   outputs:
     - aspect: landscape
-  formats: [png, pdf, html]
   voice:
     provider: auto          # resolves to local Kokoro
     gender: female          # same narrator as the product film

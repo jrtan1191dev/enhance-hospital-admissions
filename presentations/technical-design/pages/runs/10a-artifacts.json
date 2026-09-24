@@ -1,5 +1,5 @@
 {
-  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
   "id": "10a-artifacts",
   "title": "The specifications preceded the code, and it is countable",
   "recordedAt": "2026-09-18T08:08:39.471Z",

@@ -1,26 +1,32 @@
 #!/usr/bin/env node
 /**
- * render-marp.mjs — fills a gap in the video-generator pipeline.
+ * render-marp.mjs — RETIRED. Kept as historical grounding only.
  *
- * The skill declares `marp_slides` as a valid visualEngine and probes for the
- * Marp CLI, but no bundled stage actually renders slide markdown into the
- * per-scene MP4 that capture.mjs expects at assets/recordings/{id}.mp4.
- * (capture.mjs literally says "produced by render-assets.mjs", which does not
- * exist in this build.) This script produces those assets deterministically:
+ * Superseded by the skill's native marp engine (`presentation.engine: marp`),
+ * which emits real Markdown and shares one `slideCss()` generator and one
+ * Chromium with the HTML engine. This script predates that: it existed because
+ * the old skill declared `marp_slides` as a visualEngine, probed for the Marp
+ * CLI, and then shipped no stage that rendered slide markdown into the per-scene
+ * MP4 capture.mjs expects at assets/recordings/{id}.mp4.
  *
  *   scenes/<id>.md  --marp-->  assets/slides/<id>.png  --ffmpeg-->  assets/recordings/<id>.mp4
  *
- * Each still is held for the scene's resolvedTiming.sceneMs (audio-driven), so
- * a slide never drifts against its narration. Run AFTER synthesise (so audio
- * durations exist) and BEFORE compose.
+ * It no longer runs against the live storyboard: this presentation compiles with
+ * `engine: html`, so no scene carries `visualEngine: marp_slides` and the script
+ * exits early by design. Its inputs — `scenes/*.md` and
+ * `storyboard.marp-old.json` — are retained as the pre-skill reference the
+ * narration plan cites, not as build inputs.
+ *
+ * Paths below were updated for the presentations/<slug>/ layout: the work dir is
+ * this file's own directory, and `.runtime/` is now shared at the root above it.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 
-const workDir = path.resolve('video-generation');
-const runtime = path.join(workDir, '.runtime', 'node_modules');
+const workDir = import.meta.dirname;
+const runtime = path.join(workDir, '..', '.runtime', 'node_modules');
 const marpCli = path.join(runtime, '@marp-team', 'marp-cli', 'marp-cli.js');
 const ffmpeg = path.join(runtime, 'ffmpeg-static', 'ffmpeg');
 const slidesDir = path.join(workDir, 'assets', 'slides');

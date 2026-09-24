@@ -28,8 +28,8 @@
  * without a working VHS.
  *
  * Usage (from the repository root):
- *   node video-generation-technical/tools/record-runs.mjs            # all runs
- *   node video-generation-technical/tools/record-runs.mjs 09b-audit-log
+ *   node presentations/technical-design/tools/record-runs.mjs            # all runs
+ *   node presentations/technical-design/tools/record-runs.mjs 09b-audit-log
  *
  * ORDERING: 09b-audit-log must be recorded AFTER capture.mjs has driven the
  * workflows, because a freshly started JVM has zero audit lines. Everything else is
@@ -40,7 +40,7 @@ import { execFile } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const ROOT = path.resolve(import.meta.dirname, '..', '..');
+const ROOT = path.resolve(import.meta.dirname, '..', '..', '..');
 const OUT = path.resolve(import.meta.dirname, '..', 'pages', 'runs');
 
 /**
@@ -143,7 +143,7 @@ for (const spec of RUNS) {
   const steps = [];
   for (const s of spec.steps) steps.push(await run(s.cmd));
   const record = {
-    $recorded: 'Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs',
+    $recorded: 'Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs',
     id: spec.id,
     title: spec.title,
     recordedAt: new Date().toISOString(),

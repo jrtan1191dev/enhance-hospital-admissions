@@ -3,8 +3,8 @@
 ## Technical design decisions and trade-offs — Patient Admission & Discharge Management Application
 
 > **Sibling artifact, not a sequel.** [`narration-video-plan-product.md`](narration-video-plan-product.md) plans the
-> *product* film (`video-generation-product/`), which sells what the system does to a health
-> executive. This plan is for a second, independent film and deck (`video-generation-technical/`)
+> *product* film (`presentations/product-demo/`), which sells what the system does to a health
+> executive. This plan is for a second, independent film and deck (`presentations/technical-design/`)
 > that shows **how the system was designed** to a technical hiring audience. The two share a pipeline,
 > a house style and a seed dataset. They share no beats, and this one does **not** re-sell the
 > product.
@@ -182,7 +182,7 @@ IDs; this maps them to what shipped.
 ## 5. Master Beat Sheet (as shipped)
 
 > **Source of truth for narration:** the verbatim lines live **only** in
-> `video-generation-technical/storyline.yml`, one `narration:` per entry, compiled to
+> `presentations/technical-design/storyline.yml`, one `narration:` per entry, compiled to
 > `storyboard.json`. Lines below are **structure and intent** — when the two disagree, `storyline.yml`
 > wins.
 
@@ -456,10 +456,11 @@ lengthened so the narration fits at a natural rate rather than being sped up to 
 
 | | |
 | --- | --- |
-| Skill copy | **`.kiro/skills/video-generator`** — the newer copy. The `.agents/` copy is stale and must not be used |
-| Work dir | `video-generation-technical/` — its own `.runtime/` |
+| Skill copy | **`.kiro/skills/presentation-producer`** — the current skill. The `video-generator` copies under `.kiro/` and `.agents/` are the superseded predecessor and must not be used |
+| Work root / presentation | `presentations/` (holds the one shared `.runtime/`) · `presentations/technical-design/` — run it with `--root=presentations --presentation=technical-design` |
 | Source / lockfile | `storyline.yml` authored (filename load-bearing); `storyboard.json` generated, committed, never hand-edited |
-| Deck | `engine: html`, `theme: light`, `aspect: landscape`, `outputs: [landscape]`, `formats: [png, pdf, html]` |
+| Presentation block | `mode: video`, `engine: html`, `theme: light`, `formats: [png, pdf, html]` |
+| Video block | `aspect: landscape`, `outputs: [landscape]` |
 | Determinism | `baseUrl: http://127.0.0.1:3000` (D21); `fixedTime: '2026-01-15T09:00:00.000Z'` |
 | Voice | Kokoro, `gender: female` |
 | Committed | `storyline.yml`, `storyboard.json`, `scenes/`, `pages/` (incl. `pages/runs/*.json`), `tools/`; `assets/` gitignored |
@@ -480,11 +481,11 @@ application untouched.
    branch gate is red at 74.84%, which is the point).
 5. `cd frontend && npm run dev -- --host 127.0.0.1` — captures target `:3000`; the IPv4 host flag is
    required (D21).
-6. `bash video-generation-technical/tools/serve-evidence.sh` — symlinks the seam page, the terminal
+6. `bash presentations/technical-design/tools/serve-evidence.sh` — symlinks the seam page, the terminal
    renderer, the run JSONs and both coverage reports under `:4173` and verifies all URLs return 200.
    (Healthcheck references `runs/05b-consensus-gate.json`.)
-7. `node video-generation-technical/tools/record-runs.mjs` — freeze the terminal evidence (7 runs).
-8. `node video-generation-technical/tools/preflight.mjs` — must report **14/14 capture scenes ready**
+7. `node presentations/technical-design/tools/record-runs.mjs` — freeze the terminal evidence (7 runs).
+8. `node presentations/technical-design/tools/preflight.mjs` — must report **14/14 capture scenes ready**
    before any spend.
 9. `compile` → `deck` → `synthesize` → `capture` → `synthesize` → `capture` → `compose` → `verify`,
    or run `generate.mjs --yes` which orchestrates the converged order. Restart `:8080` before each

@@ -1,5 +1,5 @@
 {
-  "$recorded": "Real command output, captured once and frozen. Regenerate: node video-generation-technical/tools/record-runs.mjs",
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
   "id": "08b-conflict-409",
   "title": "Optimistic locking, proved where the UI cannot honestly stage it",
   "recordedAt": "2026-09-18T08:08:30.832Z",

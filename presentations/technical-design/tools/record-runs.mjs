@@ -80,6 +80,30 @@ const RUNS = [
     ],
   },
   {
+    // Beat 3 — separation of authority, enforced in code, not just in the UI. The
+    // delay-tag write throws 403 AccessDeniedException unless the caller holds
+    // ROLE_BMU_COORDINATOR. An ED attending cannot make an operational call.
+    id: '07b-authority-enforced',
+    title: 'Separation of authority is enforced in the code, not just the UI',
+    steps: [
+      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/service/BmuServiceTest.java | grep -i 'attachDelayTag' | sed 's/.*("/  - /; s/")//'` },
+      { cmd: "cd backend && ./mvnw test -Dtest='BmuServiceTest#testAttachDelayTag_Success+testAttachDelayTag_Forbidden_WhenNonBmu' 2>&1 | grep -E 'AccessDenied|Tests run:|BUILD'" },
+    ],
+  },
+  {
+    // Beat 3/4 bridge — the safety hierarchy the complication said could not be
+    // faked. Absolute invariants (gender cohorting, negative-pressure isolation)
+    // throw 422 with NO override path; operational constraints (ward class,
+    // telemetry) throw 400 unless a structured reason code is supplied. Two tiers,
+    // two failure modes, in one test class.
+    id: '07c-two-tier-safety',
+    title: 'Two tiers of constraint: absolute invariants (422) versus overridable rules (400)',
+    steps: [
+      { cmd: `grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/service/BmuServiceTest.java | grep -iE 'SafetyInvariant|OperationalConstraint' | sed 's/.*("/  - /; s/")//'` },
+      { cmd: "cd backend && ./mvnw test -Dtest='BmuServiceTest#testAllocateBed_SafetyInvariant_GenderCohorting+testAllocateBed_SafetyInvariant_NegativePressureIsolation+testAllocateBed_OperationalConstraint_WardClassMismatchWithoutReason+testAllocateBed_OperationalConstraint_TelemetryRequiredWithoutReason' 2>&1 | grep -E 'Tests run:|BUILD'" },
+    ],
+  },
+  {
     // Beat 5 — provable. Both pathways computed, a test fails if they disagree.
     id: '09b-parity',
     title: 'Parity between the two pathways is asserted, not eyeballed',

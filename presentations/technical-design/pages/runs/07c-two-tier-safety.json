@@ -1,0 +1,20 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
+  "id": "07c-two-tier-safety",
+  "title": "Two tiers of constraint: absolute invariants (422) versus overridable rules (400)",
+  "recordedAt": "2026-09-24T10:15:00.607Z",
+  "steps": [
+    {
+      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/service/BmuServiceTest.java | grep -iE 'SafetyInvariant|OperationalConstraint' | sed 's/.*(\"/  - /; s/\")//'",
+      "output": "  - allocateBed throws SafetyInvariantViolationException (422) when gender cohorting is violated in multi-bed ward\n  - allocateBed throws SafetyInvariantViolationException (422) when airborne infection is placed in non-negative pressure ward",
+      "exitCode": 0,
+      "durationMs": 40
+    },
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest='BmuServiceTest#testAllocateBed_SafetyInvariant_GenderCohorting+testAllocateBed_SafetyInvariant_NegativePressureIsolation+testAllocateBed_OperationalConstraint_WardClassMismatchWithoutReason+testAllocateBed_OperationalConstraint_TelemetryRequiredWithoutReason' 2>&1 | grep -E 'Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.792 s -- in com.hospital.admissions.service.BmuServiceTest\n[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 2585
+    }
+  ]
+}

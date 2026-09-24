@@ -1,0 +1,20 @@
+{
+  "$recorded": "Real command output, captured once and frozen. Regenerate: node presentations/technical-design/tools/record-runs.mjs",
+  "id": "07b-authority-enforced",
+  "title": "Separation of authority is enforced in the code, not just the UI",
+  "recordedAt": "2026-09-24T10:14:57.979Z",
+  "steps": [
+    {
+      "cmd": "grep -h '@DisplayName' backend/src/test/java/com/hospital/admissions/service/BmuServiceTest.java | grep -i 'attachDelayTag' | sed 's/.*(\"/  - /; s/\")//'",
+      "output": "  - attachDelayTag: Successfully attaches delay reason tag, note, and logs TAG_DELAY_REASON audit event\n  - attachDelayTag: Rejects non-BMU coordinators with 403 AccessDeniedException",
+      "exitCode": 0,
+      "durationMs": 38
+    },
+    {
+      "cmd": "cd backend && ./mvnw test -Dtest='BmuServiceTest#testAttachDelayTag_Success+testAttachDelayTag_Forbidden_WhenNonBmu' 2>&1 | grep -E 'AccessDenied|Tests run:|BUILD'",
+      "output": "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.892 s -- in com.hospital.admissions.service.BmuServiceTest\n[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+      "exitCode": 0,
+      "durationMs": 2906
+    }
+  ]
+}

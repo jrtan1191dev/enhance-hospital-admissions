@@ -8,36 +8,31 @@
 # ../product-demo/. This one shares the pipeline, theme, narrator and
 # seed data — and no beats.
 #
-# THESIS (re-spined): correctness in this system is a property of how the parts
-# interact. It holds under concurrency and under disagreement, and where a piece
-# isn't built yet, the boundary is drawn so it fails loudly instead of pretending.
-# Every beat states one such property, shows the mechanism, and names the
-# prototype-vs-production trade-off behind it.
+# THESIS: correctness in this system is a property of how the parts interact.
+# The film teaches five places that correctness could break and does not, in the
+# order a patient actually moves through them:
+#   eligibility -> resolution of disagreement -> ownership of the decision ->
+#   contention over the decision -> (meta) whether any of it is provable.
+# Each beat names the place, shows the mechanism in running code or a test, and
+# names the prototype-vs-production trade-off out loud. The fifth is different in
+# kind: it is a property ABOUT the other four.
 #
-# The five beats:
-#   1. Consensus before eligibility  — a patient can't be allocated a bed until
-#      every consult resolves.
-#   2. Disagreement resolves to safety — specialists disagree, system takes the
-#      highest acuity and unions telemetry, no human arbitration.
-#   3. Separation of authority — clinicians decide the clinical picture, BMU
-#      decides the bed. Different actors on purpose (ADR-0009).
-#   4. Concurrency — two people racing for the same case or bed can't both win.
-#      Optimistic locking, not pessimistic, because losing the race is cheap.
-#   5. Provable, and fails loud where unbuilt — dual-pathway parity test, plus the
-#      stubs that refuse to run. Reversibility lives here as one supporting point.
+# This is a TEACHING cut. Duration is not the constraint; understanding is. The
+# openers name the property and the link to the last beat, never an ordinal, so
+# the five read as one argument rather than a numbered list.
 #
-# NARRATION RULES: plain, direct, honest. No clever phrasing. Every line reads as
-# a clear prototype-vs-production trade-off. Numbers spoken only if the shot
-# produces them.
+# NARRATION RULES: plain, direct, honest. Short spoken sentences. No clever
+# phrasing, nothing chosen to sound smart. Numbers spoken only if the shot
+# produces them. Never read the slide aloud.
 #
 # Two schema facts:
-#   * `storyline.yml` cannot emit a `vhs_terminal` scene. Terminal evidence is a
-#     `capture` of pages/term.html?run=<id> on :4173, fed by
-#     tools/record-runs.mjs which runs each command for real and freezes stdout,
-#     stderr and exit code into pages/runs/<id>.json (committed). The bytes are
-#     real output; only the reveal is presentation, and term.html says so.
-#   * An absolute `url` bypasses `baseUrl` (capture.mjs:155), which is how the
-#     coverage report and every terminal take are captured from :4173.
+#  * `storyline.yml` cannot emit a `vhs_terminal` scene. Terminal evidence is a
+#    `capture` of pages/term.html?run=<id> on :4173, fed by
+#    tools/record-runs.mjs which runs each command for real and freezes stdout,
+#    stderr and exit code into pages/runs/<id>.json (committed). The bytes are
+#    real output; only the reveal is presentation, and term.html says so.
+#  * An absolute `url` bypasses `baseUrl` (capture.mjs:155), which is how the
+#    coverage report and every terminal take are captured from :4173.
 
 # What this presentation IS. `mode: video` is the guard the CLI word must match.
 # No `orientations:` here on purpose — a video presentation's deck follows
@@ -45,9 +40,9 @@
 presentation:
   mode: video
   title: How This System Was Designed — Technical Considerations
-  archetype: scr            # situation 1-2, complication 1-2, resolution 2-5, enforced
+  archetype: scr          # situation 1-2, complication 1-2, resolution 2-5, enforced
   engine: html
-  theme: light              # matches the app UI, so cuts to dashboards do not flash
+  theme: light            # matches the app UI, so cuts to dashboards do not flash
   formats: [png, pdf, html]
 
 video:
@@ -55,8 +50,8 @@ video:
   outputs:
     - aspect: landscape
   voice:
-    provider: auto          # resolves to local Kokoro
-    gender: female          # same narrator as the product film
+    provider: auto        # resolves to local Kokoro
+    gender: female        # same narrator as the product film
   # Captured against the VITE DEV SERVER, not the jar (the jar 404s on deep links;
   # no SPA fallback). Vite serves deep links and proxies /api to :8080.
   baseUrl: http://127.0.0.1:3000
@@ -68,7 +63,6 @@ entries:
   # a selection from a documented set. Carries no `role:`, so it does not consume
   # SCR budget. No answer-first slide: this is a walkthrough, not a pitch.
   # ==========================================================================
-
   - id: 00-decision-surface
     type: slide
     in: [deck]
@@ -101,27 +95,27 @@ entries:
     type: slide
     role: situation
     layout: stat-deepdive
-    title: What kind of problem this is
+    title: Correctness here is a whole-system property, not a per-screen one
     stat:
-      value: '6'
+      value: '5'
       unit: roles
       label: act on one patient, and no single one owns the outcome
     cards:
-      - icon: users
-        title: A multi-actor process
-        text: ED, specialists, bed management, ward nurse, housekeeping, patient.
-        detail: Five desks and a patient
       - icon: git-merge
-        title: Correctness is a whole-system property
+        title: Correctness lives in the handoffs
         text: Being right depends on how the parts hand off, not on any one part.
         detail: The design target
-    narration: "This is an admissions system, and the thing that makes it hard isn't any one screen. One patient is handled by six roles in turn — the ED, the specialists, bed management, the ward nurse, housekeeping. No single one of them owns whether the outcome is correct. Correctness comes from how they hand off to each other. So that's what I designed for."
+      - icon: users
+        title: A multi-actor process
+        text: ED, specialists, bed management, ward nurse, housekeeping.
+        detail: Five desks, one patient
+    narration: "This is a hospital admissions system. The hard part isn't any single screen. One patient passes through five roles in turn — the emergency department, the specialists, bed management, the ward nurse, housekeeping. Each does its bit and hands the patient to the next. No single role owns whether the final outcome is correct. Correctness is a property of the handoffs between them. So that is the thing I designed for, and everything in this walkthrough is about keeping the whole system correct as the patient moves through it."
 
   - id: 02-domain-model
     type: slide
     role: situation
     layout: process-flow
-    title: The domain, as a data model
+    title: The domain is a tree of beds, each in exactly one state
     cards:
       - icon: boxes
         title: 5 entities, one tree
@@ -136,24 +130,26 @@ entries:
         title: 3 external systems
         text: Records, transfers, notifications — none available to me.
         detail: The prototype constraint
-    narration: "Here's the model. Five entities in a tree: a level holds wards, a ward holds beds. A bed is always in exactly one of four states. Six roles act on it, each with its own view. And it needs to talk to three outside systems — patient records, sister hospitals, notifications — none of which I have access to. That last line is the constraint that shapes every decision after this."
+    narration: "Before the decisions, here is the model they act on. Five entities in a tree: a level holds wards, and a ward holds beds. A bed is always in exactly one of four states, and it moves between them by legal steps only. Six roles act on that tree, each seeing its own view of the same data. And the system has to talk to three outside systems — patient records, sister hospitals, notifications — none of which I could actually connect to. That last line is the constraint that shapes every decision after this one, so hold on to it."
 
   - id: 02b-bed-board-capture
     type: capture
-    narration: "This is the bed board. It looks like a dashboard, but it's a state machine. Every action is a legal move from one state to the next, and a bed can't leave a state without entering another. That's the first correctness property: a bed can never quietly go missing."
+    narration: "Here is that model running. It looks like a dashboard, but underneath it is a state machine. Every button is a legal move from one bed state to the next, and a bed cannot leave one state without entering another — there is no gap it can fall into. That is the first thing correctness rests on: a bed can never quietly go missing, because the only way to change one is a move the system recognises. Now, the five decisions — each one a place this could go wrong, in the order the patient meets them."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: 'text=Live Bed Inventory Matrix'
     overlay: none
     steps:
       - action: wait
-        delayMs: 18951
+        delayMs: 29450
     assert:
       visible: ['Live Bed Inventory Matrix', 'Mustard Yellow (Cleaning)', 'White (Clean)']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   # ==========================================================================
-  # COMPLICATION (2 of 2).
+  # COMPLICATION (2 of 2). The container for the five is installed here, at the
+  # close of 04-cannot-fake: safety had to be real, and correctness had to hold
+  # in five specific places.
   # ==========================================================================
 
   - id: 03-both-moves-fail
@@ -170,7 +166,7 @@ entries:
         title: Build all of it for real
         text: 3 integrations I can't get. 1 engineer. 0 production credentials.
         detail: Never finishes
-    narration: "There are two easy ways to build a prototype like this, and both fail. One: fake everything behind a nice UI. On camera, a real safety rule and a fake one look the same, so it proves nothing. Two: build all of it for real. That doesn't finish — no records endpoint, no identity provider, no solver licence, one engineer, no production access. So the real decision is where to spend the effort I did have."
+    narration: "There are two easy ways to build a prototype like this, and both fail. The first is to fake everything behind a polished interface. On camera, a real safety rule and a fake one look exactly the same, so faking it proves nothing to anyone who understands the domain. The second is to build all of it for real. That never finishes — there is no records endpoint, no identity provider, no solver licence, one engineer, and no production access. So the real decision, before any feature, is where to spend the effort I actually had."
 
   - id: 04-cannot-fake
     type: slide
@@ -190,10 +186,11 @@ entries:
         title: Safety can't be a stub
         text: The rules had to be real before anything else was worth showing.
         detail: This is what forces the design
-    narration: "And the safety-critical part can't be faked. Put one man in an empty six-bed cubicle, and the other five beds can only take men. Get that wrong and it isn't rough — it's just wrong, and anyone who knows the domain sees it immediately. So the safety rules had to be real. That decides what got built to production standard and what got stubbed."
+    narration: "And the safety-critical part cannot be faked. Put one man in an empty six-bed cubicle, and the other five beds can now only take men. Get a rule like that wrong and the result isn't rough or unpolished — it is simply wrong, and anyone who knows the domain sees it at a glance. So the safety rules had to be real code, not a demo. That single choice decides what got built to production standard and what got stubbed. And it points at the real question the rest of this film answers: correctness here has to hold in five specific places, in the order the patient moves through them. Here is the first."
 
   # ==========================================================================
-  # RESOLUTION 1 of 5 — Consensus before eligibility. (ADR-0007, ADR-0008)
+  # RESOLUTION 1 of 5 — Eligibility: consensus before a bed. (ADR-0007, ADR-0008)
+  # First link in the chain: WHEN is a patient allowed into the bed queue.
   # ==========================================================================
 
   - id: 05-consensus
@@ -204,7 +201,7 @@ entries:
     cards:
       - icon: pause
         title: Held, not queued
-        text: A consult-gated request sits in ASSESSMENT_PENDING, hidden from bed management.
+        text: A consult-gated request sits in ASSESSMENT_PENDING, out of the bed queue.
       - icon: check-check
         title: Consensus gate
         text: It becomes eligible only when every broadcast reaches COMPLETED.
@@ -212,11 +209,11 @@ entries:
         title: Chained consults
         text: A specialist can add another cluster; the request waits for all of them.
         detail: Trade-off — slower entry, no premature placement
-    narration: "First decision. A patient who needs specialist input is not put in the bed queue right away. The request is held, hidden from bed management, until every consult comes back. Only when all of them are complete does it become eligible for a bed. The trade-off is that entry is slower. But the alternative — allocating a bed before the specialists agree — means placing a patient the assessment might still change. In this domain that's the wrong trade."
+    narration: "The first place is eligibility — deciding when a patient is even allowed to compete for a bed. A patient who needs specialist input is not put in the bed queue right away. The request is held in a state called ASSESSMENT_PENDING, hidden from bed management, until every specialist consult comes back. And a specialist can chain another consult onto it — which opens a new request that the patient now also waits for. Only when all of them are complete does the request flip to eligible and appear in the queue. The trade-off is honest: entry is slower. But the alternative is allocating a bed before the specialists agree, which means committing a patient the assessment might still change. In this domain, that is the wrong trade, so the gate stays closed."
 
   - id: 05a-consult-hold-capture
     type: capture
-    narration: "You can see the rule stated in the ED view. When the doctor picks a patient and sends the case to specialist clusters, the admission is held in ASSESSMENT_PENDING. It won't reach bed management until the consults resolve. This is the gate, in the UI, on the way in."
+    narration: "You can watch the gate close in the emergency department view. The doctor picks a patient and sends the case out to specialist clusters. The moment that happens, the admission drops into ASSESSMENT_PENDING and stays there. It will not reach bed management, and no bed can be allocated to it, until the consults resolve. This is the rule stated in the interface, on the way in — but the interface only shows you the happy path, where the consults come back cleanly."
     url: /ed
     setupScript: scenes/role-ed.mjs
     roiSelector: main
@@ -235,30 +232,29 @@ entries:
       - action: waitForText
         value: ASSESSMENT_PENDING
       - action: wait
-        delayMs: 14900
+        delayMs: 22350
     assert:
       visible: ['Emergency Department (ED) Clinical Intake']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
-  # Test-take: the hold is a state, and the honest proof it holds under PARTIAL
-  # completion is the consensus-gate test, not a screenshot. Needs a record-runs
-  # entry: ./mvnw test -Dtest=ClinicianServiceTest (or a filtered consensus test).
+  # The hidden half: the gate has to hold under PARTIAL completion, which the UI
+  # cannot show honestly. That is a test, not a screenshot.
   - id: 05b-consensus-gate-terminal
     type: capture
-    narration: "And it holds even when the consults come back one at a time. This test completes some of the broadcasts but not all, and checks the request is still held. Partial agreement is not agreement. The bed queue only sees it once the last consult lands."
+    narration: "The part you cannot see in the interface is what happens when the consults come back one at a time — because partial agreement is the case that actually breaks systems. This test completes some of the broadcasts but deliberately not all of them, then checks the request. It is still held. The code only advances the status to bed-requested inside a single check: every broadcast must read COMPLETED. One outstanding consult, and the gate stays shut. Partial agreement is not agreement, and the bed queue never sees the request until the last consult lands."
     url: http://127.0.0.1:4173/term.html?run=05b-consensus-gate
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 15300
+        delayMs: 31850
     assert:
       visible: ['ASSESSMENT_PENDING', 'BUILD SUCCESS']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # ==========================================================================
-  # RESOLUTION 2 of 5 — Disagreement resolves to safety, by construction.
-  # (ADR-0008: highest acuity wins, telemetry unioned.)
+  # RESOLUTION 2 of 5 — Resolving disagreement. (ADR-0008) Second link: the
+  # consults the gate waits for can CONFLICT. How does the thing resolve?
   # ==========================================================================
 
   - id: 06-discordance
@@ -275,30 +271,31 @@ entries:
         title: What it does instead
         text: Takes the highest acuity, and unions every monitoring requirement.
         detail: Trade-off — sometimes over-provisions
-    narration: "Second decision. Multiple specialists can review the same patient, and they can disagree — different acuity, different monitoring. The system doesn't ask a coordinator to settle it. It takes the highest acuity anyone assigned, and it turns on every monitoring requirement anyone flagged. The cost is that it sometimes provisions more than a patient strictly needs. In exchange, a disagreement can never resolve toward the less safe option. That's deliberate."
+    narration: "But the consults that gate is waiting for can disagree — and that is the second place correctness has to hold. Several specialists review the same patient, and they can return different acuity levels and different monitoring needs. The system does not stop and ask a coordinator to settle it. It resolves by construction: it takes the highest acuity anyone assigned, and it turns on every monitoring requirement anyone flagged — the union, not the average. The cost is that it sometimes provisions more than a patient strictly needs. In exchange, a disagreement can never resolve toward the less safe option. When people disagree about safety, the system always rounds up. That is deliberate."
 
   - id: 06a-discordance-terminal
     type: capture
-    narration: "This is that rule as code. When the consults are reconciled, the effective acuity is set to the highest one across all respondents, and the queue sorts on that effective tier — not on the ED's original number. The test pins it: give it a higher specialist tier, and the effective tier moves up."
+    narration: "Here is that rule as code, because the resolution is invisible in the interface. When the consults are reconciled, the effective acuity is set to the highest tier across every respondent, not the emergency department's original number. And the bed queue sorts on that effective tier — so a patient any specialist marked more critical moves up the queue automatically. The test pins it: feed in a higher specialist tier, and the effective tier rises to match. The safe side wins without anyone having to remember to make it win."
     url: http://127.0.0.1:4173/term.html?run=06a-discordance
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 18600
+        delayMs: 30800
     assert:
       visible: ['effectiveAcuityTier', 'BUILD SUCCESS']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # ==========================================================================
-  # RESOLUTION 3 of 5 — Separation of decision authority. (ADR-0009) NET-NEW.
+  # RESOLUTION 3 of 5 — Ownership of the decision. (ADR-0009) Third link: once
+  # the consult resolves, WHO acts on it — and who is forbidden from acting.
   # ==========================================================================
 
   - id: 07-separation
     type: slide
     role: resolution
     layout: tiled
-    title: Who decides the clinical picture and who decides the bed are different people
+    title: The clinical decision and the bed decision have different owners
     cards:
       - icon: stethoscope
         title: Clinicians decide clinical
@@ -308,27 +305,59 @@ entries:
         text: After consensus, the coordinator sets the admitting cluster and allocates.
       - icon: git-merge
         title: Why split it
-        text: Forcing doctors to pick a ward during triage creates friction and delays care.
+        text: A ward decision mid-triage is friction the clinician should not own.
         detail: Trade-off — one more handoff
-    narration: "Third decision, and it's about who decides what. Clinicians decide the clinical picture — acuity, monitoring, whether to divert. They don't touch the ward or the bed. That's bed management's call, after consensus. I split it because making doctors negotiate a ward in the middle of emergency triage creates friction between departments and pulls them off patient care. The cost is one more handoff. The benefit is that each call is made by the person who should own it, with the information they actually have."
+    narration: "Once a consult resolves, the third place is ownership — who is allowed to act on it. Clinicians decide the clinical picture: the acuity, the monitoring, whether to divert. They do not touch the ward or the bed. That is bed management's call, and only after consensus. I split it on purpose. Making a doctor negotiate a ward in the middle of emergency triage creates friction between departments and pulls them off patient care. The cost is one more handoff between roles. The benefit is that each decision is made by the person who should own it, with the information they actually have — and, as the next two takes show, the split isn't just convention, it is enforced."
 
   - id: 07a-admitting-authority-capture
     type: capture
-    narration: "You can see the split on the queue. The blue badge is the admitting cluster the coordinator set — that's the authoritative one. The plain badge is the ED's suspected service. The allocation engine scores against the coordinator's choice, not the ED's guess. Two different decisions, two different owners, and the system knows which one is authoritative."
+    narration: "You can see the split on the queue itself. The blue badge is the admitting cluster the coordinator set — that is the authoritative one. The plain badge next to it is the emergency department's suspected service, its opening guess. The allocation engine scores beds against the coordinator's choice, never the guess. Two different decisions, two different owners, and the system records which one is authoritative rather than blending them."
     url: /bmu
     setupScript: scenes/role-bmu.mjs
     roiSelector: main
     overlay: none
     steps:
       - action: wait
-        delayMs: 21200
+        delayMs: 24400
     assert:
       visible: ['(Admitting)']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
+  # (B) NEW — the split is not just a UI convention; the write itself is
+  # role-gated. An ED attending calling an operational action is refused in code.
+  - id: 07b-authority-enforced-terminal
+    type: capture
+    narration: "And the interface can hide a split that the code doesn't really keep, so here is the proof it does. Tagging an operational delay is a bed-management action. This test tries it twice: once as a bed coordinator, which succeeds, and once as an emergency department attending, which is refused with an access-denied error. The role check lives in the service method, below the interface, so it holds no matter which screen or client calls it. Authority isn't a label on a badge — it is a rule the write path enforces."
+    url: http://127.0.0.1:4173/term.html?run=07b-authority-enforced
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 30050
+    assert:
+      visible: ['AccessDeniedException', 'BUILD SUCCESS']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
+
+  # (B) NEW — the safety hierarchy the complication said could not be faked, now
+  # shown: two tiers, two failure modes. Absolute invariants 422, no override;
+  # operational rules 400 unless a structured reason is supplied.
+  - id: 07c-two-tier-safety-terminal
+    type: capture
+    narration: "This is the safety part from earlier, made concrete — and it is the reason bed allocation had to be real code. The rules come in two tiers. Absolute invariants — putting a man in a women's cubicle, or an airborne-infectious patient in a ward with no negative pressure — are rejected outright with an unprocessable-entity error, and there is no override path at all. Operational rules — a ward-class upgrade, a telemetry mismatch — are rejected too, but with a bad-request error the coordinator can override by supplying a structured reason code. Four tests, one allocation method: the things that must never happen cannot be forced, and the things that sometimes should happen require a reason on the record."
+    url: http://127.0.0.1:4173/term.html?run=07c-two-tier-safety
+    roiSelector: '#term'
+    overlay: none
+    steps:
+      - action: wait
+        delayMs: 43450
+    assert:
+      visible: ['422', 'BUILD SUCCESS']
+      notVisible: ['Cannot GET', 'Not Found', 'command not found']
+
   # ==========================================================================
-  # RESOLUTION 4 of 5 — Concurrency: two races, one mechanism. Optimistic, not
-  # pessimistic, because losing the race is cheap and self-correcting.
+  # RESOLUTION 4 of 5 — Contention over the decision. Fourth link: once a
+  # decision is owned, two owners can reach for the same thing at once.
+  # Optimistic, not pessimistic, because losing the race is cheap.
   # ==========================================================================
 
   - id: 08-concurrency
@@ -345,11 +374,11 @@ entries:
         title: What it does instead
         text: Version columns on 3 entities. The losing write gets a 409.
         detail: Trade-off — the loser retries, which is free
-    narration: "Fourth decision, about concurrency. Two specialists can try to claim the same case, and two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column — not pessimistic locking. The reason is the cost of losing the race. Here, the loser just gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and fixes itself, and it adds deadlock risk and pool pressure. So optimistic is the correct trade, not just the cheaper one."
+    narration: "Once a decision has a clear owner, the fourth place is contention — two owners reaching for the same thing at the same moment. Two specialists can try to claim the same case. Two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column on the three entities that race — rather than pessimistic locking. The reasoning is the cost of losing. Here, the loser simply gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and corrects itself, while adding deadlock risk and pressure on the connection pool. So optimistic isn't just the cheaper choice — it is the correct one for this cost structure."
 
   - id: 08a-vacate-capture
     type: capture
-    narration: "First, the state machine itself. A nurse discharges a patient, and the bed doesn't go straight to available — it goes to pending cleaning, with a thirty-minute clock. There's no jump from occupied to clean, because in a real hospital there isn't one."
+    narration: "Contention only stays safe if every change is a controlled move, so first, the state machine that guards them. A nurse discharges a patient. The bed does not jump straight to available — it goes to pending cleaning, and a thirty-minute clock starts. There is no path from occupied to clean, because in a real hospital there isn't one. Each move checks the state it is leaving before it makes the change, and refuses if the bed isn't where it expects."
     url: /ward
     setupScript: scenes/role-ward.mjs
     roiSelector: main
@@ -362,14 +391,14 @@ entries:
       - action: waitForText
         value: MUSTARD YELLOW
       - action: wait
-        delayMs: 15117
+        delayMs: 23850
     assert:
       visible: ['Inpatient Ward Reception & Bed Control', 'Ward Nursing Station Bed Control']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   - id: 08a2-sanitise-capture
     type: capture
-    narration: "Housekeeping signs off the cleaning, and only then does the bed return to the pool as clean. Four states, three gates, one owner for each move. Every transition goes through one service method, so there's a single place the write happens — which is what makes the version check enough."
+    narration: "Housekeeping signs off the cleaning, and only then does the bed return to the pool as clean. Four states, and every move between them is a guarded step: the method checks the current state, refuses if it is wrong, and writes the next state inside a single database transaction. That is the detail that makes the version column enough. Two people acting on the same bed both read the same starting state, but only the first write commits — the second finds the version has moved and is rejected. The guard defines the legal moves; the version number decides who wins the race for one of them."
     url: /ward
     setupScript: scenes/role-housekeeping.mjs
     roiSelector: main
@@ -380,27 +409,28 @@ entries:
         target: Sign-Off Clean on the first bed pending cleaning
         delayMs: 900
       - action: wait
-        delayMs: 16600
+        delayMs: 34050
     assert:
       visible: ['Housekeeping (EVS) Rapid Bed Turnover', '30-Minute Turnover Queue']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   - id: 08b-conflict-409-terminal
     type: capture
-    narration: "The race itself I can't show honestly in a browser — a real race needs two clients at once, and faking it in one tab would be a lie. So it's a test. Two specialists claim the same broadcast: the first write wins, the second comes back as a 409 Conflict with a problem-detail body the client can act on. That's the loser retrying, which costs nothing."
+    narration: "The race itself I cannot show honestly in a browser — a real race needs two clients hitting the server at the same instant, and faking it in one tab would be a lie. So it is a test. Two specialists claim the same broadcast. The first write wins. The second comes back as a 409 Conflict, carrying a problem-detail body the client can actually act on, rather than a stack trace. That is the losing writer being told to retry — which, because losing costs nothing here, is exactly the behaviour we want."
     url: http://127.0.0.1:4173/term.html?run=08b-conflict-409
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 22200
+        delayMs: 31000
     assert:
       visible: ['409', 'BUILD SUCCESS']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   # ==========================================================================
-  # RESOLUTION 5 of 5 — Provable, and fails loud where unbuilt. Reversibility
-  # (the seam / profile boundary) lives here as one supporting point.
+  # RESOLUTION 5 of 5 — The meta-property. Different in kind: not the next link
+  # in the chain, but a property ABOUT the other four. Provable where built,
+  # loud where not. Reversibility / the profile boundary lives here.
   # ==========================================================================
 
   - id: 09-provable
@@ -411,7 +441,7 @@ entries:
     cards:
       - icon: database
         title: Two pathways, checked
-        text: Every metric from the database and from the audit log; a test asserts they match.
+        text: The database and the audit log; a test fails if they disagree.
       - icon: git-branch
         title: One profile boundary
         text: A Spring profile picks mocks or production adapters at startup. No demo flags.
@@ -419,51 +449,51 @@ entries:
         title: Stubs that refuse to run
         text: The 3 unbuilt adapters throw on invocation instead of returning fake data.
         detail: Trade-off — only the prototype path is tested
-    narration: "Fifth decision, about proof. Every operational metric can be computed two ways — from the database and from the audit log — and a test fails if the two disagree. And for the parts I didn't build: they sit behind interfaces chosen by a Spring profile, and the production versions throw the moment they're called instead of returning fake data. The honest cost is that only the prototype side of each boundary is actually tested. But an unbuilt piece that fails loudly is safer than one that quietly pretends."
+    narration: "The fifth is different in kind. The first four were places in the patient's path; this one is a property about all of them — whether any of it is actually provable, and what happens where I stopped building. Two things. First, every operational metric can be computed two ways, from the database and from the audit log, and a test fails if the two disagree — so the numbers are checked against themselves, not trusted. Second, for the parts I did not build: they sit behind interfaces chosen by a single Spring profile at startup, and the production versions throw the moment they are called instead of returning fake data. The honest cost is that only the prototype side of each boundary is tested. But an unbuilt piece that fails loudly is far safer than one that quietly pretends to work."
 
   - id: 09a-analytics-capture
     type: capture
-    narration: "This is the database pathway. Twenty metrics across four sections, each with a benchmark and how it scored. These are numbers the running system produced from the workflows in this walkthrough — not figures on a slide."
+    narration: "This is the first pathway — the metrics read from the database. Twenty of them across four sections, each with a benchmark and whether it was met. These aren't figures typed onto a slide. The running system computed them from the very workflows in this walkthrough, which is why they move when the workflows do."
     url: /analytics
     setupScript: scenes/role-bmu.mjs
     roiSelector: main
     overlay: none
     steps:
       - action: wait
-        delayMs: 17106
+        delayMs: 17700
     assert:
       visible: ['Hospital Operational KPI', 'Avg ED Turnaround', 'Benchmark:', 'Target Met']
       notVisible: ['Something went wrong', 'No static resource', 'Sign in']
 
   - id: 09b-parity-terminal
     type: capture
-    narration: "And the two pathways are checked against each other, not eyeballed. The reconciliation test computes each metric both ways and fails if they disagree. That's the only thing that makes a second pathway worth maintaining."
+    narration: "And the two pathways are checked against each other, not eyeballed. The reconciliation test computes each metric from the database and again from the audit log, and fails if any pair disagrees. That check is the only thing that earns the cost of maintaining a second pathway at all — without it, a second source of numbers is just a second thing that can be wrong."
     url: http://127.0.0.1:4173/term.html?run=09b-parity
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 12770
+        delayMs: 21550
     assert:
       visible: ['Tests run: 1', 'Failures: 0', 'BUILD SUCCESS']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   - id: 09c-stub-contract-terminal
     type: capture
-    narration: "And the stubs are tested to fail. The three production adapters — the solver, the records gateway, the transfer gateway — each throw the moment they're invoked. A placeholder nobody tests eventually gets called by accident, in a profile nobody checked. These can't."
+    narration: "And the parts I did not build are tested to fail on purpose. The three production adapters — the constraint solver, the records gateway, the transfer gateway — each throw the instant they are invoked. This matters because the quiet failure is the dangerous one: a placeholder that returns plausible fake data eventually gets called by accident, in a profile nobody checked, and no one notices. These cannot. If the wrong profile ever runs them, it stops immediately and says so."
     url: http://127.0.0.1:4173/term.html?run=09c-stub-contract
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 16950
+        delayMs: 28750
     assert:
       visible: ['UnsupportedOperationException', 'BUILD SUCCESS']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']
 
   - id: 09d-coverage-capture
     type: capture
-    narration: "Measured across the whole backend: ninety-four percent of instructions, ninety-seven percent of lines, sixty-nine percent of branches. The branch number is the one worth saying out loud, because that's where the untested paths are. It shows the domain layer is well exercised. It is not a quality gate."
+    narration: "Measured across the whole backend: ninety-four percent of instructions, ninety-seven percent of lines, and sixty-nine percent of branches. The branch number is the one worth saying out loud, because branches are where the untested paths hide. Ninety-four and ninety-seven say the domain layer is well exercised; sixty-nine says there are decision paths I have not covered. It is an honest measurement of what is tested, not a gate that blocks anything."
     url: http://127.0.0.1:4173/jacoco/index.html
     roiSelector: 'body'
     overlay: none
@@ -474,13 +504,13 @@ entries:
 
   - id: 09e-gate-red-terminal
     type: capture
-    narration: "And here's the most honest thing I can show you. The frontend declares four coverage thresholds at ninety percent. Run them and one comes back red — branches at seventy-five. Nothing caught it, because nothing runs it automatically. A threshold no pipeline runs isn't a safeguard; it's a number in a config file. That's on the list of what's owed."
+    narration: "And here is the most honest thing I can show you, because it is a weakness I left in. The frontend declares four coverage thresholds at ninety percent. Run them and one comes back red — branches at about seventy-five. Nothing caught it before now, because nothing runs these thresholds automatically. A threshold that no pipeline runs is not a safeguard; it is a number sitting in a config file. That is on the list of what this prototype still owes, and I would rather name it than hide it."
     url: http://127.0.0.1:4173/term.html?run=09e-gate-red
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 21300
+        delayMs: 28900
     assert:
       visible: ['branches: 90', 'does not meet global threshold', '74.84%']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']
@@ -512,17 +542,17 @@ entries:
         title: Enforcement
         text: Four declared thresholds, no pipeline to run them, one currently red.
         detail: The suite exists; the CI wiring doesn't
-    narration: "So here's what's stubbed, and it's stubbed on purpose. In-memory data a restart wipes. Polling instead of push. A heuristic instead of a real solver. Header personas instead of real authentication. And no CI to run the coverage gates. Every one of these sits behind an interface or a profile that's already in place, so the production version is added, not retrofitted. On method: AI wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the code — those decisions were mine."
+    narration: "So here is everything that is stubbed, gathered in one place, and all of it stubbed on purpose. In-memory data that a restart wipes. Polling instead of real-time push. A heuristic instead of a real constraint solver. Header-driven personas instead of real authentication. And no continuous integration to run the coverage gates. The point is that every one of these already sits behind an interface or a profile that is in place today — so the production version is added behind that boundary, not retrofitted through the code. On method: an AI coding assistant wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the design — those decisions were mine."
 
   - id: 10a-artifacts-terminal
     type: capture
-    narration: "One last count, because the order is the part people doubt. Eleven decision tickets, twenty-eight implementation issues, five specs, four decision records — all written before the code they describe."
+    narration: "One last count, because the order is the part people tend to doubt. Eleven decision tickets. Twenty-eight implementation issues. Five specifications. Four decision records. All of them written before the code they describe — which is the whole reason the design holds together as one argument rather than five separate features."
     url: http://127.0.0.1:4173/term.html?run=10a-artifacts
     roiSelector: '#term'
     overlay: none
     steps:
       - action: wait
-        delayMs: 13046
+        delayMs: 20350
     assert:
-      visible: ['wayfinder tickets : 11', 'scratch issues    : 28', 'decision records  : 4']
+      visible: ['wayfinder tickets : 11', 'scratch issues : 28', 'decision records : 4']
       notVisible: ['Cannot GET', 'Not Found', 'command not found']

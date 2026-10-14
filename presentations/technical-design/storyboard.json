@@ -2,7 +2,7 @@
   "$generated": "GENERATED FILE — do not edit. Source: storyline.yml. Regenerate with: node scripts/compile.mjs",
   "$source": {
     "file": "storyline.yml",
-    "checksum": "5199c4c6a8a49093a6fa219d941e76460869ca3a010f6e9906614d19d8b3aee1"
+    "checksum": "6a7e60ae207c2803f90cee8d336768ee5b26f854effd50a36c4af5b59965e0fe"
   },
   "meta": {
     "title": "How This System Was Designed — Technical Considerations",
@@ -75,29 +75,6 @@
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/01-problem.wav",
-        "durationMs": 32174.999999999996,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "8d3d6778169c"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 32575,
-        "ratePct": 0,
-        "padVisualMs": 32575,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/01-problem.mp4",
-        "durationMs": 32567,
-        "roi": null,
-        "hash": "48dfbe6be24a"
       }
     },
     {
@@ -108,26 +85,16 @@
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
-        "layout": "process-flow",
+        "layout": "diagram",
         "theme": "light",
         "title": "The domain is a tree of beds, each in exactly one state",
         "pill": null,
         "body": null,
         "cards": [
           {
-            "icon": "boxes",
-            "title": "5 entities, one tree",
-            "text": "A level holds wards, a ward holds beds."
-          },
-          {
             "icon": "workflow",
             "title": "4 bed states",
-            "text": "A bed is in exactly one state at a time."
-          },
-          {
-            "icon": "users",
-            "title": "6 acting roles",
-            "text": "Each role sees a different view of the same data."
+            "text": "White, green, grey, mustard — legal steps only."
           },
           {
             "icon": "plug",
@@ -140,33 +107,61 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Before the decisions, here is the model they act on. Five entities in a tree: a level holds wards, and a ward holds beds. A bed is always in exactly one of four states, and it moves between them by legal steps only. Six roles act on that tree, each seeing its own view of the same data. And the system has to talk to three outside systems — patient records, sister hospitals, notifications — none of which I could actually connect to. That last line is the constraint that shapes every decision after this one, so hold on to it."
+        "notes": "Before the decisions, here is the model they act on. Five entities in a tree: a level holds wards, and a ward holds beds. A bed is always in exactly one of four states, and it moves between them by legal steps only. Six roles act on that tree, each seeing its own view of the same data. And the system has to talk to three outside systems — patient records, sister hospitals, notifications — none of which I could actually connect to. That last line is the constraint that shapes every decision after this one, so hold on to it.",
+        "diagram": {
+          "id": "02-domain-model",
+          "kind": "tree",
+          "step": null,
+          "placement": {
+            "layout": "diagram",
+            "cards": 2
+          },
+          "spec": {
+            "kind": "tree",
+            "nodes": [
+              {
+                "name": "Level 3",
+                "children": [
+                  {
+                    "name": "Ward 3A",
+                    "sublabel": "class B2 · general medicine",
+                    "children": [
+                      {
+                        "name": "Bed 3A-01",
+                        "sublabel": "WHITE · cleaned",
+                        "weight": "primary"
+                      },
+                      {
+                        "name": "Bed 3A-02",
+                        "sublabel": "GREY · occupied"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Ward 3B",
+                    "sublabel": "class A1 · cardiology",
+                    "children": [
+                      {
+                        "name": "Bed 3B-01",
+                        "sublabel": "GREEN · assigned"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "annotations": [
+              {
+                "on": "Bed 3A-01",
+                "text": "exactly one of four states at a time"
+              }
+            ]
+          },
+          "frozen": "60c8dda1342e"
+        }
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/02-domain-model.wav",
-        "durationMs": 32475,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "cdfc155296cb"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 32875,
-        "ratePct": 0,
-        "padVisualMs": 32875,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/02-domain-model.mp4",
-        "durationMs": 32867,
-        "roi": null,
-        "hash": "8797aa9a9189"
       }
     },
     {
@@ -199,30 +194,7 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Live Bed Inventory Matrix",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/02b-bed-board-capture.mp4",
-        "durationMs": 30014.972900390625,
-        "roi": null,
-        "hash": "a44cabf68c59"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/02b-bed-board-capture.r.wav",
-        "durationMs": 30025,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a95a8d624fe3"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 30015,
-        "ratePct": 3,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 3
+      "roiSelector": "text=Live Bed Inventory Matrix"
     },
     {
       "id": "03-both-moves-fail",
@@ -259,29 +231,6 @@
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/03-both-moves-fail.wav",
-        "durationMs": 32325.000000000004,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "b55e07eb3420"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 32725,
-        "ratePct": 0,
-        "padVisualMs": 32725,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/03-both-moves-fail.mp4",
-        "durationMs": 32734,
-        "roi": null,
-        "hash": "0cf1b07491d7"
       }
     },
     {
@@ -323,29 +272,6 @@
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/04-cannot-fake.wav",
-        "durationMs": 36625,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "2c1feaccf816"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 37025,
-        "ratePct": 0,
-        "padVisualMs": 37025,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/04-cannot-fake.mp4",
-        "durationMs": 37034,
-        "roi": null,
-        "hash": "b239723af0ce"
       }
     },
     {
@@ -356,7 +282,7 @@
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
-        "layout": "process-flow",
+        "layout": "diagram",
         "theme": "light",
         "title": "No bed until every consult is in",
         "pill": null,
@@ -365,17 +291,7 @@
           {
             "icon": "pause",
             "title": "Held, not queued",
-            "text": "A consult-gated request sits in ASSESSMENT_PENDING, out of the bed queue."
-          },
-          {
-            "icon": "check-check",
-            "title": "Consensus gate",
-            "text": "It becomes eligible only when every broadcast reaches COMPLETED."
-          },
-          {
-            "icon": "git-branch",
-            "title": "Chained consults",
-            "text": "A specialist can add another cluster; the request waits for all of them.",
+            "text": "Bed management never sees a request the consults could still change.",
             "detail": "Trade-off — slower entry, no premature placement"
           }
         ],
@@ -383,33 +299,83 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "The first place is eligibility — deciding when a patient is even allowed to compete for a bed. A patient who needs specialist input is not put in the bed queue right away. The request is held in a state called ASSESSMENT_PENDING, hidden from bed management, until every specialist consult comes back. And a specialist can chain another consult onto it — which opens a new request that the patient now also waits for. Only when all of them are complete does the request flip to eligible and appear in the queue. The trade-off is honest: entry is slower. But the alternative is allocating a bed before the specialists agree, which means committing a patient the assessment might still change. In this domain, that is the wrong trade, so the gate stays closed."
+        "notes": "The first place is eligibility — deciding when a patient is even allowed to compete for a bed. A patient who needs specialist input is not put in the bed queue right away. The request is held in a state called ASSESSMENT_PENDING, hidden from bed management, until every specialist consult comes back. And a specialist can chain another consult onto it — which opens a new request that the patient now also waits for. Only when all of them are complete does the request flip to eligible and appear in the queue. The trade-off is honest: entry is slower. But the alternative is allocating a bed before the specialists agree, which means committing a patient the assessment might still change. In this domain, that is the wrong trade, so the gate stays closed.",
+        "diagram": {
+          "id": "05-consensus",
+          "kind": "flowchart",
+          "step": null,
+          "placement": {
+            "layout": "diagram",
+            "cards": 1
+          },
+          "spec": {
+            "kind": "flowchart",
+            "pattern": "fan-in",
+            "nodes": [
+              {
+                "id": "req",
+                "name": "Admission request",
+                "sublabel": "ASSESSMENT_PENDING"
+              },
+              {
+                "id": "c1",
+                "name": "Cardiology consult",
+                "sublabel": "broadcast"
+              },
+              {
+                "id": "c2",
+                "name": "Renal consult",
+                "sublabel": "chained by cardiology"
+              },
+              {
+                "id": "gate",
+                "name": "Every consult COMPLETED?",
+                "shape": "decision",
+                "weight": "primary"
+              },
+              {
+                "id": "queue",
+                "name": "Bed queue",
+                "sublabel": "BED_REQUESTED"
+              }
+            ],
+            "edges": [
+              {
+                "from": "req",
+                "to": "c1"
+              },
+              {
+                "from": "c1",
+                "to": "c2",
+                "label": "CHAIN",
+                "dashed": true
+              },
+              {
+                "from": "c1",
+                "to": "gate"
+              },
+              {
+                "from": "c2",
+                "to": "gate"
+              },
+              {
+                "from": "gate",
+                "to": "queue",
+                "label": "ALL DONE"
+              },
+              {
+                "from": "gate",
+                "to": "req",
+                "label": "WAIT",
+                "dashed": true
+              }
+            ]
+          },
+          "frozen": "83d162369db5"
+        }
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/05-consensus.wav",
-        "durationMs": 46125,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a7db9ecf4814"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 46525,
-        "ratePct": 0,
-        "padVisualMs": 46525,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05-consensus.mp4",
-        "durationMs": 46534,
-        "roi": null,
-        "hash": "1e355b216020"
       }
     },
     {
@@ -460,41 +426,7 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05a-consult-hold-capture.mp4",
-        "durationMs": 26346.31884765625,
-        "roi": {
-          "x": 1091.328125,
-          "y": 985.71875,
-          "width": 460.671875,
-          "height": 69.40625
-        },
-        "hash": "1740bedfbc5e"
-      },
-      "roi": {
-        "x": 1091.328125,
-        "y": 985.71875,
-        "width": 460.671875,
-        "height": 69.40625
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/05a-consult-hold-capture.r.wav",
-        "durationMs": 26175,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "59c3bde7a237"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 26346,
-        "ratePct": 2.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.2
+      "roiSelector": "main"
     },
     {
       "id": "05b-consensus-gate-terminal",
@@ -524,30 +456,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/05b-consensus-gate-terminal.mp4",
-        "durationMs": 32414.885009765625,
-        "roi": null,
-        "hash": "5a2bc6cea656"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/05b-consensus-gate-terminal.r.wav",
-        "durationMs": 32450.000000000004,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "2f9ecddaba92"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 32415,
-        "ratePct": 3.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 3.2
+      "roiSelector": "#term"
     },
     {
       "id": "06-discordance",
@@ -584,29 +493,6 @@
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/06-discordance.wav",
-        "durationMs": 42375,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a96a627a4233"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 42775,
-        "ratePct": 0,
-        "padVisualMs": 42775,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06-discordance.mp4",
-        "durationMs": 42767,
-        "roi": null,
-        "hash": "7d06c641f731"
       }
     },
     {
@@ -637,30 +523,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/06a-discordance-terminal.mp4",
-        "durationMs": 31364.361083984375,
-        "roi": null,
-        "hash": "3b973ced3e1e"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/06a-discordance-terminal.r.wav",
-        "durationMs": 31425,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "3451c317371a"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 31364,
-        "ratePct": 2.1,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.1
+      "roiSelector": "#term"
     },
     {
       "id": "07-separation",
@@ -670,22 +533,12 @@
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
-        "layout": "tiled",
+        "layout": "diagram",
         "theme": "light",
         "title": "The clinical decision and the bed decision have different owners",
         "pill": null,
         "body": null,
         "cards": [
-          {
-            "icon": "stethoscope",
-            "title": "Clinicians decide clinical",
-            "text": "Acuity, telemetry, diversion. Not the ward, not the bed."
-          },
-          {
-            "icon": "bed",
-            "title": "BMU decides the bed",
-            "text": "After consensus, the coordinator sets the admitting cluster and allocates."
-          },
           {
             "icon": "git-merge",
             "title": "Why split it",
@@ -697,33 +550,48 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Once a consult resolves, the third place is ownership — who is allowed to act on it. Clinicians decide the clinical picture: the acuity, the monitoring, whether to divert. They do not touch the ward or the bed. That is bed management's call, and only after consensus. I split it on purpose. Making a doctor negotiate a ward in the middle of emergency triage creates friction between departments and pulls them off patient care. The cost is one more handoff between roles. The benefit is that each decision is made by the person who should own it, with the information they actually have — and, as the next two takes show, the split isn't just convention, it is enforced."
+        "notes": "Once a consult resolves, the third place is ownership — who is allowed to act on it. Clinicians decide the clinical picture: the acuity, the monitoring, whether to divert. They do not touch the ward or the bed. That is bed management's call, and only after consensus. I split it on purpose. Making a doctor negotiate a ward in the middle of emergency triage creates friction between departments and pulls them off patient care. The cost is one more handoff between roles. The benefit is that each decision is made by the person who should own it, with the information they actually have — and, as the next two takes show, the split isn't just convention, it is enforced.",
+        "diagram": {
+          "id": "07-separation",
+          "kind": "swimlane",
+          "step": null,
+          "placement": {
+            "layout": "diagram",
+            "cards": 1
+          },
+          "spec": {
+            "kind": "swimlane",
+            "lanes": [
+              {
+                "name": "Clinicians",
+                "steps": [
+                  "Assess acuity",
+                  "Set telemetry",
+                  "Decide diversion"
+                ]
+              },
+              {
+                "name": "Bed management",
+                "steps": [
+                  "Set admitting cluster",
+                  "Allocate bed"
+                ]
+              }
+            ],
+            "handoffs": [
+              {
+                "from": "Decide diversion",
+                "to": "Set admitting cluster",
+                "label": "POST-CONSENSUS",
+                "weight": "primary"
+              }
+            ]
+          },
+          "frozen": "33c752b69d0b"
+        }
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07-separation.wav",
-        "durationMs": 41200,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "3aacbd62ebd1"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 41600,
-        "ratePct": 0,
-        "padVisualMs": 41600,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07-separation.mp4",
-        "durationMs": 41600,
-        "roi": null,
-        "hash": "240c932d2dc6"
       }
     },
     {
@@ -754,30 +622,7 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07a-admitting-authority-capture.mp4",
-        "durationMs": 24981.97314453125,
-        "roi": null,
-        "hash": "eee83730024d"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07a-admitting-authority-capture.r.wav",
-        "durationMs": 24975,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "ad3fe8a9058a"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 24982,
-        "ratePct": 4.2,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 4.2
+      "roiSelector": "main"
     },
     {
       "id": "07b-authority-enforced-terminal",
@@ -807,30 +652,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07b-authority-enforced-terminal.mp4",
-        "durationMs": 30615.39892578125,
-        "roi": null,
-        "hash": "6fcdc6cb4c92"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07b-authority-enforced-terminal.r.wav",
-        "durationMs": 30450,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "6a7fbff37edf"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 30615,
-        "ratePct": 2.3,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.3
+      "roiSelector": "#term"
     },
     {
       "id": "07c-two-tier-safety-terminal",
@@ -860,30 +682,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/07c-two-tier-safety-terminal.mp4",
-        "durationMs": 44030.56005859375,
-        "roi": null,
-        "hash": "92678620bbab"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/07c-two-tier-safety-terminal.r.wav",
-        "durationMs": 44225,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "eb632ad83f45"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 44031,
-        "ratePct": 3.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 3.4
+      "roiSelector": "#term"
     },
     {
       "id": "08-concurrency",
@@ -893,7 +692,7 @@
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
-        "layout": "comparison",
+        "layout": "diagram",
         "theme": "light",
         "title": "Two people can race for the same thing; only one wins",
         "pill": null,
@@ -901,48 +700,67 @@
         "cards": [
           {
             "icon": "lock",
-            "title": "The alternative",
-            "text": "Pessimistic locking — hold a database lock so a second writer waits.",
-            "detail": "Deadlock risk, connection-pool pressure"
-          },
-          {
-            "icon": "git-compare",
-            "title": "What it does instead",
-            "text": "Version columns on 3 entities. The losing write gets a 409.",
-            "detail": "Trade-off — the loser retries, which is free"
+            "title": "Not pessimistic locking",
+            "text": "Holding a lock would risk deadlock to prevent a conflict that costs nothing.",
+            "detail": "The loser retries, which is free"
           }
         ],
         "stat": null,
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "Once a decision has a clear owner, the fourth place is contention — two owners reaching for the same thing at the same moment. Two specialists can try to claim the same case. Two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column on the three entities that race — rather than pessimistic locking. The reasoning is the cost of losing. Here, the loser simply gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and corrects itself, while adding deadlock risk and pressure on the connection pool. So optimistic isn't just the cheaper choice — it is the correct one for this cost structure."
+        "notes": "Once a decision has a clear owner, the fourth place is contention — two owners reaching for the same thing at the same moment. Two specialists can try to claim the same case. Two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column on the three entities that race — rather than pessimistic locking. The reasoning is the cost of losing. Here, the loser simply gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and corrects itself, while adding deadlock risk and pressure on the connection pool. So optimistic isn't just the cheaper choice — it is the correct one for this cost structure.",
+        "diagram": {
+          "id": "08-concurrency",
+          "kind": "sequence",
+          "step": null,
+          "placement": {
+            "layout": "diagram",
+            "cards": 1
+          },
+          "spec": {
+            "kind": "sequence",
+            "actors": [
+              "Specialist A",
+              "Admissions API",
+              "Specialist B"
+            ],
+            "messages": [
+              {
+                "from": "Specialist A",
+                "to": "Admissions API",
+                "label": "CLAIM v3"
+              },
+              {
+                "from": "Specialist B",
+                "to": "Admissions API",
+                "label": "CLAIM v3"
+              },
+              {
+                "from": "Admissions API",
+                "to": "Specialist A",
+                "label": "200 · v4"
+              },
+              {
+                "from": "Admissions API",
+                "to": "Specialist B",
+                "label": "409 CONFLICT",
+                "dashed": true,
+                "weight": "primary"
+              }
+            ],
+            "annotations": [
+              {
+                "on": "409 CONFLICT",
+                "text": "refused, never merged"
+              }
+            ]
+          },
+          "frozen": "75035b52c5c8"
+        }
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08-concurrency.wav",
-        "durationMs": 47000,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "e2ebb598aaa8"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 47400,
-        "ratePct": 0,
-        "padVisualMs": 47400,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08-concurrency.mp4",
-        "durationMs": 47400,
-        "roi": null,
-        "hash": "49838b903593"
       }
     },
     {
@@ -984,41 +802,7 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08a-vacate-capture.mp4",
-        "durationMs": 25964.344970703125,
-        "roi": {
-          "x": 785,
-          "y": 800.921875,
-          "width": 350,
-          "height": 28
-        },
-        "hash": "e081ef830262"
-      },
-      "roi": {
-        "x": 785,
-        "y": 800.921875,
-        "width": 350,
-        "height": 28
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08a-vacate-capture.r.wav",
-        "durationMs": 25700,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "b8c6e977f280"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 25964,
-        "ratePct": 2.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.4
+      "roiSelector": "main"
     },
     {
       "id": "08a2-sanitise-capture",
@@ -1055,41 +839,7 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08a2-sanitise-capture.mp4",
-        "durationMs": 36147.80908203125,
-        "roi": {
-          "x": 614.375,
-          "y": 334.65625,
-          "width": 127.28125,
-          "height": 32
-        },
-        "hash": "3ff5b7e1a855"
-      },
-      "roi": {
-        "x": 614.375,
-        "y": 334.65625,
-        "width": 127.28125,
-        "height": 32
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08a2-sanitise-capture.r.wav",
-        "durationMs": 36325,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "254477e63082"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 36148,
-        "ratePct": 3,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 3
+      "roiSelector": "main"
     },
     {
       "id": "08b-conflict-409-terminal",
@@ -1119,30 +869,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/08b-conflict-409-terminal.mp4",
-        "durationMs": 31580.31787109375,
-        "roi": null,
-        "hash": "0e3fc4557c1d"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/08b-conflict-409-terminal.r.wav",
-        "durationMs": 31500,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "a9d8ea91fa71"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 31580,
-        "ratePct": 2.5,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.5
+      "roiSelector": "#term"
     },
     {
       "id": "09-provable",
@@ -1183,29 +910,6 @@
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09-provable.wav",
-        "durationMs": 47625,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "54c55a20570d"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 48025,
-        "ratePct": 0,
-        "padVisualMs": 48025,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09-provable.mp4",
-        "durationMs": 48034,
-        "roi": null,
-        "hash": "6768b8692a4c"
       }
     },
     {
@@ -1239,30 +943,7 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09a-analytics-capture.mp4",
-        "durationMs": 18264.68896484375,
-        "roi": null,
-        "hash": "c2306877bb40"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09a-analytics-capture.r.wav",
-        "durationMs": 18200,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "7c3ea2af9c4a"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 18265,
-        "ratePct": 4.7,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 4.7
+      "roiSelector": "main"
     },
     {
       "id": "09b-parity-terminal",
@@ -1293,30 +974,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09b-parity-terminal.mp4",
-        "durationMs": 22131.408935546875,
-        "roi": null,
-        "hash": "b10ee3ec449c"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09b-parity-terminal.r.wav",
-        "durationMs": 21925,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "4b8af73a1488"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 22131,
-        "ratePct": 1.5,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 1.5
+      "roiSelector": "#term"
     },
     {
       "id": "09c-stub-contract-terminal",
@@ -1346,30 +1004,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09c-stub-contract-terminal.mp4",
-        "durationMs": 29314.431884765625,
-        "roi": null,
-        "hash": "894158e3edd4"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09c-stub-contract-terminal.r.wav",
-        "durationMs": 29275,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "8eae463d2402"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 29314,
-        "ratePct": 3.1,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 3.1
+      "roiSelector": "#term"
     },
     {
       "id": "09d-coverage-capture",
@@ -1393,41 +1028,7 @@
           "Not Found"
         ]
       },
-      "roiSelector": "body",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09d-coverage-capture.mp4",
-        "durationMs": 27200,
-        "roi": {
-          "x": 8,
-          "y": 8,
-          "width": 1904,
-          "height": 381.15625
-        },
-        "hash": "bab6fccb67ea"
-      },
-      "roi": {
-        "x": 8,
-        "y": 8,
-        "width": 1904,
-        "height": 381.15625
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09d-coverage-capture.wav",
-        "durationMs": 26800,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "be6278fad7a7"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 27200,
-        "ratePct": 0,
-        "padVisualMs": 27200,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0
+      "roiSelector": "body"
     },
     {
       "id": "09e-gate-red-terminal",
@@ -1458,30 +1059,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/09e-gate-red-terminal.mp4",
-        "durationMs": 29480.94482421875,
-        "roi": null,
-        "hash": "d6012bb6f6bb"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/09e-gate-red-terminal.r.wav",
-        "durationMs": 29525,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "c2425c964b40"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 29481,
-        "ratePct": 2.8,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 2.8
+      "roiSelector": "#term"
     },
     {
       "id": "10-ledger",
@@ -1491,34 +1069,16 @@
       "visualEngine": "html_slides",
       "captureMode": "stills",
       "slide": {
-        "layout": "tiled",
+        "layout": "diagram",
         "theme": "light",
         "title": "What's stubbed, and the boundary it's stubbed behind",
         "pill": null,
-        "body": "Each of these is a deliberate prototype choice with a clear path to production.",
+        "body": null,
         "cards": [
-          {
-            "icon": "database",
-            "title": "State and transport",
-            "text": "In-memory data a restart erases; polling that won't scale.",
-            "detail": "Postgres driver present; STOMP push designed in ticket 003"
-          },
-          {
-            "icon": "user-check",
-            "title": "Identity",
-            "text": "Header-driven personas are convenience, not authentication.",
-            "detail": "The default config already denies everything"
-          },
-          {
-            "icon": "cpu",
-            "title": "Optimality and integration",
-            "text": "A heuristic that can be beaten; two gateways with nothing real behind them.",
-            "detail": "3 interfaces, 3 fail-fast adapters"
-          },
           {
             "icon": "test-tube",
             "title": "Enforcement",
-            "text": "Four declared thresholds, no pipeline to run them, one currently red.",
+            "text": "Four declared thresholds, no pipeline to run them.",
             "detail": "The suite exists; the CI wiring doesn't"
           }
         ],
@@ -1526,33 +1086,44 @@
         "image": null,
         "htmlPath": null,
         "portraitHtmlPath": null,
-        "notes": "So here is everything that is stubbed, gathered in one place, and all of it stubbed on purpose. In-memory data that a restart wipes. Polling instead of real-time push. A heuristic instead of a real constraint solver. Header-driven personas instead of real authentication. And no continuous integration to run the coverage gates. The point is that every one of these already sits behind an interface or a profile that is in place today — so the production version is added behind that boundary, not retrofitted through the code. On method: an AI coding assistant wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the design — those decisions were mine."
+        "notes": "So here is everything that is stubbed, gathered in one place, and all of it stubbed on purpose. In-memory data that a restart wipes. Polling instead of real-time push. A heuristic instead of a real constraint solver. Header-driven personas instead of real authentication. And no continuous integration to run the coverage gates. The point is that every one of these already sits behind an interface or a profile that is in place today — so the production version is added behind that boundary, not retrofitted through the code. On method: an AI coding assistant wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the design — those decisions were mine.",
+        "diagram": {
+          "id": "10-ledger",
+          "kind": "layers",
+          "step": null,
+          "placement": {
+            "layout": "diagram",
+            "cards": 1
+          },
+          "spec": {
+            "kind": "layers",
+            "layers": [
+              {
+                "name": "Domain logic",
+                "sublabel": "constraint engine · state machines · consensus gate"
+              },
+              {
+                "name": "Gateway interfaces and profile boundary",
+                "sublabel": "@Profile(prototype)",
+                "weight": "primary"
+              },
+              {
+                "name": "Prototype stubs",
+                "sublabel": "H2 · polling · header personas · mock EHR · heuristic solver"
+              }
+            ],
+            "annotations": [
+              {
+                "on": "Gateway interfaces and profile boundary",
+                "text": "production is added here, not retrofitted"
+              }
+            ]
+          },
+          "frozen": "31857941e461"
+        }
       },
       "vertical": {
         "strategy": "native"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10-ledger.wav",
-        "durationMs": 43825,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "2452f7d36d02"
-      },
-      "resolvedTiming": {
-        "mode": "audio-dictates",
-        "sceneMs": 44225,
-        "ratePct": 0,
-        "padVisualMs": 44225,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 0,
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10-ledger.mp4",
-        "durationMs": 44234,
-        "roi": null,
-        "hash": "ad9814b17858"
       }
     },
     {
@@ -1584,30 +1155,7 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term",
-      "resolvedVisual": {
-        "filePath": "assets/recordings/10a-artifacts-terminal.mp4",
-        "durationMs": 20931.138916015625,
-        "roi": null,
-        "hash": "d5795b6fcd37"
-      },
-      "resolvedAudio": {
-        "filePath": "assets/audio/10a-artifacts-terminal.r.wav",
-        "durationMs": 20700,
-        "subtitleSource": "synthesised",
-        "providerSrt": null,
-        "hasNativeSrt": false,
-        "hash": "bf7037f8c2a8"
-      },
-      "resolvedTiming": {
-        "mode": "speech-fit",
-        "sceneMs": 20931,
-        "ratePct": 1.4,
-        "padVisualMs": 0,
-        "padAudioMs": 0,
-        "warnings": []
-      },
-      "ratePct": 1.4
+      "roiSelector": "#term"
     }
   ]
 }

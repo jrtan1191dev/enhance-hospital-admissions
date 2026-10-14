@@ -25,7 +25,7 @@ https://github.com/user-attachments/assets/755f189b-beb8-42e4-8ad0-6173a82db5ed
 
 > 🎥 ** Patient Admission & Discharge Management Application ** — walkthrough of technical design considerations made to create this prototype.
 
-https://github.com/user-attachments/assets/abd5cb67-f276-4747-9e5a-96113c628097
+https://github.com/user-attachments/assets/6fb16788-9882-4c5b-ac8a-890bb9bb7357
 
 ---
 

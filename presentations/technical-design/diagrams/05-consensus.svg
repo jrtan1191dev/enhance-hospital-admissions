@@ -1,0 +1,41 @@
+<svg viewBox="0 0 1176 736" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="05-consensus-title 05-consensus-desc">
+<title id="05-consensus-title">No bed until every consult is in</title>
+<desc id="05-consensus-desc">Flowchart in which an admission request fans out to chained specialist consults and reaches the bed queue only when every consult is completed; otherwise it waits.</desc>
+<defs>
+<marker id="05-consensus-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#64748B"/></marker>
+<marker id="05-consensus-arrow-accent" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0, 10 4, 0 8" fill="#10B981"/></marker>
+</defs>
+<rect width="1176" height="736" fill="#F1F5F9"/>
+<path d="M164 332 V236 Q164 228 172 228 H396" fill="none" stroke="#64748B" stroke-width="1.5" marker-end="url(#05-consensus-arrow)"/>
+<path d="M568 276 V480" fill="none" stroke="#64748B" stroke-width="1.5" stroke-dasharray="8,6" marker-end="url(#05-consensus-arrow)"/>
+<rect x="580" y="364" width="76" height="28" rx="2" fill="#F1F5F9"/>
+<text x="588" y="384" fill="#0F172A" font-size="19" font-weight="500" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="start" letter-spacing="0.04em">CHAIN</text>
+<path d="M736 228 H920 Q928 228 928 236 V276" fill="none" stroke="#64748B" stroke-width="1.5" marker-end="url(#05-consensus-arrow)"/>
+<path d="M736 532 H748 Q756 532 756 524 V388 Q756 380 764 380 H780" fill="none" stroke="#64748B" stroke-width="1.5" marker-end="url(#05-consensus-arrow)"/>
+<path d="M928 480 V596" fill="none" stroke="#10B981" stroke-width="2.5" marker-end="url(#05-consensus-arrow-accent)"/>
+<rect x="940" y="528" width="112" height="28" rx="2" fill="#F1F5F9"/>
+<text x="948" y="548" fill="#0F172A" font-size="19" font-weight="500" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="start" letter-spacing="0.04em">ALL DONE</text>
+<path d="M1072 380 H1100 Q1108 380 1108 388 V712 Q1108 720 1100 720 H172 Q164 720 164 712 V432" fill="none" stroke="#64748B" stroke-width="1.5" stroke-dasharray="8,6" marker-end="url(#05-consensus-arrow)"/>
+<rect x="448" y="680" width="64" height="28" rx="2" fill="#F1F5F9"/>
+<text x="480" y="700" fill="#0F172A" font-size="19" font-weight="500" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle" letter-spacing="0.04em">WAIT</text>
+<rect x="24" y="332" width="280" height="96" rx="40" fill="#F1F5F9"/>
+<rect x="24" y="332" width="280" height="96" rx="40" fill="#FFFFFF" stroke="#64748B" stroke-width="1"/>
+<text x="164" y="375" fill="#0F172A" font-size="24" font-weight="600" font-family="Inter, system-ui, sans-serif" text-anchor="middle">Admission request</text>
+<text x="164" y="403" fill="#64748B" font-size="19" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">ASSESSMENT_PENDING</text>
+<rect x="400" y="180" width="336" height="96" rx="6" fill="#F1F5F9"/>
+<rect x="400" y="180" width="336" height="96" rx="6" fill="#FFFFFF" stroke="#64748B" stroke-width="1"/>
+<text x="568" y="223" fill="#0F172A" font-size="24" font-weight="600" font-family="Inter, system-ui, sans-serif" text-anchor="middle">Cardiology consult</text>
+<text x="568" y="251" fill="#64748B" font-size="24" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">broadcast</text>
+<rect x="400" y="484" width="336" height="96" rx="6" fill="#F1F5F9"/>
+<rect x="400" y="484" width="336" height="96" rx="6" fill="#FFFFFF" stroke="#64748B" stroke-width="1"/>
+<text x="568" y="527" fill="#0F172A" font-size="24" font-weight="600" font-family="Inter, system-ui, sans-serif" text-anchor="middle">Renal consult</text>
+<text x="568" y="555" fill="#64748B" font-size="24" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">chained by cardiology</text>
+<path d="M928 280 L1072 380 L928 480 L784 380 Z" fill="#F1F5F9"/>
+<path d="M928 280 L1072 380 L928 480 L784 380 Z" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="2"/>
+<text x="928" y="372" fill="#0F172A" font-size="24" font-weight="600" font-family="Inter, system-ui, sans-serif" text-anchor="middle">Every consult</text>
+<text x="928" y="404" fill="#0F172A" font-size="24" font-weight="600" font-family="Inter, system-ui, sans-serif" text-anchor="middle">COMPLETED?</text>
+<rect x="784" y="600" width="288" height="96" rx="40" fill="#F1F5F9"/>
+<rect x="784" y="600" width="288" height="96" rx="40" fill="#FFFFFF" stroke="#64748B" stroke-width="1"/>
+<text x="928" y="643" fill="#0F172A" font-size="24" font-weight="600" font-family="Inter, system-ui, sans-serif" text-anchor="middle">Bed queue</text>
+<text x="928" y="671" fill="#64748B" font-size="19" font-family="ui-monospace, Menlo, Consolas, monospace" text-anchor="middle">BED_REQUESTED</text>
+</svg>

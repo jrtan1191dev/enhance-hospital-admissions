@@ -114,18 +114,30 @@ entries:
   - id: 02-domain-model
     type: slide
     role: situation
-    layout: process-flow
+    layout: diagram
     title: The domain is a tree of beds, each in exactly one state
+    # tree: the claim is containment (level > ward > bed); process-flow drew a hub
+    # the model does not have.
+    diagram:
+      kind: tree
+      nodes:
+        - name: Level 3
+          children:
+            - name: Ward 3A
+              sublabel: class B2 · general medicine
+              children:
+                - { name: Bed 3A-01, sublabel: WHITE · cleaned, weight: primary }
+                - { name: Bed 3A-02, sublabel: GREY · occupied }
+            - name: Ward 3B
+              sublabel: class A1 · cardiology
+              children:
+                - { name: Bed 3B-01, sublabel: GREEN · assigned }
+      annotations:
+        - { on: Bed 3A-01, text: exactly one of four states at a time }
     cards:
-      - icon: boxes
-        title: 5 entities, one tree
-        text: A level holds wards, a ward holds beds.
       - icon: workflow
         title: 4 bed states
-        text: A bed is in exactly one state at a time.
-      - icon: users
-        title: 6 acting roles
-        text: Each role sees a different view of the same data.
+        text: White, green, grey, mustard — legal steps only.
       - icon: plug
         title: 3 external systems
         text: Records, transfers, notifications — none available to me.
@@ -196,18 +208,30 @@ entries:
   - id: 05-consensus
     type: slide
     role: resolution
-    layout: process-flow
+    layout: diagram
     title: No bed until every consult is in
+    # flowchart, fan-in pattern: the claim is a join — wait for ALL consults —
+    # which a hub-and-nodes process-flow cannot draw.
+    diagram:
+      kind: flowchart
+      pattern: fan-in
+      nodes:
+        - { id: req, name: Admission request, sublabel: ASSESSMENT_PENDING }
+        - { id: c1, name: Cardiology consult, sublabel: broadcast }
+        - { id: c2, name: Renal consult, sublabel: chained by cardiology }
+        - { id: gate, name: Every consult COMPLETED?, shape: decision, weight: primary }
+        - { id: queue, name: Bed queue, sublabel: BED_REQUESTED }
+      edges:
+        - { from: req, to: c1 }
+        - { from: c1, to: c2, label: CHAIN, dashed: true }
+        - { from: c1, to: gate }
+        - { from: c2, to: gate }
+        - { from: gate, to: queue, label: ALL DONE }
+        - { from: gate, to: req, label: WAIT, dashed: true }
     cards:
       - icon: pause
         title: Held, not queued
-        text: A consult-gated request sits in ASSESSMENT_PENDING, out of the bed queue.
-      - icon: check-check
-        title: Consensus gate
-        text: It becomes eligible only when every broadcast reaches COMPLETED.
-      - icon: git-branch
-        title: Chained consults
-        text: A specialist can add another cluster; the request waits for all of them.
+        text: Bed management never sees a request the consults could still change.
         detail: Trade-off — slower entry, no premature placement
     narration: "The first place is eligibility — deciding when a patient is even allowed to compete for a bed. A patient who needs specialist input is not put in the bed queue right away. The request is held in a state called ASSESSMENT_PENDING, hidden from bed management, until every specialist consult comes back. And a specialist can chain another consult onto it — which opens a new request that the patient now also waits for. Only when all of them are complete does the request flip to eligible and appear in the queue. The trade-off is honest: entry is slower. But the alternative is allocating a bed before the specialists agree, which means committing a patient the assessment might still change. In this domain, that is the wrong trade, so the gate stays closed."
 
@@ -294,15 +318,20 @@ entries:
   - id: 07-separation
     type: slide
     role: resolution
-    layout: tiled
+    layout: diagram
     title: The clinical decision and the bed decision have different owners
+    # swimlane: the claim is ownership — work crossing from one owner to another —
+    # which three peer cards could only list.
+    diagram:
+      kind: swimlane
+      lanes:
+        - name: Clinicians
+          steps: [Assess acuity, Set telemetry, Decide diversion]
+        - name: Bed management
+          steps: [Set admitting cluster, Allocate bed]
+      handoffs:
+        - { from: Decide diversion, to: Set admitting cluster, label: POST-CONSENSUS, weight: primary }
     cards:
-      - icon: stethoscope
-        title: Clinicians decide clinical
-        text: Acuity, telemetry, diversion. Not the ward, not the bed.
-      - icon: bed
-        title: BMU decides the bed
-        text: After consensus, the coordinator sets the admitting cluster and allocates.
       - icon: git-merge
         title: Why split it
         text: A ward decision mid-triage is friction the clinician should not own.
@@ -363,17 +392,25 @@ entries:
   - id: 08-concurrency
     type: slide
     role: resolution
-    layout: comparison
+    layout: diagram
     title: Two people can race for the same thing; only one wins
+    # sequence: the claim is order in time between actors; a side-by-side
+    # comparison could not show who arrived second.
+    diagram:
+      kind: sequence
+      actors: [Specialist A, Admissions API, Specialist B]
+      messages:
+        - { from: Specialist A, to: Admissions API, label: CLAIM v3 }
+        - { from: Specialist B, to: Admissions API, label: CLAIM v3 }
+        - { from: Admissions API, to: Specialist A, label: 200 · v4 }
+        - { from: Admissions API, to: Specialist B, label: 409 CONFLICT, dashed: true, weight: primary }
+      annotations:
+        - { on: 409 CONFLICT, text: "refused, never merged" }
     cards:
       - icon: lock
-        title: The alternative
-        text: Pessimistic locking — hold a database lock so a second writer waits.
-        detail: Deadlock risk, connection-pool pressure
-      - icon: git-compare
-        title: What it does instead
-        text: Version columns on 3 entities. The losing write gets a 409.
-        detail: Trade-off — the loser retries, which is free
+        title: Not pessimistic locking
+        text: Holding a lock would risk deadlock to prevent a conflict that costs nothing.
+        detail: The loser retries, which is free
     narration: "Once a decision has a clear owner, the fourth place is contention — two owners reaching for the same thing at the same moment. Two specialists can try to claim the same case. Two coordinators can try to allocate the same bed. Only one can win. I used optimistic locking — a version column on the three entities that race — rather than pessimistic locking. The reasoning is the cost of losing. Here, the loser simply gets a conflict, sees the case is already taken, and picks the next one. Nothing is lost. Pessimistic locking would hold a database lock to prevent a conflict that costs nothing and corrects itself, while adding deadlock risk and pressure on the connection pool. So optimistic isn't just the cheaper choice — it is the correct one for this cost structure."
 
   - id: 08a-vacate-capture
@@ -522,25 +559,22 @@ entries:
 
   - id: 10-ledger
     type: slide
-    layout: tiled
+    layout: diagram
     title: What's stubbed, and the boundary it's stubbed behind
-    body: Each of these is a deliberate prototype choice with a clear path to production.
+    # layers: the claim is a boundary between layers — production-grade above,
+    # stubs below — which four peer tiles hid.
+    diagram:
+      kind: layers
+      layers:
+        - { name: Domain logic, sublabel: constraint engine · state machines · consensus gate }
+        - { name: Gateway interfaces and profile boundary, sublabel: "@Profile(prototype)", weight: primary }
+        - { name: Prototype stubs, sublabel: H2 · polling · header personas · mock EHR · heuristic solver }
+      annotations:
+        - { on: Gateway interfaces and profile boundary, text: "production is added here, not retrofitted" }
     cards:
-      - icon: database
-        title: State and transport
-        text: In-memory data a restart erases; polling that won't scale.
-        detail: Postgres driver present; STOMP push designed in ticket 003
-      - icon: user-check
-        title: Identity
-        text: Header-driven personas are convenience, not authentication.
-        detail: The default config already denies everything
-      - icon: cpu
-        title: Optimality and integration
-        text: A heuristic that can be beaten; two gateways with nothing real behind them.
-        detail: 3 interfaces, 3 fail-fast adapters
       - icon: test-tube
         title: Enforcement
-        text: Four declared thresholds, no pipeline to run them, one currently red.
+        text: Four declared thresholds, no pipeline to run them.
         detail: The suite exists; the CI wiring doesn't
     narration: "So here is everything that is stubbed, gathered in one place, and all of it stubbed on purpose. In-memory data that a restart wipes. Polling instead of real-time push. A heuristic instead of a real constraint solver. Header-driven personas instead of real authentication. And no continuous integration to run the coverage gates. The point is that every one of these already sits behind an interface or a profile that is in place today — so the production version is added behind that boundary, not retrofitted through the code. On method: an AI coding assistant wrote a lot of this code. Which trade-off to make, which approach was right, and the final shape of the design — those decisions were mine."
 

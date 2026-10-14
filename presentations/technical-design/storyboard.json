@@ -75,6 +75,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/01-problem.wav",
+        "durationMs": 32174.999999999996,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "8d3d6778169c"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 32575,
+        "ratePct": 0,
+        "padVisualMs": 32575,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/01-problem.mp4",
+        "durationMs": 32566.667,
+        "roi": null,
+        "hash": "00dfe1f48d3e"
       }
     },
     {
@@ -162,6 +185,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02-domain-model.wav",
+        "durationMs": 32475,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "cdfc155296cb"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 32875,
+        "ratePct": 0,
+        "padVisualMs": 32875,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02-domain-model.mp4",
+        "durationMs": 32866.667,
+        "roi": null,
+        "hash": "67d20519ef52"
       }
     },
     {
@@ -194,7 +240,31 @@
           "Sign in"
         ]
       },
-      "roiSelector": "text=Live Bed Inventory Matrix"
+      "roiSelector": "text=Live Bed Inventory Matrix",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/02b-bed-board-capture.mp4",
+        "durationMs": 30013.74609375,
+        "roi": null,
+        "hash": "30e64814ae50",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/02b-bed-board-capture.r.wav",
+        "durationMs": 30025,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "a95a8d624fe3"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 30014,
+        "ratePct": 3,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 3
     },
     {
       "id": "03-both-moves-fail",
@@ -231,6 +301,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/03-both-moves-fail.wav",
+        "durationMs": 32325.000000000004,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b55e07eb3420"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 32725,
+        "ratePct": 0,
+        "padVisualMs": 32725,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/03-both-moves-fail.mp4",
+        "durationMs": 32733.333000000002,
+        "roi": null,
+        "hash": "698841069b93"
       }
     },
     {
@@ -272,6 +365,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/04-cannot-fake.wav",
+        "durationMs": 36625,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "2c1feaccf816"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 37025,
+        "ratePct": 0,
+        "padVisualMs": 37025,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/04-cannot-fake.mp4",
+        "durationMs": 37033.333,
+        "roi": null,
+        "hash": "540fe7b2dde6"
       }
     },
     {
@@ -376,6 +492,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05-consensus.wav",
+        "durationMs": 46125,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "a7db9ecf4814"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 46525,
+        "ratePct": 0,
+        "padVisualMs": 46525,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05-consensus.mp4",
+        "durationMs": 46533.333,
+        "roi": null,
+        "hash": "f5abfef37a3b"
       }
     },
     {
@@ -426,7 +565,36 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05a-consult-hold-capture.mp4",
+        "durationMs": 26415.19091796875,
+        "roi": {
+          "x": 1091.328125,
+          "y": 985.71875,
+          "width": 460.671875,
+          "height": 69.40625
+        },
+        "hash": "f14da929ae45",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05a-consult-hold-capture.r.wav",
+        "durationMs": 26200,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "59c3bde7a237"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 26415,
+        "ratePct": 2,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 2
     },
     {
       "id": "05b-consensus-gate-terminal",
@@ -456,7 +624,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/05b-consensus-gate-terminal.mp4",
+        "durationMs": 32413.1181640625,
+        "roi": null,
+        "hash": "236d4e59ac50",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/05b-consensus-gate-terminal.r.wav",
+        "durationMs": 32450.000000000004,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "2f9ecddaba92"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 32413,
+        "ratePct": 3.2,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 3.2
     },
     {
       "id": "06-discordance",
@@ -493,6 +685,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06-discordance.wav",
+        "durationMs": 42375,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "a96a627a4233"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 42775,
+        "ratePct": 0,
+        "padVisualMs": 42775,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06-discordance.mp4",
+        "durationMs": 42766.667,
+        "roi": null,
+        "hash": "9f594e6b4b5e"
       }
     },
     {
@@ -523,7 +738,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/06a-discordance-terminal.mp4",
+        "durationMs": 31363.480224609375,
+        "roi": null,
+        "hash": "e09402507ec6",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/06a-discordance-terminal.r.wav",
+        "durationMs": 31425,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3451c317371a"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 31363,
+        "ratePct": 2.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 2.1
     },
     {
       "id": "07-separation",
@@ -592,6 +831,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07-separation.wav",
+        "durationMs": 41200,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "3aacbd62ebd1"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 41600,
+        "ratePct": 0,
+        "padVisualMs": 41600,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07-separation.mp4",
+        "durationMs": 41600,
+        "roi": null,
+        "hash": "5af4b18c0197"
       }
     },
     {
@@ -622,7 +884,31 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07a-admitting-authority-capture.mp4",
+        "durationMs": 24964.5400390625,
+        "roi": null,
+        "hash": "4e29f6b888eb",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07a-admitting-authority-capture.r.wav",
+        "durationMs": 24975,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "ad3fe8a9058a"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 24965,
+        "ratePct": 4.3,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 4.3
     },
     {
       "id": "07b-authority-enforced-terminal",
@@ -652,7 +938,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07b-authority-enforced-terminal.mp4",
+        "durationMs": 30630.3828125,
+        "roi": null,
+        "hash": "29e667809ccc",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07b-authority-enforced-terminal.r.wav",
+        "durationMs": 30450,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "6a7fbff37edf"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 30630,
+        "ratePct": 2.2,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 2.2
     },
     {
       "id": "07c-two-tier-safety-terminal",
@@ -682,7 +992,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/07c-two-tier-safety-terminal.mp4",
+        "durationMs": 44013.291259765625,
+        "roi": null,
+        "hash": "2839c8087faf",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/07c-two-tier-safety-terminal.r.wav",
+        "durationMs": 44200,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "eb632ad83f45"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 44013,
+        "ratePct": 3.5,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 3.5
     },
     {
       "id": "08-concurrency",
@@ -761,6 +1095,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08-concurrency.wav",
+        "durationMs": 47000,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "e2ebb598aaa8"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 47400,
+        "ratePct": 0,
+        "padVisualMs": 47400,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08-concurrency.mp4",
+        "durationMs": 47400,
+        "roi": null,
+        "hash": "eef5d56132ca"
       }
     },
     {
@@ -802,7 +1159,36 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08a-vacate-capture.mp4",
+        "durationMs": 25964.084228515625,
+        "roi": {
+          "x": 385,
+          "y": 800.921875,
+          "width": 350,
+          "height": 28
+        },
+        "hash": "f1bf3df6df5c",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a-vacate-capture.r.wav",
+        "durationMs": 25700,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "b8c6e977f280"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 25964,
+        "ratePct": 2.4,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 2.4
     },
     {
       "id": "08a2-sanitise-capture",
@@ -839,7 +1225,36 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08a2-sanitise-capture.mp4",
+        "durationMs": 36158.81201171875,
+        "roi": {
+          "x": 614.375,
+          "y": 334.65625,
+          "width": 127.28125,
+          "height": 32
+        },
+        "hash": "b3e922669319",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08a2-sanitise-capture.r.wav",
+        "durationMs": 36325,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "254477e63082"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 36159,
+        "ratePct": 3,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 3
     },
     {
       "id": "08b-conflict-409-terminal",
@@ -869,7 +1284,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/08b-conflict-409-terminal.mp4",
+        "durationMs": 31563.192138671875,
+        "roi": null,
+        "hash": "270c83115503",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/08b-conflict-409-terminal.r.wav",
+        "durationMs": 31500,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "a9d8ea91fa71"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 31563,
+        "ratePct": 2.6,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 2.6
     },
     {
       "id": "09-provable",
@@ -910,6 +1349,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09-provable.wav",
+        "durationMs": 47625,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "54c55a20570d"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 48025,
+        "ratePct": 0,
+        "padVisualMs": 48025,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09-provable.mp4",
+        "durationMs": 48033.333,
+        "roi": null,
+        "hash": "b2678fdf2511"
       }
     },
     {
@@ -943,7 +1405,31 @@
           "Sign in"
         ]
       },
-      "roiSelector": "main"
+      "roiSelector": "main",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09a-analytics-capture.mp4",
+        "durationMs": 18264.26513671875,
+        "roi": null,
+        "hash": "f77de4a185de",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09a-analytics-capture.r.wav",
+        "durationMs": 18200,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "7c3ea2af9c4a"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 18264,
+        "ratePct": 4.7,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 4.7
     },
     {
       "id": "09b-parity-terminal",
@@ -974,7 +1460,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09b-parity-terminal.mp4",
+        "durationMs": 22113.2900390625,
+        "roi": null,
+        "hash": "003084cb2156",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09b-parity-terminal.r.wav",
+        "durationMs": 21925,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "4b8af73a1488"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 22113,
+        "ratePct": 1.6,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 1.6
     },
     {
       "id": "09c-stub-contract-terminal",
@@ -1004,7 +1514,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09c-stub-contract-terminal.mp4",
+        "durationMs": 29311.22509765625,
+        "roi": null,
+        "hash": "6a6119f78096",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09c-stub-contract-terminal.r.wav",
+        "durationMs": 29275,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "8eae463d2402"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 29311,
+        "ratePct": 3.1,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 3.1
     },
     {
       "id": "09d-coverage-capture",
@@ -1028,7 +1562,36 @@
           "Not Found"
         ]
       },
-      "roiSelector": "body"
+      "roiSelector": "body",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09d-coverage-capture.mp4",
+        "durationMs": 5000,
+        "roi": {
+          "x": 8,
+          "y": 8,
+          "width": 1904,
+          "height": 381.15625
+        },
+        "hash": "e538b68b35ef",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09d-coverage-capture.wav",
+        "durationMs": 26800,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "be6278fad7a7"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 27200,
+        "ratePct": 0,
+        "padVisualMs": 27200,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0
     },
     {
       "id": "09e-gate-red-terminal",
@@ -1059,7 +1622,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/09e-gate-red-terminal.mp4",
+        "durationMs": 29478.645263671875,
+        "roi": null,
+        "hash": "0560efbb510a",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/09e-gate-red-terminal.r.wav",
+        "durationMs": 29525,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "c2425c964b40"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 29479,
+        "ratePct": 2.8,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 2.8
     },
     {
       "id": "10-ledger",
@@ -1124,6 +1711,29 @@
       },
       "vertical": {
         "strategy": "native"
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10-ledger.wav",
+        "durationMs": 43825,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "2452f7d36d02"
+      },
+      "resolvedTiming": {
+        "mode": "audio-dictates",
+        "sceneMs": 44225,
+        "ratePct": 0,
+        "padVisualMs": 44225,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 0,
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10-ledger.mp4",
+        "durationMs": 44233.333,
+        "roi": null,
+        "hash": "218181648fc6"
       }
     },
     {
@@ -1155,7 +1765,31 @@
           "command not found"
         ]
       },
-      "roiSelector": "#term"
+      "roiSelector": "#term",
+      "resolvedVisual": {
+        "filePath": "assets/recordings/10a-artifacts-terminal.mp4",
+        "durationMs": 20913.284912109375,
+        "roi": null,
+        "hash": "5d29ae74e963",
+        "reused": true
+      },
+      "resolvedAudio": {
+        "filePath": "assets/audio/10a-artifacts-terminal.r.wav",
+        "durationMs": 20700,
+        "subtitleSource": "synthesised",
+        "providerSrt": null,
+        "hasNativeSrt": false,
+        "hash": "bf7037f8c2a8"
+      },
+      "resolvedTiming": {
+        "mode": "speech-fit",
+        "sceneMs": 20913,
+        "ratePct": 1.5,
+        "padVisualMs": 0,
+        "padAudioMs": 0,
+        "warnings": []
+      },
+      "ratePct": 1.5
     }
   ]
 }

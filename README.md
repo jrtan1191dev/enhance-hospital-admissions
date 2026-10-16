@@ -19,7 +19,7 @@
 > - **BMU Coordinator — Bed Allocation:** Severity-prioritized bed queue with Top-3 recommendations showing constraint match rationale. BMU coordinators approve allocations with 1-click or override with a mandatory structured reason.
 > - **Patient Milestone Tracker:** Mobile-optimised 3-stage milestone stepper showing queue position partitioned by ward class, estimated wait duration, and empathetic operational delay explanations.
 
-https://github.com/user-attachments/assets/755f189b-beb8-42e4-8ad0-6173a82db5ed
+https://github.com/user-attachments/assets/4c29e63d-3fc1-4bef-8649-d95311edb38f
 
 ## Technical Design Considerations Video
 
